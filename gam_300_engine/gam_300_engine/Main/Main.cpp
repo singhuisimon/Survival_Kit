@@ -44,7 +44,7 @@ int main(void) {
     glfwMakeContextCurrent(window);
 
     // Set up a key callback to end the game
-    glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
+    glfwSetKeyCallback(window, [](GLFWwindow* /*window*/, int key, int /*scancode*/, int action, int /*mods*/) {
         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
             GM.setGameOver(true);
         }

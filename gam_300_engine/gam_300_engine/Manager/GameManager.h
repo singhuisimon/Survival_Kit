@@ -31,8 +31,8 @@ namespace gam300 {
 	// Gam300 cofiguration file.
 	const std::string CONFIG_FILENAME = "gam300-config.txt";
 
-	// Default frame time (game loop time) in milliseconds (16.67 ms == 60 f/s).
-	const int FRAME_TIME_DEFAULT = 17;
+	// Default frame time (game loop time) in milliseconds (11.11 ms == 90 f/s).
+	const int FRAME_TIME_DEFAULT = 11;
 
 	class GameManager : public Manager {
 
