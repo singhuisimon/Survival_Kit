@@ -11,9 +11,6 @@
 
  // Include required headers
 #include "LogManager.h"
-#include <stdarg.h>   // for va_list, va_start, va_end
-#include <time.h>     // for time functions
-#include <string.h>   // for string handling
 
 namespace gam300 {
 

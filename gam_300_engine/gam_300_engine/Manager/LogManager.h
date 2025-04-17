@@ -12,9 +12,12 @@
 #ifndef __LOG_MANAGER_H__
 #define __LOG_MANAGER_H__
 
-// System includes.
+ // System includes.
 #include <stdio.h>
 #include <map>
+#include <stdarg.h>   // Moved from LogManager.cpp
+#include <time.h>     // Moved from LogManager.cpp
+#include <string.h>   // Moved from LogManager.cpp
 
 // Engine includes.
 #include "Manager.h"
