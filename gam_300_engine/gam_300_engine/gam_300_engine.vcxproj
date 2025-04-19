@@ -19,20 +19,34 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Entity\Entity.cpp" />
     <ClCompile Include="Glad\glad.c" />
     <ClCompile Include="Main\Main.cpp" />
+    <ClCompile Include="Manager\ComponentManager.cpp" />
     <ClCompile Include="Manager\GameManager.cpp" />
     <ClCompile Include="Manager\LogManager.cpp" />
     <ClCompile Include="Manager\Manager.cpp" />
+    <ClCompile Include="Manager\SystemManager.cpp" />
     <ClCompile Include="Utility\Clock.cpp" />
+    <ClCompile Include="Utility\MathUtils.cpp" />
+    <ClCompile Include="Utility\Vector2D.cpp" />
+    <ClCompile Include="Utility\Vector3D.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Component\Component.h" />
+    <ClInclude Include="Entity\Entity.h" />
     <ClInclude Include="Glad\glad.h" />
     <ClInclude Include="Main\Main.h" />
+    <ClInclude Include="Manager\ComponentManager.h" />
     <ClInclude Include="Manager\GameManager.h" />
     <ClInclude Include="Manager\LogManager.h" />
     <ClInclude Include="Manager\Manager.h" />
+    <ClInclude Include="System\System.h" />
     <ClInclude Include="Utility\Clock.h" />
+    <ClInclude Include="Utility\MathUtils.h" />
+    <ClInclude Include="Utility\ECS_Variables.h" />
+    <ClInclude Include="Utility\Vector2D.h" />
+    <ClInclude Include="Utility\Vector3D.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="gam300.log" />

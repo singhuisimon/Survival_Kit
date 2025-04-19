@@ -15,9 +15,8 @@
 
 #include "Manager.h"
 #include <GLFW/glfw3.h>
-#include <thread>  // Moved from GameManager.cpp
-#include <chrono>  // Moved from GameManager.cpp
-
+#include <thread>
+#include <chrono>
 // Forward declaration for Clock (to avoid circular dependency)
 namespace gam300 {
 	class Clock;
@@ -47,31 +46,56 @@ namespace gam300 {
 		// Get the singleton instance of the GameManager.
 		static GameManager& getInstance();
 
-		// Startup all GameManager services.
+		/**
+		 * @brief Startup all GameManager services.
+		 * @return 0 if successful, negative number if error.
+		 */
 		int startUp();
 
-		// Game manager only accepts step events.
-		// Return false if other event.
+		/**
+		 * @brief Check if an event is valid for the GameManager.
+		 * @param event_name The name of the event to check.
+		 * @return True if the event is valid, false otherwise.
+		 * @details Game manager only accepts step events.
+		 */
 		bool isValid(std::string event_name) const;
 
-		// Shut down GameManager services.
+		/**
+		 * @brief Shut down GameManager services.
+		 * @details Cleans up resources and shuts down the GameManager.
+		 */
 		void shutDown();
 
-		// Run game loop.
+		/**
+		 * @brief Run the main game loop.
+		 * @details Executes the game loop until game over is set.
+		 */
 		void run();
 
-		// Set game over status to indicated value.
-		// If true (default), will stop game loop.
+		/**
+		 * @brief Set game over status to indicated value.
+		 * @param new_game_over The new game over status (default: true).
+		 * @details If true, will stop game loop.
+		 */
 		void setGameOver(bool new_game_over = true);
 
-		// Get game over status.
+		/**
+		 * @brief Get game over status.
+		 * @return True if game is over, false otherwise.
+		 */
 		bool getGameOver() const;
 
-		// Return frame time.  
-		// Frame time is target time for each game loop, in milliseconds.
+		/**
+		 * @brief Return frame time.
+		 * @return Frame time in milliseconds.
+		 * @details Frame time is target time for each game loop.
+		 */
 		int getFrameTime() const;
 
-		// Return game loop step count.
+		/**
+		 * @brief Return game loop step count.
+		 * @return The current game loop step count.
+		 */
 		int getStepCount() const;
 	};
 

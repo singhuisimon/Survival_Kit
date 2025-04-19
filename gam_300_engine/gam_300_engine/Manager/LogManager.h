@@ -45,19 +45,31 @@ namespace gam300 {
 		// Get the one and only instance of the LogManager.
 		static LogManager& getInstance();
 
-		// Start up LogManager (open main logfile, usually "dragonfly.log").
-		// Return 0 if ok, else -1.
+		/**
+		 * @brief Start up LogManager.
+		 * @return 0 if successful, else -1.
+		 * @details Opens main logfile, usually "gam300.log".
+		 */
 		int startUp();
 
-		// Shut down LogManager (close all logfiles).
+		/**
+		 * @brief Shut down LogManager.
+		 * @details Closes all logfiles.
+		 */
 		void shutDown();
 
-		// Write to logfile.
-		// Supports printf() formatting of strings.
-		// Return number of bytes written (excluding prepends), -1 if error.
+		/**
+		 * @brief Write to logfile.
+		 * @param fmt Format string supporting printf() formatting.
+		 * @param ... Variable arguments for formatting.
+		 * @return Number of bytes written (excluding prepends), -1 if error.
+		 */
 		int writeLog(const char* fmt, ...) const;
 
-		// Set flush of logfile after each write.
+		/**
+		 * @brief Set flush of logfile after each write.
+		 * @param new_do_flush New flush setting (default: true).
+		 */
 		void setFlush(bool new_do_flush = true);
 	};
 

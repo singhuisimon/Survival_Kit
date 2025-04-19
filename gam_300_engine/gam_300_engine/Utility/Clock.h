@@ -27,14 +27,18 @@ namespace gam300 {
 		// Sets previous_time to current time.
 		Clock();
 
-		// Return time elapsed since delta() was called, -1 if error.
-		// Resets clock time.
-		// Units are microseconds.
+		/**
+		 * @brief Return time elapsed since delta() was called.
+		 * @return Elapsed time in microseconds, -1 if error.
+		 * @details Resets clock time.
+		 */
 		long int delta();
 
-		// Return time elapsed since delta() was called, -1 if error.
-		// Does not reset clock time.
-		// Units are microseconds.
+		/**
+		 * @brief Return time elapsed since delta() was called.
+		 * @return Elapsed time in microseconds, -1 if error.
+		 * @details Does not reset clock time.
+		 */
 		long int split() const;
 	};
 
