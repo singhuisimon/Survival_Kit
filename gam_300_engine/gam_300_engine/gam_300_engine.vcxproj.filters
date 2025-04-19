@@ -95,6 +95,12 @@
     <ClInclude Include="System\System.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Component\ComponentPool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Component\ComponentView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="gam300.log" />

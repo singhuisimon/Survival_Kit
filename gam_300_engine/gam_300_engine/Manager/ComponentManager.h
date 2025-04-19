@@ -19,6 +19,7 @@
 #include <vector>
 #include "../Component/Component.h"
 #include "../Manager/Manager.h"
+#include "../Component/ComponentPool.h"
 
  // Two-letter acronym for easier access to manager.
 #define CM gam300::ComponentManager::getInstance()
@@ -49,7 +50,13 @@ namespace gam300 {
          * @param component The component instance.
          */
         void insert_component(EntityID entity_id, T* component) {
-            m_entity_to_component[entity_id] = component;
+            // Use ComponentPool to store the component
+            // Moving ownership to the pool
+            m_component_pool.insert(entity_id, std::move(*component));
+
+            // Since we're transferring ownership to the pool, 
+            // we should delete the original component passed in
+            delete component;
         }
 
         /**
@@ -57,11 +64,7 @@ namespace gam300 {
          * @param entity_id The entity to remove the component from.
          */
         void remove_component(EntityID entity_id) {
-            auto it = m_entity_to_component.find(entity_id);
-            if (it != m_entity_to_component.end()) {
-                delete it->second;
-                m_entity_to_component.erase(it);
-            }
+            m_component_pool.remove(entity_id);
         }
 
         /**
@@ -70,11 +73,7 @@ namespace gam300 {
          * @return Pointer to the component, or nullptr if not found.
          */
         T* get_component(EntityID entity_id) {
-            auto it = m_entity_to_component.find(entity_id);
-            if (it != m_entity_to_component.end()) {
-                return it->second;
-            }
-            return nullptr;
+            return m_component_pool.get(entity_id);
         }
 
         /**
@@ -82,15 +81,36 @@ namespace gam300 {
          * @param entity_id The entity that was destroyed.
          */
         void entity_destroyed(EntityID entity_id) override {
-            auto it = m_entity_to_component.find(entity_id);
-            if (it != m_entity_to_component.end()) {
-                delete it->second;
-                m_entity_to_component.erase(it);
-            }
+            m_component_pool.remove(entity_id);
+        }
+
+        /**
+         * @brief Get all components of this type for iteration.
+         * @return The vector of components.
+         */
+        const std::vector<T>& get_components() const {
+            return m_component_pool.get_components();
+        }
+
+        /**
+         * @brief Get the entity ID that owns a component at a specific index.
+         * @param index The index in the component array.
+         * @return The entity ID associated with that component.
+         */
+        EntityID get_entity_at(size_t index) const {
+            return m_component_pool.get_entity_at(index);
+        }
+
+        /**
+         * @brief Get the number of components in this array.
+         * @return The number of components.
+         */
+        size_t size() const {
+            return m_component_pool.size();
         }
 
     private:
-        std::unordered_map<EntityID, T*> m_entity_to_component;
+        ComponentPool<T> m_component_pool;  // Using ComponentPool instead of std::unordered_map
     };
 
     /**
@@ -163,7 +183,8 @@ namespace gam300 {
             auto componentArray = std::static_pointer_cast<ComponentArray<T>>(m_component_arrays[type_id]);
             componentArray->insert_component(entity_id, component);
 
-            return component;
+            // Return a pointer to the component in the pool
+            return componentArray->get_component(entity_id);
         }
 
         /**
@@ -199,6 +220,25 @@ namespace gam300 {
             }
 
             return nullptr;
+        }
+
+        /**
+         * @brief Get all components of a specific type.
+         * @tparam T The component type to get.
+         * @return The vector of components, or empty vector if type not registered.
+         */
+        template<typename T>
+        const std::vector<T>& get_all_components() {
+            static std::vector<T> empty_vector;
+            ComponentTypeID type_id = get_component_type_id<T>();
+
+            // Make sure component type is registered
+            if (m_component_arrays.find(type_id) != m_component_arrays.end()) {
+                auto componentArray = std::static_pointer_cast<ComponentArray<T>>(m_component_arrays[type_id]);
+                return componentArray->get_components();
+            }
+
+            return empty_vector;
         }
 
         /**

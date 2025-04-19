@@ -34,6 +34,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component\Component.h" />
+    <ClInclude Include="Component\ComponentPool.h" />
+    <ClInclude Include="Component\ComponentView.h" />
     <ClInclude Include="Entity\Entity.h" />
     <ClInclude Include="Glad\glad.h" />
     <ClInclude Include="Main\Main.h" />
