@@ -19,19 +19,20 @@ namespace gam300 {
         auto now = std::chrono::high_resolution_clock::now();
         auto now_us = std::chrono::time_point_cast<std::chrono::microseconds>(now);
         auto epoch = now_us.time_since_epoch();
-        m_previous_time = epoch.count();
+        m_previous_time = epoch.count(); // This will now store into int64_t
     }
 
+
     // Return time elapsed since previous call to delta(), reset clock time
-    long int Clock::delta() {
+    int64_t Clock::delta() { // Changed return type
         // Get current time in microseconds
         auto now = std::chrono::high_resolution_clock::now();
         auto now_us = std::chrono::time_point_cast<std::chrono::microseconds>(now);
         auto epoch = now_us.time_since_epoch();
-        long int current_time = epoch.count();
+        int64_t current_time = epoch.count(); // Changed to int64_t
 
         // Calculate elapsed time
-        long int elapsed_time = current_time - m_previous_time;
+        int64_t elapsed_time = current_time - m_previous_time; // Changed to int64_t
 
         // Handle potential error conditions (system clock adjusted, etc.)
         if (elapsed_time < 0) {
@@ -46,15 +47,15 @@ namespace gam300 {
     }
 
     // Return time elapsed since previous call to delta(), don't reset clock time
-    long int Clock::split() const {
+    int64_t Clock::split() const { // Changed return type
         // Get current time in microseconds
         auto now = std::chrono::high_resolution_clock::now();
         auto now_us = std::chrono::time_point_cast<std::chrono::microseconds>(now);
         auto epoch = now_us.time_since_epoch();
-        long int current_time = epoch.count();
+        int64_t current_time = epoch.count(); // Changed to int64_t
 
         // Calculate elapsed time
-        long int elapsed_time = current_time - m_previous_time;
+        int64_t elapsed_time = current_time - m_previous_time; // Changed to int64_t
 
         // Handle potential error conditions (system clock adjusted, etc.)
         if (elapsed_time < 0) {

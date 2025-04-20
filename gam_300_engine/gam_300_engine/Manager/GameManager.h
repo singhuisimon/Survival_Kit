@@ -14,12 +14,14 @@
 #define __GAME_MANAGER_H__
 
 #include "Manager.h"
+#include "ECSManager.h"
 #include <GLFW/glfw3.h>
 #include <thread>
 #include <chrono>
-// Forward declaration for Clock (to avoid circular dependency)
+
+ // Forward declaration for Clock (to avoid circular dependency)
 namespace gam300 {
-	class Clock;
+    class Clock;
 }
 
 // Two-letter acronym for easier access to manager.
@@ -27,77 +29,80 @@ namespace gam300 {
 
 namespace gam300 {
 
-	// Gam300 cofiguration file.
-	const std::string CONFIG_FILENAME = "gam300-config.txt";
+    // Gam300 configuration file.
+    const std::string CONFIG_FILENAME = "gam300-config.txt";
 
-	// Default frame time (game loop time) in milliseconds (11.11 ms == 90 f/s).
-	const int FRAME_TIME_DEFAULT = 11;
+    // Default frame time (game loop time) in milliseconds (11.11 ms == 90 f/s).
+    const int FRAME_TIME_DEFAULT = 11;
 
-	class GameManager : public Manager {
+    class GameManager : public Manager {
 
-	private:
-		GameManager();                      // Private since a singleton.
-		GameManager(GameManager const&);    // Don't allow copy.
-		void operator=(GameManager const&); // Don't allow assignment.
-		bool m_game_over;           // True -> game loop should stop.
-		int m_step_count;           // Count of game loop iterations.
+    private:
+        GameManager();                      // Private since a singleton.
+        GameManager(GameManager const&);    // Don't allow copy.
+        void operator=(GameManager const&); // Don't allow assignment.
+        bool m_game_over;                   // True -> game loop should stop.
+        int m_step_count;                   // Count of game loop iterations.
 
-	public:
-		// Get the singleton instance of the GameManager.
-		static GameManager& getInstance();
+    public:
+        /**
+         * @brief Get the singleton instance of the GameManager.
+         * @return Reference to the singleton instance.
+         */
+        static GameManager& getInstance();
 
-		/**
-		 * @brief Startup all GameManager services.
-		 * @return 0 if successful, negative number if error.
-		 */
-		int startUp();
+        /**
+         * @brief Startup all GameManager services.
+         * @return 0 if successful, negative number if error.
+         */
+        int startUp() override;
 
-		/**
-		 * @brief Check if an event is valid for the GameManager.
-		 * @param event_name The name of the event to check.
-		 * @return True if the event is valid, false otherwise.
-		 * @details Game manager only accepts step events.
-		 */
-		bool isValid(std::string event_name) const;
+        /**
+         * @brief Check if an event is valid for the GameManager.
+         * @param event_name The name of the event to check.
+         * @return True if the event is valid, false otherwise.
+         * @details Game manager only accepts step events.
+         */
+        bool isValid(std::string event_name) const;
 
-		/**
-		 * @brief Shut down GameManager services.
-		 * @details Cleans up resources and shuts down the GameManager.
-		 */
-		void shutDown();
+        /**
+         * @brief Shut down GameManager services.
+         * @details Cleans up resources and shuts down the GameManager.
+         */
+        void shutDown() override;
 
-		/**
-		 * @brief Run the main game loop.
-		 * @details Executes the game loop until game over is set.
-		 */
-		void run();
+        /**
+         * @brief Run the main game loop.
+         * @details Executes the game loop until game over is set.
+         */
+        void run();
 
-		/**
-		 * @brief Set game over status to indicated value.
-		 * @param new_game_over The new game over status (default: true).
-		 * @details If true, will stop game loop.
-		 */
-		void setGameOver(bool new_game_over = true);
+        /**
+         * @brief Set game over status to indicated value.
+         * @param new_game_over The new game over status (default: true).
+         * @details If true, will stop game loop.
+         */
+        void setGameOver(bool new_game_over = true);
 
-		/**
-		 * @brief Get game over status.
-		 * @return True if game is over, false otherwise.
-		 */
-		bool getGameOver() const;
+        /**
+         * @brief Get game over status.
+         * @return True if game is over, false otherwise.
+         */
+        bool getGameOver() const;
 
-		/**
-		 * @brief Return frame time.
-		 * @return Frame time in milliseconds.
-		 * @details Frame time is target time for each game loop.
-		 */
-		int getFrameTime() const;
+        /**
+         * @brief Return frame time.
+         * @return Frame time in milliseconds.
+         * @details Frame time is target time for each game loop.
+         */
+        int getFrameTime() const;
 
-		/**
-		 * @brief Return game loop step count.
-		 * @return The current game loop step count.
-		 */
-		int getStepCount() const;
-	};
+        /**
+         * @brief Return game loop step count.
+         * @return The current game loop step count.
+         */
+        int getStepCount() const;
+    };
 
-} // end of namespace df
+} // end of namespace gam300
 #endif // __GAME_MANAGER_H__

@@ -96,7 +96,7 @@ namespace gam300 {
         // Check each system to see if the entity should be added or removed
         for (auto& system : m_systems) {
             bool matches = system->matches_requirements(entity);
-            bool has_entity = std::find(system->m_entities.begin(), system->m_entities.end(), entity.get_id()) != system->m_entities.end();
+            bool has_entity = system->has_entity(entity.get_id());
 
             if (matches && !has_entity) {
                 // Entity should be added to the system

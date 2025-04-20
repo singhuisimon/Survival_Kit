@@ -51,6 +51,13 @@ namespace gam300 {
     };
 
     /**
+     * @brief Get the next available component type ID.
+     * @details Each call increments and returns a static counter.
+     * @return The next available component type ID.
+     */
+    inline ComponentTypeID next_component_type_id();
+
+    /**
      * @brief Template function to get the component type ID at compile time.
      * @details Uses a static counter to generate unique IDs for each component type.
      * @tparam T The component type.

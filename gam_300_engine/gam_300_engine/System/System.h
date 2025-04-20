@@ -1,4 +1,3 @@
-#pragma once
 /**
  * @file System.h
  * @brief Base System class and system manager for the Entity Component System.
@@ -144,6 +143,23 @@ namespace gam300 {
          * @return True if the entity has all the required components, false otherwise.
          */
         virtual bool matches_requirements(const Entity& entity) const = 0;
+
+        /**
+         * @brief Get the list of entities managed by this system.
+         * @return Vector of entity IDs processed by this system.
+         */
+        const std::vector<EntityID>& get_entities() const {
+            return m_entities;
+        }
+
+        /**
+         * @brief Check if this system contains a specific entity.
+         * @param entity_id The entity ID to check.
+         * @return True if the entity is in this system, false otherwise.
+         */
+        bool has_entity(EntityID entity_id) const {
+            return std::find(m_entities.begin(), m_entities.end(), entity_id) != m_entities.end();
+        }
 
     protected:
         std::string m_name;              ///< Name of the system

@@ -15,32 +15,33 @@
  // Include chrono for high_resolution_clock (moved from Clock.cpp)
 #include <chrono>
 #include <ctime>
+#include <cstdint> // Add this for int64_t
 
 namespace gam300 {
 
-	class Clock {
+    class Clock {
 
-	private:
-		long int m_previous_time; // Previous call to delta() (in microseconds).
+    private:
+        int64_t m_previous_time; // Changed from long int to int64_t
 
-	public:
-		// Sets previous_time to current time.
-		Clock();
+    public:
+        // Sets previous_time to current time.
+        Clock();
 
-		/**
-		 * @brief Return time elapsed since delta() was called.
-		 * @return Elapsed time in microseconds, -1 if error.
-		 * @details Resets clock time.
-		 */
-		long int delta();
+        /**
+         * @brief Return time elapsed since delta() was called.
+         * @return Elapsed time in microseconds, -1 if error.
+         * @details Resets clock time.
+         */
+        int64_t delta(); // Changed return type from long int to int64_t
 
-		/**
-		 * @brief Return time elapsed since delta() was called.
-		 * @return Elapsed time in microseconds, -1 if error.
-		 * @details Does not reset clock time.
-		 */
-		long int split() const;
-	};
+        /**
+         * @brief Return time elapsed since delta() was called.
+         * @return Elapsed time in microseconds, -1 if error.
+         * @details Does not reset clock time.
+         */
+        int64_t split() const; // Changed return type from long int to int64_t
+    };
 
 } // end of namespace gam300
 #endif // __CLOCK_H__

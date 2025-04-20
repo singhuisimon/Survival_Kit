@@ -54,8 +54,8 @@ int main(void) {
     gam300::Clock clock;
 
     // Variables for timing
-    long int elapsed_time = 0;
-    long int sleep_time = 0;
+    int64_t elapsed_time = 0;
+    int64_t sleep_time = 0;
 
     // Main game loop
     LM.writeLog("Starting main game loop");
@@ -79,7 +79,7 @@ int main(void) {
         elapsed_time = clock.split();
 
         // Convert frame time from milliseconds to microseconds
-        long int frame_time_us = GM.getFrameTime() * 1000;
+        int64_t frame_time_us = GM.getFrameTime() * 1000;
 
         // Calculate sleep time (need to ensure it's not negative)
         sleep_time = frame_time_us - elapsed_time;
@@ -91,7 +91,7 @@ int main(void) {
         }
         else {
             // If we're behind, log that we're not keeping up
-            LM.writeLog("Main: Frame running behind: %ld us", -sleep_time);
+            LM.writeLog("GameManager::run() - Frame running behind: %lld us", -sleep_time);
         }
     }
 

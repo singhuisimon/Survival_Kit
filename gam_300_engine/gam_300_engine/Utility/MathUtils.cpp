@@ -72,4 +72,30 @@ namespace gam300 {
     // Random [0.0, 1.0)
     float MathUtils::random() {
         if (!hasBeenSeeded) {
-            seedRandom(static_cast<unsigned int
+            seedRandom(static_cast<unsigned int>(std::time(nullptr)));
+        }
+
+        std::uniform_real_distribution<float> distribution(0.0f, 1.0f);
+        return distribution(randomEngine);
+    }
+
+    // Random [min, max)
+    float MathUtils::random(float min, float max) {
+        if (!hasBeenSeeded) {
+            seedRandom(static_cast<unsigned int>(std::time(nullptr)));
+        }
+
+        std::uniform_real_distribution<float> distribution(min, max);
+        return distribution(randomEngine);
+    }
+
+    // Random integer [min, max]
+    int MathUtils::randomInt(int min, int max) {
+        if (!hasBeenSeeded) {
+            seedRandom(static_cast<unsigned int>(std::time(nullptr)));
+        }
+
+        std::uniform_int_distribution<int> distribution(min, max);
+        return distribution(randomEngine);
+    }
+}

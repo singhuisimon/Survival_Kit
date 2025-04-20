@@ -9,9 +9,10 @@
  * prior written consent of DigiPen Institute of Technology is prohibited.
  */
 
-// Include managers and utility headers
+ // Include managers and utility headers
 #include "GameManager.h"
 #include "LogManager.h"
+#include "ECSManager.h"
 #include "../Utility/Clock.h"
 
 namespace gam300 {
@@ -44,6 +45,14 @@ namespace gam300 {
 
         logManager.writeLog("GameManager::startUp() - LogManager started successfully");
 
+        // Start the ECSManager
+        if (EM.startUp()) {
+            logManager.writeLog("GameManager::startUp() - Failed to start ECSManager");
+            return -1;
+        }
+
+        logManager.writeLog("GameManager::startUp() - ECSManager started successfully");
+
         // Initialize step count
         m_step_count = 0;
 
@@ -68,7 +77,8 @@ namespace gam300 {
         // Set game over
         setGameOver();
 
-        // Shut down LogManager
+        // Shut down managers in reverse order of initialization
+        EM.shutDown();
         logManager.shutDown();
 
         // Call parent's shutDown()
@@ -85,14 +95,11 @@ namespace gam300 {
         Clock clock;
 
         // Variables for timing
-        long int elapsed_time = 0;
-        long int sleep_time = 0;
+        int64_t elapsed_time = 0;
+        int64_t sleep_time = 0;
 
         // Main game loop
         while (!m_game_over) {
-            
-            glfwPollEvents();
-
             // Increment step count
             m_step_count++;
 
@@ -104,17 +111,17 @@ namespace gam300 {
             // Start of loop timing
             clock.delta();
 
-            // This is where game logic would be processed
-            // For now, just a dummy statement
-            if (m_step_count % 1000 == 0) {  // Reduced logging frequency to avoid filling log file
-                logManager.writeLog("GameManager::run() - Step %d", m_step_count);
-            }
+            // Calculate delta time in seconds for system updates
+            float dt = getFrameTime() / 1000.0f;
+
+            // Update all ECS systems
+            EM.updateSystems(dt);
 
             // End of loop timing
             elapsed_time = clock.split();
 
             // Convert frame time from milliseconds to microseconds
-            long int frame_time_us = getFrameTime() * 1000;
+            int64_t frame_time_us = getFrameTime() * 1000;
 
             // Calculate sleep time (need to ensure it's not negative)
             sleep_time = frame_time_us - elapsed_time;
