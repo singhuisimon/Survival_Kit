@@ -131,6 +131,7 @@ namespace gam300 {
         // Helper to call a function with an entity and its components
         template<typename Func, typename... CompTypes>
         void call_with_components(EntityID entity, Func&& func) const {
+            // Get pointers to components and dereference them
             func(entity, *CM.get_component<CompTypes>(entity)...);
         }
     };

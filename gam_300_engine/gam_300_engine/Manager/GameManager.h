@@ -1,7 +1,7 @@
 /**
  * @file GameManager.h
  * @brief Declaration of the Game Manager for the game engine.
- * @details Manages the game loop, frame timing, and overall game state.
+ * @details Manages the game state, frame timing, and overall game systems.
  * @author
  * @date
  * Copyright (C) 2025 DigiPen Institute of Technology.
@@ -14,7 +14,6 @@
 #define __GAME_MANAGER_H__
 
 #include "Manager.h"
-#include "ECSManager.h"
 #include <GLFW/glfw3.h>
 #include <thread>
 #include <chrono>
@@ -28,9 +27,6 @@ namespace gam300 {
 #define GM gam300::GameManager::getInstance()
 
 namespace gam300 {
-
-    // Gam300 configuration file.
-    const std::string CONFIG_FILENAME = "gam300-config.txt";
 
     // Default frame time (game loop time) in milliseconds (11.11 ms == 90 f/s).
     const int FRAME_TIME_DEFAULT = 11;
@@ -72,10 +68,11 @@ namespace gam300 {
         void shutDown() override;
 
         /**
-         * @brief Run the main game loop.
-         * @details Executes the game loop until game over is set.
+         * @brief Update the game state for the current frame.
+         * @param dt Delta time in seconds.
+         * @details Processes input, updates systems, and handles game state.
          */
-        void run();
+        void update(float dt);
 
         /**
          * @brief Set game over status to indicated value.

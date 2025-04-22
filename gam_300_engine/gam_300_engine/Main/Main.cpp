@@ -14,7 +14,7 @@
 int main(void) {
     // Initialize GameManager
     if (GM.startUp()) {
-        // Failed to start GameManager (which should already have started LogManager)
+        // Failed to start GameManager
         printf("ERROR: Failed to start GameManager\n");
         return -1;
     }
@@ -43,12 +43,9 @@ int main(void) {
     LM.writeLog("Window created with dimensions 640x480");
     glfwMakeContextCurrent(window);
 
-    // Set up a key callback to end the game
-    glfwSetKeyCallback(window, [](GLFWwindow* /*window*/, int key, int /*scancode*/, int action, int /*mods*/) {
-        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-            GM.setGameOver(true);
-        }
-        });
+    // Register window with InputManager
+    IM.setWindow(window);
+    LM.writeLog("InputManager initialized successfully");
 
     // Create a clock for timing
     gam300::Clock clock;
@@ -63,11 +60,14 @@ int main(void) {
         // Process events
         glfwPollEvents();
 
-        // Increment step count in GameManager
-        // Note: You might need to add a method in GameManager to increment step count
+        // Update input system
+        IM.update();
 
         // Start of loop timing
         clock.delta();
+
+        // Update all systems (including InputSystem)
+        EM.updateSystems(GM.getFrameTime() / 1000.0f);
 
         // Render frame 
         glClear(GL_COLOR_BUFFER_BIT);
@@ -96,10 +96,15 @@ int main(void) {
     }
 
     // Cleanup
-    LM.writeLog("Cleaning up GLFW resources");
+    LM.writeLog("Cleaning up resources");
+
+    // Shut down InputManager
+    IM.shutDown();
+
+    // Terminate GLFW
     glfwTerminate();
 
-    // Properly shut down the GameManager (which will also shut down LogManager)
+    // Properly shut down the GameManager (which will also shut down all other managers)
     GM.shutDown();
 
     return 0;

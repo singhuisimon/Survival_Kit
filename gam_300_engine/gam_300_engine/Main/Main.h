@@ -23,6 +23,8 @@
 #include "../Manager/Manager.h"
 #include "../Manager/GameManager.h"
 #include "../Manager/LogManager.h"
+#include "../Manager/InputManager.h"
+#include "../Manager/ECSManager.h"
 #include "../Utility/Clock.h"
 
 #endif // __MAIN_H__

@@ -1,4 +1,3 @@
-#pragma once
 /**
  * @file ComponentManager.h
  * @brief Manages component storage and retrieval in the Entity Component System.
@@ -47,16 +46,13 @@ namespace gam300 {
         /**
          * @brief Insert a component for an entity.
          * @param entity_id The entity to attach the component to.
-         * @param component The component instance.
+         * @param component Unique pointer to the component.
+         * @return Pointer to the stored component.
          */
-        void insert_component(EntityID entity_id, T* component) {
+        T* insert_component(EntityID entity_id, std::unique_ptr<T> component) {
             // Use ComponentPool to store the component
             // Moving ownership to the pool
-            m_component_pool.insert(entity_id, std::move(*component));
-
-            // Since we're transferring ownership to the pool, 
-            // we should delete the original component passed in
-            delete component;
+            return m_component_pool.insert(entity_id, std::move(component));
         }
 
         /**
@@ -88,7 +84,7 @@ namespace gam300 {
          * @brief Get all components of this type for iteration.
          * @return The vector of components.
          */
-        const std::vector<T>& get_components() const {
+        const std::vector<std::unique_ptr<T>>& get_components() const {
             return m_component_pool.get_components();
         }
 
@@ -110,7 +106,7 @@ namespace gam300 {
         }
 
     private:
-        ComponentPool<T> m_component_pool;  // Using ComponentPool instead of std::unordered_map
+        ComponentPool<T> m_component_pool;  // Using ComponentPool for storage
     };
 
     /**
@@ -175,16 +171,13 @@ namespace gam300 {
                 register_component<T>();
             }
 
-            // Create the component
-            T* component = new T(std::forward<Args>(args)...);
+            // Create the component using make_unique
+            auto component = std::make_unique<T>(std::forward<Args>(args)...);
             component->init(entity_id);
 
             // Add to component array
             auto componentArray = std::static_pointer_cast<ComponentArray<T>>(m_component_arrays[type_id]);
-            componentArray->insert_component(entity_id, component);
-
-            // Return a pointer to the component in the pool
-            return componentArray->get_component(entity_id);
+            return componentArray->insert_component(entity_id, std::move(component));
         }
 
         /**
@@ -228,8 +221,8 @@ namespace gam300 {
          * @return The vector of components, or empty vector if type not registered.
          */
         template<typename T>
-        const std::vector<T>& get_all_components() {
-            static std::vector<T> empty_vector;
+        const std::vector<std::unique_ptr<T>>& get_all_components() {
+            static std::vector<std::unique_ptr<T>> empty_vector;
             ComponentTypeID type_id = get_component_type_id<T>();
 
             // Make sure component type is registered
@@ -246,6 +239,9 @@ namespace gam300 {
          * @param entity_id The entity that was destroyed.
          */
         void entity_destroyed(EntityID entity_id);
+
+        // Make ECSManager a friend so it can access ComponentManager methods
+        friend class ECSManager;
     };
 
 } // namespace gam300

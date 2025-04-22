@@ -1,4 +1,3 @@
-#pragma once
 /**
  * @file ComponentPool.h
  * @brief Provides a contiguous memory storage for components of the same type.
@@ -17,6 +16,7 @@
 #include <unordered_map>
 #include <algorithm>
 #include <cassert>
+#include <memory>
 #include "../Utility/ECS_Variables.h"
 
 namespace gam300 {
@@ -42,15 +42,17 @@ namespace gam300 {
         /**
          * @brief Insert a component for an entity.
          * @param entity_id The entity to add the component to.
-         * @param component The component to add.
+         * @param component Unique pointer to the component to add.
+         * @return Pointer to the stored component.
          */
-        void insert(EntityID entity_id, T component) {
+        T* insert(EntityID entity_id, std::unique_ptr<T> component) {
             // If entity already has a component of this type, replace it
             auto it = m_entity_to_index.find(entity_id);
             if (it != m_entity_to_index.end()) {
                 // Replace existing component
-                m_components[it->second] = std::move(component);
-                return;
+                size_t index = it->second;
+                m_components[index] = std::move(component);
+                return m_components[index].get();
             }
 
             // Add new component
@@ -58,6 +60,7 @@ namespace gam300 {
             m_entity_to_index[entity_id] = new_index;
             m_index_to_entity[new_index] = entity_id;
             m_components.push_back(std::move(component));
+            return m_components.back().get();
         }
 
         /**
@@ -102,7 +105,7 @@ namespace gam300 {
         T* get(EntityID entity_id) {
             auto it = m_entity_to_index.find(entity_id);
             if (it != m_entity_to_index.end()) {
-                return &m_components[it->second];
+                return m_components[it->second].get();
             }
             return nullptr;
         }
@@ -137,7 +140,7 @@ namespace gam300 {
          * @brief Get all components for iteration.
          * @return Reference to the vector of components.
          */
-        const std::vector<T>& get_components() const {
+        const std::vector<std::unique_ptr<T>>& get_components() const {
             return m_components;
         }
 
@@ -155,9 +158,9 @@ namespace gam300 {
         }
 
     private:
-        std::vector<T> m_components;                    ///< Dense array of components
-        std::unordered_map<EntityID, size_t> m_entity_to_index;  ///< Maps entity IDs to component indices
-        std::unordered_map<size_t, EntityID> m_index_to_entity;  ///< Maps component indices to entity IDs
+        std::vector<std::unique_ptr<T>> m_components;              ///< Dense array of components
+        std::unordered_map<EntityID, size_t> m_entity_to_index;    ///< Maps entity IDs to component indices
+        std::unordered_map<size_t, EntityID> m_index_to_entity;    ///< Maps component indices to entity IDs
     };
 
 } // namespace gam300

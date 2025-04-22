@@ -1,4 +1,3 @@
-#pragma once
 /**
  * @file Component.h
  * @brief Base interface for all components in the Entity Component System.
@@ -14,6 +13,7 @@
 #define __COMPONENT_H__
 
 #include "../Utility/ECS_Variables.h"
+#include <memory> // Added for std::unique_ptr
 
 namespace gam300 {
 
@@ -49,6 +49,10 @@ namespace gam300 {
     protected:
         EntityID m_owner_id = INVALID_ENTITY_ID; ///< ID of the entity this component is attached to
     };
+
+    // Type alias for component smart pointers
+    template<typename T>
+    using ComponentPtr = std::unique_ptr<T>;
 
     /**
      * @brief Get the next available component type ID.

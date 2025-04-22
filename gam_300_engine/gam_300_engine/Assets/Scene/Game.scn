@@ -1,0 +1,11 @@
+{
+  "objects": [
+    {
+      "name": "player",
+      "components": {
+        "Input": {
+        }
+      }
+    }
+  ]
+}
