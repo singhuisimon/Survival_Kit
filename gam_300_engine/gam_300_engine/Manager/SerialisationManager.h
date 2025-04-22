@@ -17,6 +17,7 @@
 #include <vector>
 #include <unordered_map>
 #include <functional>
+#include <memory>
 #include "../Utility/ECS_Variables.h"
 
  // Two-letter acronym for easier access to manager.
@@ -26,6 +27,41 @@ namespace gam300 {
 
     // Forward declarations
     class Entity;
+    class InputComponent;
+    class Component;
+
+    /**
+     * @brief Interface for component serialization.
+     * @details Provides methods for serializing and deserializing component data.
+     */
+    class IComponentSerializer {
+    public:
+        virtual ~IComponentSerializer() = default;
+
+        /**
+         * @brief Serialize a component to JSON format.
+         * @param component Pointer to the component to serialize.
+         * @return JSON string representation of the component.
+         */
+        virtual std::string serialize(Component* component) = 0;
+
+        /**
+         * @brief Create and configure a component from JSON data.
+         * @param entityId The entity to attach the component to.
+         * @param jsonData JSON data for the component.
+         * @return Pointer to the created component.
+         */
+        virtual Component* deserialize(EntityID entityId, const std::string& jsonData) = 0;
+    };
+
+    /**
+     * @brief Serializer for Input components.
+     */
+    class InputComponentSerializer : public IComponentSerializer {
+    public:
+        std::string serialize(Component* component) override;
+        Component* deserialize(EntityID entityId, const std::string& jsonData) override;
+    };
 
     /**
      * @brief Manager for serializing and deserializing game entities.
@@ -41,9 +77,8 @@ namespace gam300 {
         using ComponentCreatorFunc = std::function<void(EntityID, const std::string&)>;
         std::unordered_map<std::string, ComponentCreatorFunc> m_component_creators;
 
-        // Helper methods for parsing
-        bool parseJsonFile(const std::string& filename, std::string& jsonContent);
-        bool parseComponents(EntityID entityId, const std::string& componentData);
+        // Component serializers
+        std::unordered_map<std::string, std::shared_ptr<IComponentSerializer>> m_component_serializers;
 
     public:
         /**
@@ -83,6 +118,27 @@ namespace gam300 {
          * @param creatorFunc The function to call to create the component.
          */
         void registerComponentCreator(const std::string& componentName, ComponentCreatorFunc creatorFunc);
+
+        /**
+         * @brief Register a component serializer.
+         * @param componentName The name of the component type.
+         * @param serializer The serializer for this component type.
+         */
+        void registerComponentSerializer(const std::string& componentName, std::shared_ptr<IComponentSerializer> serializer);
+
+        // Helper methods for parsing
+        bool parseJsonFile(const std::string& filename, std::string& jsonContent);
+        bool parseComponents(EntityID entityId, const std::string& componentData);
+
+        // Helper methods for JSON parsing
+        static std::string extractSection(const std::string& json, const std::string& sectionName);
+        static std::string extractQuotedValue(const std::string& json, const std::string& fieldName);
+        static std::vector<std::string> splitJsonArray(const std::string& jsonArray);
+        static void parseKeyMappings(const std::string& keyMappingsJson, InputComponent* input);
+        static void parseMouseMappings(const std::string& mouseMappingsJson, InputComponent* input);
+
+        // Indentation helper for pretty JSON output
+        std::string getIndent(int level) const;
     };
 
 } // end of namespace gam300

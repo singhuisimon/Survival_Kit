@@ -13,10 +13,137 @@
 #include "LogManager.h"
 #include "ECSManager.h"
 #include "../Component/InputComponent.h"
+#include "../Utility/InputKeyMappings.h"
 #include <fstream>
 #include <sstream>
+#include <functional>
 
 namespace gam300 {
+
+    // InputComponentSerializer implementation
+    std::string InputComponentSerializer::serialize(Component* component) {
+        InputComponent* input = static_cast<InputComponent*>(component);
+        if (!input) {
+            return "{}";
+        }
+
+        std::stringstream ss;
+        ss << "{\n";
+
+        // Get the actual mappings from the InputComponent
+        const auto& actions = input->getActionMappings();
+
+        // Separate keyboard and mouse mappings
+        std::vector<const InputAction*> keyMappings;
+        std::vector<const InputAction*> mouseMappings;
+
+        // Sort the actions into the appropriate categories
+        for (const auto& pair : actions) {
+            const InputAction& action = pair.second;
+            // Mouse buttons start at GLFW_MOUSE_BUTTON_1
+            if (action.input_key >= GLFW_MOUSE_BUTTON_1) {
+                mouseMappings.push_back(&action);
+            }
+            else {
+                keyMappings.push_back(&action);
+            }
+        }
+
+        // Serialize key mappings
+        ss << "          \"keyMappings\": [\n";
+        for (size_t i = 0; i < keyMappings.size(); i++) {
+            const InputAction* action = keyMappings[i];
+            ss << "            {\n";
+            ss << "              \"name\": \"" << action->name << "\",\n";
+
+            // Convert action type to string
+            std::string typeStr = "press";
+            if (action->type == InputActionType::RELEASE) typeStr = "release";
+            else if (action->type == InputActionType::REPEAT) typeStr = "repeat";
+            else if (action->type == InputActionType::AXIS) typeStr = "axis";
+
+            ss << "              \"type\": \"" << typeStr << "\",\n";
+
+            // Convert key code to string
+            std::string keyStr = "UNKNOWN";
+            for (const auto& keyPair : getKeyNameMap()) {
+                if (keyPair.second == action->input_key) {
+                    keyStr = keyPair.first;
+                    break;
+                }
+            }
+
+            ss << "              \"key\": \"" << keyStr << "\",\n";
+            ss << "              \"action\": \"" << action->name << " action\"\n";
+            ss << "            }";
+
+            // Add comma if not the last item
+            if (i < keyMappings.size() - 1) {
+                ss << ",";
+            }
+            ss << "\n";
+        }
+        ss << "          ],\n";
+
+        // Serialize mouse mappings
+        ss << "          \"mouseMappings\": [\n";
+        for (size_t i = 0; i < mouseMappings.size(); i++) {
+            const InputAction* action = mouseMappings[i];
+            ss << "            {\n";
+            ss << "              \"name\": \"" << action->name << "\",\n";
+
+            // Convert action type to string
+            std::string typeStr = "press";
+            if (action->type == InputActionType::RELEASE) typeStr = "release";
+            else if (action->type == InputActionType::REPEAT) typeStr = "repeat";
+
+            ss << "              \"type\": \"" << typeStr << "\",\n";
+
+            // Convert button code to string
+            std::string buttonStr = "UNKNOWN";
+            int buttonIndex = action->input_key - GLFW_MOUSE_BUTTON_1; // Convert back to button index
+            for (const auto& buttonPair : getMouseButtonNameMap()) {
+                if (buttonPair.second == buttonIndex) {
+                    buttonStr = buttonPair.first;
+                    break;
+                }
+            }
+
+            ss << "              \"button\": \"" << buttonStr << "\",\n";
+            ss << "              \"action\": \"" << action->name << " action\"\n";
+            ss << "            }";
+
+            // Add comma if not the last item
+            if (i < mouseMappings.size() - 1) {
+                ss << ",";
+            }
+            ss << "\n";
+        }
+        ss << "          ]\n";
+        ss << "        }";
+
+        return ss.str();
+    }
+
+    // InputComponentDeserializer implementation
+    Component* InputComponentSerializer::deserialize(EntityID entityId, const std::string& jsonData) {
+        // Create the InputComponent
+        InputComponent* input = EM.addComponent<InputComponent>(entityId);
+
+        // Parse key mappings
+        std::string keyMappingsSection = SerialisationManager::extractSection(jsonData, "\"keyMappings\"");
+        if (!keyMappingsSection.empty()) {
+            SerialisationManager::parseKeyMappings(keyMappingsSection, input);
+        }
+
+        // Parse mouse mappings
+        std::string mouseMappingsSection = SerialisationManager::extractSection(jsonData, "\"mouseMappings\"");
+        if (!mouseMappingsSection.empty()) {
+            SerialisationManager::parseMouseMappings(mouseMappingsSection, input);
+        }
+
+        return input;
+    }
 
     // Initialize singleton instance
     SerialisationManager::SerialisationManager() {
@@ -35,41 +162,17 @@ namespace gam300 {
         if (Manager::startUp())
             return -1;
 
+        // Register component serializers
+        registerComponentSerializer("Input", std::make_shared<InputComponentSerializer>());
+
         // Register component creators
-        registerComponentCreator("Input", [](EntityID entityId, const std::string& componentData) {
-            // Mark parameter as unused to avoid compiler warning
-            (void)componentData;  // Explicitly tell compiler that this parameter is intentionally unused
-
-            // Create InputComponent
-            InputComponent* input = EM.addComponent<InputComponent>(entityId);
-
-            // Set up basic input mappings for the player
-            input->mapKeyPress("move_up", GLFW_KEY_W, []() {
-                LM.writeLog("Player moving up");
-                });
-
-            input->mapKeyPress("move_down", GLFW_KEY_S, []() {
-                LM.writeLog("Player moving down");
-                });
-
-            input->mapKeyPress("move_left", GLFW_KEY_A, []() {
-                LM.writeLog("Player moving left");
-                });
-
-            input->mapKeyPress("move_right", GLFW_KEY_D, []() {
-                LM.writeLog("Player moving right");
-                });
-
-            // Add some mouse input as well
-            input->mapMousePress("primary_action", GLFW_MOUSE_BUTTON_LEFT, []() {
-                LM.writeLog("Player primary action");
-                });
-
-            input->mapMousePress("secondary_action", GLFW_MOUSE_BUTTON_RIGHT, []() {
-                LM.writeLog("Player secondary action");
-                });
-
-            LM.writeLog("InputComponent created for entity %d", entityId);
+        registerComponentCreator("Input", [this](EntityID entityId, const std::string& componentData) {
+            // Use the serializer to create the component
+            auto serializer = m_component_serializers["Input"];
+            if (serializer) {
+                serializer->deserialize(entityId, componentData);
+                LM.writeLog("InputComponent created for entity %d", entityId);
+            }
             });
 
         // Log startup
@@ -83,8 +186,9 @@ namespace gam300 {
         // Log shutdown
         LM.writeLog("SerialisationManager::shutDown() - Shutting down Serialisation Manager");
 
-        // Clear component creators
+        // Clear component creators and serializers
         m_component_creators.clear();
+        m_component_serializers.clear();
 
         // Call parent's shutDown()
         Manager::shutDown();
@@ -94,6 +198,12 @@ namespace gam300 {
     void SerialisationManager::registerComponentCreator(const std::string& componentName, ComponentCreatorFunc creatorFunc) {
         m_component_creators[componentName] = creatorFunc;
         LM.writeLog("SerialisationManager::registerComponentCreator() - Registered creator for '%s'", componentName.c_str());
+    }
+
+    // Register a component serializer
+    void SerialisationManager::registerComponentSerializer(const std::string& componentName, std::shared_ptr<IComponentSerializer> serializer) {
+        m_component_serializers[componentName] = serializer;
+        LM.writeLog("SerialisationManager::registerComponentSerializer() - Registered serializer for '%s'", componentName.c_str());
     }
 
     // Load entities from a scene file
@@ -238,23 +348,53 @@ namespace gam300 {
     bool SerialisationManager::saveScene(const std::string& filename) {
         LM.writeLog("SerialisationManager::saveScene() - Saving scene to '%s'", filename.c_str());
 
-        // Create a simple example file
+        // Create the scene file
         std::ofstream file(filename);
         if (!file.is_open()) {
             LM.writeLog("SerialisationManager::saveScene() - Failed to open file for writing");
             return false;
         }
 
+        // Get all entities
+        const auto& entities = EM.getAllEntities();
+
+        // Start the JSON structure
         file << "{\n";
-        file << "  \"objects\": [\n";
-        file << "    {\n";
-        file << "      \"name\": \"player\",\n";
-        file << "      \"components\": {\n";
-        file << "        \"Input\": {\n";
-        file << "        }\n";
-        file << "      }\n";
-        file << "    }\n";
-        file << "  ]\n";
+        file << getIndent(1) << "\"objects\": [\n";
+
+        // Save each entity
+        for (size_t i = 0; i < entities.size(); ++i) {
+            const Entity& entity = entities[i];
+
+            file << getIndent(2) << "{\n";
+            file << getIndent(3) << "\"name\": \"" << entity.get_name() << "\",\n";
+            file << getIndent(3) << "\"components\": {\n";
+
+            // Save each component
+            bool hasComponents = false;
+
+            // Check for Input component
+            if (auto serializer = m_component_serializers.find("Input");
+                serializer != m_component_serializers.end()) {
+                if (InputComponent* input = EM.getComponent<InputComponent>(entity.get_id())) {
+                    file << getIndent(4) << "\"Input\": " << serializer->second->serialize(input);
+                    hasComponents = true;
+                }
+            }
+
+            // TODO: Add more component types here as needed
+
+            // Close the components object
+            file << "\n" << getIndent(3) << "}";
+
+            // Add comma if not the last entity
+            file << (i < entities.size() - 1 ? "," : "") << "\n";
+            file << getIndent(2) << "}";
+            file << (i < entities.size() - 1 ? "," : "") << "\n";
+        }
+
+        // Close the JSON structure
+        file << getIndent(1) << "]\n";
         file << "}\n";
 
         file.close();
@@ -321,6 +461,205 @@ namespace gam300 {
         }
 
         return true;
+    }
+
+    // Helper function to extract a section from JSON
+    std::string SerialisationManager::extractSection(const std::string& json, const std::string& sectionName) {
+        size_t pos = json.find(sectionName);
+        if (pos == std::string::npos) {
+            return ""; // Section not found
+        }
+
+        // Find the beginning of the array
+        size_t arrayStart = json.find('[', pos);
+        if (arrayStart == std::string::npos) {
+            return ""; // Array not found
+        }
+
+        // Find the end of the array, accounting for nested arrays
+        int bracketLevel = 1;
+        size_t arrayEnd = arrayStart + 1;
+
+        while (bracketLevel > 0 && arrayEnd < json.length()) {
+            if (json[arrayEnd] == '[') {
+                bracketLevel++;
+            }
+            else if (json[arrayEnd] == ']') {
+                bracketLevel--;
+            }
+            arrayEnd++;
+        }
+
+        if (bracketLevel != 0) {
+            return ""; // Unbalanced brackets
+        }
+
+        return json.substr(arrayStart, arrayEnd - arrayStart);
+    }
+
+    // Helper function to extract quoted string
+    std::string SerialisationManager::extractQuotedValue(const std::string& json, const std::string& fieldName) {
+        size_t pos = json.find("\"" + fieldName + "\"");
+        if (pos == std::string::npos) {
+            return ""; // Field not found
+        }
+
+        // Find the colon after the field name
+        size_t colonPos = json.find(':', pos);
+        if (colonPos == std::string::npos) {
+            return ""; // Invalid JSON format
+        }
+
+        // Find the beginning of the string value
+        size_t valueStart = json.find('"', colonPos);
+        if (valueStart == std::string::npos) {
+            return ""; // Invalid JSON format
+        }
+
+        // Find the end of the string value
+        size_t valueEnd = json.find('"', valueStart + 1);
+        if (valueEnd == std::string::npos) {
+            return ""; // Invalid JSON format
+        }
+
+        return json.substr(valueStart + 1, valueEnd - valueStart - 1);
+    }
+
+    // Parse key mappings
+    void SerialisationManager::parseKeyMappings(const std::string& keyMappingsJson, InputComponent* input) {
+        // Split the array into individual objects
+        std::vector<std::string> mappings = splitJsonArray(keyMappingsJson);
+
+        for (const auto& mapping : mappings) {
+            std::string name = extractQuotedValue(mapping, "name");
+            std::string type = extractQuotedValue(mapping, "type");
+            std::string key = extractQuotedValue(mapping, "key");
+            std::string action = extractQuotedValue(mapping, "action");
+
+            // Skip invalid mappings
+            if (name.empty() || type.empty() || key.empty()) {
+                continue;
+            }
+
+            // Convert key string to GLFW code
+            int keyCode = getKeyCodeFromName(key);
+            if (keyCode == GLFW_KEY_UNKNOWN) {
+                LM.writeLog("Warning: Unknown key '%s' in mapping '%s'", key.c_str(), name.c_str());
+                continue;
+            }
+
+            // Create a closure that logs the action
+            std::string actionCopy = action; // Copy for the lambda capture
+            auto callback = [actionCopy]() {
+                LM.writeLog("%s", actionCopy.c_str());
+                };
+
+            // Register the mapping based on type
+            if (type == "press") {
+                input->mapKeyPress(name, keyCode, callback);
+                LM.writeLog("Added key press mapping: %s -> %s", name.c_str(), action.c_str());
+            }
+            else if (type == "release") {
+                input->mapKeyRelease(name, keyCode, callback);
+                LM.writeLog("Added key release mapping: %s -> %s", name.c_str(), action.c_str());
+            }
+            else if (type == "repeat") {
+                input->mapKeyRepeat(name, keyCode, callback);
+                LM.writeLog("Added key repeat mapping: %s -> %s", name.c_str(), action.c_str());
+            }
+        }
+    }
+
+    // Parse mouse mappings
+    void SerialisationManager::parseMouseMappings(const std::string& mouseMappingsJson, InputComponent* input) {
+        // Split the array into individual objects
+        std::vector<std::string> mappings = splitJsonArray(mouseMappingsJson);
+
+        for (const auto& mapping : mappings) {
+            std::string name = extractQuotedValue(mapping, "name");
+            std::string type = extractQuotedValue(mapping, "type");
+            std::string button = extractQuotedValue(mapping, "button");
+            std::string action = extractQuotedValue(mapping, "action");
+
+            // Skip invalid mappings
+            if (name.empty() || type.empty() || button.empty()) {
+                continue;
+            }
+
+            // Convert button string to GLFW code
+            int buttonCode = getMouseButtonFromName(button);
+            if (buttonCode == -1) {
+                LM.writeLog("Warning: Unknown mouse button '%s' in mapping '%s'", button.c_str(), name.c_str());
+                continue;
+            }
+
+            // Create a closure that logs the action
+            std::string actionCopy = action; // Copy for the lambda capture
+            auto callback = [actionCopy]() {
+                LM.writeLog("%s", actionCopy.c_str());
+                };
+
+            // Register the mapping based on type
+            if (type == "press") {
+                input->mapMousePress(name, buttonCode, callback);
+                LM.writeLog("Added mouse press mapping: %s -> %s", name.c_str(), action.c_str());
+            }
+            else if (type == "release") {
+                input->mapMouseRelease(name, buttonCode, callback);
+                LM.writeLog("Added mouse release mapping: %s -> %s", name.c_str(), action.c_str());
+            }
+        }
+    }
+
+    // Split a JSON array into individual objects
+    std::vector<std::string> SerialisationManager::splitJsonArray(const std::string& jsonArray) {
+        std::vector<std::string> result;
+
+        // Find each object in the array
+        size_t pos = 0;
+        while (pos < jsonArray.length()) {
+            // Find the start of an object
+            size_t objectStart = jsonArray.find('{', pos);
+            if (objectStart == std::string::npos) {
+                break; // No more objects
+            }
+
+            // Find the end of the object, accounting for nested objects
+            int braceLevel = 1;
+            size_t objectEnd = objectStart + 1;
+
+            while (braceLevel > 0 && objectEnd < jsonArray.length()) {
+                if (jsonArray[objectEnd] == '{') {
+                    braceLevel++;
+                }
+                else if (jsonArray[objectEnd] == '}') {
+                    braceLevel--;
+                }
+                objectEnd++;
+            }
+
+            if (braceLevel != 0) {
+                break; // Unbalanced braces
+            }
+
+            // Extract the object and add it to the result
+            std::string object = jsonArray.substr(objectStart, objectEnd - objectStart);
+            result.push_back(object);
+
+            // Move to the next position
+            pos = objectEnd;
+        }
+
+        return result;
+    }
+
+    // Helper for JSON indentation
+    std::string SerialisationManager::getIndent(int level) const {
+        std::string indent;
+        for (int i = 0; i < level; ++i) {
+            indent += "  "; // Two spaces per level
+        }
+        return indent;
     }
 
 } // end of namespace gam300

@@ -57,6 +57,7 @@
     <ClInclude Include="System\System.h" />
     <ClInclude Include="Utility\AssetPath.h" />
     <ClInclude Include="Utility\Clock.h" />
+    <ClInclude Include="Utility\InputKeyMappings.h" />
     <ClInclude Include="Utility\MathUtils.h" />
     <ClInclude Include="Utility\ECS_Variables.h" />
     <ClInclude Include="Utility\Vector2D.h" />
@@ -66,7 +67,7 @@
     <Text Include="gam300.log" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Assets\Scene\game.scn" />
+    <None Include="Assets\Scene\Game.scn" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

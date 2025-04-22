@@ -52,6 +52,13 @@ namespace gam300 {
          */
         InputComponent();
 
+         /**
+         * @brief Get a copy of all the action mappings for serialization
+         */
+        const std::unordered_map<std::string, InputAction>& getActionMappings() const {
+            return m_actions;
+        }
+
         /**
          * @brief Initialize the component after creation.
          * @param entity_id The ID of the entity this component is attached to.
