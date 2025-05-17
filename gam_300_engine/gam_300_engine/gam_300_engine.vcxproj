@@ -22,6 +22,7 @@
     <ClCompile Include="Component\InputComponent.cpp" />
     <ClCompile Include="Entity\Entity.cpp" />
     <ClCompile Include="Glad\glad.c" />
+    <ClCompile Include="Graphics\RenderFactory.cpp" />
     <ClCompile Include="Main\Main.cpp" />
     <ClCompile Include="Manager\ComponentManager.cpp" />
     <ClCompile Include="Manager\ECSManager.cpp" />
@@ -45,6 +46,10 @@
     <ClInclude Include="Component\InputComponent.h" />
     <ClInclude Include="Entity\Entity.h" />
     <ClInclude Include="Glad\glad.h" />
+    <ClInclude Include="Graphics\GLRenderer.h" />
+    <ClInclude Include="Graphics\IRenderer.h" />
+    <ClInclude Include="Graphics\RenderCommand.h" />
+    <ClInclude Include="Graphics\RenderFactory.h" />
     <ClInclude Include="Main\Main.h" />
     <ClInclude Include="Manager\ComponentManager.h" />
     <ClInclude Include="Manager\ECSManager.h" />
