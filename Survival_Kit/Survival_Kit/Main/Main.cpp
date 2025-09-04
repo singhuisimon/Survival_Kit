@@ -32,7 +32,7 @@ int main(void) {
     LM.writeLog("GLFW initialized successfully");
 
     // Create window
-    GLFWwindow* window = glfwCreateWindow(640, 480, "Game Engine Test", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(640, 480, "Survival_Kit", NULL, NULL);
     if (!window) {
         LM.writeLog("ERROR: Failed to create GLFW window");
         glfwTerminate();

@@ -64,10 +64,11 @@
     <ClInclude Include="Utility\Vector3D.h" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="gam300.log" />
+    <None Include="Assets\Scene\Game.scn" />
+    <None Include="game.scn" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Assets\Scene\Game.scn" />
+    <Text Include="Survival_Kit.log" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -75,6 +76,7 @@
     <ProjectGuid>{1f3067ca-7827-439f-a3e4-302db0f6b5ee}</ProjectGuid>
     <RootNamespace>gam300engine</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>Survival_Kit</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

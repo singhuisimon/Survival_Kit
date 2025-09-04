@@ -79,5 +79,33 @@ namespace gam300 {
         return buttonMap;
     }
 
+    /**
+     * @brief Get the GLFW key code from a key name.
+     * @param keyName The name of the key (e.g., "A", "SPACE", "LEFT_SHIFT")
+     * @return The GLFW key code, or GLFW_KEY_UNKNOWN if not found.
+     */
+    int getKeyCodeFromName(const std::string& keyName) {
+        const auto& keyMap = getKeyNameMap();
+        auto it = keyMap.find(keyName);
+        if (it != keyMap.end()) {
+            return it->second;
+        }
+        return GLFW_KEY_UNKNOWN;  // Return unknown key code if not found
+    }
+
+    /**
+     * @brief Get the GLFW mouse button code from a button name.
+     * @param buttonName The name of the mouse button (e.g., "LEFT", "RIGHT", "MIDDLE")
+     * @return The GLFW mouse button code, or -1 if not found.
+     */
+    int getMouseButtonFromName(const std::string& buttonName) {
+        const auto& buttonMap = getMouseButtonNameMap();
+        auto it = buttonMap.find(buttonName);
+        if (it != buttonMap.end()) {
+            return it->second;
+        }
+        return -1;  // Return -1 if button name not found
+    }
+
 } // end of namespace gam300
 #endif // __INPUT_KEY_MAPPINGS_H__

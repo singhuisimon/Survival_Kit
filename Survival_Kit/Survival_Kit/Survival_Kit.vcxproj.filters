@@ -142,9 +142,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="gam300.log" />
+    <None Include="Assets\Scene\Game.scn" />
+    <None Include="game.scn" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Assets\Scene\Game.scn" />
+    <Text Include="Survival_Kit.log" />
   </ItemGroup>
 </Project>
