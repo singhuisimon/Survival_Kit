@@ -54,7 +54,7 @@ namespace gam300 {
         strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", &timeinfo);
 
         // Write the header
-        fprintf(m_p_f, "=== GAM300 LOG START: %s ===\n", timestamp);
+        fprintf(m_p_f, "=== SURVIVAL KIT LOG START: %s ===\n", timestamp);
 
         // If flush is enabled, make sure it's written to disk
         if (m_do_flush) {
@@ -78,7 +78,7 @@ namespace gam300 {
             strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", &timeinfo);
 
             // Write the footer
-            fprintf(m_p_f, "=== GAM300 LOG END: %s ===\n", timestamp);
+            fprintf(m_p_f, "=== SURVIVAL KIT LOG END: %s ===\n", timestamp);
 
             // Close the file
             fclose(m_p_f);
