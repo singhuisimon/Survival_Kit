@@ -29,6 +29,7 @@
     <ClCompile Include="Manager\InputManager.cpp" />
     <ClCompile Include="Manager\LogManager.cpp" />
     <ClCompile Include="Manager\Manager.cpp" />
+    <ClCompile Include="Manager\SerialisationBinManager.cpp" />
     <ClCompile Include="Manager\SerialisationManager.cpp" />
     <ClCompile Include="Manager\SystemManager.cpp" />
     <ClCompile Include="System\InputSystem.cpp" />
@@ -52,6 +53,7 @@
     <ClInclude Include="Manager\InputManager.h" />
     <ClInclude Include="Manager\LogManager.h" />
     <ClInclude Include="Manager\Manager.h" />
+    <ClInclude Include="Manager\SerialisationBinManager.h" />
     <ClInclude Include="Manager\SerialisationManager.h" />
     <ClInclude Include="System\InputSystem.h" />
     <ClInclude Include="System\System.h" />
