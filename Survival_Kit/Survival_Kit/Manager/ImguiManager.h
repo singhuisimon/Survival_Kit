@@ -25,7 +25,9 @@
 #include <fstream>
 #include <sstream>
 #include <filesystem>
+#include <GLFW/glfw3.h>
 
+#define IMGUIM gam300::ImguiManager::getInstance()
 
 namespace gam300
 {
@@ -62,7 +64,7 @@ namespace gam300
 
 		int startUp() override;
 
-		int startUp(GLFWwindow*& glfwindow);
+		int startUp(GLFWwindow*& glfwindow, ImGuiIO& imgui_io);
 
 		void startImguiFrame();
 
@@ -75,6 +77,8 @@ namespace gam300
 		void displayPropertiesList();
 
 		void displayAssetsBrowserList();
+
+		void finishImguiRender(ImGuiIO& imgui_io);
 
 		void shutDown() override;
 

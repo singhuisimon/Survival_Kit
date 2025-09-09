@@ -18,6 +18,7 @@
 // Include thread/chrono
 #include <thread>
 #include <chrono>
+#include <iostream>
 
 // Include Manager headers using consistent paths
 #include "../Manager/Manager.h"
@@ -25,6 +26,7 @@
 #include "../Manager/LogManager.h"
 #include "../Manager/InputManager.h"
 #include "../Manager/ECSManager.h"
+#include "../Manager/ImguiManager.h"
 #include "../Utility/Clock.h"
 
 // Include IMGUI headers

@@ -47,44 +47,17 @@ int main(void) {
     IM.setWindow(window);
     LM.writeLog("InputManager initialized successfully");
 
-
-    //===============================================================IMGUI STUFF START1=============================================================//
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
-    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
-    //io.ConfigViewportsNoAutoMerge = true;
-    //io.ConfigViewportsNoTaskBarIcon = true;
 
-    // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
-    //ImGui::StyleColorsLight();
+    IMGUIM.startUp(window, io);
 
-    // Setup scaling
-    ImGuiStyle& style = ImGui::GetStyle();
-    //style.ScaleAllSizes(main_scale);        // Bake a fixed style scale. (until we have a solution for dynamic style scaling, changing this requires resetting Style + calling this again)
-    //style.FontScaleDpi = main_scale;        // Set initial font scale. (using io.ConfigDpiScaleFonts=true makes this unnecessary. We leave both here for documentation purpose)
-
-    // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
-    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-    {
-        style.WindowRounding = 0.0f;
-        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-    }
-
-    // Setup Platform/Renderer backends
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init();
-
-    bool test_window = true;
+    //TO DELETE LATER
+    //bool test_window = true;
     bool inspectorWindow = true;
     bool assetsBrowser = true; // to load assets
-
-    //===============================================================IMGUI STUFF END 1=============================================================//
 
     //bool test_done = false;
     // Create a clock for timing
@@ -109,17 +82,13 @@ int main(void) {
         // Update all systems (including InputSystem)
         EM.updateSystems(GM.getFrameTime() / 1000.0f);
 
-        //===============================================================IMGUI STUFF START2=============================================================//
         if (glfwGetWindowAttrib(window, GLFW_ICONIFIED) != 0)
         {
             ImGui_ImplGlfw_Sleep(10);
             continue;
         }
 
-        // Start the Dear ImGui frame
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
+        IMGUIM.startImguiFrame();
 
         //// Top Menu Bar
         if (ImGui::BeginMainMenuBar())
@@ -147,16 +116,7 @@ int main(void) {
         // dockspace 
         ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
 
-        // Home to load file 
-        ImGui::SetNextWindowSize(ImVec2(600, 400));
-        if (ImGui::Begin("Hierarchy Test", &test_window, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize)) {
-           
-
-           /* if (ImGui::Button("File")) 
-            {}*/
-        }
-       
-        ImGui::End();
+        IMGUIM.displayHierarchyList();
 
         ImGui::SetNextWindowSize(ImVec2(600, 400));
         if (ImGui::Begin("Properties Panel Test", &inspectorWindow, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize)) {
@@ -171,27 +131,14 @@ int main(void) {
         }
         ImGui::End();
 
+        //Imgui Start Render
         ImGui::Render();
-        //===============================================================IMGUI STUFF END2=============================================================//
 
         // Render frame 
         glClear(GL_COLOR_BUFFER_BIT);
 
-        //===============================================================IMGUI STUFF START3=============================================================//
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-      
-        // 
-        // Update and Render additional Platform Windows
-        // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
-        //  For this specific demo app we could also call glfwMakeContextCurrent(window) directly)
-        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-        {
-            GLFWwindow* backup_current_context = glfwGetCurrentContext();
-            ImGui::UpdatePlatformWindows();
-            ImGui::RenderPlatformWindowsDefault();
-            glfwMakeContextCurrent(backup_current_context);
-        }
-        //===============================================================IMGUI STUFF END3=============================================================//
+        IMGUIM.finishImguiRender(io);
+        
         // Swap buffers
         glfwSwapBuffers(window);
 
@@ -220,11 +167,9 @@ int main(void) {
 
     // Shut down InputManager
     IM.shutDown();
-    //===============================================================IMGUI STUFF START4=============================================================//
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
-    //===============================================================IMGUI STUFF END4=============================================================//
+    
+    IMGUIM.shutDown();
+    
     // Terminate GLFW
     glfwTerminate();
 
