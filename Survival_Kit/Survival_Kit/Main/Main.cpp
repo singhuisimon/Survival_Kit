@@ -47,6 +47,8 @@ int main(void) {
     IM.setWindow(window);
     LM.writeLog("InputManager initialized successfully");
 
+
+    //===============================================================IMGUI STUFF START1=============================================================//
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -79,6 +81,12 @@ int main(void) {
     ImGui_ImplOpenGL3_Init();
 
     bool test_window = true;
+    bool inspectorWindow = true;
+    bool assetsBrowser = true; // to load assets
+
+    //===============================================================IMGUI STUFF END 1=============================================================//
+
+    //bool test_done = false;
     // Create a clock for timing
     gam300::Clock clock;
 
@@ -101,6 +109,7 @@ int main(void) {
         // Update all systems (including InputSystem)
         EM.updateSystems(GM.getFrameTime() / 1000.0f);
 
+        //===============================================================IMGUI STUFF START2=============================================================//
         if (glfwGetWindowAttrib(window, GLFW_ICONIFIED) != 0)
         {
             ImGui_ImplGlfw_Sleep(10);
@@ -112,20 +121,66 @@ int main(void) {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::SetNextWindowSize(ImVec2(600, 400));
-        if (ImGui::Begin("Test", &test_window, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize)) {
+        //// Top Menu Bar
+        if (ImGui::BeginMainMenuBar())
+        {
+            ImGui::Separator();
+            if (ImGui::BeginMenu("File_Test"))
+            {
+                if (ImGui::MenuItem("New"))
+                {
+                    
+                }
 
+                if (ImGui::MenuItem("Save"))
+                {
+
+                }
+                ImGui::EndMenu();
+                ImGui::Separator();
+            }
+            ImGui::EndMainMenuBar();
+        }
+       
+
+       
+        // dockspace 
+        ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
+
+        // Home to load file 
+        ImGui::SetNextWindowSize(ImVec2(600, 400));
+        if (ImGui::Begin("Hierarchy Test", &test_window, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize)) {
+           
+
+           /* if (ImGui::Button("File")) 
+            {}*/
+        }
+       
+        ImGui::End();
+
+        ImGui::SetNextWindowSize(ImVec2(600, 400));
+        if (ImGui::Begin("Properties Panel Test", &inspectorWindow, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize)) {
 
         }
         ImGui::End();
 
+     
+        ImGui::SetNextWindowSize(ImVec2(600, 400));
+        if (ImGui::Begin("Assets Browser Test", &assetsBrowser, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize))
+        {
+        }
+        ImGui::End();
+
         ImGui::Render();
+        //===============================================================IMGUI STUFF END2=============================================================//
 
         // Render frame 
         glClear(GL_COLOR_BUFFER_BIT);
 
+        //===============================================================IMGUI STUFF START3=============================================================//
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
+      
+        // 
         // Update and Render additional Platform Windows
         // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
         //  For this specific demo app we could also call glfwMakeContextCurrent(window) directly)
@@ -136,7 +191,7 @@ int main(void) {
             ImGui::RenderPlatformWindowsDefault();
             glfwMakeContextCurrent(backup_current_context);
         }
-
+        //===============================================================IMGUI STUFF END3=============================================================//
         // Swap buffers
         glfwSwapBuffers(window);
 
@@ -165,11 +220,11 @@ int main(void) {
 
     // Shut down InputManager
     IM.shutDown();
-
+    //===============================================================IMGUI STUFF START4=============================================================//
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
-
+    //===============================================================IMGUI STUFF END4=============================================================//
     // Terminate GLFW
     glfwTerminate();
 
