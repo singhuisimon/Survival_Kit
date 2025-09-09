@@ -91,6 +91,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Manager\ImguiManager.cpp">
+    <ClCompile Include="Manager\SerialisationBinManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -192,6 +193,7 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Manager\ImguiManager.h">
+    <ClInclude Include="Manager\SerialisationBinManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
