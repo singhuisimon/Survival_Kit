@@ -23,7 +23,7 @@
     <ClCompile Include="Entity\Entity.cpp" />
     <ClCompile Include="Glad\glad.c" />
     <ClCompile Include="Main\Main.cpp" />
-    <ClCompile Include="Manager\BVHManager.cpp" />
+    <ClCompile Include="Manager\CollisionManager.cpp" />
     <ClCompile Include="Manager\ComponentManager.cpp" />
     <ClCompile Include="Manager\ECSManager.cpp" />
     <ClCompile Include="Manager\GameManager.cpp" />
@@ -47,7 +47,7 @@
     <ClInclude Include="Entity\Entity.h" />
     <ClInclude Include="Glad\glad.h" />
     <ClInclude Include="Main\Main.h" />
-    <ClInclude Include="Manager\BVHManager.h" />
+    <ClInclude Include="Manager\CollisionManager.h" />
     <ClInclude Include="Manager\ComponentManager.h" />
     <ClInclude Include="Manager\ECSManager.h" />
     <ClInclude Include="Manager\GameManager.h" />
