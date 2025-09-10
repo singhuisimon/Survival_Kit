@@ -22,10 +22,12 @@
     <ClCompile Include="Component\InputComponent.cpp" />
     <ClCompile Include="Entity\Entity.cpp" />
     <ClCompile Include="Glad\glad.c" />
+    <ClCompile Include="Graphics\ShaderProgram.cpp" />
     <ClCompile Include="Main\Main.cpp" />
     <ClCompile Include="Manager\ComponentManager.cpp" />
     <ClCompile Include="Manager\ECSManager.cpp" />
     <ClCompile Include="Manager\GameManager.cpp" />
+    <ClCompile Include="Manager\GraphicsManager.cpp" />
     <ClCompile Include="Manager\InputManager.cpp" />
     <ClCompile Include="Manager\LogManager.cpp" />
     <ClCompile Include="Manager\Manager.cpp" />
@@ -45,10 +47,13 @@
     <ClInclude Include="Component\InputComponent.h" />
     <ClInclude Include="Entity\Entity.h" />
     <ClInclude Include="Glad\glad.h" />
+    <ClInclude Include="Graphics\Camera.h" />
+    <ClInclude Include="Graphics\ShaderProgram.h" />
     <ClInclude Include="Main\Main.h" />
     <ClInclude Include="Manager\ComponentManager.h" />
     <ClInclude Include="Manager\ECSManager.h" />
     <ClInclude Include="Manager\GameManager.h" />
+    <ClInclude Include="Manager\GraphicsManager.h" />
     <ClInclude Include="Manager\InputManager.h" />
     <ClInclude Include="Manager\LogManager.h" />
     <ClInclude Include="Manager\Manager.h" />
@@ -57,6 +62,7 @@
     <ClInclude Include="System\System.h" />
     <ClInclude Include="Utility\AssetPath.h" />
     <ClInclude Include="Utility\Clock.h" />
+    <ClInclude Include="Utility\Constant.h" />
     <ClInclude Include="Utility\InputKeyMappings.h" />
     <ClInclude Include="Utility\MathUtils.h" />
     <ClInclude Include="Utility\ECS_Variables.h" />
@@ -65,6 +71,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Scene\Game.scn" />
+    <None Include="Assets\Shaders\survival_kit_obj.frag" />
+    <None Include="Assets\Shaders\survival_kit_obj.vert" />
     <None Include="game.scn" />
   </ItemGroup>
   <ItemGroup>
