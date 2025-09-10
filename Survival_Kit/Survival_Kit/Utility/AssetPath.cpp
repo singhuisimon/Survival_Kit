@@ -24,7 +24,8 @@ namespace gam300 {
     std::string getAssetFilePath(const std::string& relativePath) {
         // Make sure the path uses forward slashes for consistency
 
-        std::cout << "Current Path: " << std::filesystem::current_path() << "\n";
+        //Debug for the Assets File path
+        //std::cout << "Current Path: " << std::filesystem::current_path() << "\n";
 
         std::string formattedPath = relativePath;
         std::string currentPath = std::filesystem::current_path().string() + "\\Assets\\";
