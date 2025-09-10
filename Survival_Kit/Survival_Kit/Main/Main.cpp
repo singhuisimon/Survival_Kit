@@ -8,7 +8,7 @@
  * Reproduction or disclosure of this file or its contents without the
  * prior written consent of DigiPen Institute of Technology is prohibited.
  */
-
+#include "Application.h"
 #include "Main.h"
 
 int main(void) {
@@ -53,7 +53,8 @@ int main(void) {
     // Variables for timing
     int64_t elapsed_time = 0;
     int64_t sleep_time = 0;
-
+    Core::Application app;
+    app.Run();
     // Main game loop
     LM.writeLog("Starting main game loop");
     while (!GM.getGameOver() && !glfwWindowShouldClose(window)) {

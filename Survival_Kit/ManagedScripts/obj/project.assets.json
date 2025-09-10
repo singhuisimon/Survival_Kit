@@ -1,0 +1,120 @@
+{
+  "version": 3,
+  "targets": {
+    "net8.0-windows7.0": {
+      "ScriptAPI/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "compile": {
+          "bin/placeholder/ScriptAPI.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/ScriptAPI.dll": {}
+        }
+      },
+      "ScriptCore/1.0.0": {
+        "type": "project",
+        "compile": {
+          "bin/placeholder/ScriptCore.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/ScriptCore.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "ScriptAPI/1.0.0": {
+      "type": "project",
+      "path": "../ScriptAPI/ScriptAPI.vcxproj",
+      "msbuildProject": "../ScriptAPI/ScriptAPI.vcxproj"
+    },
+    "ScriptCore/1.0.0": {
+      "type": "project",
+      "path": "../ScriptCore/ScriptCore.vcxproj",
+      "msbuildProject": "../ScriptCore/ScriptCore.vcxproj"
+    }
+  },
+  "projectFileDependencyGroups": {
+    "net8.0-windows7.0": [
+      "ScriptAPI >= 1.0.0",
+      "ScriptCore >= 1.0.0"
+    ]
+  },
+  "packageFolders": {
+    "C:\\Users\\kuekw\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "C:\\Users\\kuekw\\source\\repos\\here\\Survival_Kit\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj",
+      "projectName": "ManagedScripts",
+      "projectPath": "C:\\Users\\kuekw\\source\\repos\\here\\Survival_Kit\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj",
+      "packagesPath": "C:\\Users\\kuekw\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\kuekw\\source\\repos\\here\\Survival_Kit\\Survival_Kit\\ManagedScripts\\obj\\",
+      "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
+      "configFilePaths": [
+        "C:\\Users\\kuekw\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+      ],
+      "originalTargetFrameworks": [
+        "net8.0-windows"
+      ],
+      "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net8.0-windows7.0": {
+          "targetAlias": "net8.0-windows",
+          "projectReferences": {
+            "C:\\Users\\kuekw\\source\\repos\\here\\Survival_Kit\\Survival_Kit\\ScriptAPI\\ScriptAPI.vcxproj": {
+              "projectPath": "C:\\Users\\kuekw\\source\\repos\\here\\Survival_Kit\\Survival_Kit\\ScriptAPI\\ScriptAPI.vcxproj"
+            },
+            "C:\\Users\\kuekw\\source\\repos\\here\\Survival_Kit\\Survival_Kit\\ScriptCore\\ScriptCore.vcxproj": {
+              "projectPath": "C:\\Users\\kuekw\\source\\repos\\here\\Survival_Kit\\Survival_Kit\\ScriptCore\\ScriptCore.vcxproj"
+            }
+          }
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
+      },
+      "SdkAnalysisLevel": "9.0.300"
+    },
+    "frameworks": {
+      "net8.0-windows7.0": {
+        "targetAlias": "net8.0-windows",
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48",
+          "net481"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "frameworkReferences": {
+          "Microsoft.NETCore.App": {
+            "privateAssets": "all"
+          }
+        },
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.304/PortableRuntimeIdentifierGraph.json"
+      }
+    }
+  }
+}
