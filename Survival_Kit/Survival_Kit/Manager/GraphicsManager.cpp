@@ -30,6 +30,17 @@ namespace gam300 {
         if (Manager::startUp())
             return -1;
 
+        // Load OpenGL function pointers with GLAD
+        if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+            LM.writeLog("GraphicsManager::startUp(): Failed to initialize OpenGL function pointers!");
+            std::cerr << "GraphicsManager::startUp(): Failed to initialize OpenGL function pointers!" << std::endl;
+            return -1;
+        }
+        else {
+            LM.writeLog("GraphicsManager::startUp(): GLAD initialized successfully.");
+            //std::cout << "GraphicsManager::startUp(): GLAD initialized successfully." << std::endl;
+        }
+
         //// Set framebuffer with color (Background color)
         //glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         //glViewport(0, 0, WC.get_win_width(), WC.get_win_height());
@@ -44,8 +55,10 @@ namespace gam300 {
         //std::string fragment_font_path = ASM.get_full_path(ASM.SHADER_PATH, "lack_of_oxygen_font.frag");
 
         // Temporary hardcoded filepath for vertex and fragment shaders
-        std::string vertex_obj_path{ "..\\Assets\\Shaders\\survival_kit_obj.vert" };
-        std::string fragment_obj_path{ "..\\Assets\\Shaders\\survival_kit_obj.frag" };
+        //std::string vertex_obj_path{ "..\\..\\Assets\\Shaders\\survival_kit_obj.vert" };
+        //std::string fragment_obj_path{ "..\\..\\Assets\\Shaders\\survival_kit_obj.frag" };
+        std::string vertex_obj_path{ "..\\Survival_Kit\\Assets\\Shaders\\survival_kit_obj.vert" };
+        std::string fragment_obj_path{ "..\\Survival_Kit\\Assets\\Shaders\\survival_kit_obj.frag" };
 
         // Pair vertex and fragment shader files
         std::vector<std::pair<std::string, std::string>> shader_files{
@@ -53,7 +66,7 @@ namespace gam300 {
         };
 
         // Load shader files
-        if (loadShaderPrograms(shader_files)) {
+        if (!loadShaderPrograms(shader_files)) {
             LM.writeLog("GraphicsManager::startUp(): Failed to load shader programs");
             return -1;
         } else {
@@ -139,7 +152,7 @@ namespace gam300 {
 
             // Use Graphics_Manager to compile the shader
             if (!shader_program.compileShader(shader_files)) {
-                //LM.write_log("Assets_Manager::load_shader_programs(): Shader program failed to compile.");
+                LM.writeLog("GraphicsManager::loadShaderPrograms(): Shader program failed to compile.");
                 return false;
             }
 
@@ -147,8 +160,8 @@ namespace gam300 {
             shadersStorage.emplace_back(shader_program);
             std::size_t shader_idx = shadersStorage.size() - 1;
 
-            LM.writeLog("Assets_Manager::load_shader_programs(): Shader program handle is %u.", shader_program.getShaderProgramHandle());
-            LM.writeLog("Assets_Manager::load_shader_programs(): Shader program %zu created, compiled and added successfully.", shader_idx);
+            LM.writeLog("GraphicsManager::loadShaderPrograms(): Shader program handle is %u.", shader_program.getShaderProgramHandle());
+            LM.writeLog("GraphicsManager::loadShaderPrograms(): Shader program %zu created, compiled and added successfully.", shader_idx);
         }
         return true;
     }

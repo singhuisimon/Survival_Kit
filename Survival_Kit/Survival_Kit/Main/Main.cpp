@@ -12,12 +12,12 @@
 #include "Main.h"
 
 int main(void) {
-    // Initialize GameManager
-    if (GM.startUp()) {
-        // Failed to start GameManager
-        printf("ERROR: Failed to start GameManager\n");
-        return -1;
-    }
+    //// Initialize GameManager
+    //if (GM.startUp()) {
+    //    // Failed to start GameManager
+    //    printf("ERROR: Failed to start GameManager\n");
+    //    return -1;
+    //}
 
     // Get reference to LogManager (already started by GameManager)
     LM.writeLog("Main: GameManager initialized successfully");
@@ -54,17 +54,26 @@ int main(void) {
     LM.writeLog("Window created with dimensions 640x480");
     glfwMakeContextCurrent(window);
 
-    // Load OpenGL function pointers with GLAD
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        LM.writeLog("Failed to initialize OpenGL function pointers!");
-        std::cerr << "Failed to initialize OpenGL function pointers!" << std::endl;
+    //// Load OpenGL function pointers with GLAD
+    //if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    //    LM.writeLog("Failed to initialize OpenGL function pointers!");
+    //    std::cerr << "Failed to initialize OpenGL function pointers!" << std::endl;
+    //    glfwDestroyWindow(window);
+    //    glfwTerminate();
+    //    return -1;
+    //}
+    //else {
+    //    LM.writeLog("GLAD initialized successfully.");
+    //    std::cout << "GLAD initialized successfully." << std::endl;
+    //}
+
+    // Initialize GameManager
+    if (GM.startUp()) {
+        // Failed to start GameManager
+        printf("ERROR: Failed to start GameManager\n");
         glfwDestroyWindow(window);
         glfwTerminate();
         return -1;
-    }
-    else {
-        LM.writeLog("GLAD initialized successfully.");
-        std::cout << "GLAD initialized successfully." << std::endl;
     }
 
     // Register window with InputManager

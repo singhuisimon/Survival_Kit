@@ -96,7 +96,7 @@ namespace gam300 {
         // Check if file's state is good for reading
         std::ifstream input_file(file_path); 
         if (input_file.good() == GL_FALSE) {
-            // LM.write_log("Assets_Manager: File %s has error.", file_path.c_str());
+            LM.writeLog("ShaderProgram::readShaderFile: File %s has error.", file_path.c_str());
             return false;
         }
 
@@ -106,7 +106,7 @@ namespace gam300 {
         input_file.close();
 
         shader_source = ss.str();
-        //LM.write_log("Assets_Manager: Successfully read shader file %s", file_path.c_str());
+        LM.writeLog("ShaderProgram::readShaderFile: Successfully read shader file %s", file_path.c_str());
         return true;
     }
 
