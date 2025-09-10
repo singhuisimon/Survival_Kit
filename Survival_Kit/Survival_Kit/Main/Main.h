@@ -18,7 +18,6 @@
 // Include thread/chrono
 #include <thread>
 #include <chrono>
-#include <iostream>
 
 // Include Manager headers using consistent paths
 #include "../Manager/Manager.h"

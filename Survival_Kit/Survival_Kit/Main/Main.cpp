@@ -54,7 +54,7 @@ int main(void) {
 
     IMGUIM.startUp(window, io);
 
-    //TO DELETE LATER
+    // Editor Temporary Windows
     //bool test_window = true;
     bool inspectorWindow = true;
     bool assetsBrowser = true; // to load assets
@@ -90,7 +90,7 @@ int main(void) {
 
         IMGUIM.startImguiFrame();
 
-        //// Top Menu Bar
+        // Editor Temporary Menu Bar
         if (ImGui::BeginMainMenuBar())
         {
             ImGui::Separator();
@@ -111,12 +111,12 @@ int main(void) {
             ImGui::EndMainMenuBar();
         }
        
-
-       
-        // dockspace 
+        // Editor Dockspace
         ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
 
         IMGUIM.displayHierarchyList();
+
+        // Editor Temporary Windows
 
         ImGui::SetNextWindowSize(ImVec2(600, 400));
         if (ImGui::Begin("Properties Panel Test", &inspectorWindow, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize)) {
@@ -131,7 +131,7 @@ int main(void) {
         }
         ImGui::End();
 
-        //Imgui Start Render
+        // Editor Start Render
         ImGui::Render();
 
         // Render frame 
