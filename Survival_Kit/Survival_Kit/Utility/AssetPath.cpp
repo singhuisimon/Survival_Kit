@@ -9,11 +9,13 @@
  */
 
 #include "AssetPath.h"
+#include <iostream>
+#include <filesystem>
 
 namespace gam300 {
 
     // Base path to the assets directory - modify this to match your project structure
-    const std::string BASE_ASSETS_PATH = "C:/GitHub/gam_300/gam_300_engine/gam_300_engine/Assets/";
+    const std::string BASE_ASSETS_PATH = "..\\..\\Survival_Kit\\Assets\\";
 
     std::string getAssetsPath() {
         return BASE_ASSETS_PATH;
@@ -21,7 +23,12 @@ namespace gam300 {
 
     std::string getAssetFilePath(const std::string& relativePath) {
         // Make sure the path uses forward slashes for consistency
+
+        std::cout << "Current Path: " << std::filesystem::current_path() << "\n";
+
         std::string formattedPath = relativePath;
+        std::string currentPath = std::filesystem::current_path().string() + "\\Assets\\";
+
         for (char& c : formattedPath) {
             if (c == '\\') c = '/';
         }
@@ -31,7 +38,16 @@ namespace gam300 {
             formattedPath = formattedPath.substr(1);
         }
 
-        return BASE_ASSETS_PATH + formattedPath;
+        for (char& c : currentPath) {
+            if (c == '\\') c = '/';
+        }
+
+        // Remove leading slash if present to avoid double slash
+        if (!currentPath.empty() && (currentPath[0] == '/' || currentPath[0] == '\\')) {
+            currentPath = currentPath.substr(1);
+        }
+
+        return currentPath + formattedPath;
     }
 
 } // end of namespace gam300
