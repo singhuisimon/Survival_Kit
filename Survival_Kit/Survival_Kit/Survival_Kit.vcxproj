@@ -22,7 +22,8 @@
     <ClCompile Include="Component\InputComponent.cpp" />
     <ClCompile Include="Entity\Entity.cpp" />
     <ClCompile Include="Glad\glad.c" />
-    <ClCompile Include="Graphics\RenderFactory.cpp" />
+    <ClCompile Include="Graphics\GLResources.cpp" />
+    <ClCompile Include="Graphics\Shape.cpp" />
     <ClCompile Include="Main\Main.cpp" />
     <ClCompile Include="Manager\ComponentManager.cpp" />
     <ClCompile Include="Manager\ECSManager.cpp" />
@@ -33,6 +34,7 @@
     <ClCompile Include="Manager\SerialisationManager.cpp" />
     <ClCompile Include="Manager\SystemManager.cpp" />
     <ClCompile Include="System\InputSystem.cpp" />
+    <ClCompile Include="System\TransformSystem.cpp" />
     <ClCompile Include="Utility\AssetPath.cpp" />
     <ClCompile Include="Utility\Clock.cpp" />
     <ClCompile Include="Utility\MathUtils.cpp" />
@@ -44,12 +46,18 @@
     <ClInclude Include="Component\ComponentPool.h" />
     <ClInclude Include="Component\ComponentView.h" />
     <ClInclude Include="Component\InputComponent.h" />
+    <ClInclude Include="Component\TransformComponent.h" />
     <ClInclude Include="Entity\Entity.h" />
     <ClInclude Include="Glad\glad.h" />
+    <ClInclude Include="Graphics\Framebuffer.h" />
     <ClInclude Include="Graphics\GLRenderer.h" />
+    <ClInclude Include="Graphics\GLResources.h" />
     <ClInclude Include="Graphics\IRenderer.h" />
     <ClInclude Include="Graphics\RenderCommand.h" />
     <ClInclude Include="Graphics\RenderFactory.h" />
+    <ClInclude Include="Graphics\Shape.h" />
+    <ClInclude Include="Graphics\Texture.h" />
+    <ClInclude Include="Graphics\Vertex.h" />
     <ClInclude Include="Main\Main.h" />
     <ClInclude Include="Manager\ComponentManager.h" />
     <ClInclude Include="Manager\ECSManager.h" />
@@ -60,6 +68,7 @@
     <ClInclude Include="Manager\SerialisationManager.h" />
     <ClInclude Include="System\InputSystem.h" />
     <ClInclude Include="System\System.h" />
+    <ClInclude Include="System\TransformSystem.h" />
     <ClInclude Include="Utility\AssetPath.h" />
     <ClInclude Include="Utility\Clock.h" />
     <ClInclude Include="Utility\InputKeyMappings.h" />
