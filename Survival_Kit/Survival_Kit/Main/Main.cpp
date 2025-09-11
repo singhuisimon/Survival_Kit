@@ -47,6 +47,19 @@ int main(void) {
     IM.setWindow(window);
     LM.writeLog("InputManager initialized successfully");
 
+    // Setup Dear ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+    IMGUIM.startUp(window, io);
+
+    // Editor Temporary Windows
+    //bool test_window = true;
+    bool inspectorWindow = true;
+    bool assetsBrowser = true; // to load assets
+
+    //bool test_done = false;
     // Create a clock for timing
     gam300::Clock clock;
 
@@ -69,9 +82,63 @@ int main(void) {
         // Update all systems (including InputSystem)
         EM.updateSystems(GM.getFrameTime() / 1000.0f);
 
+        if (glfwGetWindowAttrib(window, GLFW_ICONIFIED) != 0)
+        {
+            ImGui_ImplGlfw_Sleep(10);
+            continue;
+        }
+
+        IMGUIM.startImguiFrame();
+
+        // Editor Temporary Menu Bar
+        if (ImGui::BeginMainMenuBar())
+        {
+            ImGui::Separator();
+            if (ImGui::BeginMenu("File_Test"))
+            {
+                if (ImGui::MenuItem("New"))
+                {
+                    
+                }
+
+                if (ImGui::MenuItem("Save"))
+                {
+
+                }
+                ImGui::EndMenu();
+                ImGui::Separator();
+            }
+            ImGui::EndMainMenuBar();
+        }
+       
+        // Editor Dockspace
+        ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
+
+        IMGUIM.displayHierarchyList();
+
+        // Editor Temporary Windows
+
+        ImGui::SetNextWindowSize(ImVec2(600, 400));
+        if (ImGui::Begin("Properties Panel Test", &inspectorWindow, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize)) {
+
+        }
+        ImGui::End();
+
+     
+        ImGui::SetNextWindowSize(ImVec2(600, 400));
+        if (ImGui::Begin("Assets Browser Test", &assetsBrowser, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize))
+        {
+        }
+        ImGui::End();
+
+        // Editor Start Render
+        ImGui::Render();
+
         // Render frame 
         glClear(GL_COLOR_BUFFER_BIT);
 
+        IMGUIM.finishImguiRender(io);
+        
         // Swap buffers
         glfwSwapBuffers(window);
 
@@ -100,7 +167,9 @@ int main(void) {
 
     // Shut down InputManager
     IM.shutDown();
-
+    
+    IMGUIM.shutDown();
+    
     // Terminate GLFW
     glfwTerminate();
 
