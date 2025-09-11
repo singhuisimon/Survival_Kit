@@ -9,19 +9,38 @@
  */
 
 #include "AssetPath.h"
+#include <filesystem>
 
 namespace gam300 {
 
     // Base path to the assets directory - modify this to match your project structure
-    const std::string BASE_ASSETS_PATH = "C:/GitHub/gam_300/gam_300_engine/gam_300_engine/Assets/";
+    const std::string BASE_ASSETS_PATH = std::filesystem::current_path().string() + "\\Assets\\";
 
+    //Edited - Lily and Huishan (10/9)
     std::string getAssetsPath() {
-        return BASE_ASSETS_PATH;
+        std::string formattedBasePath = BASE_ASSETS_PATH;
+
+        for (char& c : formattedBasePath) {
+            if (c == '\\') c = '/';
+        }
+
+        if (!formattedBasePath.empty() && (formattedBasePath[0] == '/' || formattedBasePath[0] == '\\')) {
+            formattedBasePath = formattedBasePath.substr(1);
+        }
+
+        return formattedBasePath;
     }
 
+    //Edited - Lily and Huishan (10/9)
     std::string getAssetFilePath(const std::string& relativePath) {
         // Make sure the path uses forward slashes for consistency
+
+        //Debug for the Assets File path
+        //std::cout << "Current Path: " << std::filesystem::current_path() << "\n";
+
         std::string formattedPath = relativePath;
+        std::string currentPath = getAssetsPath();
+
         for (char& c : formattedPath) {
             if (c == '\\') c = '/';
         }
@@ -31,7 +50,7 @@ namespace gam300 {
             formattedPath = formattedPath.substr(1);
         }
 
-        return BASE_ASSETS_PATH + formattedPath;
+        return currentPath + formattedPath;
     }
 
 } // end of namespace gam300
