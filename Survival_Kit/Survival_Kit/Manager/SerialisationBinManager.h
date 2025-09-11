@@ -9,6 +9,8 @@
 #include <vector>
 #include <string>
 
+#include "ECSManager.h"
+
 namespace gam300
 {
 
@@ -20,45 +22,88 @@ namespace gam300
 	class SerializerBin
 	{
 	public:
-		//===================== File helpers =====================
-
-		/*!***********************************************************************
-		\brief
-		Convenience function to serialize any supported object to a binary file.
-		\tparam T  The object type to serialize.
-		\param[in] path  Output file path.
-		\param[in] obj   Object instance to serialize.
-		*************************************************************************/
-		template <class T>
-		static inline void save(const char *path, const T &obj)
+		void writeScene(ECSManager &ecs, char const *fp)
 		{
-			std::ofstream os(path, std::ios::binary);
-			write_any(os, obj);
+			std::ofstream os(fp, std::ios::binary);
+			if (!os) return;
+
+			auto &ents{ ecs.getAllEntities() };
+			if (ents.empty())
+				return;
+
+			// Write header of bin file
+			write_header(os);
+
+			// Write each entity
+			for (auto &e : ents)
+			{
+				writeEntity(os, ecs, e);
+			}
 		}
 
-		/*!***********************************************************************
-		\brief
-			Convenience function to deserialize any supported object from a binaryfile.
-		\tparam T  The object type to deserialize.
-		\param[in]  path  Input file path.
-		\param[out] obj   Destination object to populate.
-		*************************************************************************/
-		template <class T>
-		static inline void load(const char *path, T &obj)
+		void writeEntity(std::ofstream &os, ECSManager &ecs, Entity const &e)
 		{
-			std::ifstream is(path, std::ios::binary);
-			read_any(is, obj);
+			// --- entity header "GAM300EN" ---
+			Header h{};
+			h.magic[0] = 'G'; h.magic[1] = 'A'; h.magic[2] = 'M'; h.magic[3] = '3';
+			h.magic[4] = '0'; h.magic[5] = '0'; h.magic[6] = 'E'; h.magic[7] = 'N';
+			os.write(reinterpret_cast<const char *>(&h), sizeof(h));
+
+			const EntityID id = e.get_id();
+			write_any(os, id);
+
+			const auto mask = e.get_component_mask(); 
+
+			std::uint32_t present = 0u;
+
+			write_any(os, present);
+
+		}
+
+
+		void writeComponent(std::ofstream &os, Component const &e)
+		{
+			// Write component header
+			Header h{};
+			h.magic[0] = 'G'; h.magic[1] = 'A'; h.magic[2] = 'M'; h.magic[3] = '3';
+			h.magic[4] = '0'; h.magic[5] = '0'; h.magic[6] = 'C'; h.magic[7] = 'P';
+			os.write(reinterpret_cast<const char *>(&h), sizeof(h));
+
+			// Write component as_tuple
+
+		}
+
+	private:
+		struct Header
+		{
+			char     magic[8];   // "GAM300SC" "GAM300EN" "GAM300CP"
+		};
+
+		inline void write_header(std::ofstream &os)
+		{
+			Header h{};
+			h.magic[0] = 'G'; h.magic[1] = 'A'; h.magic[2] = 'M'; h.magic[3] = '3';
+			h.magic[4] = '0'; h.magic[5] = '0'; h.magic[6] = 'S'; h.magic[7] = 'C';
+			os.write(reinterpret_cast<const char *>(&h), sizeof(h));
+		}
+		inline bool read_header(std::ifstream &is)
+		{
+			Header h{};
+			is.read(reinterpret_cast<char *>(&h), sizeof(h));
+			const bool magic_ok =
+				h.magic[0] == 'G' && h.magic[1] == 'A' && h.magic[2] == 'M' && h.magic[3] == '3' &&
+				h.magic[4] == '0' && h.magic[5] == '0' && h.magic[6] == 'S' && h.magic[7] == 'C';
+			return magic_ok;
 		}
 
 		//===================== Core dispatch =====================
-
 		/*!***********************************************************************
 		\brief
 		Generic dispatcher for writing a value to a binary stream.
 		Routes to:
 			- write_container() if T is contiguous+resizable (string/vector),
 			- write_data()      if T is trivially copyable,
-			- write_component() otherwise (field-by-field via as_tuple()).
+			- write_tuple() otherwise (field-by-field via as_tuple()).
 		*************************************************************************/
 		template <class T>
 		static void write_any(std::ofstream &os, const T &v)
@@ -73,7 +118,7 @@ namespace gam300
 			}
 			else
 			{
-				write_component(os, v);
+				write_tuple(os, v);
 			}
 		}
 
@@ -83,7 +128,7 @@ namespace gam300
 		Routes to:
 			- read_container() if T is contiguous+resizable (string/vector),
 			- read_data()      if T is trivially copyable,
-			- read_component() otherwise (field-by-field via as_tuple()).
+			- read_tuple() otherwise (field-by-field via as_tuple()).
 		*************************************************************************/
 		template <class T>
 		static void read_any(std::ifstream &is, T &v)
@@ -98,11 +143,10 @@ namespace gam300
 			}
 			else
 			{
-				read_component(is, v);
+				read_tuple(is, v);
 			}
 		}
 
-	private:
 		//===================== u64 size I/O =====================
 
 		/*!***********************************************************************
@@ -235,7 +279,7 @@ namespace gam300
 		//===================== components (as_tuple) =====================
 
 		template <class T>
-		static void write_component(std::ofstream &os, const T &obj)
+		static void write_tuple(std::ofstream &os, const T &obj)
 		{
 			auto tup = obj.as_tuple(); // tuple of (const) refs
 			tuple_for_each(tup, [&](auto const &f)
@@ -245,7 +289,7 @@ namespace gam300
 		}
 
 		template <class T>
-		static void read_component(std::ifstream &is, T &obj)
+		static void read_tuple(std::ifstream &is, T &obj)
 		{
 			auto tup = obj.as_tuple(); // tuple of refs
 			tuple_for_each(tup, [&](auto &f)
