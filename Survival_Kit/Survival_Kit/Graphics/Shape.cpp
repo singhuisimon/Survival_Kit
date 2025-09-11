@@ -1,4 +1,5 @@
 ﻿#include "../Graphics/Shape.h"
+#include "../Manager/GraphicsManager.h"
 #include <string>
 
 namespace gam300 {
@@ -138,7 +139,8 @@ namespace gam300 {
 		draw_count	   = indices.size();
 	}
 
-	void Cube::draw() {
+	GLuint Cube::GetVAOId() const noexcept {
 
+		return vao.id();
 	}
 }

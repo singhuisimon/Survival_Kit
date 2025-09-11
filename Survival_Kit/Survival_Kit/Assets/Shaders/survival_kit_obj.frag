@@ -74,5 +74,6 @@ void main()
     vec3 material_ka = vec3(0.9f, 0.5f, 0.3f);
     vec3 ambient = light_la * material_ka;
 
-    FragColor = vec4(ambient, 1.0f);
+    vec3 n = normalize(Normal);
+    FragColor = vec4(n * 0.5 + 0.5, 1.0f);
 }

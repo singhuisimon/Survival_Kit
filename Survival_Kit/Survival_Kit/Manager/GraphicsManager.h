@@ -25,6 +25,7 @@
 #include "../Utility/Constant.h"
 #include "../Graphics/ShaderProgram.h"
 #include "../Graphics/Camera.h"
+#include "../Graphics/Shape.h"
 
 // Things to include or KIV for creating a scene
 /* 
@@ -51,6 +52,8 @@ namespace gam300 {
 
         // Storage for shader programs (Will port to asset manager eventually)
         std::vector<ShaderProgram> shadersStorage;
+        Cube cube;
+        
 
     public:
         /**

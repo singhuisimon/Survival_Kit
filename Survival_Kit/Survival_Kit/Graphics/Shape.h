@@ -14,16 +14,20 @@ namespace gam300 {
 	public:
 
 		void init();
-		void draw();
+		GLuint GetVAOId() const noexcept;
 
-	private:
-		VertexSoA vertices;
+		GLenum    primitive_type;
+		GLuint    draw_count;
+
 		VAO       vao;
 		VBO       vbo;
 		VBO       ebo;
 
-		GLenum    primitive_type;
-		GLuint    draw_count;
+	private:
+		VertexSoA vertices;
+
+
+
 	};
 
 }

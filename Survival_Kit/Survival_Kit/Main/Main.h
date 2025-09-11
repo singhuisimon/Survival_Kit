@@ -25,4 +25,5 @@
 #include "../Manager/GraphicsManager.h" // GLFW & GLAD headers
 #include "../Utility/Clock.h"
 
+
 #endif // __MAIN_H__

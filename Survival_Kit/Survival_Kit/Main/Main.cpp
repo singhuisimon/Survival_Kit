@@ -35,6 +35,7 @@ int main(void) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
     // Additional settings
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
@@ -53,6 +54,9 @@ int main(void) {
 
     LM.writeLog("Window created with dimensions 640x480");
     glfwMakeContextCurrent(window);
+
+    // Initialize graphics manager
+    GFXM.startUp();
 
     //// Load OpenGL function pointers with GLAD
     //if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -104,6 +108,8 @@ int main(void) {
 
         // Render frame 
         glClear(GL_COLOR_BUFFER_BIT);
+
+        GFXM.update();
 
         // Swap buffers
         glfwSwapBuffers(window);

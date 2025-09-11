@@ -108,6 +108,8 @@ namespace gam300 {
         // Log startup
         LM.writeLog("GraphicsManager::startUp() - Graphics Manager started successfully");
 
+        cube.init();
+
         return 0;
     }
 
@@ -138,6 +140,23 @@ namespace gam300 {
         -
         -
         */
+
+        shadersStorage[0].programUse();
+
+        // Clear the color and depth buffer
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        cube.vao.bind();
+
+        // Set draw mode
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+        // Draw the actual object
+        glDrawElements(cube.primitive_type, cube.draw_count, GL_UNSIGNED_SHORT, NULL);
+
+        glBindVertexArray(0);
+
+        shadersStorage[0].programFree();
     }
 
     bool GraphicsManager::loadShaderPrograms(std::vector<std::pair<std::string, std::string>> shaders) {
