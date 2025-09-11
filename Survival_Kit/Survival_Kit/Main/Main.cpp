@@ -12,12 +12,12 @@
 #include "Main.h"
 
 int main(void) {
-    // Initialize GameManager
-    if (GM.startUp()) {
-        // Failed to start GameManager
-        printf("ERROR: Failed to start GameManager\n");
-        return -1;
-    }
+    //// Initialize GameManager
+    //if (GM.startUp()) {
+    //    // Failed to start GameManager
+    //    printf("ERROR: Failed to start GameManager\n");
+    //    return -1;
+    //}
 
     // Get reference to LogManager (already started by GameManager)
     LM.writeLog("Main: GameManager initialized successfully");
@@ -31,6 +31,17 @@ int main(void) {
 
     LM.writeLog("GLFW initialized successfully");
 
+    // Set OpenGL version and profile
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    // Additional settings
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
+    glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
+    glfwWindowHint(GLFW_RED_BITS, 8); glfwWindowHint(GLFW_GREEN_BITS, 8);
+    glfwWindowHint(GLFW_BLUE_BITS, 8); glfwWindowHint(GLFW_ALPHA_BITS, 8);
+
     // Create window
     GLFWwindow* window = glfwCreateWindow(640, 480, "Survival_Kit", NULL, NULL);
     if (!window) {
@@ -42,6 +53,28 @@ int main(void) {
 
     LM.writeLog("Window created with dimensions 640x480");
     glfwMakeContextCurrent(window);
+
+    //// Load OpenGL function pointers with GLAD
+    //if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    //    LM.writeLog("Failed to initialize OpenGL function pointers!");
+    //    std::cerr << "Failed to initialize OpenGL function pointers!" << std::endl;
+    //    glfwDestroyWindow(window);
+    //    glfwTerminate();
+    //    return -1;
+    //}
+    //else {
+    //    LM.writeLog("GLAD initialized successfully.");
+    //    std::cout << "GLAD initialized successfully." << std::endl;
+    //}
+
+    // Initialize GameManager
+    if (GM.startUp()) {
+        // Failed to start GameManager
+        printf("ERROR: Failed to start GameManager\n");
+        glfwDestroyWindow(window);
+        glfwTerminate();
+        return -1;
+    }
 
     // Register window with InputManager
     IM.setWindow(window);

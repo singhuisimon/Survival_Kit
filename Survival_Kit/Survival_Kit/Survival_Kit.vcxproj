@@ -24,10 +24,12 @@
     <ClCompile Include="Glad\glad.c" />
     <ClCompile Include="Graphics\GLResources.cpp" />
     <ClCompile Include="Graphics\Shape.cpp" />
+    <ClCompile Include="Graphics\ShaderProgram.cpp" />
     <ClCompile Include="Main\Main.cpp" />
     <ClCompile Include="Manager\ComponentManager.cpp" />
     <ClCompile Include="Manager\ECSManager.cpp" />
     <ClCompile Include="Manager\GameManager.cpp" />
+    <ClCompile Include="Manager\GraphicsManager.cpp" />
     <ClCompile Include="Manager\InputManager.cpp" />
     <ClCompile Include="Manager\LogManager.cpp" />
     <ClCompile Include="Manager\Manager.cpp" />
@@ -52,16 +54,16 @@
     <ClInclude Include="Graphics\Framebuffer.h" />
     <ClInclude Include="Graphics\GLRenderer.h" />
     <ClInclude Include="Graphics\GLResources.h" />
-    <ClInclude Include="Graphics\IRenderer.h" />
-    <ClInclude Include="Graphics\RenderCommand.h" />
-    <ClInclude Include="Graphics\RenderFactory.h" />
     <ClInclude Include="Graphics\Shape.h" />
     <ClInclude Include="Graphics\Texture.h" />
     <ClInclude Include="Graphics\Vertex.h" />
+    <ClInclude Include="Graphics\Camera.h" />
+    <ClInclude Include="Graphics\ShaderProgram.h" />
     <ClInclude Include="Main\Main.h" />
     <ClInclude Include="Manager\ComponentManager.h" />
     <ClInclude Include="Manager\ECSManager.h" />
     <ClInclude Include="Manager\GameManager.h" />
+    <ClInclude Include="Manager\GraphicsManager.h" />
     <ClInclude Include="Manager\InputManager.h" />
     <ClInclude Include="Manager\LogManager.h" />
     <ClInclude Include="Manager\Manager.h" />
@@ -71,6 +73,7 @@
     <ClInclude Include="System\TransformSystem.h" />
     <ClInclude Include="Utility\AssetPath.h" />
     <ClInclude Include="Utility\Clock.h" />
+    <ClInclude Include="Utility\Constant.h" />
     <ClInclude Include="Utility\InputKeyMappings.h" />
     <ClInclude Include="Utility\MathUtils.h" />
     <ClInclude Include="Utility\ECS_Variables.h" />
@@ -79,6 +82,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Scene\Game.scn" />
+    <None Include="Assets\Shaders\survival_kit_obj.frag" />
+    <None Include="Assets\Shaders\survival_kit_obj.vert" />
     <None Include="game.scn" />
   </ItemGroup>
   <ItemGroup>

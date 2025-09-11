@@ -12,9 +12,6 @@
 #ifndef __MAIN_H__
 #define __MAIN_H__
 
- // Include GLFW
-#include <GLFW/glfw3.h>
-
 // Include thread/chrono
 #include <thread>
 #include <chrono>
@@ -25,6 +22,7 @@
 #include "../Manager/LogManager.h"
 #include "../Manager/InputManager.h"
 #include "../Manager/ECSManager.h"
+#include "../Manager/GraphicsManager.h" // GLFW & GLAD headers
 #include "../Utility/Clock.h"
 
 #endif // __MAIN_H__
