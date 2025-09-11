@@ -17,72 +17,74 @@
 
 namespace gam300 {
 
-    /**
-     * @brief Base interface for all component types.
-     * @details Provides virtual methods that all components must implement.
-     */
-    class Component {
-    public:
-        /**
-         * @brief Virtual destructor to ensure proper cleanup of derived classes.
-         */
-        virtual ~Component() = default;
+	/**
+	 * @brief Base interface for all component types.
+	 * @details Provides virtual methods that all components must implement.
+	 */
+	class Component {
+	public:
+		/**
+		 * @brief Virtual destructor to ensure proper cleanup of derived classes.
+		 */
+		virtual ~Component() = default;
 
-        /**
-         * @brief Initialize the component after it's been created.
-         * @param entity_id The ID of the entity this component is attached to.
-         */
-        virtual void init(EntityID entity_id) = 0;
+		/**
+		 * @brief Initialize the component after it's been created.
+		 * @param entity_id The ID of the entity this component is attached to.
+		 */
+		virtual void init(EntityID entity_id) = 0;
 
-        /**
-         * @brief Update the component's state.
-         * @param dt Delta time - time elapsed since last update.
-         */
-        virtual void update(float dt) = 0;
+		/**
+		 * @brief Update the component's state.
+		 * @param dt Delta time - time elapsed since last update.
+		 */
+		virtual void update(float dt) = 0;
 
-        /**
-         * @brief Get the entity ID this component is attached to.
-         * @return The entity ID.
-         */
-        EntityID get_owner() const { return m_owner_id; }
+		/**
+		 * @brief Get the entity ID this component is attached to.
+		 * @return The entity ID.
+		 */
+		EntityID get_owner() const {
+			return m_owner_id;
+		}
 
-    protected:
-        EntityID m_owner_id = INVALID_ENTITY_ID; ///< ID of the entity this component is attached to
-    };
+	protected:
+		EntityID m_owner_id = INVALID_ENTITY_ID; ///< ID of the entity this component is attached to
+	};
 
-    // Type alias for component smart pointers
-    template<typename T>
-    using ComponentPtr = std::unique_ptr<T>;
+	// Type alias for component smart pointers
+	template<typename T>
+	using ComponentPtr = std::unique_ptr<T>;
 
-    /**
-     * @brief Get the next available component type ID.
-     * @details Each call increments and returns a static counter.
-     * @return The next available component type ID.
-     */
-    inline ComponentTypeID next_component_type_id();
+	/**
+	 * @brief Get the next available component type ID.
+	 * @details Each call increments and returns a static counter.
+	 * @return The next available component type ID.
+	 */
+	inline ComponentTypeID next_component_type_id();
 
-    /**
-     * @brief Template function to get the component type ID at compile time.
-     * @details Uses a static counter to generate unique IDs for each component type.
-     * @tparam T The component type.
-     * @return A unique component type ID.
-     */
-    template<typename T>
-    ComponentTypeID get_component_type_id() {
-        static_assert(std::is_base_of<Component, T>::value, "T must inherit from Component");
-        static ComponentTypeID typeId = next_component_type_id();
-        return typeId;
-    }
+	/**
+	 * @brief Template function to get the component type ID at compile time.
+	 * @details Uses a static counter to generate unique IDs for each component type.
+	 * @tparam T The component type.
+	 * @return A unique component type ID.
+	 */
+	template<typename T>
+	ComponentTypeID get_component_type_id() {
+		static_assert(std::is_base_of<Component, T>::value, "T must inherit from Component");
+		static ComponentTypeID typeId = next_component_type_id();
+		return typeId;
+	}
 
-    /**
-     * @brief Get the next available component type ID.
-     * @details Each call increments and returns a static counter.
-     * @return The next available component type ID.
-     */
-    inline ComponentTypeID next_component_type_id() {
-        static ComponentTypeID lastId = 0;
-        return lastId++;
-    }
+	/**
+	 * @brief Get the next available component type ID.
+	 * @details Each call increments and returns a static counter.
+	 * @return The next available component type ID.
+	 */
+	inline ComponentTypeID next_component_type_id() {
+		static ComponentTypeID lastId = 0;
+		return lastId++;
+	}
 
 } // namespace gam300
 
