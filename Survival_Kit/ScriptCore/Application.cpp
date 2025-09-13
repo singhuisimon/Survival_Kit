@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Application.h"
+#include <filesystem>
 
 #pragma comment(lib, "shlwapi.lib")
 
@@ -7,31 +8,65 @@
 
 namespace Core
 {
+
+    std::array<TransformComponent, Application::ENTITY_COUNT> Application::nativeData;
     void Application::Run()
     {
-        startScriptEngine();
+        std::cout << "Starting application..." << std::endl;
 
-        void(*hwFunc)(void) = GetFunctionPtr<void(*)(void)>
+
+
+        startScriptEngine();
+        // Step 1: Get Functions
+        auto init = GetFunctionPtr<void(*)(void)>
             (
                 "ScriptAPI",
                 "ScriptAPI.EngineInterface",
-                "HelloWorld"
+                "Init"
             );
-        hwFunc();
+        auto addScript = GetFunctionPtr<bool(*)(int, const char*)>
+            (
+                "ScriptAPI",
+                "ScriptAPI.EngineInterface",
+                "AddScriptViaName"
+            );
+        auto executeUpdate = GetFunctionPtr<void(*)(void)>
+            (
+                "ScriptAPI",
+                "ScriptAPI.EngineInterface",
+                "ExecuteUpdate"
+            );
+        // Step 2: Initialize
+        std::cout << "INIT application..." << std::endl;
+
+        init();
+        // Step 3: Add script to an entity
+        addScript(0, "TestScript");
+        std::cout << "Test script added" << std::endl;
 
         // Load
         while (true)
         {
             if (GetKeyState(VK_ESCAPE) & 0x8000)
                 break;
-        }
 
+            // Step 4: Run the Update loop for our scripts
+
+            executeUpdate();
+        }
         stopScriptEngine();
     }
-
     void Application::HelloWorld()
     {
         std::cout << "Hello Native World!" << std::endl;
+    }
+
+    TransformComponent* Application::GetComponent(int entityId)
+    {
+        if (entityId < MIN_ENTITY_ID || entityId > MAX_ENTITY_ID)
+            return nullptr;
+
+        return &nativeData[entityId];
     }
     void Application::startScriptEngine()
     {
@@ -41,6 +76,7 @@ namespace Core
         PathRemoveFileSpecA(runtimePath.data());
         // Since PathRemoveFileSpecA() removes from data(), the size is not updated, so we must manually update it
         runtimePath.resize(std::strlen(runtimePath.data()));
+        std::filesystem::current_path(runtimePath);
 
         // Construct the CoreCLR path
         std::string coreClrPath(runtimePath); // Works

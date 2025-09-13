@@ -92,6 +92,7 @@
     <Link>
       <AdditionalDependencies>ScriptCore.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir).bin\$(Configuration)-$(Platform)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <TargetMachine>MachineX64</TargetMachine>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -121,13 +122,18 @@
     <Link>
       <AdditionalDependencies>ScriptCore.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir).bin\$(Configuration)-$(Platform)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <TargetMachine>MachineX64</TargetMachine>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="EngineInterface.cxx" />
+    <ClCompile Include="Script.cxx" />
+    <ClCompile Include="TransformComponent.cxx" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EngineInterface.hxx" />
+    <ClInclude Include="Script.hxx" />
+    <ClInclude Include="TransformComponent.hxx" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

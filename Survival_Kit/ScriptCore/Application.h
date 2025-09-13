@@ -13,14 +13,30 @@
 
 namespace Core
 {
+
+    class DLL_API TransformComponent
+    {
+    public:
+        float x = 0.0f;
+        float y = 0.0f;
+    };
     class DLL_API Application
     {
     public:
+
+        //need to replace with entity Manager
+        static constexpr int ENTITY_COUNT = 64;
+        static constexpr int MIN_ENTITY_ID = 0;
+        static constexpr int MAX_ENTITY_ID = ENTITY_COUNT - 1;
+        static TransformComponent* GetComponent(int entityId);
+
         void Run();
 
         static void HelloWorld();
 
     private:
+        static std::array<TransformComponent, ENTITY_COUNT> nativeData;
+
         void startScriptEngine();
         void stopScriptEngine();
         std::string buildTpaList(const std::string& directory);
@@ -73,4 +89,7 @@ namespace Core
             return managedDelegate;
         }
     };
+
+  
+
 }

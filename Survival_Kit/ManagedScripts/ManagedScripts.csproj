@@ -4,6 +4,7 @@
 	  <TargetFramework>net8.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <BaseOutputPath>$(SolutionDir).bin\$(Configuration)-x64</BaseOutputPath>
   </PropertyGroup>
 
 
@@ -15,9 +16,14 @@
     <OutputPath>$(SolutionDir).bin\$(Configuration)-$(Platform)\</OutputPath>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <Optimize>True</Optimize>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ScriptCore\ScriptCore.vcxproj" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ScriptAPI\ScriptAPI.vcxproj" />
-    <ProjectReference Include="..\ScriptCore\ScriptCore.vcxproj" />
   </ItemGroup>
 
 

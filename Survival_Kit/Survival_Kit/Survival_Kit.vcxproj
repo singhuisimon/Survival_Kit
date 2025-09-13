@@ -149,14 +149,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LibraryPath>$(OutDir)</LibraryPath>
+    <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
     <IncludePath>$(SolutionDir)ScriptCore;$(IncludePath)</IncludePath>
-    <ExternalIncludePath>$(SolutionDir)External_Libraries\include\dotnet;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>$(SolutionDir)External_Libraries\include\dotnet;$(SolutionDir)External_Libraries\include;$(ExternalIncludePath)</ExternalIncludePath>
+    <OutDir>$(SolutionDir).bin\$(Configuration)-$(Platform)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LibraryPath>$(OutDir)</LibraryPath>
+    <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
     <IncludePath>$(SolutionDir)ScriptCore;$(IncludePath)</IncludePath>
-    <ExternalIncludePath>$(SolutionDir)External_Libraries\include\dotnet;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>$(SolutionDir)External_Libraries\include\dotnet;$(SolutionDir)External_Libraries\include;$(ExternalIncludePath)</ExternalIncludePath>
+    <OutDir>$(SolutionDir).bin\$(Configuration)-$(Platform)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -192,18 +194,20 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)External_Libraries\include;%(AdditionalIncludeDirectories);$(SolutionDir)ScriptCore</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)ScriptCore;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)External_Libraries\lib;%(AdditionalLibraryDirectories);$(SolutionDir).bin\$(Configuration)-$(Platform)\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies);$(SolutionDir).bin\$(Configuration)-$(Platform)\</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)External_Libraries\lib;$(SolutionDir).bin\$(Configuration)-$(Platform)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);ScriptCore.lib;opengl32.lib;glfw3.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /s /r /y /q "$(OutDir)net8.0" "$(OutDir)"
-rmdir /s /q "$(OutDir)net8.0"</Command>
+      <Command>if exist "$(OutDir)net8.0-windows\*.*" (
+    xcopy /s /r /y /q "$(OutDir)net8.0-windows\*" "$(OutDir)"
+    rmdir /s /q "$(OutDir)net8.0-windows"
+)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -214,19 +218,22 @@ rmdir /s /q "$(OutDir)net8.0"</Command>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>;$(SolutionDir)ScriptCore</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)ScriptCore;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>;$(SolutionDir).bin\$(Configuration)-$(Platform)\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);$(SolutionDir).bin\$(Configuration)-$(Platform)\;"ScriptCore.lib";"$(SolutionDir).bin\$(Configuration)-$(Platform)\ScriptCore.lib"</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir).bin\$(Configuration)-$(Platform)\;$(SolutionDir)External_Libraries\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);opengl32.lib;ScriptCore.lib;glfw3.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /s /r /y /q "$(OutDir)net8.0" "$(OutDir)"
-rmdir /s /q "$(OutDir)net8.0"</Command>
+      <Command>if exist "$(OutDir)net8.0-windows\*.*" (
+    xcopy /s /r /y /q "$(OutDir)net8.0-windows\*" "$(OutDir)"
+    rmdir /s /q "$(OutDir)net8.0-windows"
+)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
