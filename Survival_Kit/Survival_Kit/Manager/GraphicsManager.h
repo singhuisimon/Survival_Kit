@@ -27,6 +27,10 @@
 #include "../Graphics/Camera.h"
 #include "../Graphics/Shape.h"
 
+// KENNY TESTING: For testing cursor input
+#include "InputManager.h"
+
+
 // Things to include or KIV for creating a scene
 /* 
 - shader program (P)
@@ -54,6 +58,8 @@ namespace gam300 {
         std::vector<ShaderProgram> shadersStorage;
         Cube cube;
         
+        // Main camera
+        Camera3D mainCamera;
 
     public:
         /**

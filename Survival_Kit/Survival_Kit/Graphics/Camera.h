@@ -45,62 +45,35 @@ namespace gam300 {
         glm::vec3 pos;      // 3D position of the camera
         glm::vec3 target;   // target the camera is looking at
         float FOV;          // Field of view of camera in degrees
-        float near;         // Near clipping plane
-        float far;          // Far clipping plane
+        float nearPlane;         // Near clipping plane
+        float farPlane;          // Far clipping plane
 
     public:
-        
-        // Constructor for a default walking 3D camera 
+
+        // Default constructor for a default 3D camera
+        Camera3D() :    camType{ CameraType::WALKING },
+                        pos{ 0.0f, 5.0f, 5.0f },
+                        target{ 0.0f, 0.0f, 0.0f },
+                        FOV{ 45.0f },
+                        nearPlane{ 0.5f },
+                        farPlane{ 100.0f }
+        {}
+
+        // Constructor for a 3D camera with custom values
         Camera3D(CameraType camType,
-                 glm::vec3 pos      = { 0.0f, 5.0f, 5.0f },
-                 glm::vec3 target   = { 0.0f, 0.0f, 0.0f },
-                 float FOV          = 45.0f,
-                 float near         = 0.5f,
-                 float far          = 100.0f) :
+                 glm::vec3 pos      ,
+                 glm::vec3 target   ,
+                 float FOV          ,
+                 float near         ,
+                 float far          ) :
                  
                  camType{ camType },
                  pos{ pos },
                  target{ target },
                  FOV{ FOV },
-                 near{ near },
-                 far{ far } 
+                 nearPlane{ near },
+                 farPlane{ far } 
         {}
-
-        // Constructor for a default orbiting 3D camera 
-        Camera3D(CameraType camType,
-                 glm::vec3 pos = { 0.0f, 5.0f, 5.0f },
-                 float FOV = 45.0f) :
-                 
-                 camType{ ORBITING },
-                 pos{ pos },
-                 target{ 0.0f, 0.0f, 0.0f },
-                 FOV{ FOV },
-                 near{ 0.5f },
-                 far{ 100.0f }
-        {}
-
-        //// Getters for camera data
-        //CameraType getCamType() { return camType; }
-        //glm::vec3& getCamPos() { return pos; }
-        //glm::vec3& getCamTarget() { return target; }
-        //float& getCamFOV() { return FOV; }
-        //float& getCamNear() { return near; }
-        //float& getCamFar() { return far ; }
-
-        //// Setters for camera data
-        //void setCamType(CameraType newType) {
-        //    camType = newType;
-
-        //    // Set default target if type changed to orbiting
-        //    if (camType == ORBITING) {
-        //        target = { 0.0f, 0.0f, 0.0f };
-        //    }
-        //}
-        //void setCamPos(glm::vec3 newPos) { pos = newPos; }
-        //void setCamTarget(glm::vec3 newTarget) { target = newTarget; }
-        //void setCamFOV(float newFOV) { FOV = newFOV; }
-        //void setCamNear(float newNear) { near = newNear; }
-        //void setCamFar(float newFar) { far = newFar; }
         
         // Compute the view matrix (V) for the camera (Default up is 0.0f, 1.0f, 0.0f)
         glm::mat4 getLookAt(glm::vec3 up = { 0.0f, 1.0f, 0.0f }) const
@@ -111,7 +84,7 @@ namespace gam300 {
         // Compute the perspective projection matrix (P) based on the field of view and aspect ratio (Default aspect ratio is 1)
         glm::mat4 getPerspective(float aspect = 1.0f) const
         {
-            return glm::perspective(glm::radians(FOV), aspect, near, far);
+            return glm::perspective(glm::radians(FOV), aspect, nearPlane, farPlane);
         }
 
         // Handles cursor movement to adjust camera orientation
@@ -120,6 +93,9 @@ namespace gam300 {
 
             if (camType == CameraType::ORBITING)
             {
+                // KENNY TESTING
+                std::cout << "Camera is orbiting with offsets: " << xoffset << ", " << yoffset << std::endl;
+
                 // Calculate spherical coordinates for orbiting movement
                 const float r = glm::sqrt(pos.x * pos.x +
                     pos.y * pos.y + pos.z * pos.z);
@@ -147,6 +123,10 @@ namespace gam300 {
             }
             else if (camType == CameraType::WALKING)
             {
+
+                // KENNY TESTING
+                //std::cout << "Camera is walking" << std::endl;
+
                 // Calculate spherical coordinates for walking movement
                 const float r = glm::sqrt(
                     (target.x - pos.x) * (target.x - pos.x) +
@@ -175,10 +155,10 @@ namespace gam300 {
                 target.z = pos.z + r * glm::cos(alpha) * glm::cos(betta);
             }
 
-            // Update shader program with the new camera settings
-            shader->programUse();
-            shader->setUniform("camera.position", pos);
-            shader->programFree();
+            //// Update shader program with the new camera settings
+            //shader->programUse();
+            //shader->setUniform("camera.position", pos);
+            //shader->programFree();
         }
 
         // Handles scroll input to adjust zoom or camera position
@@ -207,11 +187,34 @@ namespace gam300 {
                 target += velocity * glm::vec3(1.0f, 0.0f, 1.0f);
             }
 
-            // Update shader program with the new camera settings
-            shader->programUse();
-            shader->setUniform("camera.position", pos);
-            shader->programFree();
+            //// Update shader program with the new camera settings
+            //shader->programUse();
+            //shader->setUniform("camera.position", pos);
+            //shader->programFree();
         }
+
+        //// Getters for camera data
+        //CameraType getCamType() { return camType; }
+        //glm::vec3& getCamPos() { return pos; }
+        //glm::vec3& getCamTarget() { return target; }
+        //float& getCamFOV() { return FOV; }
+        //float& getCamNear() { return nearPlane; }
+        //float& getCamFar() { return farPlane; }
+
+        //// Setters for camera data
+        //void setCamType(CameraType newType) {
+        //    camType = newType;
+
+        //    // Set default target if type changed to orbiting
+        //    if (camType == ORBITING) {
+        //        target = { 0.0f, 0.0f, 0.0f };
+        //    }
+        //}
+        //void setCamPos(glm::vec3 newPos) { pos = newPos; }
+        //void setCamTarget(glm::vec3 newTarget) { target = newTarget; }
+        //void setCamFOV(float newFOV) { FOV = newFOV; }
+        //void setCamNear(float newNear) { nearPlane = newNear; }
+        //void setCamFar(float newFar) { farPlane = newFar; }
 
     };
 

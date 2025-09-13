@@ -105,28 +105,42 @@ namespace gam300 {
 		glBindVertexArray(0);
 
 		std::vector<GLushort> indices = {
-			// +X (base 0):   0,2,1,3
-			0, 2, 1, 3,
-			// bridge to -X
-			3, 4, 4,
-			// -X (base 4):   4,6,5,7
-			6, 5, 7,
-			// bridge to +Y
-			7, 8, 8,
-			// +Y (base 8):   8,10,9,11
-			10, 9, 11,
-			// bridge to -Y
-			11, 12, 12,
-			// -Y (base 12):  12,14,13,15
-			14, 13, 15,
-			// bridge to +Z
-			15, 16, 16,
-			// +Z (base 16):  16,18,17,19
-			18, 17, 19,
-			// bridge to -Z
-			19, 20, 20,
-			// -Z (base 20):  20,22,21,23
-			22, 21, 23
+			//// +X (base 0):   0,2,1,3
+			//0, 2, 1, 3,
+			//// bridge to -X
+			//3, 4, 4,
+			//// -X (base 4):   4,6,5,7
+			//6, 5, 7,
+			//// bridge to +Y
+			//7, 8, 8,
+			//// +Y (base 8):   8,10,9,11
+			//10, 9, 11,
+			//// bridge to -Y
+			//11, 12, 12,
+			//// -Y (base 12):  12,14,13,15
+			//14, 13, 15,
+			//// bridge to +Z
+			//15, 16, 16,
+			//// +Z (base 16):  16,18,17,19
+			//18, 17, 19,
+			//// bridge to -Z
+			//19, 20, 20,
+			//// -Z (base 20):  20,22,21,23
+			//22, 21, 23
+			 
+			// KENNY TESTING:
+			// front (0..3)
+			0,1,2,  0,2,3,
+			// back (4..7)  (note the swap to keep CCW from *outside*)
+			4,6,5,  4,7,6,
+			// left (8..11)
+			8,9,10,  8,10,11,
+			// right (12..15)
+			12,14,13,  12,15,14,
+			// bottom (16..19)
+			16,17,18,  16,18,19,
+			// top (20..23)
+			20,22,21,  20,23,22
 		};
 		
 		// Create an element buffer object to transfer topology
@@ -135,7 +149,7 @@ namespace gam300 {
 		vao.bind_element_buffer(ebo);
 		glBindVertexArray(0);
 
-		primitive_type = GL_TRIANGLE_STRIP;
+		primitive_type = GL_TRIANGLES;
 		draw_count	   = indices.size();
 	}
 

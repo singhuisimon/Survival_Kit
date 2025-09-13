@@ -54,6 +54,8 @@
     <ClInclude Include="Graphics\Framebuffer.h" />
     <ClInclude Include="Graphics\GLRenderer.h" />
     <ClInclude Include="Graphics\GLResources.h" />
+    <ClInclude Include="Graphics\Light.h" />
+    <ClInclude Include="Graphics\Material.h" />
     <ClInclude Include="Graphics\Shape.h" />
     <ClInclude Include="Graphics\Texture.h" />
     <ClInclude Include="Graphics\Vertex.h" />

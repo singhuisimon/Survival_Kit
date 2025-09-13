@@ -73,6 +73,9 @@ namespace gam300 {
             LM.writeLog("GraphicsManager::startUp(): Succesfully added shader programs.");
         }
 
+        // Set camera as orbiting
+        mainCamera = Camera3D(ORBITING, glm::vec3(0.0f, 5.0f, 5.0f), glm::vec3(0.0f), 45.0f, 0.5f, 100.0f);
+
         //// File path for assets
         //std::string mesh_path = ASM.get_full_path(ASM.MODEL_PATH, DEFAULT_MODEL_MSH_FILE);
         //std::string animation_path = ASM.get_full_path(ASM.TEXTURE_PATH, DEFAULT_ATLAS_FILE);
@@ -105,11 +108,11 @@ namespace gam300 {
         //glBindFramebuffer(GL_FRAMEBUFFER, 0);
         //glBindTexture(GL_TEXTURE_2D, 0);
 
-        // Log startup
-        LM.writeLog("GraphicsManager::startUp() - Graphics Manager started successfully");
 
         cube.init();
 
+        // Log startup
+        LM.writeLog("GraphicsManager::startUp() - Graphics Manager started successfully");
         return 0;
     }
 
@@ -141,7 +144,22 @@ namespace gam300 {
         -
         */
 
+
+        
+
         shadersStorage[0].programUse();
+
+        // KENNY TESTING: Temporary transformations for camera
+        shadersStorage[0].setUniform("M", glm::mat4(1.0f)); // Model transform
+        shadersStorage[0].setUniform("V", mainCamera.getLookAt()); // View transform
+        shadersStorage[0].setUniform("P", mainCamera.getPerspective()); // Perspective transform
+
+        // KENNY TESTING: Temporary input for cursor
+        if (IM.isKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
+            std::cout << IM.getMouseDeltaX() << std::endl;
+            mainCamera.onCursor(IM.getMouseDeltaX(), IM.getMouseDeltaY(), &shadersStorage[0]);
+        }
+
 
         // Clear the color and depth buffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

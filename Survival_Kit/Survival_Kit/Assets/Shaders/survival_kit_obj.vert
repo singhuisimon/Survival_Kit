@@ -17,14 +17,21 @@ uniform mat4 P; // Projection transform matrix
 
 void main()
 {
-    // mat4 MV = V * M; // Model-View transform matrix
 
-    // mat3 N = mat3(vec3(MV[0]), vec3(MV[1]), vec3(MV[2])); // Normal transform matrix
-    // Normal = normalize(N * VertexNormal);
+    
+    //Normal = VertexNormal;
+    //gl_Position = vec4(VertexPosition, 1.0f);
 
-    // vec4 VertexPositionInView = MV * vec4(VertexPosition, 1.0f);
-    // Position = VertexPositionInView.xyz;
-    //gl_Position = P * VertexPositionInView; 
+
+    // KENNY TESTING
+    mat4 MV = V * M; // Model-View transform matrix
+
+    mat3 N = mat3(vec3(MV[0]), vec3(MV[1]), vec3(MV[2])); // Normal transform matrix
+    //Normal = normalize(N * VertexNormal);
     Normal = VertexNormal;
-    gl_Position = vec4(VertexPosition, 1.0f);
+
+    vec4 VertexPositionInView = MV * vec4(VertexPosition, 1.0f);
+    Position = VertexPositionInView.xyz;
+    gl_Position = P * VertexPositionInView;
+
 }

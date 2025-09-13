@@ -56,7 +56,8 @@ int main(void) {
     glfwMakeContextCurrent(window);
 
     // Initialize graphics manager
-    GFXM.startUp();
+    // KENNY TESTING: Remove this start up as GM startup GFXM in the next block
+    //GFXM.startUp(); 
 
     //// Load OpenGL function pointers with GLAD
     //if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
