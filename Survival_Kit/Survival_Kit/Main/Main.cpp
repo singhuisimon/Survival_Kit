@@ -10,6 +10,7 @@
  */
 
 #include "Main.h"
+#include "../Manager/SerialisationManager.h"
 
 int main(void) {
     // Initialize GameManager
@@ -58,6 +59,8 @@ int main(void) {
     //bool test_window = true;
     bool inspectorWindow = true;
     bool assetsBrowser = true; // to load assets
+    bool fileWindow = true;
+    std::string shownFile{};
 
     //bool test_done = false;
     // Create a clock for timing
@@ -101,9 +104,15 @@ int main(void) {
                     
                 }
 
+                if (ImGui::MenuItem("Open"))
+                {
+                    fileWindow = true;
+                }
+
                 if (ImGui::MenuItem("Save"))
                 {
-
+                    //To uncomment after Serialisation is fixed
+                    //SEM.saveScene(shownFile);
                 }
                 ImGui::EndMenu();
                 ImGui::Separator();
@@ -114,6 +123,10 @@ int main(void) {
         // Editor Dockspace
         ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
 
+        if (fileWindow) {
+            IMGUIM.displayFileList(fileWindow, shownFile);
+        }
+        
         IMGUIM.displayHierarchyList();
 
         // Editor Temporary Windows

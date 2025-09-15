@@ -11,7 +11,10 @@
  // Include header file
 #include "ImguiManager.h"
 #include "ECSManager.h"
+#include "SerialisationManager.h"
 #include <iostream>
+#include "../Utility/AssetPath.h"
+#include "../Component/InputComponent.h"
 
 namespace gam300 {
 
@@ -98,6 +101,81 @@ namespace gam300 {
             ImGui::RenderPlatformWindowsDefault();
             glfwMakeContextCurrent(backup_current_context);
         }
+    }
+
+    void ImguiManager::displayFileList(bool& fileWindow, std::string& shownFile) {
+
+        std::string scenePath = getAssetFilePath("Scene");
+        std::vector<std::pair<std::string, std::string>> sceneFiles;
+
+        if (std::filesystem::exists(scenePath) && std::filesystem::is_directory(scenePath))
+        {
+            for (const auto& file : std::filesystem::directory_iterator(scenePath)) {
+                if (std::filesystem::is_regular_file(file.path())) {
+                    sceneFiles.push_back(std::make_pair(file.path().filename().string(), file.path().string()));
+                }
+            }
+        }
+
+        ImGui::SetNextWindowSize(ImVec2(800, 400));
+
+        if (ImGui::Begin("Level Select", &fileWindow, ImGuiWindowFlags_NoDocking)) {
+            for (int i = 0; i < sceneFiles.size(); i++)
+            {
+                std::string fileName = sceneFiles[i].first;
+                if (ImGui::Selectable(fileName.c_str())) {
+
+                    if (sceneFiles[i].second != shownFile) {
+
+                        if (SEM.loadScene(sceneFiles[i].second)) {
+
+                            shownFile = sceneFiles[i].second;
+
+                            LM.writeLog("IMGUI_Manager::displayFileList(): Scene %s loaded successfully.", sceneFiles[i].first.c_str());
+                            //std::cout << sceneFiles[i].second << std::endl;
+                            //std::cout << "Scene " << sceneFiles[i].first << "loaded successfully from displayFileList" << std::endl;
+
+                        }
+                        else {
+
+                            LM.writeLog("IMGUI_Manager::displayFileList(): Scene %s failed to load. Loading default scene.", sceneFiles[i].first.c_str());
+                            //std::cout << "Scene " << sceneFiles[i].first << "failed to load from displayFileList. Loading default scene." << std::endl;
+
+                            SEM.saveScene(getAssetFilePath("Scene/Game.scn"));
+                            if (SEM.loadScene(getAssetFilePath("Scene/Game.scn"))) {
+
+                                LM.writeLog("IMGUI_Manager::displayFileList(): Default scene loaded successfully.");
+                                //std::cout << "Default scene loaded successfully from displayFileList" << std::endl;
+                            }
+                            else {
+
+                                LM.writeLog("IMGUI_Manager::displayFileList(): WARNING: Failed to load default scene.");
+                                //std::cout << "WARNING: Failed to load default scene from displayFileList" << std::endl;
+                            }
+
+                            shownFile = getAssetFilePath("Scene/Game.scn");
+                        }
+                    }
+                    else {
+
+                        //std::cout << "Scene " << sceneFiles[i].first << " is already loaded." << std::endl;
+
+                        LM.writeLog("Scene %s is already loaded.", sceneFiles[i].first.c_str());
+                        
+                        //std::cout << "shownFile: " << shownFile << std::endl;
+                        //std::cout << "sceneFiles[i].second: " << sceneFiles[i].second << std::endl;
+
+                    }
+
+                    fileWindow = false;
+                    ImGui::CloseCurrentPopup();
+                    break;
+                }
+            }
+
+            ImGui::End();
+        }
+        
     }
 
     void ImguiManager::displayHierarchyList() {

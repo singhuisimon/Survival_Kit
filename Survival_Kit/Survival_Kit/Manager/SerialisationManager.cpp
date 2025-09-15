@@ -219,7 +219,7 @@ namespace gam300 {
 
         // Very simple JSON parsing - in a real implementation we would use a proper JSON parser
         // Find the objects array
-        size_t objectsStart = fileContent.find("\"objects\"");
+        /*size_t objectsStart = fileContent.find("\"objects\"");
         if (objectsStart == std::string::npos) {
             LM.writeLog("SerialisationManager::loadScene() - No objects found in scene file");
             return false;
@@ -237,10 +237,10 @@ namespace gam300 {
         if (arrayEnd == std::string::npos) {
             LM.writeLog("SerialisationManager::loadScene() - Invalid objects format in scene file");
             return false;
-        }
+        }*/
 
         // Extract the objects array content
-        std::string objectsContent = fileContent.substr(arrayStart + 1, arrayEnd - arrayStart - 1);
+        std::string objectsContent = fileContent; //.substr(arrayStart + 1, arrayEnd - arrayStart - 1);
 
         // Process each object in the array
         size_t objectStart = 0;
