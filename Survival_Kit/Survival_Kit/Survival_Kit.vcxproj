@@ -24,6 +24,7 @@
     <ClCompile Include="Glad\glad.c" />
     <ClCompile Include="Main\Main.cpp" />
     <ClCompile Include="Manager\ComponentManager.cpp" />
+    <ClCompile Include="Manager\DescriptorFileManager.cpp" />
     <ClCompile Include="Manager\ECSManager.cpp" />
     <ClCompile Include="Manager\GameManager.cpp" />
     <ClCompile Include="Manager\InputManager.cpp" />
@@ -47,6 +48,7 @@
     <ClInclude Include="Glad\glad.h" />
     <ClInclude Include="Main\Main.h" />
     <ClInclude Include="Manager\ComponentManager.h" />
+    <ClInclude Include="Manager\DescriptorFileManager.h" />
     <ClInclude Include="Manager\ECSManager.h" />
     <ClInclude Include="Manager\GameManager.h" />
     <ClInclude Include="Manager\InputManager.h" />
@@ -175,6 +177,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
