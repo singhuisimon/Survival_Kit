@@ -1,6 +1,7 @@
 // EngineInterface.cxx
 #include "EngineInterface.hxx"
 #include "../ScriptCore/Application.h"
+#include "Debug.hxx"
 
 using namespace System;
 #pragma comment (lib, "ScriptCore.lib")
@@ -15,7 +16,17 @@ namespace ScriptAPI
     void EngineInterface::Init()
     {
         // Load assembly
-        System::Reflection::Assembly::LoadFrom("ManagedScripts.dll");
+        using namespace System::IO;
+        loadContext =
+            gcnew System::Runtime::Loader::AssemblyLoadContext(nullptr, true);
+        // Load assembly
+        FileStream^ managedLibFile = File::Open
+        (
+            "ManagedScripts.dll",
+            FileMode::Open, FileAccess::Read, FileShare::Read
+        );
+        loadContext->LoadFromStream(managedLibFile);
+        managedLibFile->Close();
 
         // Create our script storage
         scripts = gcnew System::Collections::Generic::List<ScriptList^>();
@@ -27,9 +38,25 @@ namespace ScriptAPI
         // Populate list of types of scripts
         updateScriptTypeList();
     }
+    void EngineInterface::Reload()
+    {
+        // Clear all references to types in the script assembly we are going to unload
+        scripts->Clear();
+        scriptTypeList = nullptr;
+        // Unload
+        loadContext->Unload();
+        loadContext = nullptr;
+        // Wait for unloading to finish
+        System::GC::Collect();
+        System::GC::WaitForPendingFinalizers();
+        // Load the assembly again
+        Init();
+    }
 
     bool EngineInterface::AddScriptViaName(int entityId, System::String^ scriptName)
     {
+        SAFE_NATIVE_CALL_BEGIN
+
         // Check if valid entity
         if (entityId < Core::Application::MIN_ENTITY_ID || entityId > Core::Application::MAX_ENTITY_ID)
             return false;
@@ -64,6 +91,9 @@ namespace ScriptAPI
         // Add the script
         scripts[entityId]->Add(script);
         return true;
+        SAFE_NATIVE_CALL_END
+            return false;
+
     }
     void EngineInterface::ExecuteUpdate()
     {
@@ -79,8 +109,10 @@ namespace ScriptAPI
             {
                 //std::cout << "Calling Update on script: " << script->GetType()->Name << std::endl;
                 //System::Console::WriteLine("yur");
-
-                script->Update();
+                SAFE_NATIVE_CALL_BEGIN
+                    script->Update();
+                SAFE_NATIVE_CALL_END
+                //script->Update();
                 //std::cout << "Update completed" << std::endl;
             }
         }

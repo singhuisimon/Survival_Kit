@@ -131,6 +131,7 @@
     <ClCompile Include="TransformComponent.cxx" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Debug.hxx" />
     <ClInclude Include="EngineInterface.hxx" />
     <ClInclude Include="Script.hxx" />
     <ClInclude Include="TransformComponent.hxx" />

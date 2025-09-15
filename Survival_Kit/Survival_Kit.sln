@@ -6,7 +6,6 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Survival_Kit", "Survival_Kit\Survival_Kit.vcxproj", "{1F3067CA-7827-439F-A3E4-302DB0F6B5EE}"
 	ProjectSection(ProjectDependencies) = postProject
 		{06115020-1DC0-4009-A890-34BBCCBDB4A2} = {06115020-1DC0-4009-A890-34BBCCBDB4A2}
-		{81AE2A2B-2FE1-47A1-8F86-D42DDBC81644} = {81AE2A2B-2FE1-47A1-8F86-D42DDBC81644}
 		{CD45B5B8-24D0-4291-AD94-D2597784CBE2} = {CD45B5B8-24D0-4291-AD94-D2597784CBE2}
 	EndProjectSection
 EndProject
@@ -16,8 +15,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ScriptAPI", "ScriptAPI\Scri
 	ProjectSection(ProjectDependencies) = postProject
 		{CD45B5B8-24D0-4291-AD94-D2597784CBE2} = {CD45B5B8-24D0-4291-AD94-D2597784CBE2}
 	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagedScripts", "ManagedScripts\ManagedScripts.csproj", "{81AE2A2B-2FE1-47A1-8F86-D42DDBC81644}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -65,18 +62,6 @@ Global
 		{06115020-1DC0-4009-A890-34BBCCBDB4A2}.Release|x64.Build.0 = Release|x64
 		{06115020-1DC0-4009-A890-34BBCCBDB4A2}.Release|x86.ActiveCfg = Release|Win32
 		{06115020-1DC0-4009-A890-34BBCCBDB4A2}.Release|x86.Build.0 = Release|Win32
-		{81AE2A2B-2FE1-47A1-8F86-D42DDBC81644}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{81AE2A2B-2FE1-47A1-8F86-D42DDBC81644}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{81AE2A2B-2FE1-47A1-8F86-D42DDBC81644}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{81AE2A2B-2FE1-47A1-8F86-D42DDBC81644}.Debug|x64.Build.0 = Debug|Any CPU
-		{81AE2A2B-2FE1-47A1-8F86-D42DDBC81644}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{81AE2A2B-2FE1-47A1-8F86-D42DDBC81644}.Debug|x86.Build.0 = Debug|Any CPU
-		{81AE2A2B-2FE1-47A1-8F86-D42DDBC81644}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{81AE2A2B-2FE1-47A1-8F86-D42DDBC81644}.Release|Any CPU.Build.0 = Release|Any CPU
-		{81AE2A2B-2FE1-47A1-8F86-D42DDBC81644}.Release|x64.ActiveCfg = Release|Any CPU
-		{81AE2A2B-2FE1-47A1-8F86-D42DDBC81644}.Release|x64.Build.0 = Release|Any CPU
-		{81AE2A2B-2FE1-47A1-8F86-D42DDBC81644}.Release|x86.ActiveCfg = Release|Any CPU
-		{81AE2A2B-2FE1-47A1-8F86-D42DDBC81644}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

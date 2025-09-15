@@ -36,6 +36,7 @@ namespace Core
 
     private:
         static std::array<TransformComponent, ENTITY_COUNT> nativeData;
+        void compileScriptAssembly();
 
         void startScriptEngine();
         void stopScriptEngine();

@@ -204,10 +204,8 @@
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);ScriptCore.lib;opengl32.lib;glfw3.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>if exist "$(OutDir)net8.0-windows\*.*" (
-    xcopy /s /r /y /q "$(OutDir)net8.0-windows\*" "$(OutDir)"
-    rmdir /s /q "$(OutDir)net8.0-windows"
-)</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -230,10 +228,8 @@
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);opengl32.lib;ScriptCore.lib;glfw3.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>if exist "$(OutDir)net8.0-windows\*.*" (
-    xcopy /s /r /y /q "$(OutDir)net8.0-windows\*" "$(OutDir)"
-    rmdir /s /q "$(OutDir)net8.0-windows"
-)</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

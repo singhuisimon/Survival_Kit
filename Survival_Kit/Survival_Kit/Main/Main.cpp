@@ -66,10 +66,14 @@ int main(void) {
     // Variables for timing
     int64_t elapsed_time = 0;
     int64_t sleep_time = 0;
-    Core::Application app;
-    app.Run();
     // Main game loop
     LM.writeLog("Starting main game loop");
+
+
+    Core::Application app;
+    app.Run();
+
+
     while (!GM.getGameOver() && !glfwWindowShouldClose(window)) {
         // Process events
         glfwPollEvents();
