@@ -8,7 +8,6 @@
  * Reproduction or disclosure of this file or its contents without the
  * prior written consent of DigiPen Institute of Technology is prohibited.
  */
-#include "Application.h"
 #include "Main.h"
 
 int main(void) {
@@ -18,6 +17,8 @@ int main(void) {
         printf("ERROR: Failed to start GameManager\n");
         return -1;
     }
+    bool spacePressed = false;
+
 
     // Get reference to LogManager (already started by GameManager)
     LM.writeLog("Main: GameManager initialized successfully");
@@ -86,6 +87,13 @@ int main(void) {
 
         // Start of loop timing
         clock.delta();
+
+        bool currentSpaceState = GetKeyState(VK_SPACE) & 0x8000;
+        if (currentSpaceState && !spacePressed)
+        {
+            app.ReloadScripts();
+            app.AddScript(0, "TestScript");  // Re-add script after reload
+        }
 
         // Update all systems (including InputSystem)
         EM.updateSystems(GM.getFrameTime() / 1000.0f);
@@ -170,6 +178,8 @@ int main(void) {
         }
 
         app.UpdateScripts();
+        app.CheckAndReloadScripts();
+
     }
 
 

@@ -8,6 +8,12 @@
 #include <string_view>
 #include <filesystem>
 
+//file watching includes
+#include <thread>
+#include <atomic>
+#include <chrono>
+#include <unordered_map>
+
 // Relative include as this file will be included from other projects later
 #include "../External_Libraries/include/dotnet/coreclrhost.h"    // coreclr_*
 
@@ -36,7 +42,8 @@ namespace Core
         void UpdateScripts();
         void ShutdownScripting();
         void ReloadScripts();
-        void Run();
+        void Run(); // not using currently
+        void CheckAndReloadScripts();
 
         static void HelloWorld();
 
@@ -50,6 +57,21 @@ namespace Core
         void startScriptEngine();
         void stopScriptEngine();
         std::string buildTpaList(const std::string& directory);
+
+        // File watching members
+        std::thread fileWatcherThread;
+        std::atomic<bool> shouldStopWatching{ false };
+        std::atomic<bool> scriptsNeedReload{ false };
+        std::string scriptDirectory;
+        std::unordered_map<std::string, std::filesystem::file_time_type> fileTimestamps;
+        std::chrono::steady_clock::time_point lastCheck;
+
+        // File watching methods
+        void startFileWatcher();
+        void stopFileWatcher();
+        void fileWatcherLoop();
+        bool checkForScriptChanges();
+        void updateFileTimestamps();
 
         // References to CoreCLR key components
         HMODULE coreClr = nullptr;

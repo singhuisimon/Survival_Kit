@@ -260,6 +260,12 @@ namespace Core
         initFunc();
 
         std::cout << "Script system initialized successfully!" << std::endl;
+        // Initialize file watching
+        updateFileTimestamps();
+        lastCheck = std::chrono::steady_clock::now();
+        startFileWatcher();
+
+        std::cout << "Script system and file watcher initialized successfully!" << std::endl;
     }
 
     bool Application::AddScript(int entityId, const char* scriptName)
@@ -277,6 +283,7 @@ namespace Core
 
     void Application::ShutdownScripting()
     {
+        stopFileWatcher();
         stopScriptEngine();
 
         // Reset all function pointers
@@ -294,6 +301,212 @@ namespace Core
             compileScriptAssembly();
             reloadScriptsFunc();
             std::cout << "Scripts reloaded!" << std::endl;
+        }
+    }
+
+
+    void Application::CheckAndReloadScripts()
+    {
+        // Option 1: Use the atomic flag from file watcher thread
+        if (scriptsNeedReload.exchange(false))
+        {
+            std::cout << "Auto-reloading scripts due to file changes..." << std::endl;
+            try
+            {
+                // Add a small delay to ensure file write is complete
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+                compileScriptAssembly();
+                if (reloadScriptsFunc)
+                {
+                    reloadScriptsFunc();
+                }
+
+                // Re-add your scripts here
+                AddScript(0, "TestScript");
+
+                std::cout << "Auto-reload completed!" << std::endl;
+            }
+            catch (const std::exception& e)
+            {
+                std::cout << "Auto-reload failed: " << e.what() << std::endl;
+            }
+        }
+
+        // Option 2: Alternative polling approach (comment out if using file watcher thread)
+        /*
+        auto now = std::chrono::steady_clock::now();
+        if (std::chrono::duration_cast<std::chrono::milliseconds>(now - lastCheck).count() > 500)
+        {
+            if (checkForScriptChanges())
+            {
+                std::cout << "Auto-reloading scripts due to file changes..." << std::endl;
+                try
+                {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                    compileScriptAssembly();
+                    if (reloadScriptsFunc)
+                    {
+                        reloadScriptsFunc();
+                    }
+                    AddScript(0, "TestScript");
+                    std::cout << "Auto-reload completed!" << std::endl;
+                }
+                catch (const std::exception& e)
+                {
+                    std::cout << "Auto-reload failed: " << e.what() << std::endl;
+                }
+            }
+            lastCheck = now;
+        }
+        */
+    }
+
+
+    void Application::startFileWatcher()
+    {
+        scriptDirectory = "..\\..\\ManagedScripts\\";
+        shouldStopWatching = false;
+        fileWatcherThread = std::thread(&Application::fileWatcherLoop, this);
+    }
+
+    void Application::stopFileWatcher()
+    {
+        shouldStopWatching = true;
+        if (fileWatcherThread.joinable())
+            fileWatcherThread.join();
+    }
+
+    void Application::fileWatcherLoop()
+    {
+        HANDLE hDir = CreateFileA(
+            scriptDirectory.c_str(),
+            FILE_LIST_DIRECTORY,
+            FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+            nullptr,
+            OPEN_EXISTING,
+            FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED,
+            nullptr
+        );
+
+        if (hDir == INVALID_HANDLE_VALUE)
+        {
+            std::cout << "Failed to open directory for monitoring: " << scriptDirectory << std::endl;
+            return;
+        }
+
+        char buffer[1024];
+        DWORD bytesReturned;
+        OVERLAPPED overlapped = {};
+        overlapped.hEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+
+        std::cout << "File watcher started for: " << scriptDirectory << std::endl;
+
+        while (!shouldStopWatching)
+        {
+            if (ReadDirectoryChangesW(
+                hDir,
+                buffer,
+                sizeof(buffer),
+                TRUE, // Watch subdirectories
+                FILE_NOTIFY_CHANGE_LAST_WRITE | FILE_NOTIFY_CHANGE_CREATION,
+                &bytesReturned,
+                &overlapped,
+                nullptr))
+            {
+                DWORD waitResult = WaitForSingleObject(overlapped.hEvent, 1000);
+
+                if (waitResult == WAIT_OBJECT_0)
+                {
+                    FILE_NOTIFY_INFORMATION* info = reinterpret_cast<FILE_NOTIFY_INFORMATION*>(buffer);
+
+                    do
+                    {
+                        std::wstring filename(info->FileName, info->FileNameLength / sizeof(wchar_t));
+
+                        // Check if it's a C# file
+                        if (filename.length() > 3 &&
+                            filename.substr(filename.length() - 3) == L".cs")
+                        {
+                            std::wcout << L"Detected change in: " << filename << std::endl;
+                            scriptsNeedReload = true;
+                            break;
+                        }
+
+                        if (info->NextEntryOffset == 0)
+                            break;
+
+                        info = reinterpret_cast<FILE_NOTIFY_INFORMATION*>(
+                            reinterpret_cast<char*>(info) + info->NextEntryOffset);
+
+                    } while (true);
+                }
+            }
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+
+        CloseHandle(overlapped.hEvent);
+        CloseHandle(hDir);
+        std::cout << "File watcher stopped" << std::endl;
+    }
+
+    bool Application::checkForScriptChanges()
+    {
+        bool hasChanges = false;
+
+        try
+        {
+            for (const auto& entry : std::filesystem::recursive_directory_iterator(scriptDirectory))
+            {
+                if (entry.is_regular_file() && entry.path().extension() == ".cs")
+                {
+                    std::string filepath = entry.path().string();
+                    auto lastWriteTime = entry.last_write_time();
+
+                    auto it = fileTimestamps.find(filepath);
+                    if (it == fileTimestamps.end())
+                    {
+                        fileTimestamps[filepath] = lastWriteTime;
+                        hasChanges = true;
+                        std::cout << "New script file detected: " << filepath << std::endl;
+                    }
+                    else if (it->second != lastWriteTime)
+                    {
+                        it->second = lastWriteTime;
+                        hasChanges = true;
+                        std::cout << "Script file modified: " << filepath << std::endl;
+                    }
+                }
+            }
+        }
+        catch (const std::filesystem::filesystem_error& e)
+        {
+            std::cout << "Error checking script files: " << e.what() << std::endl;
+        }
+
+        return hasChanges;
+    }
+
+    void Application::updateFileTimestamps()
+    {
+        scriptDirectory = "..\\..\\ManagedScripts\\";
+
+        try
+        {
+            fileTimestamps.clear();
+            for (const auto& entry : std::filesystem::recursive_directory_iterator(scriptDirectory))
+            {
+                if (entry.is_regular_file() && entry.path().extension() == ".cs")
+                {
+                    fileTimestamps[entry.path().string()] = entry.last_write_time();
+                }
+            }
+            std::cout << "Initialized tracking for " << fileTimestamps.size() << " C# files" << std::endl;
+        }
+        catch (const std::filesystem::filesystem_error& e)
+        {
+            std::cout << "Error updating file timestamps: " << e.what() << std::endl;
         }
     }
 }

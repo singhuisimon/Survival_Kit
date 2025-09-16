@@ -3,6 +3,6 @@ public class TestScript : Script
 {
     public override void Update()
     {
-        Console.Write("3");
+        Console.Write("huhhh   ");
     }
 }
