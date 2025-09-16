@@ -78,7 +78,7 @@ namespace gam300 {
         }
 
         // Set camera as orbiting
-        mainCamera = Camera3D(ORBITING, glm::vec3(0.0f, 5.0f, 5.0f), glm::vec3(0.f, 0.f, 0.0f), 45.0f, 0.5f, 100.0f);
+        main_camera = Camera3D(ORBITING, glm::vec3(0.0f, 5.0f, 5.0f), glm::vec3(0.f, 0.f, 0.0f), 45.0f, 0.5f, 100.0f);
 
         //// File path for assets
         //std::string mesh_path = ASM.get_full_path(ASM.MODEL_PATH, DEFAULT_MODEL_MSH_FILE);
@@ -148,7 +148,7 @@ namespace gam300 {
         // update loop 
         /*
         to include:
-        - 
+        -
         -
         -
         -
@@ -171,13 +171,33 @@ namespace gam300 {
 
         // KENNY TESTING: Temporary transformations for camera
         shadersStorage[0].setUniform("M", TRS); // Model transform
-        shadersStorage[0].setUniform("V", mainCamera.getLookAt()); // View transform
-        shadersStorage[0].setUniform("P", mainCamera.getPerspective()); // Perspective transform
+        shadersStorage[0].setUniform("V", main_camera.getLookAt()); // View transform
+        shadersStorage[0].setUniform("P", main_camera.getPerspective()); // Perspective transform
 
         // KENNY TESTING: Temporary input for cursor
         if (IM.isKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
             std::cout << IM.getMouseDeltaX() << std::endl;
-            mainCamera.onCursor(IM.getMouseDeltaX(), IM.getMouseDeltaY(), &shadersStorage[0]);
+            main_camera.cameraOnCursor(IM.getMouseDeltaX(), IM.getMouseDeltaY(), &shadersStorage[0]);
+        }
+
+        //// KENNY TESTING: Temporary input for scroll
+        //if (IM.isKeyPressed(GLFW_KEY_RIGHT_SHIFT)) {
+        //    std::cout << IM.getScrollY() << std::endl;
+        //    main_camera.cameraOnScroll(IM.getScrollY(), &shadersStorage[0]);
+        //}
+
+        // Set uniform to shader after update light values
+        shadersStorage[0].setUniform("light.position", main_light.getLightPos());  // Position
+        shadersStorage[0].setUniform("light.La", main_light.getLightAmbient());        // Ambient
+        shadersStorage[0].setUniform("light.Ld", main_light.getLightDiffuse());        // Diffuse
+        shadersStorage[0].setUniform("light.Ls", main_light.getLightSpecular());        // Specular
+
+
+        // ------------- LIGHTING ------------- //
+        // KENNY TESTING: Temporary input for light cursor
+        if (IM.isKeyPressed(GLFW_KEY_L)) {
+            //std::cout << IM.getMouseDeltaX() << std::endl;
+            main_light.lightOnCursor(IM.getMouseDeltaX(), IM.getMouseDeltaY(), &shadersStorage[0]);
         }
 
         glEnable(GL_DEPTH_TEST);

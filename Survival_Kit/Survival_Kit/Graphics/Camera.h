@@ -88,7 +88,7 @@ namespace gam300 {
         }
 
         // Handles cursor movement to adjust camera orientation
-        void onCursor(double xoffset, double yoffset, ShaderProgram* shader)
+        void cameraOnCursor(double xoffset, double yoffset, ShaderProgram* shader)
         {
 
             if (camType == CameraType::ORBITING)
@@ -162,7 +162,7 @@ namespace gam300 {
         }
 
         // Handles scroll input to adjust zoom or camera position
-        void onScroll(double yoffset, ShaderProgram* shader)
+        void cameraOnScroll(double yoffset, ShaderProgram* shader)
         {
             if (camType == CameraType::ORBITING)
             {

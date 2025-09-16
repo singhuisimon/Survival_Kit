@@ -22,6 +22,12 @@
 // For logging information
 #include "../Manager/LogManager.h"
 
+// Support setting of light uniforms
+#include "../Graphics/ShaderProgram.h"
+
+// Mathematical operations
+#include "../Utility/MathUtils.h"
+
 
 namespace gam300 {
 
@@ -38,7 +44,7 @@ namespace gam300 {
     public:
 
         // Default constructor for a default light
-        Light() :   pos{ 0.0f, 0.5f, 0.0f},         // From the top
+        Light() :   pos{ 0.0f, 2.0f, 0.0f},         // From the top
                     light_ambient{ 0.4f, 0.4f, 0.4f },
                     light_diffuse{ 1.0f, 1.0f, 1.0f },
                     light_specular{ 1.0f, 1.0f, 1.0f }
@@ -62,6 +68,34 @@ namespace gam300 {
         glm::vec3& getLightDiffuse() { return light_diffuse; }
         glm::vec3& getLightSpecular() { return light_specular; }
 
+        // Handles cursor movement events to adjust the light's position.
+        void lightOnCursor(double xoffset, double yoffset, ShaderProgram* shader/*, int i = 0*/)
+        {
+            const float r = glm::sqrt(pos.x * pos.x +
+                pos.y * pos.y + pos.z * pos.z); // Calculate radial distance
+            float alpha = glm::asin(pos.y / r); // Calculate elevation angle
+            float betta = std::atan2f(pos.x, pos.z); // Calculate azimuth angle
+
+            // Adjust angles based on cursor offsets
+            alpha += yoffset > 0.0 ? -0.05f : 0.05f;
+            betta += xoffset < 0.0 ? -0.05f : 0.05f;
+
+            // Clamp alpha to avoid flipping at the poles
+            alpha = glm::clamp(alpha, -MathUtils::HALF_PI + 0.01f, MathUtils::HALF_PI - 0.01f);
+
+            // Recalculate position based on new angles
+            pos.x = r * glm::cos(alpha) * glm::sin(betta);
+            pos.y = r * glm::sin(alpha);
+            pos.z = r * glm::cos(alpha) * glm::cos(betta);
+
+            // Set uniform to shader after update light values
+            if (shader) {
+                shader->setUniform("light.position", pos);      // Position
+                //shader->setUniform("light.La", light_ambient);  // Ambient
+                //shader->setUniform("light.Ld", light_diffuse);  // Diffuse
+                //shader->setUniform("light.Ls", light_specular); // Specular
+            }
+        }
     };
 
 } // end of namespace gam300

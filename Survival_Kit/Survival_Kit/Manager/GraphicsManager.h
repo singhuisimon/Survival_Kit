@@ -25,6 +25,7 @@
 #include "../Utility/Constant.h"
 #include "../Graphics/ShaderProgram.h"
 #include "../Graphics/Camera.h"
+#include "../Graphics/Light.h"
 #include "../Graphics/Shape.h"
 
 // KENNY TESTING: For testing cursor input
@@ -59,7 +60,10 @@ namespace gam300 {
         std::vector<MeshGL>        meshStorage;
         
         // Main camera
-        Camera3D mainCamera;
+        Camera3D main_camera;
+
+        // Main light
+        Light main_light;
 
     public:
         /**
