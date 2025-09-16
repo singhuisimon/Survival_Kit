@@ -95,7 +95,7 @@ namespace gam300 {
         //}
 
         // Load the scene - Commented out to load scene using editor instead (Edited - Lily (15/9))
-        /*const std::string scenePath = getAssetFilePath("Scene/Game.scn");
+        const std::string scenePath = getAssetFilePath("Scene/Game.scn");
         if (SEM.loadScene(scenePath)) {
             logManager.writeLog("GameManager::startUp() - Scene loaded successfully from %s", scenePath.c_str());
         }
@@ -109,7 +109,7 @@ namespace gam300 {
             else {
                 logManager.writeLog("GameManager::startUp() - WARNING: Failed to load default scene");
             }
-        }*/
+        }
 
         // Initialize step count
         m_step_count = 0;
