@@ -1,12 +1,23 @@
+/**
+ * @file GLResources.cpp
+ * @brief RAII Wrappers for GPU resources (OpenGL based).
+ * @details Contains the prototype of RAII wrappers for GPU resources like vertex array objects and buffer objects.
+ * @author
+ * @date
+ * Copyright (C) 2025 DigiPen Institute of Technology.
+ * Reproduction or disclosure of this file or its contents without the
+ * prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+
+// For std::exchange
 #include <algorithm>
+
 #include "../Graphics/GLResources.h"
 
 namespace gam300 {
 
-	VBO::VBO() : handle(0) {
-
-		
-	}
+#pragma region VBO
+	VBO::VBO() : handle(0) { }
 
 	VBO::~VBO() {
 
@@ -52,6 +63,9 @@ namespace gam300 {
 		if (handle) glDeleteBuffers(1, &handle);
 	}
 
+#pragma endregion
+
+#pragma region VAO
 	VAO::VAO() : handle(0) {
 		
 	}
@@ -67,11 +81,8 @@ namespace gam300 {
 
 		if (this != &other) {
 
-			if (handle) {
-				glDeleteVertexArrays(1, &handle);
-				handle = std::exchange(other.handle, 0);
-			}
-
+			if (handle) glDeleteVertexArrays(1, &handle);
+			handle = std::exchange(other.handle, 0);
 		}
 
 		return *this;
@@ -121,4 +132,5 @@ namespace gam300 {
 
 		if(handle) glDeleteVertexArrays(1, &handle);
 	}
+#pragma endregion
 }

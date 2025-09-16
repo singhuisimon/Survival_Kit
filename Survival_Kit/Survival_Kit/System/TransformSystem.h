@@ -1,12 +1,24 @@
+/**
+ * @file TransformSystem.h
+ * @brief RAII Wrappers for GPU resources (OpenGL based).
+ * @details Contains the prototype of RAII wrappers for GPU resources like vertex array objects and buffer objects.
+ * @author
+ * @date
+ * Copyright (C) 2025 DigiPen Institute of Technology.
+ * Reproduction or disclosure of this file or its contents without the
+ * prior written consent of DigiPen Institute of Technology is prohibited.
+ */
 #pragma once
 
 #ifndef __TRANSFORM_SYSTEM_H__
 #define __TRANSFORM_SYSTEM_H__
 
-#include "System.h"
+#include "../System/System.h"
+
 #include "../Component/TransformComponent.h"
 
 namespace gam300{
+
 
 	class TransformSystem : public ComponentSystem<TransformComponent> {
 

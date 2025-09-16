@@ -56,7 +56,7 @@ namespace gam300 {
 
         // Storage for shader programs (Will port to asset manager eventually)
         std::vector<ShaderProgram> shadersStorage;
-        Cube cube;
+        std::vector<MeshGL>        meshStorage;
         
         // Main camera
         Camera3D mainCamera;

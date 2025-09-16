@@ -34,11 +34,16 @@ namespace gam300 {
 		TransformComponent* transform_component = CM.get_component<TransformComponent>(entity_id);
 
 		// Do the thing
-		if (transform_component) {
+		if (transform_component && transform_component->IsDirty()) {
 			
 			// Calculate the model to world transform
 			glm::mat4 scale_matrix = glm::scale(glm::mat4(1.0f), transform_component->GetScale());
-			glm::mat4 rotation	   = glm::toMat4(transform_component->GetRotation());
+			glm::mat4 rot_matrix   = glm::toMat4(transform_component->GetRotation());
+			glm::mat4 trans_matrix = glm::translate(glm::mat4(1.0f), transform_component->GetPosition());
+
+			glm::mat4 TRS = trans_matrix * rot_matrix * scale_matrix;
+			transform_component->SetTransform(TRS);
+			transform_component->MarkDirty(false);
 		}
 	}
 

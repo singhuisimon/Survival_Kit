@@ -1,33 +1,18 @@
-// Utilizes vertex SoA to create meshes that are simple shapes
-
 #pragma once
 
 #ifndef __SHAPE_H__
 #define __SHAPE_H__
 #include "../Graphics/MeshData.h"
-#include "../Graphics/GLResources.h"
 
 namespace gam300 {
 
-	class Cube {
+	namespace Shape {
 
-	public:
-
-		void init();
-		GLuint GetVAOId() const noexcept;
-
-		GLuint    draw_count;
-
-		VAO       vao;
-		VBO       vbo;
-		VBO       ebo;
-
-		MeshData  geometry;
-
-	private:
-
-	};
-
+		MeshData make_cube();
+		MeshData make_plane();
+	
+		MeshGL   upload_mesh_data(MeshData& mesh);
+	}
 }
 
 

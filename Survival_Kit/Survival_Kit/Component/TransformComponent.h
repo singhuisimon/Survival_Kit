@@ -28,6 +28,8 @@ namespace gam300{
 
 		const EntityID  GetParentID() const { return parent; }
 
+		const bool      IsDirty() const { return dirty; }
+
 		void  SetPosition(glm::vec3  const& pos) { position = pos; }
 		void  SetLocalPosition(glm::vec3  const& pos) { local_position = pos; }
 
@@ -41,6 +43,8 @@ namespace gam300{
 		void  SetLocalTransform(glm::mat4 const& trf) { local_transform = trf; }
 
 		void  SetParentID(EntityID const id) { parent = id; }
+
+		void  MarkDirty(bool d) { dirty = d; }
 
 	private:
 		glm::vec3 local_position;
@@ -56,6 +60,7 @@ namespace gam300{
 		glm::mat4 local_transform;
 
 		EntityID  parent = INVALID_ENTITY_ID;
+		bool      dirty  = true;
 	};
 }
 

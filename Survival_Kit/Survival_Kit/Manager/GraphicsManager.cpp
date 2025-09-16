@@ -11,6 +11,10 @@
 
 #include "GraphicsManager.h"
 
+#include <glm-0.9.9.8/glm/glm.hpp>
+#include <glm-0.9.9.8/glm/gtc/quaternion.hpp>
+#include <glm-0.9.9.8/glm/gtx/quaternion.hpp>
+
 namespace gam300 {
 
     // Initialize singleton instance
@@ -74,7 +78,7 @@ namespace gam300 {
         }
 
         // Set camera as orbiting
-        mainCamera = Camera3D(ORBITING, glm::vec3(0.0f, 5.0f, 5.0f), glm::vec3(0.f, 0.f, 2.0f), 45.0f, 0.5f, 100.0f);
+        mainCamera = Camera3D(ORBITING, glm::vec3(0.0f, 5.0f, 5.0f), glm::vec3(0.f, 0.f, 0.0f), 45.0f, 0.5f, 100.0f);
 
         //// File path for assets
         //std::string mesh_path = ASM.get_full_path(ASM.MODEL_PATH, DEFAULT_MODEL_MSH_FILE);
@@ -108,7 +112,15 @@ namespace gam300 {
         //glBindFramebuffer(GL_FRAMEBUFFER, 0);
         //glBindTexture(GL_TEXTURE_2D, 0);
 
-        cube.init();
+        MeshData cubeData = Shape::make_cube();
+        MeshData planeData = Shape::make_plane();
+
+        MeshGL   cubeGL = Shape::upload_mesh_data(cubeData);
+        MeshGL   planeGL = Shape::upload_mesh_data(planeData);
+
+        meshStorage.push_back(std::move(cubeGL));
+        meshStorage.push_back(std::move(planeGL));
+
 
         // Log startup
         LM.writeLog("GraphicsManager::startUp() - Graphics Manager started successfully");
@@ -143,10 +155,22 @@ namespace gam300 {
         -
         */
 
+        auto x = glm::angleAxis(glm::radians(0.0f), glm::vec3(0, 0, 1));
+        auto y = glm::angleAxis(glm::radians(0.0f), glm::vec3(0, 1, 0));
+
+        auto xy = x * y;
+
+        // Calculate the model to world transform
+        glm::mat4 scale_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+        glm::mat4 rot_matrix = glm::toMat4(xy);
+        glm::mat4 trans_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.f, 0.f));
+
+        glm::mat4 TRS = trans_matrix * rot_matrix * scale_matrix;
+
         shadersStorage[0].programUse();
 
         // KENNY TESTING: Temporary transformations for camera
-        shadersStorage[0].setUniform("M", glm::mat4(1.0f)); // Model transform
+        shadersStorage[0].setUniform("M", TRS); // Model transform
         shadersStorage[0].setUniform("V", mainCamera.getLookAt()); // View transform
         shadersStorage[0].setUniform("P", mainCamera.getPerspective()); // Perspective transform
 
@@ -162,15 +186,15 @@ namespace gam300 {
         // Clear the color and depth buffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        cube.vao.bind();
+        for (auto const& mesh : meshStorage) {
 
-        // Set draw mode
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            mesh.vao.bind();
 
-        // Draw the actual object
-        glDrawElements(cube.geometry.primitive_type, cube.draw_count, GL_UNSIGNED_SHORT, NULL);
+            // Draw the actual object
+            glDrawElements(mesh.primitive_type, mesh.draw_count, GL_UNSIGNED_SHORT, NULL);
 
-        glBindVertexArray(0);
+            glBindVertexArray(0);
+        }
 
         shadersStorage[0].programFree();
     }
