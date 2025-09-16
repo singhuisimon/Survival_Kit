@@ -10,10 +10,19 @@
  */
 
 #include "SerialisationManager.h"
+
+#include "rapidjson/document.h"
+#include "rapidjson/error/en.h"
+#include "rapidjson/stringbuffer.h"   
+#include "rapidjson/prettywriter.h"    
+#include "rapidjson/writer.h" 
+
 #include "LogManager.h"
 #include "ECSManager.h"
+
 #include "../Component/InputComponent.h"
 #include "../Utility/InputKeyMappings.h"
+
 #include <fstream>
 #include <sstream>
 #include <functional>
