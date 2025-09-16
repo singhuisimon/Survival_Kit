@@ -5,11 +5,12 @@
 #include <array>
 #include <memory>
 
-#include "../Entity/Entity.h"
+#include "ComponentManager.h">
+#include "ECSManager.h"
 
 namespace gam300
 {
-	static BVHManager bvh;
+	//static BVHManager bvh;
 
 	struct AABB
 	{
@@ -33,72 +34,117 @@ namespace gam300
 		glm::vec3 max;
 	};
 
-	struct BVHConfig
+	//struct BVHConfig
+	//{
+	//	unsigned maxDepth = std::numeric_limits<unsigned>::max();
+	//	unsigned minObjects = 1;
+	//	float minVolume = 0;
+	//};
+
+	//struct BVHWrapper
+	//{
+	//	EntityID	id{};
+	//	AABB		bv{};
+
+	//	struct
+	//	{
+	//		BVHWrapper *next{ nullptr };
+	//		BVHWrapper *prev{ nullptr };
+	//		void *node{ nullptr };
+	//	} bvhInfo;
+	//};
+
+	//class BVHManager
+	//{
+	//public: // Public for testing reasons
+	//	struct Node
+	//	{
+	//		AABB  bv;          // Node bounding volume
+	//		Node *children[2]; // Both children
+	//		BVHWrapper     firstObject; //
+	//		BVHWrapper     lastObject;  //
+
+	//		void                        AddObject(BVHWrapper object);
+	//		int                         Depth() const; // Branches to leaves
+	//		int                         Size() const;  // Amount of nodes
+	//		bool                        IsLeaf() const;// Checks if leaf node
+	//		unsigned                    ObjectCount() const; // Self-explanatory
+	//	};
+
+	//private:
+	//	Node *mRoot;
+	//	unsigned mObjectCount;
+
+	//public:
+	//	BVHManager();
+	//	~BVHManager();
+	//	BVHManager(BVHManager const &) = delete;
+	//	BVHManager &operator=(BVHManager const &) = delete;
+
+	//	template <typename IT> void Build(IT begin, IT end, BVHConfig const &config);
+	//	template <typename IT> void Insert(IT begin, IT end, BVHConfig const &config);
+	//	void                        Insert(T object, BVHConfig const &config);
+	//	void                        Clear();
+	//	bool                        Empty() const;
+	//	int                         Depth() const;
+	//	int                         Size() const;
+
+	//	Node const *root() const;
+
+	//	//std::vector<unsigned> Query(Frustum const &frustum) const;
+
+	//	unsigned objectCount() const
+	//	{
+	//		return mObjectCount;
+	//	}
+
+	//private:
+	//	void SplitNode(Node *node, BVHConfig const &config, unsigned depth);
+	//	Node *InsertSubtree(Node *node, Node *subtree, BVHConfig const &config);
+	//};
+
+	static Octree OTManager;
+
+	struct ObjNode
 	{
-		unsigned maxDepth = std::numeric_limits<unsigned>::max();
-		unsigned minObjects = 1;
-		float minVolume = 0;
+		unsigned id{};
+		std::unique_ptr<ObjNode> next{ nullptr };
 	};
 
-	struct BVHWrapper
+	struct OctNode
 	{
-		EntityID	id{};
-		AABB		bv{};
-
-		struct
-		{
-			BVHWrapper *next{ nullptr };
-			BVHWrapper *prev{ nullptr };
-			void *node{ nullptr };
-		} bvhInfo;
+		std::array<std::unique_ptr<OctNode>, 8> child{};
+		std::unique_ptr<ObjNode> head{ nullptr };
 	};
 
-	class BVHManager
+	class Octree
 	{
-	public: // Public for testing reasons
-		struct Node
-		{
-			AABB  bv;          // Node bounding volume
-			Node *children[2]; // Both children
-			BVHWrapper     firstObject; //
-			BVHWrapper     lastObject;  //
-
-			void                        AddObject(BVHWrapper object);
-			int                         Depth() const; // Branches to leaves
-			int                         Size() const;  // Amount of nodes
-			bool                        IsLeaf() const;// Checks if leaf node
-			unsigned                    ObjectCount() const; // Self-explanatory
-		};
-
-	private:
-		Node *mRoot;
-		unsigned mObjectCount;
-
 	public:
-		BVHManager();
-		~BVHManager();
-		BVHManager(BVHManager const &) = delete;
-		BVHManager &operator=(BVHManager const &) = delete;
-
-		template <typename IT> void Build(IT begin, IT end, BVHConfig const &config);
-		template <typename IT> void Insert(IT begin, IT end, BVHConfig const &config);
-		void                        Insert(T object, BVHConfig const &config);
-		void                        Clear();
-		bool                        Empty() const;
-		int                         Depth() const;
-		int                         Size() const;
-
-		Node const *root() const;
-
-		//std::vector<unsigned> Query(Frustum const &frustum) const;
-
-		unsigned objectCount() const
+		void setWorld(AABB w)
 		{
-			return mObjectCount;
+			world = w;
 		}
 
-	private:
-		void SplitNode(Node *node, BVHConfig const &config, unsigned depth);
-		Node *InsertSubtree(Node *node, Node *subtree, BVHConfig const &config);
+		void insert(EntityID id)
+		{
+			auto const &e = EM.getEntity(id);
+		}
+
+		void remove(EntityID id)
+		{
+			auto const &e = EM.getEntity(id);
+		}
+
+		std::vector<EntityID> retrieveEntitiesInNode(EntityID id)
+		{
+
+		}
+
+		AABB world{};
+		std::unique_ptr<OctNode> root{};
+		
+		// std::unordered_map<unsigned, OctNode*> 4+8bytes/entry
+		// std::vector<unsigned> paths; 4/entry
+		
 	};
 }
