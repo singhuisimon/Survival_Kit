@@ -8,7 +8,6 @@
  * Reproduction or disclosure of this file or its contents without the
  * prior written consent of DigiPen Institute of Technology is prohibited.
  */
-
 #include "Main.h"
 #include "../Manager/SerialisationManager.h"
 
@@ -19,6 +18,8 @@ int main(void) {
         printf("ERROR: Failed to start GameManager\n");
         return -1;
     }
+    bool spacePressed = false;
+
 
     // Get reference to LogManager (already started by GameManager)
     LM.writeLog("Main: GameManager initialized successfully");
@@ -69,9 +70,17 @@ int main(void) {
     // Variables for timing
     int64_t elapsed_time = 0;
     int64_t sleep_time = 0;
-
     // Main game loop
     LM.writeLog("Starting main game loop");
+
+
+    //Core::Application app;
+    //app.Run();
+    Core::Application app;
+    app.InitializeScripting();
+    app.AddScript(0, "TestScript");
+    //std::cout << "Initial script added" << std::endl;
+
     while (!GM.getGameOver() && !glfwWindowShouldClose(window)) {
         // Process events
         glfwPollEvents();
@@ -81,6 +90,13 @@ int main(void) {
 
         // Start of loop timing
         clock.delta();
+
+        bool currentSpaceState = GetKeyState(VK_SPACE) & 0x8000;
+        if (currentSpaceState && !spacePressed)
+        {
+            app.ReloadScripts();
+            app.AddScript(0, "TestScript");  // Re-add script after reload
+        }
 
         // Update all systems (including InputSystem)
         EM.updateSystems(GM.getFrameTime() / 1000.0f);
@@ -169,8 +185,14 @@ int main(void) {
             // If we're behind, log that we're not keeping up
             LM.writeLog("GameManager::run() - Frame running behind: %lld us", -sleep_time);
         }
+
+        app.UpdateScripts();
+        app.CheckAndReloadScripts();
+
     }
 
+
+    app.ShutdownScripting();
     // Cleanup
     LM.writeLog("Cleaning up resources");
 
