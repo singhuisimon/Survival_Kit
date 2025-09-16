@@ -70,7 +70,10 @@ namespace gam300
 
 		void renderUi(unsigned int scrWidth, unsigned int scrHeight);
 
-		void displayFileList();
+		void displayTopMenuBar();
+
+		void displayFileList(bool& fileWindow, std::string& shownFile);
+		//void displayFileList();
 
 		void displayHierarchyList();
 

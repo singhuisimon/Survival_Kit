@@ -83,6 +83,12 @@ namespace gam300 {
         const std::vector<Entity>& getAllEntities() const;
 
         /**
+        * @brief Overload the get all entities function.
+        * @return Reference to the vector of all entities.
+        */
+        std::vector<Entity>& getAllEntitiesOverload();
+
+        /**
          * @brief Add a component to an entity.
          * @tparam T The component type to add.
          * @tparam Args Types of arguments to forward to the component constructor.
