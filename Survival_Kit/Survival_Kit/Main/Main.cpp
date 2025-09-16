@@ -70,9 +70,12 @@ int main(void) {
     LM.writeLog("Starting main game loop");
 
 
+    //Core::Application app;
+    //app.Run();
     Core::Application app;
-    app.Run();
-
+    app.InitializeScripting();
+    app.AddScript(0, "TestScript");
+    //std::cout << "Initial script added" << std::endl;
 
     while (!GM.getGameOver() && !glfwWindowShouldClose(window)) {
         // Process events
@@ -165,8 +168,12 @@ int main(void) {
             // If we're behind, log that we're not keeping up
             LM.writeLog("GameManager::run() - Frame running behind: %lld us", -sleep_time);
         }
+
+        app.UpdateScripts();
     }
 
+
+    app.ShutdownScripting();
     // Cleanup
     LM.writeLog("Cleaning up resources");
 

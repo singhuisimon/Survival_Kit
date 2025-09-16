@@ -6,6 +6,8 @@
 #include <iomanip>
 #include <sstream>
 #include <string_view>
+#include <filesystem>
+
 // Relative include as this file will be included from other projects later
 #include "../External_Libraries/include/dotnet/coreclrhost.h"    // coreclr_*
 
@@ -29,7 +31,11 @@ namespace Core
         static constexpr int MIN_ENTITY_ID = 0;
         static constexpr int MAX_ENTITY_ID = ENTITY_COUNT - 1;
         static TransformComponent* GetComponent(int entityId);
-
+        void InitializeScripting();
+        bool AddScript(int entityId, const char* scriptName);
+        void UpdateScripts();
+        void ShutdownScripting();
+        void ReloadScripts();
         void Run();
 
         static void HelloWorld();
@@ -37,7 +43,10 @@ namespace Core
     private:
         static std::array<TransformComponent, ENTITY_COUNT> nativeData;
         void compileScriptAssembly();
-
+        void(*initFunc)() = nullptr;
+        bool(*addScriptFunc)(int, const char*) = nullptr;
+        void(*executeUpdateFunc)() = nullptr;
+        void(*reloadScriptsFunc)() = nullptr;  // Add this
         void startScriptEngine();
         void stopScriptEngine();
         std::string buildTpaList(const std::string& directory);

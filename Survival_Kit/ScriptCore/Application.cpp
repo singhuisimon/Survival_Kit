@@ -26,48 +26,48 @@ namespace Core
                 "ScriptAPI.EngineInterface",
                 "Init"
             );
-        //auto addScript = GetFunctionPtr<bool(*)(int, const char*)>
-        //    (
-        //        "ScriptAPI",
-        //        "ScriptAPI.EngineInterface",
-        //        "AddScriptViaName"
-        //    );
-        //auto executeUpdate = GetFunctionPtr<void(*)(void)>
-        //    (
-        //        "ScriptAPI",
-        //        "ScriptAPI.EngineInterface",
-        //        "ExecuteUpdate"
-        //    );
-        //auto reloadScripts = GetFunctionPtr<void(*)(void)>
-        //    (
-        //        "ScriptAPI",
-        //        "ScriptAPI.EngineInterface",
-        //        "Reload"
-        //    );
+        auto addScript = GetFunctionPtr<bool(*)(int, const char*)>
+            (
+                "ScriptAPI",
+                "ScriptAPI.EngineInterface",
+                "AddScriptViaName"
+            );
+        auto executeUpdate = GetFunctionPtr<void(*)(void)>
+            (
+                "ScriptAPI",
+                "ScriptAPI.EngineInterface",
+                "ExecuteUpdate"
+            );
+        auto reloadScripts = GetFunctionPtr<void(*)(void)>
+            (
+                "ScriptAPI",
+                "ScriptAPI.EngineInterface",
+                "Reload"
+            );
         // Step 2: Initialize
         std::cout << "INIT application..." << std::endl;
 
         init();
         //// Step 3: Add script to an entity
-        //addScript(0, "TestScript");
-        //std::cout << "Test script added" << std::endl;
+        addScript(0, "TestScript");
+        std::cout << "Test script added" << std::endl;
 
-        // Load
-        //while (true)
-        //{
-        //    if (GetKeyState(VK_ESCAPE) & 0x8000)
-        //        break;
+         
+        while (true)
+        {
+            if (GetKeyState(VK_ESCAPE) & 0x8000)
+                break;
 
-        //    // Step 4: Run the Update loop for our scripts
-        //    if (GetKeyState(VK_SPACE) & 0x8000)
-        //    {
-        //        compileScriptAssembly();
-        //        reloadScripts();
-        //        addScript(0, "TestScript");
-        //    }
-        //    executeUpdate();
-        //}
-        //stopScriptEngine();
+            // Step 4: Run the Update loop for our scripts
+            if (GetKeyState(VK_SPACE) & 0x8000)
+            {
+                compileScriptAssembly();
+                reloadScripts();
+                addScript(0, "TestScript");
+            }
+            executeUpdate();
+        }
+        stopScriptEngine();
     }
     void Application::HelloWorld()
     {
@@ -240,5 +240,60 @@ namespace Core
         }
 
         return tpaList.str();
+    }
+
+    void Application::InitializeScripting()
+    {
+        std::cout << "Starting script engine..." << std::endl;
+        startScriptEngine();
+
+        std::cout << "Compiling script assembly..." << std::endl;
+        compileScriptAssembly();
+
+        std::cout << "Getting function pointers..." << std::endl;
+        initFunc = GetFunctionPtr<void(*)(void)>("ScriptAPI", "ScriptAPI.EngineInterface", "Init");
+        addScriptFunc = GetFunctionPtr<bool(*)(int, const char*)>("ScriptAPI", "ScriptAPI.EngineInterface", "AddScriptViaName");
+        executeUpdateFunc = GetFunctionPtr<void(*)(void)>("ScriptAPI", "ScriptAPI.EngineInterface", "ExecuteUpdate");
+        reloadScriptsFunc = GetFunctionPtr<void(*)(void)>("ScriptAPI", "ScriptAPI.EngineInterface", "Reload");
+
+        std::cout << "Initializing script system..." << std::endl;
+        initFunc();
+
+        std::cout << "Script system initialized successfully!" << std::endl;
+    }
+
+    bool Application::AddScript(int entityId, const char* scriptName)
+    {
+        if (addScriptFunc)
+            return addScriptFunc(entityId, scriptName);
+        return false;
+    }
+
+    void Application::UpdateScripts()
+    {
+        if (executeUpdateFunc)
+            executeUpdateFunc();
+    }
+
+    void Application::ShutdownScripting()
+    {
+        stopScriptEngine();
+
+        // Reset all function pointers
+        initFunc = nullptr;
+        addScriptFunc = nullptr;
+        executeUpdateFunc = nullptr;
+        reloadScriptsFunc = nullptr;
+    }
+
+    void Application::ReloadScripts()
+    {
+        if (reloadScriptsFunc)
+        {
+            std::cout << "Reloading scripts..." << std::endl;
+            compileScriptAssembly();
+            reloadScriptsFunc();
+            std::cout << "Scripts reloaded!" << std::endl;
+        }
     }
 }
