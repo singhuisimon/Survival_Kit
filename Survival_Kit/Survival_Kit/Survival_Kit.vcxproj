@@ -75,6 +75,7 @@
     <ClInclude Include="Manager\Manager.h" />
     <ClInclude Include="Manager\SerialisationBinManager.h" />
     <ClInclude Include="Manager\SerialisationManager.h" />
+    <ClInclude Include="Resource\ResourceTypes.h" />
     <ClInclude Include="System\InputSystem.h" />
     <ClInclude Include="System\System.h" />
     <ClInclude Include="Utility\AssetPath.h" />
