@@ -38,7 +38,6 @@ namespace gam300 {
         }
         else {
             LM.writeLog("GraphicsManager::startUp(): GLAD initialized successfully.");
-            //std::cout << "GraphicsManager::startUp(): GLAD initialized successfully." << std::endl;
         }
 
         //// Set framebuffer with color (Background color)
@@ -68,13 +67,14 @@ namespace gam300 {
         // Load shader files
         if (!loadShaderPrograms(shader_files)) {
             LM.writeLog("GraphicsManager::startUp(): Failed to load shader programs");
+            std::cerr << "GraphicsManager::startUp(): Failed to load shader programs" << std::endl;
             return -1;
         } else {
             LM.writeLog("GraphicsManager::startUp(): Succesfully added shader programs.");
         }
 
         // Set camera as orbiting
-        mainCamera = Camera3D(ORBITING, glm::vec3(0.0f, 5.0f, 5.0f), glm::vec3(0.0f), 45.0f, 0.5f, 100.0f);
+        mainCamera = Camera3D(ORBITING, glm::vec3(0.0f, 5.0f, 5.0f), glm::vec3(0.f, 0.f, 2.0f), 45.0f, 0.5f, 100.0f);
 
         //// File path for assets
         //std::string mesh_path = ASM.get_full_path(ASM.MODEL_PATH, DEFAULT_MODEL_MSH_FILE);
@@ -107,7 +107,6 @@ namespace gam300 {
         //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, imgui_tex, 0);
         //glBindFramebuffer(GL_FRAMEBUFFER, 0);
         //glBindTexture(GL_TEXTURE_2D, 0);
-
 
         cube.init();
 
@@ -144,9 +143,6 @@ namespace gam300 {
         -
         */
 
-
-        
-
         shadersStorage[0].programUse();
 
         // KENNY TESTING: Temporary transformations for camera
@@ -160,6 +156,8 @@ namespace gam300 {
             mainCamera.onCursor(IM.getMouseDeltaX(), IM.getMouseDeltaY(), &shadersStorage[0]);
         }
 
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LESS); // Default comparison
 
         // Clear the color and depth buffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -167,10 +165,10 @@ namespace gam300 {
         cube.vao.bind();
 
         // Set draw mode
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
         // Draw the actual object
-        glDrawElements(cube.primitive_type, cube.draw_count, GL_UNSIGNED_SHORT, NULL);
+        glDrawElements(cube.geometry.primitive_type, cube.draw_count, GL_UNSIGNED_SHORT, NULL);
 
         glBindVertexArray(0);
 

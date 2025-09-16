@@ -4,7 +4,7 @@
 
 #ifndef __SHAPE_H__
 #define __SHAPE_H__
-#include "../Graphics/Vertex.h"
+#include "../Graphics/MeshData.h"
 #include "../Graphics/GLResources.h"
 
 namespace gam300 {
@@ -16,17 +16,15 @@ namespace gam300 {
 		void init();
 		GLuint GetVAOId() const noexcept;
 
-		GLenum    primitive_type;
 		GLuint    draw_count;
 
 		VAO       vao;
 		VBO       vbo;
 		VBO       ebo;
 
+		MeshData  geometry;
+
 	private:
-		VertexSoA vertices;
-
-
 
 	};
 

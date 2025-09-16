@@ -4,36 +4,9 @@
 
 namespace gam300 {
 
-	// Self contained shaders
-	std::string vtx_shd // Vertex Shader
-	{
-		R"(#version 450 core
-			layout(location = 0) in vec3 aVertexPosition;
-			layout(location = 1) in vec3 aVertexColor;
-			layout(location = 0) out vec3 vColor;
-			void main()
-			{
-				gl_Position = vec4(aVertexPosition, 1.0);
-				vColor = aVertexColor;
-			}
-			)"
-	};
-
-	std::string frag_shd // Fragment Shader
-	{
-		R"( #version 450 core
-			layout (location=0) in vec3 vInterpColor;
-			layout (location=0) out vec4 fFragColor;
-			void main () 
-			{
-				fFragColor = vec4(vInterpColor, 1.0);
-			}
-			)"
-	};
-
 	void Cube::init() {
 
-		vertices.positions = {
+		geometry.positions = {
             // +X face
 			{+0.5f,-0.5f,-0.5f}, {+0.5f,-0.5f,+0.5f}, {+0.5f,+0.5f,+0.5f}, {+0.5f,+0.5f,-0.5f},
 			// -X face
@@ -48,7 +21,7 @@ namespace gam300 {
 			{-0.5f,-0.5f,-0.5f}, {+0.5f,-0.5f,-0.5f}, {+0.5f,+0.5f,-0.5f}, {-0.5f,+0.5f,-0.5f}
 		};
 
-		vertices.colors = {
+		geometry.colors = {
 
 			// +X → red
 			{1,0,0}, {1,0,0}, {1,0,0}, {1,0,0},
@@ -62,6 +35,7 @@ namespace gam300 {
 			{1,0,1}, {1,0,1}, {1,0,1}, {1,0,1},
 			// -Z → cyan
 			{0,1,1}, {0,1,1}, {0,1,1}, {0,1,1}
+
 		};
 
 		// Create buffers
@@ -72,11 +46,11 @@ namespace gam300 {
 		// Calculate values for ease of packing
 		GLsizei position_data_offset = 0;
 		GLsizei position_attribute_size = sizeof(glm::vec3);
-		GLsizei position_data_size = position_attribute_size * static_cast<GLsizei>(vertices.positions.size());
+		GLsizei position_data_size = position_attribute_size * static_cast<GLsizei>(geometry.positions.size());
 
 		GLsizei color_data_offset = position_data_size;
 		GLsizei color_attribute_size = sizeof(glm::vec3);
-		GLsizei color_data_size = color_attribute_size * static_cast<GLsizei>(vertices.colors.size());
+		GLsizei color_data_size = color_attribute_size * static_cast<GLsizei>(geometry.colors.size());
 
 		GLsizei buffer_size = position_data_size + color_data_size;
 
@@ -84,8 +58,8 @@ namespace gam300 {
 		vbo.storage(buffer_size, nullptr, GL_DYNAMIC_STORAGE_BIT);
 
 		// Load data into sub buffer		
-		vbo.sub_data(position_data_offset, position_data_size, vertices.positions.data());
-		vbo.sub_data(color_data_offset, color_data_size, vertices.colors.data());
+		vbo.sub_data(position_data_offset, position_data_size, geometry.positions.data());
+		vbo.sub_data(color_data_offset, color_data_size, geometry.colors.data());
 
 		// Set up the VAO
 		vao.create();
@@ -104,7 +78,7 @@ namespace gam300 {
 		vao.attrib_binding(1, 1);
 		glBindVertexArray(0);
 
-		std::vector<GLushort> indices = {
+		geometry.indices = {
 			//// +X (base 0):   0,2,1,3
 			//0, 2, 1, 3,
 			//// bridge to -X
@@ -145,12 +119,12 @@ namespace gam300 {
 		
 		// Create an element buffer object to transfer topology
 		ebo.create();
-		ebo.storage(sizeof(GLushort)* indices.size(), reinterpret_cast<GLvoid*>(indices.data()), GL_DYNAMIC_STORAGE_BIT);
+		ebo.storage(sizeof(GLushort)* geometry.indices.size(), reinterpret_cast<GLvoid*>(geometry.indices.data()), GL_DYNAMIC_STORAGE_BIT);
 		vao.bind_element_buffer(ebo);
 		glBindVertexArray(0);
 
-		primitive_type = GL_TRIANGLES;
-		draw_count	   = indices.size();
+		geometry.primitive_type = GL_TRIANGLES;
+		draw_count			    = geometry.indices.size();
 	}
 
 	GLuint Cube::GetVAOId() const noexcept {

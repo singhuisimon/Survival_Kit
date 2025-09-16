@@ -18,10 +18,8 @@ uniform mat4 P; // Projection transform matrix
 void main()
 {
 
-    
     //Normal = VertexNormal;
     //gl_Position = vec4(VertexPosition, 1.0f);
-
 
     // KENNY TESTING
     mat4 MV = V * M; // Model-View transform matrix
