@@ -18,8 +18,9 @@ int main(void) {
     //    printf("ERROR: Failed to start GameManager\n");
     //    return -1;
     //}
-    //bool spacePressed = false;
 
+
+    bool spacePressed = false;
 
     // Get reference to LogManager (already started by GameManager)
     LM.writeLog("Main: GameManager initialized successfully");
@@ -200,9 +201,9 @@ int main(void) {
         // Render frame 
         glClear(GL_COLOR_BUFFER_BIT);
 
-        GFXM.update();
-
         IMGUIM.finishImguiRender(io);
+
+        GFXM.update();
         
         // Swap buffers
         glfwSwapBuffers(window);

@@ -22,6 +22,9 @@
     <ClCompile Include="Component\Transform3D.cpp" />
     <ClCompile Include="Entity\Entity.cpp" />
     <ClCompile Include="Glad\glad.c" />
+    <ClCompile Include="Graphics\GLResources.cpp" />
+    <ClCompile Include="Graphics\ShaderProgram.cpp" />
+    <ClCompile Include="Graphics\Shape.cpp" />
     <ClCompile Include="IMGUI\imgui.cpp" />
     <ClCompile Include="IMGUI\imgui_demo.cpp" />
     <ClCompile Include="IMGUI\imgui_draw.cpp" />
@@ -33,6 +36,7 @@
     <ClCompile Include="Manager\ComponentManager.cpp" />
     <ClCompile Include="Manager\ECSManager.cpp" />
     <ClCompile Include="Manager\GameManager.cpp" />
+    <ClCompile Include="Manager\GraphicsManager.cpp" />
     <ClCompile Include="Manager\ImguiManager.cpp" />
     <ClCompile Include="Manager\InputManager.cpp" />
     <ClCompile Include="Manager\LogManager.cpp" />
@@ -40,6 +44,7 @@
     <ClCompile Include="Manager\SerialisationBinManager.cpp" />
     <ClCompile Include="Manager\SerialisationManager.cpp" />
     <ClCompile Include="Manager\SystemManager.cpp" />
+    <ClCompile Include="System\TransformSystem.cpp" />
     <ClCompile Include="Utility\AssetPath.cpp" />
     <ClCompile Include="Utility\Clock.cpp" />
     <ClCompile Include="Utility\MathUtils.cpp" />
@@ -51,8 +56,17 @@
     <ClInclude Include="Component\ComponentPool.h" />
     <ClInclude Include="Component\ComponentView.h" />
     <ClInclude Include="Component\Transform3D.h" />
+    <ClInclude Include="Component\TransformComponent.h" />
     <ClInclude Include="Entity\Entity.h" />
     <ClInclude Include="Glad\glad.h" />
+    <ClInclude Include="Graphics\Camera.h" />
+    <ClInclude Include="Graphics\Framebuffer.h" />
+    <ClInclude Include="Graphics\GLResources.h" />
+    <ClInclude Include="Graphics\Light.h" />
+    <ClInclude Include="Graphics\Material.h" />
+    <ClInclude Include="Graphics\MeshData.h" />
+    <ClInclude Include="Graphics\ShaderProgram.h" />
+    <ClInclude Include="Graphics\Shape.h" />
     <ClInclude Include="IMGUI\imconfig.h" />
     <ClInclude Include="IMGUI\imgui.h" />
     <ClInclude Include="IMGUI\imgui_impl_glfw.h" />
@@ -66,6 +80,7 @@
     <ClInclude Include="Manager\ComponentManager.h" />
     <ClInclude Include="Manager\ECSManager.h" />
     <ClInclude Include="Manager\GameManager.h" />
+    <ClInclude Include="Manager\GraphicsManager.h" />
     <ClInclude Include="Manager\ImguiManager.h" />
     <ClInclude Include="Manager\InputManager.h" />
     <ClInclude Include="Manager\LogManager.h" />
@@ -73,8 +88,10 @@
     <ClInclude Include="Manager\SerialisationBinManager.h" />
     <ClInclude Include="Manager\SerialisationManager.h" />
     <ClInclude Include="System\System.h" />
+    <ClInclude Include="System\TransformSystem.h" />
     <ClInclude Include="Utility\AssetPath.h" />
     <ClInclude Include="Utility\Clock.h" />
+    <ClInclude Include="Utility\Constant.h" />
     <ClInclude Include="Utility\InputKeyMappings.h" />
     <ClInclude Include="Utility\MathUtils.h" />
     <ClInclude Include="Utility\ECS_Variables.h" />
@@ -83,6 +100,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Scene\Game.scn" />
+    <None Include="Assets\Shaders\survival_kit_obj.frag" />
+    <None Include="Assets\Shaders\survival_kit_obj.vert" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Survival_Kit.log" />
