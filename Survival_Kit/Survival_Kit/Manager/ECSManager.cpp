@@ -126,6 +126,11 @@ namespace gam300 {
         return m_entities;
     }
 
+    std::vector<Entity>& ECSManager::getAllEntitiesOverload()
+    {
+        return m_entities;
+    }
+
     // Update all systems
     void ECSManager::updateSystems(float dt) {
         SM.update_systems(dt);

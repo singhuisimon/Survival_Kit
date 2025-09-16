@@ -36,11 +36,11 @@ namespace gam300 {
     class GameManager : public Manager {
 
     private:
-        GameManager();                      // Private since a singleton.
-        GameManager(GameManager const&);    // Don't allow copy.
-        void operator=(GameManager const&); // Don't allow assignment.
-        bool m_game_over;                   // True -> game loop should stop.
-        int m_step_count;                   // Count of game loop iterations.
+        GameManager();                               // Private since a singleton.
+        GameManager(GameManager const&) = delete;    // Don't allow copy.
+        void operator=(GameManager const&) = delete; // Don't allow assignment.
+        bool m_game_over;                            // True -> game loop should stop.
+        int m_step_count;                            // Count of game loop iterations.
 
     public:
         /**

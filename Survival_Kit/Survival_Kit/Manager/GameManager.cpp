@@ -17,6 +17,7 @@
 #include "SerialisationManager.h"
 #include "GraphicsManager.h"
 #include "../System/InputSystem.h"
+#include "../Component/Transform3D.h"
 #include "../Utility/Clock.h"
 #include "../Utility/AssetPath.h"
 
@@ -92,16 +93,22 @@ namespace gam300 {
 
         logManager.writeLog("GameManager::startUp() - GraphicsManager started successfully");
 
-        // Register the InputSystem to process our Input components
-        auto inputSystem = EM.registerSystem<InputSystem>();
-        if (!inputSystem) {
-            logManager.writeLog("GameManager::startUp() - Failed to register InputSystem");
-        }
-        else {
-            logManager.writeLog("GameManager::startUp() - InputSystem registered successfully");
-        }
+        // Register the Transform3D component with the ComponentManager
+        CM.register_component<Transform3D>();
+        logManager.writeLog("GameManager::startUp() - Transform3D component registered successfully");
 
-        // Load the scene
+        //// Create a test entity with Transform3D component for demonstration
+        //Entity& testEntity = EM.createEntity("TestEntity");
+        //Vector3D position(0.0f, 0.0f, 0.0f);
+        //Vector3D rotation(0.0f, 45.0f, 0.0f);  // 45 degrees rotation on Y axis
+        //Vector3D scale(1.0f, 1.0f, 1.0f);
+
+        //Transform3D* transform = EM.addComponent<Transform3D>(testEntity.get_id(), position, rotation, scale);
+        //if (transform) {
+        //    logManager.writeLog("GameManager::startUp() - Test entity created with Transform3D component");
+        //}
+
+        // Load the scene - Commented out to load scene using editor instead (Edited - Lily (15/9))
         const std::string scenePath = getAssetFilePath("Scene/Game.scn");
         if (SEM.loadScene(scenePath)) {
             logManager.writeLog("GameManager::startUp() - Scene loaded successfully from %s", scenePath.c_str());
@@ -170,6 +177,18 @@ namespace gam300 {
 
         // Update all ECS systems
         EM.updateSystems(dt);
+
+        // Example: Update transform components
+        const auto& entities = EM.getAllEntities();
+        for (const auto& entity : entities) {
+            Transform3D* transform = EM.getComponent<Transform3D>(entity.get_id());
+            if (transform) {
+                // Example: Rotate the entity slowly
+                Vector3D currentRotation = transform->getRotation();
+                currentRotation.y += dt * 10.0f; // 10 degrees per second
+                transform->setRotation(currentRotation);
+            }
+        }
     }
 
     // Set game over status
