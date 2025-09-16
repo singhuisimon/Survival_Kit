@@ -14,7 +14,7 @@
 #include "SerialisationManager.h"
 #include <iostream>
 #include "../Utility/AssetPath.h"
-#include "../Component/InputComponent.h"
+#include "../Component/Transform3D.h"
 
 namespace gam300 {
 
