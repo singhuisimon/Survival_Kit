@@ -17,6 +17,7 @@
 #include <fstream>
 #include <sstream>
 #include <functional>
+#include <iostream>
 
 namespace gam300 {
 
@@ -266,6 +267,7 @@ namespace gam300 {
 
             if (braceLevel != 0) {
                 LM.writeLog("SerialisationManager::loadScene() - Invalid object format in scene file");
+                std::cout << "braceLevel: " << braceLevel << "\n";
                 break;
             }
 

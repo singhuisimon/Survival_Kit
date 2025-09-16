@@ -185,28 +185,83 @@ namespace gam300 {
         if (ImGui::Begin("Hierarchy", &hierachyWindow, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize)) {
             const auto& allEntities = ImguiEcsRef.getAllEntities();
 
-            int currObjIndex = -1;
+            // Debug code
+            // std::cout << "Entity count: " << allEntities.size() << "\n";
+
+            /*  for (auto& e_name : allEntities)
+                {
+                    std::cout << "Entity Name: " << e_name.get_name() << "\n";
+                }
+           */
+            //int currObjIndex = -1;
             
             //Toggle Select object
-            if (selectedObjIndex >= allEntities.size())
-            {
-                selectedObjIndex = -1;
-            }
             //std::cout << "Check entities list from Imgui: " << allEntities.size() << std::endl;
 
-            for (int i = 0; i < allEntities.size(); i++)
+            if (allEntities.empty())
             {
-                std::string objName = allEntities[i].get_name();
-                if (ImGui::Selectable(objName.c_str(), selectedObjIndex == currObjIndex))
-                {
-                    selectedObjIndex = currObjIndex;
-                }
-
-                ++currObjIndex;
+                //std::cout << "There is no entities to get in IMGUI\n"; 
+                ImGui::Text("No entity available.");
+                selectedObjIndex = -1; // reset selected object if there is no entity to get
             }
+            else
+            {
+                //std::cout << "There are entities to get in IMGUI\n";
+                for (int i = 0; i < allEntities.size(); i++)
+                {
+                    const std::string objName = allEntities[i].get_name();
+                    if (ImGui::Selectable(objName.c_str(), selectedObjIndex == i))
+                    {
+                        selectedObjIndex = i;
+                    }
+
+                    //++currObjIndex;
+                }
+            }
+           
         }
 
         ImGui::End();
+    }
+
+    void ImguiManager::displayPropertiesList()
+    {
+        ImGui::SetWindowSize(ImVec2(600, 400));
+        if (ImGui::Begin("Properties/ Inspector", &inspectorWindow, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize)) {
+
+        }
+
+        // Get all entities
+        auto& allEntities = ImguiEcsRef.getAllEntitiesOverload();
+
+        if (selectedObjIndex >= allEntities.size())
+        {
+            ImGui::Text("No Entity Available, Invalid Selection");
+            selectedObjIndex = -1;
+        
+        }
+        else
+        {
+            // get the selected entity from list
+            auto& selectedEntity = allEntities[selectedObjIndex];
+
+            // display information of the entity info
+            //ImGui::Text("Entity Name: %s", selectedEntity.get_name().c_str());
+
+            // displlay information using text input
+            char nameBuffer[128];
+            strncpy_s(nameBuffer, selectedEntity.get_name().c_str(), sizeof(nameBuffer));
+            if (ImGui::InputText("Entity Name", nameBuffer, sizeof(nameBuffer)))
+            {
+                const std::string newName = nameBuffer;
+                selectedEntity.set_name(newName);
+            }
+           
+
+          
+        }
+        ImGui::End();
+
     }
 
     void ImguiManager::shutDown() {

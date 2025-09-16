@@ -130,12 +130,8 @@ int main(void) {
         IMGUIM.displayHierarchyList();
 
         // Editor Temporary Windows
-
-        ImGui::SetNextWindowSize(ImVec2(600, 400));
-        if (ImGui::Begin("Properties Panel Test", &inspectorWindow, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize)) {
-
-        }
-        ImGui::End();
+        IMGUIM.displayPropertiesList();
+       
 
      
         ImGui::SetNextWindowSize(ImVec2(600, 400));
