@@ -95,21 +95,21 @@ namespace gam300 {
         //}
 
         // Load the scene - Commented out to load scene using editor instead (Edited - Lily (15/9))
-        const std::string scenePath = getAssetFilePath("Scene/Game.scn");
-        if (SEM.loadScene(scenePath)) {
-            logManager.writeLog("GameManager::startUp() - Scene loaded successfully from %s", scenePath.c_str());
-        }
-        else {
-            logManager.writeLog("GameManager::startUp() - Failed to load scene, creating default scene");
-            // Save to the same path
-            SEM.saveScene(scenePath);
-            if (SEM.loadScene(scenePath)) {
-                logManager.writeLog("GameManager::startUp() - Default scene loaded successfully");
-            }
-            else {
-                logManager.writeLog("GameManager::startUp() - WARNING: Failed to load default scene");
-            }
-        }
+        //const std::string scenePath = getAssetFilePath("Scene/Game.scn");
+        //if (SEM.loadScene(scenePath)) {
+        //    logManager.writeLog("GameManager::startUp() - Scene loaded successfully from %s", scenePath.c_str());
+        //}
+        //else {
+        //    logManager.writeLog("GameManager::startUp() - Failed to load scene, creating default scene");
+        //    // Save to the same path
+        //    SEM.saveScene(scenePath);
+        //    if (SEM.loadScene(scenePath)) {
+        //        logManager.writeLog("GameManager::startUp() - Default scene loaded successfully");
+        //    }
+        //    else {
+        //        logManager.writeLog("GameManager::startUp() - WARNING: Failed to load default scene");
+        //    }
+        //}
 
         // Initialize step count
         m_step_count = 0;
