@@ -33,6 +33,8 @@
 #include "../IMGUI/imgui_impl_glfw.h"
 #include "../IMGUI/imgui_impl_opengl3.h"
 
+// Include Tracy
+#include "../Tracy/tracy/Tracy.hpp"
 
 #include "Application.h"
 #endif // __MAIN_H__

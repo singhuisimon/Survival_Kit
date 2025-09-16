@@ -24,6 +24,9 @@ Global
 		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
+		Tracy|Any CPU = Tracy|Any CPU
+		Tracy|x64 = Tracy|x64
+		Tracy|x86 = Tracy|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{1F3067CA-7827-439F-A3E4-302DB0F6B5EE}.Debug|Any CPU.ActiveCfg = Debug|x64
@@ -38,6 +41,12 @@ Global
 		{1F3067CA-7827-439F-A3E4-302DB0F6B5EE}.Release|x64.Build.0 = Release|x64
 		{1F3067CA-7827-439F-A3E4-302DB0F6B5EE}.Release|x86.ActiveCfg = Release|Win32
 		{1F3067CA-7827-439F-A3E4-302DB0F6B5EE}.Release|x86.Build.0 = Release|Win32
+		{1F3067CA-7827-439F-A3E4-302DB0F6B5EE}.Tracy|Any CPU.ActiveCfg = Tracy|x64
+		{1F3067CA-7827-439F-A3E4-302DB0F6B5EE}.Tracy|Any CPU.Build.0 = Tracy|x64
+		{1F3067CA-7827-439F-A3E4-302DB0F6B5EE}.Tracy|x64.ActiveCfg = Tracy|x64
+		{1F3067CA-7827-439F-A3E4-302DB0F6B5EE}.Tracy|x64.Build.0 = Tracy|x64
+		{1F3067CA-7827-439F-A3E4-302DB0F6B5EE}.Tracy|x86.ActiveCfg = Tracy|Win32
+		{1F3067CA-7827-439F-A3E4-302DB0F6B5EE}.Tracy|x86.Build.0 = Tracy|Win32
 		{CD45B5B8-24D0-4291-AD94-D2597784CBE2}.Debug|Any CPU.ActiveCfg = Debug|x64
 		{CD45B5B8-24D0-4291-AD94-D2597784CBE2}.Debug|Any CPU.Build.0 = Debug|x64
 		{CD45B5B8-24D0-4291-AD94-D2597784CBE2}.Debug|x64.ActiveCfg = Debug|x64
@@ -50,6 +59,12 @@ Global
 		{CD45B5B8-24D0-4291-AD94-D2597784CBE2}.Release|x64.Build.0 = Release|x64
 		{CD45B5B8-24D0-4291-AD94-D2597784CBE2}.Release|x86.ActiveCfg = Release|Win32
 		{CD45B5B8-24D0-4291-AD94-D2597784CBE2}.Release|x86.Build.0 = Release|Win32
+		{CD45B5B8-24D0-4291-AD94-D2597784CBE2}.Tracy|Any CPU.ActiveCfg = Tracy|x64
+		{CD45B5B8-24D0-4291-AD94-D2597784CBE2}.Tracy|Any CPU.Build.0 = Tracy|x64
+		{CD45B5B8-24D0-4291-AD94-D2597784CBE2}.Tracy|x64.ActiveCfg = Tracy|x64
+		{CD45B5B8-24D0-4291-AD94-D2597784CBE2}.Tracy|x64.Build.0 = Tracy|x64
+		{CD45B5B8-24D0-4291-AD94-D2597784CBE2}.Tracy|x86.ActiveCfg = Tracy|Win32
+		{CD45B5B8-24D0-4291-AD94-D2597784CBE2}.Tracy|x86.Build.0 = Tracy|Win32
 		{06115020-1DC0-4009-A890-34BBCCBDB4A2}.Debug|Any CPU.ActiveCfg = Debug|x64
 		{06115020-1DC0-4009-A890-34BBCCBDB4A2}.Debug|Any CPU.Build.0 = Debug|x64
 		{06115020-1DC0-4009-A890-34BBCCBDB4A2}.Debug|x64.ActiveCfg = Debug|x64
@@ -62,6 +77,12 @@ Global
 		{06115020-1DC0-4009-A890-34BBCCBDB4A2}.Release|x64.Build.0 = Release|x64
 		{06115020-1DC0-4009-A890-34BBCCBDB4A2}.Release|x86.ActiveCfg = Release|Win32
 		{06115020-1DC0-4009-A890-34BBCCBDB4A2}.Release|x86.Build.0 = Release|Win32
+		{06115020-1DC0-4009-A890-34BBCCBDB4A2}.Tracy|Any CPU.ActiveCfg = Tracy|x64
+		{06115020-1DC0-4009-A890-34BBCCBDB4A2}.Tracy|Any CPU.Build.0 = Tracy|x64
+		{06115020-1DC0-4009-A890-34BBCCBDB4A2}.Tracy|x64.ActiveCfg = Tracy|x64
+		{06115020-1DC0-4009-A890-34BBCCBDB4A2}.Tracy|x64.Build.0 = Tracy|x64
+		{06115020-1DC0-4009-A890-34BBCCBDB4A2}.Tracy|x86.ActiveCfg = Tracy|Win32
+		{06115020-1DC0-4009-A890-34BBCCBDB4A2}.Tracy|x86.Build.0 = Tracy|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -82,6 +82,9 @@ int main(void) {
     //std::cout << "Initial script added" << std::endl;
 
     while (!GM.getGameOver() && !glfwWindowShouldClose(window)) {
+
+		ZoneScopedN("Main Loop");
+
         // Process events
         glfwPollEvents();
 
@@ -166,6 +169,8 @@ int main(void) {
         
         // Swap buffers
         glfwSwapBuffers(window);
+
+        FrameMark;
 
         // End of loop timing
         elapsed_time = clock.split();

@@ -1,0 +1,5 @@
+C:\Users\Admin\source\repos\gam_300\Survival_Kit\.bin\Tracy-x64\Ijwhost.dll
+C:\Users\Admin\source\repos\gam_300\Survival_Kit\.bin\Tracy-x64\ScriptAPI.deps.json
+C:\Users\Admin\source\repos\gam_300\Survival_Kit\.bin\Tracy-x64\ScriptAPI.runtimeconfig.json
+C:\Users\Admin\source\repos\gam_300\Survival_Kit\ScriptAPI\x64\Tracy\ScriptAPI.sourcelink.json
+C:\Users\Admin\source\repos\gam_300\Survival_Kit\ScriptAPI\x64\Tracy\ScriptAPI.genruntimeconfig.cache
