@@ -14,6 +14,7 @@
 #include <glm-0.9.9.8/glm/glm.hpp>
 #include <glm-0.9.9.8/glm/gtc/quaternion.hpp>
 #include <glm-0.9.9.8/glm/gtx/quaternion.hpp>
+#include "../Component/Transform3D.h"
 
 namespace gam300 {
 
@@ -167,10 +168,16 @@ namespace gam300 {
 
         glm::mat4 TRS = trans_matrix * rot_matrix * scale_matrix;
 
+        Transform3D transform;
+
+        transform.setPosition(Vector3D(0.0f, 0.0f, 0.0f));
+        transform.setScale(Vector3D(1.0f, 1.0f, 1.0f)); // Don't set any values to 0
+        transform.setRotation(Vector3D(0.0f, 0.0f, 0.0f));
+
         shadersStorage[0].programUse();
 
         // KENNY TESTING: Temporary transformations for camera
-        shadersStorage[0].setUniform("M", TRS); // Model transform
+        shadersStorage[0].setUniform("M", transform.getTransformationMatrix()); // Model transform
         shadersStorage[0].setUniform("V", main_camera.getLookAt()); // View transform
         shadersStorage[0].setUniform("P", main_camera.getPerspective()); // Perspective transform
 
