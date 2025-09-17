@@ -27,6 +27,10 @@
 #include <filesystem>
 #include <GLFW/glfw3.h>
 
+// Include other necessary headers
+#include "../Component/Transform3D.h"
+#include "../Utility/Vector3D.h"
+
 #define IMGUIM gam300::ImguiManager::getInstance()
 
 namespace gam300

@@ -229,39 +229,82 @@ namespace gam300 {
         ImGui::SetWindowSize(ImVec2(600, 400));
         if (ImGui::Begin("Properties/ Inspector", &inspectorWindow, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize)) {
 
-        }
+            // Get all entities (Fix: use getAllEntities() instead of getAllEntitiesOverload())
+            const std::vector<Entity>& allEntities = ImguiEcsRef.getAllEntities();
 
-        // Get all entities
-        auto& allEntities = ImguiEcsRef.getAllEntitiesOverload();
-
-        if (selectedObjIndex >= allEntities.size())
-        {
-            ImGui::Text("No Entity Available, Invalid Selection");
-            selectedObjIndex = -1;
-        
-        }
-        else
-        {
-            // get the selected entity from list
-            auto& selectedEntity = allEntities[selectedObjIndex];
-
-            // display information of the entity info
-            //ImGui::Text("Entity Name: %s", selectedEntity.get_name().c_str());
-
-            // displlay information using text input
-            char nameBuffer[128];
-            strncpy_s(nameBuffer, selectedEntity.get_name().c_str(), sizeof(nameBuffer));
-            if (ImGui::InputText("Entity Name", nameBuffer, sizeof(nameBuffer)))
-            {
-                const std::string newName = nameBuffer;
-                selectedEntity.set_name(newName);
+            // Check if we have valid selection and entities
+            if (allEntities.empty()) {
+                ImGui::Text("No Entity Available");
+                selectedObjIndex = -1;
             }
-           
+            else if (selectedObjIndex < 0 || selectedObjIndex >= static_cast<int>(allEntities.size())) {
+                ImGui::Text("No Entity Selected or Invalid Selection");
+                selectedObjIndex = -1;
+            }
+            else {
+                // Get the selected entity (Fix: proper array access)
+                const Entity& selectedEntity = allEntities[selectedObjIndex];
 
-          
+                // Display entity information using input text (Fix: strncpy_s parameters)
+                char nameBuffer[128];
+                const std::string& entityName = selectedEntity.get_name();
+
+                // Fix: strncpy_s requires 3 parameters: destination, size, source
+                strcpy_s(nameBuffer, sizeof(nameBuffer), entityName.c_str()); 
+
+                if (ImGui::InputText("Entity Name", nameBuffer, sizeof(nameBuffer))) {
+                    const std::string newName = nameBuffer;
+
+                    // Fix: Can't modify const entity directly, need to use ECS manager
+                    ImguiEcsRef.renameEntity(selectedEntity.get_id(), newName);
+                }
+
+                // Display entity ID
+                ImGui::Text("Entity ID: %u", selectedEntity.get_id());
+
+                // Display component information
+                ImGui::Separator();
+                ImGui::Text("Components:");
+
+                // Example: Check for Transform3D component and display its properties
+                if (ImguiEcsRef.hasComponent<Transform3D>(selectedEntity.get_id())) {
+                    if (ImGui::CollapsingHeader("Transform3D")) {
+                        Transform3D* transform = ImguiEcsRef.getComponent<Transform3D>(selectedEntity.get_id());
+                        if (transform) {
+                            // Position
+                            Vector3D pos = transform->getPosition();
+                            float position[3] = { pos.x, pos.y, pos.z };
+                            if (ImGui::DragFloat3("Position", position, 0.1f)) {
+                                transform->setPosition(Vector3D(position[0], position[1], position[2]));
+                            }
+
+                            // Rotation
+                            Vector3D rot = transform->getRotation();
+                            float rotation[3] = { rot.x, rot.y, rot.z };
+                            if (ImGui::DragFloat3("Rotation", rotation, 1.0f)) {
+                                transform->setRotation(Vector3D(rotation[0], rotation[1], rotation[2]));
+                            }
+
+                            // Scale
+                            Vector3D scl = transform->getScale();
+                            float scale[3] = { scl.x, scl.y, scl.z };
+                            if (ImGui::DragFloat3("Scale", scale, 0.1f)) {
+                                transform->setScale(Vector3D(scale[0], scale[1], scale[2]));
+                            }
+                        }
+                    }
+                }
+
+                // Add component button
+                ImGui::Separator();
+                if (ImGui::Button("Add Transform3D")) {
+                    if (!ImguiEcsRef.hasComponent<Transform3D>(selectedEntity.get_id())) {
+                        ImguiEcsRef.addComponent<Transform3D>(selectedEntity.get_id());
+                    }
+                }
+            }
         }
         ImGui::End();
-
     }
 
     void ImguiManager::shutDown() {
