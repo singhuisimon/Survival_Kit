@@ -16,7 +16,6 @@
 #include "Manager.h"
 #include <vector>
 #include <memory>
-#include <unordered_map>  // Added for entity name lookup
 #include "../Entity/Entity.h"
 #include "../Manager/ComponentManager.h"
 #include "../System/System.h"
@@ -38,9 +37,6 @@ namespace gam300 {
 
         std::vector<Entity> m_entities;      // Storage for all entities
         EntityID m_next_entity_id;           // Next available entity ID
-
-        // Added: Entity name lookup system
-        std::unordered_map<std::string, EntityID> m_entity_name_map;
 
     public:
         /**
@@ -85,154 +81,6 @@ namespace gam300 {
          * @return Reference to the vector of all entities.
          */
         const std::vector<Entity>& getAllEntities() const;
-
-		// =============== ENITY LOOKUP METHODS =============== //
-
-        // Added: Entity lookup methods (Method 1: By name)
-        /**
-         * @brief Get an entity by its name.
-         * @param name The name of the entity to find.
-         * @return Pointer to the entity, or nullptr if not found.
-         */
-        Entity* getEntityByName(const std::string& name);
-
-        /**
-         * @brief Get an entity ID by its name.
-         * @param name The name of the entity to find.
-         * @return The entity ID, or INVALID_ENTITY_ID if not found.
-         */
-        EntityID getEntityIdByName(const std::string& name);
-
-        /**
-         * @brief Check if an entity name already exists.
-         * @param name The name to check.
-         * @return True if an entity with this name exists, false otherwise.
-         */
-        bool entityNameExists(const std::string& name);
-
-		// Method 2: By component type(s)
-        /**
-         * @brief Check if an entity has all specified component types.
-         * @tparam T First component type.
-         * @tparam Args Additional component types.
-         * @param entity_id The entity to check.
-         * @return True if entity has all specified components.
-         */
-        template<typename T, typename... Args>
-        bool hasAllComponents(EntityID entity_id) {
-            if constexpr (sizeof...(Args) == 0) {
-                return hasComponent<T>(entity_id);
-            }
-            else {
-                return hasComponent<T>(entity_id) && hasAllComponents<Args...>(entity_id);
-            }
-        }
-
-        /**
-         * @brief Find all entities that have a specific component type.
-         * @tparam T The component type to search for.
-         * @return Vector of entity IDs that have the specified component.
-         */
-        template<typename T>
-        std::vector<EntityID> getEntitiesWithComponent() {
-            std::vector<EntityID> result;
-            ComponentTypeID component_id = get_component_type_id<T>();
-
-            for (const auto& entity : m_entities) {
-                if (entity.has_component(component_id)) {
-                    result.push_back(entity.get_id());
-                }
-            }
-            return result;
-        }
-
-        /**
-         * @brief Find all entities that have multiple specific component types.
-         * @tparam T First component type.
-         * @tparam Args Additional component types.
-         * @return Vector of entity IDs that have ALL specified components.
-         */
-        template<typename T, typename... Args>
-        std::vector<EntityID> getEntitiesWithComponents() {
-            std::vector<EntityID> result;
-
-            for (const auto& entity : m_entities) {
-                if (hasAllComponents<T, Args...>(entity.get_id())) {
-                    result.push_back(entity.get_id());
-                }
-            }
-            return result;
-        }
-
-        /**
-         * @brief Find the first entity with a specific component type.
-         * @tparam T The component type to search for.
-         * @return Entity ID of first entity with component, or INVALID_ENTITY_ID if none found.
-         */
-        template<typename T>
-        EntityID getFirstEntityWithComponent() {
-            ComponentTypeID component_id = get_component_type_id<T>();
-
-            for (const auto& entity : m_entities) {
-                if (entity.has_component(component_id)) {
-                    return entity.get_id();
-                }
-            }
-            return INVALID_ENTITY_ID;
-        }
-
-        /**
-         * @brief Find entities by component type and name pattern.
-         * @tparam T The component type to search for.
-         * @param namePattern String that entity name must contain.
-         * @return Vector of entity IDs matching both criteria.
-         */
-        template<typename T>
-        std::vector<EntityID> getEntitiesWithComponentAndName(const std::string& namePattern) {
-            std::vector<EntityID> result;
-            ComponentTypeID component_id = get_component_type_id<T>();
-
-            for (const auto& entity : m_entities) {
-                if (entity.has_component(component_id) &&
-                    entity.get_name().find(namePattern) != std::string::npos) {
-                    result.push_back(entity.get_id());
-                }
-            }
-            return result;
-        }
-
-        /**
-         * @brief Count entities with a specific component type.
-         * @tparam T The component type to count.
-         * @return Number of entities with the specified component.
-         */
-        template<typename T>
-        size_t countEntitiesWithComponent() {
-            size_t count = 0;
-            ComponentTypeID component_id = get_component_type_id<T>();
-
-            for (const auto& entity : m_entities) {
-                if (entity.has_component(component_id)) {
-                    count++;
-                }
-            }
-            return count;
-        }
-
-		// =============== END ENTITY LOOKUP METHODS =============== //
-
-        /**
-         * @brief Clear all entities from the ECS.
-         * @details Destroys all entities and clears internal storage.
-         */
-        void clearAllEntities();
-
-        /**
-         * @brief Rename an existing entity.
-         * @param entity_id The ID of the entity to rename.
-         * @param new_name The new name for the entity.
-         */
-        void renameEntity(EntityID entity_id, const std::string& new_name);
 
         /**
          * @brief Add a component to an entity.

@@ -1,28 +1,48 @@
 {
   "objects": [
     {
-      "name": "Cube",
+      "name": "player",
       "components": {
-        "Transform3D": {
-          "position": [
-            0.0,
-            0.0,
-            0.0
+        "Input": {
+          "keyMappings": [
+            {
+              "name": "move_up",
+              "type": "press",
+              "key": "W",
+              "action": "Player moving up"
+            },
+            {
+              "name": "move_down",
+              "type": "press",
+              "key": "S",
+              "action": "Player moving down"
+            },
+            {
+              "name": "move_left",
+              "type": "press",
+              "key": "A",
+              "action": "Player moving left"
+            },
+            {
+              "name": "move_right",
+              "type": "press",
+              "key": "D",
+              "action": "Player moving right"
+            }
           ],
-          "prev_position": [
-            0.0,
-            0.0,
-            0.0
-          ],
-          "rotation": [
-            0.0,
-            0.0,
-            0.0
-          ],
-          "scale": [
-            1.0,
-            1.0,
-            1.0
+          "mouseMappings": [
+            {
+              "name": "primary_action",
+              "type": "press",
+              "button": "LEFT",
+              "action": "Player primary action"
+            },
+            {
+              "name": "secondary_action",
+              "type": "press",
+              "button": "RIGHT",
+              "action": "Player secondary action"
+            }
           ]
         }
       }
