@@ -13,7 +13,7 @@
 *.exp
 *.iobj
 *.ipdb
-//bin
+bin
 Debug
 Release
 *.recipe

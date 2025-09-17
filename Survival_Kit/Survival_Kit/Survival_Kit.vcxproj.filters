@@ -1,69 +1,160 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="Component\InputComponent.cpp" />
-    <ClCompile Include="Entity\Entity.cpp" />
-    <ClCompile Include="Glad\glad.c" />
-    <ClCompile Include="IMGUI\imgui.cpp" />
-    <ClCompile Include="IMGUI\imgui_demo.cpp" />
-    <ClCompile Include="IMGUI\imgui_draw.cpp" />
-    <ClCompile Include="IMGUI\imgui_impl_glfw.cpp" />
-    <ClCompile Include="IMGUI\imgui_impl_opengl3.cpp" />
-    <ClCompile Include="IMGUI\imgui_tables.cpp" />
-    <ClCompile Include="IMGUI\imgui_widgets.cpp" />
-    <ClCompile Include="Main\Main.cpp" />
-    <ClCompile Include="Manager\ComponentManager.cpp" />
-    <ClCompile Include="Manager\ECSManager.cpp" />
-    <ClCompile Include="Manager\GameManager.cpp" />
-    <ClCompile Include="Manager\ImguiManager.cpp" />
-    <ClCompile Include="Manager\InputManager.cpp" />
-    <ClCompile Include="Manager\LogManager.cpp" />
-    <ClCompile Include="Manager\Manager.cpp" />
-    <ClCompile Include="Manager\SerialisationBinManager.cpp" />
-    <ClCompile Include="Manager\SerialisationManager.cpp" />
-    <ClCompile Include="Manager\SystemManager.cpp" />
-    <ClCompile Include="System\InputSystem.cpp" />
-    <ClCompile Include="Utility\AssetPath.cpp" />
-    <ClCompile Include="Utility\Clock.cpp" />
-    <ClCompile Include="Utility\MathUtils.cpp" />
-    <ClCompile Include="Utility\Vector2D.cpp" />
-    <ClCompile Include="Utility\Vector3D.cpp" />
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Component\Component.h" />
-    <ClInclude Include="Component\ComponentPool.h" />
-    <ClInclude Include="Component\ComponentView.h" />
-    <ClInclude Include="Component\InputComponent.h" />
-    <ClInclude Include="Entity\Entity.h" />
-    <ClInclude Include="Glad\glad.h" />
-    <ClInclude Include="IMGUI\imconfig.h" />
-    <ClInclude Include="IMGUI\imgui.h" />
-    <ClInclude Include="IMGUI\imgui_impl_glfw.h" />
-    <ClInclude Include="IMGUI\imgui_impl_opengl3.h" />
-    <ClInclude Include="IMGUI\imgui_impl_opengl3_loader.h" />
-    <ClInclude Include="IMGUI\imgui_internal.h" />
-    <ClInclude Include="IMGUI\imstb_rectpack.h" />
-    <ClInclude Include="IMGUI\imstb_textedit.h" />
-    <ClInclude Include="IMGUI\imstb_truetype.h" />
-    <ClInclude Include="Main\Main.h" />
-    <ClInclude Include="Manager\ComponentManager.h" />
-    <ClInclude Include="Manager\ECSManager.h" />
-    <ClInclude Include="Manager\GameManager.h" />
-    <ClInclude Include="Manager\ImguiManager.h" />
-    <ClInclude Include="Manager\InputManager.h" />
-    <ClInclude Include="Manager\LogManager.h" />
-    <ClInclude Include="Manager\Manager.h" />
-    <ClInclude Include="Manager\SerialisationBinManager.h" />
-    <ClInclude Include="Manager\SerialisationManager.h" />
-    <ClInclude Include="System\InputSystem.h" />
-    <ClInclude Include="System\System.h" />
-    <ClInclude Include="Utility\AssetPath.h" />
-    <ClInclude Include="Utility\Clock.h" />
-    <ClInclude Include="Utility\InputKeyMappings.h" />
-    <ClInclude Include="Utility\MathUtils.h" />
-    <ClInclude Include="Utility\ECS_Variables.h" />
-    <ClInclude Include="Utility\Vector2D.h" />
-    <ClInclude Include="Utility\Vector3D.h" />
+    <ClCompile Include="Main\Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Manager\Manager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Manager\LogManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility\Clock.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Manager\GameManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Glad\glad.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility\Vector2D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility\Vector3D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility\MathUtils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Entity\Entity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Manager\ComponentManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Manager\SystemManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Manager\ECSManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Manager\InputManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Component\InputComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="System\InputSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Manager\SerialisationManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility\AssetPath.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\RenderFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Main\Main.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Manager\Manager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Manager\LogManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility\Clock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Manager\GameManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Glad\glad.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility\Vector2D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility\Vector3D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility\MathUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Entity\Entity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility\ECS_Variables.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Component\Component.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Manager\ComponentManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="System\System.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Component\ComponentPool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Component\ComponentView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Manager\ECSManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Manager\InputManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Component\InputComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="System\InputSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Manager\SerialisationManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility\AssetPath.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility\InputKeyMappings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\IRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\GLRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\RenderCommand.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\RenderFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Scene\Game.scn" />

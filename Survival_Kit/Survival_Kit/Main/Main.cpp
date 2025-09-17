@@ -8,8 +8,8 @@
  * Reproduction or disclosure of this file or its contents without the
  * prior written consent of DigiPen Institute of Technology is prohibited.
  */
+
 #include "Main.h"
-#include "../Manager/SerialisationManager.h"
 
 int main(void) {
     // Initialize GameManager
@@ -18,8 +18,6 @@ int main(void) {
         printf("ERROR: Failed to start GameManager\n");
         return -1;
     }
-    bool spacePressed = false;
-
 
     // Get reference to LogManager (already started by GameManager)
     LM.writeLog("Main: GameManager initialized successfully");
@@ -49,38 +47,15 @@ int main(void) {
     IM.setWindow(window);
     LM.writeLog("InputManager initialized successfully");
 
-    // Setup Dear ImGui context
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-
-    IMGUIM.startUp(window, io);
-
-    // Editor Temporary Windows
-    //bool test_window = true;
-    bool inspectorWindow = true;
-    bool assetsBrowser = true; // to load assets
-    bool fileWindow = true;
-    std::string shownFile{};
-
-    //bool test_done = false;
     // Create a clock for timing
     gam300::Clock clock;
 
     // Variables for timing
     int64_t elapsed_time = 0;
     int64_t sleep_time = 0;
+
     // Main game loop
     LM.writeLog("Starting main game loop");
-
-
-    //Core::Application app;
-    //app.Run();
-    Core::Application app;
-    app.InitializeScripting();
-    app.AddScript(0, "TestScript");
-    //std::cout << "Initial script added" << std::endl;
-
     while (!GM.getGameOver() && !glfwWindowShouldClose(window)) {
         // Process events
         glfwPollEvents();
@@ -91,79 +66,12 @@ int main(void) {
         // Start of loop timing
         clock.delta();
 
-        bool currentSpaceState = GetKeyState(VK_SPACE) & 0x8000;
-        if (currentSpaceState && !spacePressed)
-        {
-            app.ReloadScripts();
-            app.AddScript(0, "TestScript");  // Re-add script after reload
-        }
-
         // Update all systems (including InputSystem)
         EM.updateSystems(GM.getFrameTime() / 1000.0f);
-
-        if (glfwGetWindowAttrib(window, GLFW_ICONIFIED) != 0)
-        {
-            ImGui_ImplGlfw_Sleep(10);
-            continue;
-        }
-
-        IMGUIM.startImguiFrame();
-
-        // Editor Temporary Menu Bar
-        if (ImGui::BeginMainMenuBar())
-        {
-            ImGui::Separator();
-            if (ImGui::BeginMenu("File_Test"))
-            {
-                if (ImGui::MenuItem("New"))
-                {
-                    
-                }
-
-                if (ImGui::MenuItem("Open"))
-                {
-                    fileWindow = true;
-                }
-
-                if (ImGui::MenuItem("Save"))
-                {
-                    //To uncomment after Serialisation is fixed
-                    //SEM.saveScene(shownFile);
-                }
-                ImGui::EndMenu();
-                ImGui::Separator();
-            }
-            ImGui::EndMainMenuBar();
-        }
-       
-        // Editor Dockspace
-        ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
-
-        if (fileWindow) {
-            IMGUIM.displayFileList(fileWindow, shownFile);
-        }
-        
-        IMGUIM.displayHierarchyList();
-
-        // Editor Temporary Windows
-        IMGUIM.displayPropertiesList();
-       
-
-     
-        ImGui::SetNextWindowSize(ImVec2(600, 400));
-        if (ImGui::Begin("Assets Browser Test", &assetsBrowser, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize))
-        {
-        }
-        ImGui::End();
-
-        // Editor Start Render
-        ImGui::Render();
 
         // Render frame 
         glClear(GL_COLOR_BUFFER_BIT);
 
-        IMGUIM.finishImguiRender(io);
-        
         // Swap buffers
         glfwSwapBuffers(window);
 
@@ -185,22 +93,14 @@ int main(void) {
             // If we're behind, log that we're not keeping up
             LM.writeLog("GameManager::run() - Frame running behind: %lld us", -sleep_time);
         }
-
-        app.UpdateScripts();
-        app.CheckAndReloadScripts();
-
     }
 
-
-    app.ShutdownScripting();
     // Cleanup
     LM.writeLog("Cleaning up resources");
 
     // Shut down InputManager
     IM.shutDown();
-    
-    IMGUIM.shutDown();
-    
+
     // Terminate GLFW
     glfwTerminate();
 
