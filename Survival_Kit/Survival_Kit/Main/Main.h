@@ -27,4 +27,11 @@
 #include "../Manager/ImguiManager.h"
 
 
+// Include IMGUI headers
+#include "../IMGUI/imgui.h"
+#include "../IMGUI/imgui_impl_glfw.h"
+#include "../IMGUI/imgui_impl_opengl3.h"
+
+
+#include "Application.h"
 #endif // __MAIN_H__

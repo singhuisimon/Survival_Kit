@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Component\InputComponent.cpp" />
+    <ClCompile Include="Component\Transform3D.cpp" />
     <ClCompile Include="Entity\Entity.cpp" />
     <ClCompile Include="Glad\glad.c" />
     <ClCompile Include="Graphics\GLResources.cpp" />
@@ -41,6 +41,7 @@
     <ClCompile Include="Manager\InputManager.cpp" />
     <ClCompile Include="Manager\LogManager.cpp" />
     <ClCompile Include="Manager\Manager.cpp" />
+    <ClCompile Include="Manager\SerialisationBinManager.cpp" />
     <ClCompile Include="Manager\SerialisationManager.cpp" />
     <ClCompile Include="Manager\SystemManager.cpp" />
     <ClCompile Include="System\TransformSystem.cpp" />
@@ -84,8 +85,8 @@
     <ClInclude Include="Manager\InputManager.h" />
     <ClInclude Include="Manager\LogManager.h" />
     <ClInclude Include="Manager\Manager.h" />
+    <ClInclude Include="Manager\SerialisationBinManager.h" />
     <ClInclude Include="Manager\SerialisationManager.h" />
-    <ClInclude Include="System\InputSystem.h" />
     <ClInclude Include="System\System.h" />
     <ClInclude Include="System\TransformSystem.h" />
     <ClInclude Include="Utility\AssetPath.h" />
@@ -104,6 +105,11 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="Survival_Kit.log" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ScriptCore\ScriptCore.vcxproj">
+      <Project>{cd45b5b8-24d0-4291-ad94-d2597784cbe2}</Project>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -158,6 +164,18 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)ScriptCore;$(IncludePath)</IncludePath>
+    <ExternalIncludePath>$(SolutionDir)External_Libraries\include\dotnet;$(SolutionDir)External_Libraries\include;$(ExternalIncludePath)</ExternalIncludePath>
+    <OutDir>$(SolutionDir).bin\$(Configuration)-$(Platform)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)ScriptCore;$(IncludePath)</IncludePath>
+    <ExternalIncludePath>$(SolutionDir)External_Libraries\include\dotnet;$(SolutionDir)External_Libraries\include;$(ExternalIncludePath)</ExternalIncludePath>
+    <OutDir>$(SolutionDir).bin\$(Configuration)-$(Platform)\</OutDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -192,15 +210,19 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)External_Libraries\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)ScriptCore;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)External_Libraries\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)External_Libraries\lib;$(SolutionDir).bin\$(Configuration)-$(Platform)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);ScriptCore.lib;opengl32.lib;glfw3.lib</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -210,13 +232,21 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)ScriptCore;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir).bin\$(Configuration)-$(Platform)\;$(SolutionDir)External_Libraries\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);opengl32.lib;ScriptCore.lib;glfw3.lib</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
