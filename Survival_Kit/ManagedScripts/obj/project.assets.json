@@ -9,31 +9,29 @@
     "net8.0-windows7.0": []
   },
   "packageFolders": {
-    "C:\\Users\\kuekw\\.nuget\\packages\\": {},
+    "C:\\Users\\shsim\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\kuekw\\source\\repos\\here\\Survival_Kit\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj",
+      "projectUniqueName": "C:\\GitHub\\Survival_Kit\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj",
       "projectName": "ManagedScripts",
-      "projectPath": "C:\\Users\\kuekw\\source\\repos\\here\\Survival_Kit\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj",
-      "packagesPath": "C:\\Users\\kuekw\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\kuekw\\source\\repos\\here\\Survival_Kit\\Survival_Kit\\ManagedScripts\\obj\\",
+      "projectPath": "C:\\GitHub\\Survival_Kit\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj",
+      "packagesPath": "C:\\Users\\shsim\\.nuget\\packages\\",
+      "outputPath": "C:\\GitHub\\Survival_Kit\\Survival_Kit\\ManagedScripts\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\kuekw\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        "C:\\Users\\shsim\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config"
       ],
       "originalTargetFrameworks": [
         "net8.0-windows"
       ],
       "sources": {
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -51,8 +49,7 @@
         "enableAudit": "true",
         "auditLevel": "low",
         "auditMode": "direct"
-      },
-      "SdkAnalysisLevel": "9.0.300"
+      }
     },
     "frameworks": {
       "net8.0-windows7.0": {
@@ -73,7 +70,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.304/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.414/PortableRuntimeIdentifierGraph.json"
       }
     },
     "runtimes": {
