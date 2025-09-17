@@ -19,7 +19,6 @@
 #include <thread>
 #include <chrono>
 
-
  // Forward declaration for Clock (to avoid circular dependency)
 namespace gam300 {
     class Clock;
@@ -36,11 +35,11 @@ namespace gam300 {
     class GameManager : public Manager {
 
     private:
-        GameManager();                               // Private since a singleton.
-        GameManager(GameManager const&) = delete;    // Don't allow copy.
-        void operator=(GameManager const&) = delete; // Don't allow assignment.
-        bool m_game_over;                            // True -> game loop should stop.
-        int m_step_count;                            // Count of game loop iterations.
+        GameManager();                      // Private since a singleton.
+        GameManager(GameManager const&);    // Don't allow copy.
+        void operator=(GameManager const&); // Don't allow assignment.
+        bool m_game_over;                   // True -> game loop should stop.
+        int m_step_count;                   // Count of game loop iterations.
 
     public:
         /**
@@ -101,6 +100,28 @@ namespace gam300 {
          * @return The current game loop step count.
          */
         int getStepCount() const;
+
+        // Added: Scene management helper methods
+        /**
+         * @brief Work with entities loaded from serialization.
+         * @param dt Delta time in seconds.
+         * @details Demonstrates how to use entity lookup functionality.
+         */
+        void workWithSerializedEntities(float dt);
+
+        /**
+         * @brief Load a new scene, clearing existing entities first.
+         * @param scenePath Path to the scene file to load.
+         * @details Clears all existing entities before loading new scene.
+         */
+        void loadNewScene(const std::string& scenePath);
+
+        /**
+         * @brief Save current game state to a save slot.
+         * @param saveSlot Name of the save slot (e.g., "slot1", "quicksave").
+         * @details Saves current entities without clearing them from memory.
+         */
+        void saveCurrentGame(const std::string& saveSlot);
     };
 
 } // end of namespace gam300
