@@ -14,13 +14,11 @@
 #define __TRANSFORM_SYSTEM_H__
 
 #include "../System/System.h"
-
-#include "../Component/TransformComponent.h"
+#include "../Component/Transform3D.h"
 
 namespace gam300{
 
-
-	class TransformSystem : public ComponentSystem<TransformComponent> {
+	class TransformSystem : public ComponentSystem<Transform3D> {
 
 	public:
         /**
