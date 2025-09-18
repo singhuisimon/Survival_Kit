@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "hq3xzaAGBfk=",
+  "dgSpecHash": "2UlHr/2jG7Y=",
   "success": true,
-  "projectFilePath": "C:\\Users\\kuekw\\source\\repos\\here\\Survival_Kit\\Survival_Kit\\ScriptAPI\\ScriptAPI.vcxproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "C:\\Users\\nicho\\OneDrive\\Documents\\GitHub\\Survival_Kit\\Survival_Kit\\ScriptAPI\\ScriptAPI.vcxproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\nicho\\.nuget\\packages\\microsoft.windows.sdk.net.ref\\10.0.22621.54\\microsoft.windows.sdk.net.ref.10.0.22621.54.nupkg.sha512"
+  ],
   "logs": []
 }
