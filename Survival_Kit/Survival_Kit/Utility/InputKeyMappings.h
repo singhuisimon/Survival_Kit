@@ -11,6 +11,7 @@
 #ifndef __INPUT_KEY_MAPPINGS_H__
 #define __INPUT_KEY_MAPPINGS_H__
 
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <string>
 #include <unordered_map>
