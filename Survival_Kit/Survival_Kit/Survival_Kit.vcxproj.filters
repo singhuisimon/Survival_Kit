@@ -29,6 +29,8 @@
     <ClCompile Include="Utility\MathUtils.cpp" />
     <ClCompile Include="Utility\Vector2D.cpp" />
     <ClCompile Include="Utility\Vector3D.cpp" />
+    <ClCompile Include="Manager\ResourceManager.cpp" />
+    <ClCompile Include="Resource\ResourceLoaders.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component\Component.h" />
@@ -68,6 +70,8 @@
     <ClInclude Include="Utility\ECS_Variables.h" />
     <ClInclude Include="Utility\Vector2D.h" />
     <ClInclude Include="Utility\Vector3D.h" />
+    <ClInclude Include="Manager\ResourceManager.h" />
+    <ClInclude Include="Resource\ResourceData.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Scene\Game.scn" />

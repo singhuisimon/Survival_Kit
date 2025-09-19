@@ -1,7 +1,7 @@
 /**
 * @file ResourceMetadata.h
 * @brief Resource properties definitions
-*	Defines property structure for different resource types
+*	Defines property structure for different resource types (descriptor files data)
 * @author
 * @date
 * Copyright (C) 2025 DigiPen Institute of Technology.
