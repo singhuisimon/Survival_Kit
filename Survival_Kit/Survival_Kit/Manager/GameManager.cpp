@@ -15,6 +15,7 @@
 #include "InputManager.h" 
 #include "ECSManager.h"
 #include "SerialisationManager.h"
+#include "GraphicsManager.h"
 #include "../Component/Transform3D.h"
 #include "../Utility/Clock.h"
 #include "../Utility/AssetPath.h"
@@ -78,6 +79,18 @@ namespace gam300 {
         }
 
         logManager.writeLog("GameManager::startUp() - SerialisationManager started successfully");
+
+        // Start the GraphicsManager
+        if (GFXM.startUp()) {
+            logManager.writeLog("GameManager::startUp() - Failed to start GraphicsManager");
+            EM.shutDown();
+            IM.shutDown();
+            SEM.shutDown();
+            logManager.shutDown();
+            return -1;
+        }
+
+        logManager.writeLog("GameManager::startUp() - GraphicsManager started successfully");
 
         // Register the Transform3D component with the ComponentManager
         CM.register_component<Transform3D>();

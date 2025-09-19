@@ -15,6 +15,7 @@
 
 #include <cmath>
 #include <iostream>
+
 #include "Vector2D.h" // Include for Vector2D interoperability
 
 namespace gam300 {
@@ -25,6 +26,9 @@ namespace gam300 {
         float x;
         float y;
         float z;
+
+        // Operator to perform a cast to a glm vector
+        explicit operator glm::vec3() const noexcept { return glm::vec3(x, y, z); }
 
         // Constructors
         Vector3D();                              // Default constructor (0,0,0)
