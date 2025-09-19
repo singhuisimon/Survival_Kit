@@ -19,9 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Component\InputComponent.cpp" />
+    <ClCompile Include="Component\Transform3D.cpp" />
     <ClCompile Include="Entity\Entity.cpp" />
     <ClCompile Include="Glad\glad.c" />
+    <ClCompile Include="Graphics\GLResources.cpp" />
+    <ClCompile Include="Graphics\ShaderProgram.cpp" />
+    <ClCompile Include="Graphics\Shape.cpp" />
     <ClCompile Include="IMGUI\imgui.cpp" />
     <ClCompile Include="IMGUI\imgui_demo.cpp" />
     <ClCompile Include="IMGUI\imgui_draw.cpp" />
@@ -34,6 +37,7 @@
     <ClCompile Include="Manager\DescriptorFileManager.cpp" />
     <ClCompile Include="Manager\ECSManager.cpp" />
     <ClCompile Include="Manager\GameManager.cpp" />
+    <ClCompile Include="Manager\GraphicsManager.cpp" />
     <ClCompile Include="Manager\ImguiManager.cpp" />
     <ClCompile Include="Manager\InputManager.cpp" />
     <ClCompile Include="Manager\LogManager.cpp" />
@@ -41,7 +45,7 @@
     <ClCompile Include="Manager\SerialisationBinManager.cpp" />
     <ClCompile Include="Manager\SerialisationManager.cpp" />
     <ClCompile Include="Manager\SystemManager.cpp" />
-    <ClCompile Include="System\InputSystem.cpp" />
+    <ClCompile Include="System\TransformSystem.cpp" />
     <ClCompile Include="Utility\AssetPath.cpp" />
     <ClCompile Include="Utility\Clock.cpp" />
     <ClCompile Include="Utility\MathUtils.cpp" />
@@ -52,9 +56,18 @@
     <ClInclude Include="Component\Component.h" />
     <ClInclude Include="Component\ComponentPool.h" />
     <ClInclude Include="Component\ComponentView.h" />
-    <ClInclude Include="Component\InputComponent.h" />
+    <ClInclude Include="Component\Transform3D.h" />
+    <ClInclude Include="Component\TransformComponent.h" />
     <ClInclude Include="Entity\Entity.h" />
     <ClInclude Include="Glad\glad.h" />
+    <ClInclude Include="Graphics\Camera.h" />
+    <ClInclude Include="Graphics\Framebuffer.h" />
+    <ClInclude Include="Graphics\GLResources.h" />
+    <ClInclude Include="Graphics\Light.h" />
+    <ClInclude Include="Graphics\Material.h" />
+    <ClInclude Include="Graphics\MeshData.h" />
+    <ClInclude Include="Graphics\ShaderProgram.h" />
+    <ClInclude Include="Graphics\Shape.h" />
     <ClInclude Include="IMGUI\imconfig.h" />
     <ClInclude Include="IMGUI\imgui.h" />
     <ClInclude Include="IMGUI\imgui_impl_glfw.h" />
@@ -69,6 +82,7 @@
     <ClInclude Include="Manager\DescriptorFileManager.h" />
     <ClInclude Include="Manager\ECSManager.h" />
     <ClInclude Include="Manager\GameManager.h" />
+    <ClInclude Include="Manager\GraphicsManager.h" />
     <ClInclude Include="Manager\ImguiManager.h" />
     <ClInclude Include="Manager\InputManager.h" />
     <ClInclude Include="Manager\LogManager.h" />
@@ -78,8 +92,10 @@
     <ClInclude Include="Resource\ResourceTypes.h" />
     <ClInclude Include="System\InputSystem.h" />
     <ClInclude Include="System\System.h" />
+    <ClInclude Include="System\TransformSystem.h" />
     <ClInclude Include="Utility\AssetPath.h" />
     <ClInclude Include="Utility\Clock.h" />
+    <ClInclude Include="Utility\Constant.h" />
     <ClInclude Include="Utility\InputKeyMappings.h" />
     <ClInclude Include="Utility\MathUtils.h" />
     <ClInclude Include="Utility\ECS_Variables.h" />
@@ -88,10 +104,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Scene\Game.scn" />
-    <None Include="game.scn" />
+    <None Include="Assets\Shaders\survival_kit_obj.frag" />
+    <None Include="Assets\Shaders\survival_kit_obj.vert" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Survival_Kit.log" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ScriptCore\ScriptCore.vcxproj">
+      <Project>{cd45b5b8-24d0-4291-ad94-d2597784cbe2}</Project>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -146,6 +168,18 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)ScriptCore;$(IncludePath)</IncludePath>
+    <ExternalIncludePath>$(SolutionDir)External_Libraries\include\dotnet;$(SolutionDir)External_Libraries\include;$(ExternalIncludePath)</ExternalIncludePath>
+    <OutDir>$(SolutionDir).bin\$(Configuration)-$(Platform)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)ScriptCore;$(IncludePath)</IncludePath>
+    <ExternalIncludePath>$(SolutionDir)External_Libraries\include\dotnet;$(SolutionDir)External_Libraries\include;$(ExternalIncludePath)</ExternalIncludePath>
+    <OutDir>$(SolutionDir).bin\$(Configuration)-$(Platform)\</OutDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -180,15 +214,19 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)External_Libraries\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)ScriptCore;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)External_Libraries\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)External_Libraries\lib;$(SolutionDir).bin\$(Configuration)-$(Platform)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);ScriptCore.lib;opengl32.lib;glfw3.lib</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -198,6 +236,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)ScriptCore;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -205,7 +244,13 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir).bin\$(Configuration)-$(Platform)\;$(SolutionDir)External_Libraries\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);opengl32.lib;ScriptCore.lib;glfw3.lib</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
