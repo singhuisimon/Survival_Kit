@@ -12,6 +12,9 @@
 #include "../Component/Transform3D.h"
 #include "../Manager/LogManager.h"
 #include "../Utility/MathUtils.h"
+
+#include <glm-0.9.9.8/glm/gtx/quaternion.hpp>
+
 #include <cmath>
 
 namespace gam300 {
@@ -85,6 +88,28 @@ namespace gam300 {
         matrix[1] = r10 * m_scale.x;  matrix[5] = r11 * m_scale.y;  matrix[9] = r12 * m_scale.z;  matrix[13] = m_position.y;
         matrix[2] = r20 * m_scale.x;  matrix[6] = r21 * m_scale.y;  matrix[10] = r22 * m_scale.z;  matrix[14] = m_position.z;
         matrix[3] = 0.0f;             matrix[7] = 0.0f;             matrix[11] = 0.0f;             matrix[15] = 1.0f;
+    }
+
+    glm::mat4 Transform3D::getTransformationMatrix() const {
+
+        glm::vec3 trl = static_cast<glm::vec3>(m_position);
+        glm::vec3 rot = static_cast<glm::vec3>(m_rotation);
+        glm::vec3 scl = static_cast<glm::vec3>(m_scale);
+
+        glm::mat4 trl_mat = glm::translate(glm::mat4(1.0f), trl);
+        glm::mat4 scl_mat = glm::scale(glm::mat4(1.0f), scl);
+
+        auto quat_x = glm::angleAxis(glm::radians(rot.x), glm::vec3(1.0f, 0.0f, 0.0f));
+        auto quat_y = glm::angleAxis(glm::radians(rot.y), glm::vec3(0.0f, 1.0f, 0.0f));
+        auto quat_z = glm::angleAxis(glm::radians(rot.z), glm::vec3(0.0f, 0.0f, 1.0f));
+
+        auto quat_final = quat_z * quat_y * quat_x;
+
+        glm::mat4 rot_mat = glm::toMat4(quat_final);
+
+        glm::mat4 trans_mat = trl_mat * rot_mat * scl_mat;
+
+        return trans_mat;
     }
 
     // Get forward direction vector

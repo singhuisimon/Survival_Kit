@@ -12,6 +12,8 @@
 #ifndef __TRANSFORM3D_H__
 #define __TRANSFORM3D_H__
 
+#include <glm-0.9.9.8/glm/gtc/quaternion.hpp>
+
 #include "../Component/Component.h"
 #include "../Utility/Vector3D.h"
 
@@ -121,6 +123,12 @@ namespace gam300 {
          * @note This is a simplified version - in a real engine you'd use a proper Matrix4x4 class.
          */
         void getTransformationMatrix(float matrix[16]) const;
+
+        /**
+         * @brief Get the 4x4 transformation matrix
+         * @return glm mat4 transformation matrix 
+         */
+        glm::mat4 getTransformationMatrix() const;
 
         // Utility methods
         /**
