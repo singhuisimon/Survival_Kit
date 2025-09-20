@@ -74,7 +74,7 @@ namespace gam300
 
 		void renderUi(unsigned int scrWidth, unsigned int scrHeight);
 
-		void displayTopMenuBar();
+		//void displayTopMenuBar();
 
 		void displayFileList(bool& fileWindow, std::string& shownFile);
 		//void displayFileList();
@@ -89,6 +89,15 @@ namespace gam300
 
 		void shutDown() override;
 
+		// template to add the remove component menu right beside collapsing menu
+		template<typename componentType>
+		void displayComponentMenu(EntityID entityID, const char* componentName);
+
+		template<typename componentType>
+		void displayComponentContent(EntityID selectedEntityID);
+
 	};
+
+
 } // end of namespace gam300
 #endif // LOF_IMGUI_MANAGER_h

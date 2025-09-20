@@ -92,12 +92,13 @@ int main(void) {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
+    //io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // to enable docking 
 
     IMGUIM.startUp(window, io);
 
     // Editor Temporary Windows
     //bool test_window = true;
-    bool inspectorWindow = true;
+    bool temporaryMainMenu = true;
     bool assetsBrowser = true; // to load assets
     bool fileWindow = true;
     std::string shownFile{};
@@ -148,7 +149,20 @@ int main(void) {
 
         IMGUIM.startImguiFrame();
 
+        //ImGuiViewport* viewport = ImGui::GetMainViewport();
+        //if (viewport == nullptr) {
+        //    std::cout << "Error: ImGui::GetMainViewport() returned nullptr!" << std::endl;
+        //}
+        //else {
+        //    // Create dock space over the main viewport
+        //    ImGuiID dockspace_id = 0;  // If 0, it will generate a new one
+        //    ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_AutoHideTabBar;
+        //    ImGui::DockSpaceOverViewport(dockspace_id, viewport, dockspace_flags);
+
+        //}
+
         // Editor Temporary Menu Bar
+#if 0
         if (ImGui::BeginMainMenuBar())
         {
             ImGui::Separator();
@@ -156,7 +170,7 @@ int main(void) {
             {
                 if (ImGui::MenuItem("New"))
                 {
-                    
+
                 }
 
                 if (ImGui::MenuItem("Open"))
@@ -174,26 +188,55 @@ int main(void) {
             }
             ImGui::EndMainMenuBar();
         }
-       
-        // Editor Dockspace
-        ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
 
-        if (fileWindow) {
-            IMGUIM.displayFileList(fileWindow, shownFile);
+#endif // use back after solving viewport problem
+
+        ImGui::SetNextWindowSize(ImVec2(600, 400));
+        if (ImGui::Begin("Temporary Menu Bar to test save", &temporaryMainMenu, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize))
+        {
+          
+            if (ImGui::MenuItem("New"))
+            {
+
+            }
+
+            if (ImGui::MenuItem("Open"))
+            {
+                fileWindow = true; 
+            }
+
+            if (ImGui::MenuItem("Save"))
+            {
+                //To uncomment after Serialisation is fixed
+                //SEM.saveScene(shownFile);
+            }
+                  
         }
         
-        IMGUIM.displayHierarchyList();
+        ImGui::End();
+       
+        // Editor Dockspace
+       
+        //ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport()); //not working for some reason 
+        //ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_AutoHideTabBar);
+
+        if (fileWindow) {
+
+            IMGUIM.displayFileList(fileWindow, shownFile); // for now it open at the start of the engine
+        }
+        
 
         // Editor Temporary Windows
         IMGUIM.displayPropertiesList();
        
+        IMGUIM.displayHierarchyList();
 
      
-        ImGui::SetNextWindowSize(ImVec2(600, 400));
+      /*  ImGui::SetNextWindowSize(ImVec2(600, 400));
         if (ImGui::Begin("Assets Browser Test", &assetsBrowser, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize))
         {
         }
-        ImGui::End();
+        ImGui::End();*/
 
         // Editor Start Render
         ImGui::Render();
