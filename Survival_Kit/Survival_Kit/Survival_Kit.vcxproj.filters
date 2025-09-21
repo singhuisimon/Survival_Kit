@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="Component\InputComponent.cpp" />
     <ClCompile Include="Entity\Entity.cpp" />
     <ClCompile Include="Glad\glad.c" />
     <ClCompile Include="IMGUI\imgui.cpp" />
@@ -23,7 +22,6 @@
     <ClCompile Include="Manager\SerialisationManager.cpp" />
     <ClCompile Include="Manager\SystemManager.cpp" />
     <ClCompile Include="Resource\ResourcePaths.cpp" />
-    <ClCompile Include="System\InputSystem.cpp" />
     <ClCompile Include="Utility\AssetPath.cpp" />
     <ClCompile Include="Utility\Clock.cpp" />
     <ClCompile Include="Utility\MathUtils.cpp" />
@@ -31,12 +29,17 @@
     <ClCompile Include="Utility\Vector3D.cpp" />
     <ClCompile Include="Manager\ResourceManager.cpp" />
     <ClCompile Include="Resource\ResourceLoaders.cpp" />
+    <ClCompile Include="Component\Transform3D.cpp" />
+    <ClCompile Include="Manager\GraphicsManager.cpp" />
+    <ClCompile Include="Graphics\GLResources.cpp" />
+    <ClCompile Include="Graphics\ShaderProgram.cpp" />
+    <ClCompile Include="Graphics\Shape.cpp" />
+    <ClCompile Include="System\TransformSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component\Component.h" />
     <ClInclude Include="Component\ComponentPool.h" />
     <ClInclude Include="Component\ComponentView.h" />
-    <ClInclude Include="Component\InputComponent.h" />
     <ClInclude Include="Entity\Entity.h" />
     <ClInclude Include="Glad\glad.h" />
     <ClInclude Include="IMGUI\imconfig.h" />
@@ -61,7 +64,6 @@
     <ClInclude Include="Resource\ResourceMetadata.h" />
     <ClInclude Include="Resource\ResourcePaths.h" />
     <ClInclude Include="Resource\ResourceTypes.h" />
-    <ClInclude Include="System\InputSystem.h" />
     <ClInclude Include="System\System.h" />
     <ClInclude Include="Utility\AssetPath.h" />
     <ClInclude Include="Utility\Clock.h" />
@@ -72,10 +74,24 @@
     <ClInclude Include="Utility\Vector3D.h" />
     <ClInclude Include="Manager\ResourceManager.h" />
     <ClInclude Include="Resource\ResourceData.h" />
+    <ClInclude Include="Component\Transform3D.h" />
+    <ClInclude Include="Manager\GraphicsManager.h" />
+    <ClInclude Include="Graphics\Camera.h" />
+    <ClInclude Include="Graphics\Framebuffer.h" />
+    <ClInclude Include="Graphics\GLResources.h" />
+    <ClInclude Include="Graphics\Light.h" />
+    <ClInclude Include="Graphics\Material.h" />
+    <ClInclude Include="Graphics\MeshData.h" />
+    <ClInclude Include="Graphics\ShaderProgram.h" />
+    <ClInclude Include="Graphics\Shape.h" />
+    <ClInclude Include="Utility\Constant.h" />
+    <ClInclude Include="Component\TransformComponent.h" />
+    <ClInclude Include="System\TransformSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Scene\Game.scn" />
-    <None Include="game.scn" />
+    <None Include="Assets\Shaders\survival_kit_obj.frag" />
+    <None Include="Assets\Shaders\survival_kit_obj.vert" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Survival_Kit.log" />
