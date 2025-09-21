@@ -125,7 +125,9 @@ namespace gam300 {
                 std::string fileName = sceneFiles[i].first;
                 if (ImGui::Selectable(fileName.c_str())) {
 
-                    if (sceneFiles[i].second != shownFile) {
+                    ImguiEcsRef.clearAllEntities();
+
+                    //if (sceneFiles[i].second != shownFile) {
 
                         if (SEM.loadScene(sceneFiles[i].second)) {
 
@@ -155,17 +157,17 @@ namespace gam300 {
 
                             shownFile = getAssetFilePath("Scene/Game.scn");
                         }
-                    }
-                    else {
+                    //}
+                    //else {
 
-                        //std::cout << "Scene " << sceneFiles[i].first << " is already loaded." << std::endl;
+                    //    //std::cout << "Scene " << sceneFiles[i].first << " is already loaded." << std::endl;
 
-                        LM.writeLog("Scene %s is already loaded.", sceneFiles[i].first.c_str());
-                        
-                        //std::cout << "shownFile: " << shownFile << std::endl;
-                        //std::cout << "sceneFiles[i].second: " << sceneFiles[i].second << std::endl;
+                    //    LM.writeLog("Scene %s is already loaded.", sceneFiles[i].first.c_str());
+                    //    
+                    //    //std::cout << "shownFile: " << shownFile << std::endl;
+                    //    //std::cout << "sceneFiles[i].second: " << sceneFiles[i].second << std::endl;
 
-                    }
+                    //}
 
                     fileWindow = false;
                     ImGui::CloseCurrentPopup();
@@ -444,7 +446,11 @@ namespace gam300 {
                 // add ImGuiInputTextFlags_EnterReturnsTrue to ensure only change name after user press enter
                 // Fix: Game crash if delete the last alphabet since it keep updating the frame and cause a empty ID 
                 if (ImGui::InputText("Entity Name", nameBuffer, sizeof(nameBuffer), ImGuiInputTextFlags_EnterReturnsTrue)) {
-                    const std::string newSelectedEntityName = nameBuffer;
+                    std::string newSelectedEntityName = nameBuffer;
+
+                    if (newSelectedEntityName.empty()) {
+                        newSelectedEntityName = selectedEntity.get_name();
+                    }
 
                     // Fix: Can't modify const entity directly, need to use ECS manager
                     ImguiEcsRef.renameEntity(selectedEntity.get_id(), newSelectedEntityName);

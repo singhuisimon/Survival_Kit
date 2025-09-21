@@ -208,7 +208,7 @@ int main(void) {
             if (ImGui::MenuItem("Save"))
             {
                 //To uncomment after Serialisation is fixed
-                //SEM.saveScene(shownFile);
+                SEM.saveScene(shownFile);
             }
                   
         }
