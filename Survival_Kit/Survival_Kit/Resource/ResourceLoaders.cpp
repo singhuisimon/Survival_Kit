@@ -15,6 +15,14 @@
 #include <fstream>
 #include <memory>
 
+
+ // ========== LOADER REGISTRATIONS DEFINITIONS ==========
+ // These must be defined exactly once in the entire program
+xresource::loader_registration<gam300::ResourceGUID::texture_type_guid_v> texture_loader;
+xresource::loader_registration<gam300::ResourceGUID::mesh_type_guid_v> mesh_loader;
+xresource::loader_registration<gam300::ResourceGUID::material_type_guid_v> material_loader;
+xresource::loader_registration<gam300::ResourceGUID::audio_type_guid_v> audio_loader;
+xresource::loader_registration<gam300::ResourceGUID::shader_type_guid_v> shader_loader;
 namespace gam300 {
 
     // Helper function to get ResourceManager from xresource::mgr

@@ -153,6 +153,7 @@ namespace gam300 {
                     return false;
                 }
             }
+            return true;
         }
         catch (const std::exception&) {
             return false;
@@ -205,7 +206,7 @@ namespace gam300 {
         }
     }
 
-    std::string& ResourcePaths::normalizePath(const std::string& path) const {
+    std::string ResourcePaths::normalizePath(const std::string& path) const {
         std::string normalized = path;
         std::replace(normalized.begin(), normalized.end(), '\\', '/');
         return normalized;

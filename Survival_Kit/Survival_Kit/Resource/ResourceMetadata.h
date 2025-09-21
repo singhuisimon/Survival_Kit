@@ -30,6 +30,7 @@ namespace gam300 {
          * @details Contains common properties shared by all resource types.
          */
     struct ResourceProperties {
+
         std::string resourceName; //human readable name
         std::string intermediateFilePath; 
         std::vector<std::string> tags; //for categorization
@@ -57,9 +58,9 @@ namespace gam300 {
         int maxWidth = 1024;                ///< Maximum texture width
         int maxHeight = 1024;               ///< Maximum texture height
         std::string compressionFormat;      ///< Compression format (DXT1, DXT5, etc.)
-        bool srgb;                  ///< Whether to use sRGB color space
-        bool generateMipmaps;        ///< Whether to generate mipmaps
-        int compressionQuality;        ///< Compression quality (0-100)
+        bool srgb = false;                  ///< Whether to use sRGB color space
+        bool generateMipmaps = true;        ///< Whether to generate mipmaps
+        int compressionQuality = 80;        ///< Compression quality (0-100)
 
         TextureProperties() {
             resourceType = ResourceType::TEXTURE;
@@ -162,7 +163,7 @@ namespace gam300 {
         * @param type The resource type.
         * @return Unique pointer to the created properties object.
         */
-        std::unique_ptr<ResourceProperties> createResourceProperties(ResourceType type) {
+        inline std::unique_ptr<ResourceProperties> createResourceProperties(ResourceType type) {
             switch (type) {
             case ResourceType::TEXTURE:
                 return std::make_unique<TextureProperties>();
@@ -175,7 +176,8 @@ namespace gam300 {
             case ResourceType::SHADER:
                 return std::make_unique<ShaderProperties>();
             default:
-                return std::make_unique<ResourceProperties>();
+                return std::make_unique<TextureProperties>(); //return a concrete implementation instead of abstract 
+                //or we could return a nullptr?
             }
         }
         /**

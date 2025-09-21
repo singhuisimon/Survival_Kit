@@ -157,10 +157,10 @@ struct xresource::loader<gam300::ResourceGUID::shader_type_guid_v> {
 
 // ========== LOADER REGISTRATIONS ==========
 // These register the loaders with xresource_mgr
-inline static xresource::loader_registration<gam300::ResourceGUID::texture_type_guid_v> texture_loader;
-inline static xresource::loader_registration<gam300::ResourceGUID::mesh_type_guid_v> mesh_loader;
-inline static xresource::loader_registration<gam300::ResourceGUID::material_type_guid_v> material_loader;
-inline static xresource::loader_registration<gam300::ResourceGUID::audio_type_guid_v> audio_loader;
-inline static xresource::loader_registration<gam300::ResourceGUID::shader_type_guid_v> shader_loader;
+extern xresource::loader_registration<gam300::ResourceGUID::texture_type_guid_v> texture_loader;
+extern xresource::loader_registration<gam300::ResourceGUID::mesh_type_guid_v> mesh_loader;
+extern xresource::loader_registration<gam300::ResourceGUID::material_type_guid_v> material_loader;
+extern xresource::loader_registration<gam300::ResourceGUID::audio_type_guid_v> audio_loader;
+extern xresource::loader_registration<gam300::ResourceGUID::shader_type_guid_v> shader_loader;
 
 #endif // __RESOURCE_DATA_H__

@@ -86,6 +86,13 @@ namespace gam300 {
 
 #endif
 
+    //forward declarations for resource data structures
+    struct TextureResource;
+    struct MeshResource;
+    struct MaterialResource;
+    struct AudioResource;
+    struct ShaderResource;
+
 	class ResourceManager : public Manager {
 	private: 
 		ResourceManager();
@@ -148,6 +155,37 @@ namespace gam300 {
          */
         void onEndFrame() { m_resource_mgr->OnEndFrameDelegate(); }
 	};
+
+    // Template specializations (declared here, defined in .cpp)
+    template<>
+    TextureResource* ResourceManager::loadResource<TextureResource>(const xresource::full_guid& guid);
+
+    template<>
+    void ResourceManager::releaseResource<TextureResource>(xresource::full_guid& guid);
+
+    template<>
+    MeshResource* ResourceManager::loadResource<MeshResource>(const xresource::full_guid& guid);
+
+    template<>
+    void ResourceManager::releaseResource<MeshResource>(xresource::full_guid& guid);
+
+    template<>
+    MaterialResource* ResourceManager::loadResource<MaterialResource>(const xresource::full_guid& guid);
+
+    template<>
+    void ResourceManager::releaseResource<MaterialResource>(xresource::full_guid& guid);
+
+    template<>
+    AudioResource* ResourceManager::loadResource<AudioResource>(const xresource::full_guid& guid);
+
+    template<>
+    void ResourceManager::releaseResource<AudioResource>(xresource::full_guid& guid);
+
+    template<>
+    ShaderResource* ResourceManager::loadResource<ShaderResource>(const xresource::full_guid& guid);
+
+    template<>
+    void ResourceManager::releaseResource<ShaderResource>(xresource::full_guid& guid);
 
 
 }// end of namespace gam300

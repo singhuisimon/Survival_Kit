@@ -21,6 +21,7 @@
 //c++ libraries
 #include <string>
 #include <vector>
+#include <algorithm>
 
 namespace gam300 {
 
@@ -41,7 +42,7 @@ namespace gam300 {
 	 * @param type The resource type to convert.
 	 * @return String representation of the resource type.
 	 */
-	std::string resourceTypeToString(ResourceType type) {
+	inline std::string resourceTypeToString(ResourceType type) {
 		switch (type) {
 		case ResourceType::TEXTURE: 
 			return "Texture";
@@ -62,7 +63,7 @@ namespace gam300 {
 	 * @param type_str The string to convert.
 	 * @return ResourceType enum value.
 	 */
-	ResourceType stringToResourceType(const std::string& type_str)  {
+	inline ResourceType stringToResourceType(const std::string& type_str)  {
 		if (type_str == "Texture")
 			return ResourceType::TEXTURE;
 		if (type_str == "Mesh") 
@@ -80,7 +81,7 @@ namespace gam300 {
 	 * @param type The resource type.
 	 * @return Vector of supported file extensions (without dots).
 	 */
-	std::vector<std::string> getResourceTypeExtension(ResourceType type) {
+	inline std::vector<std::string> getResourceTypeExtension(ResourceType type) {
 
 		switch (type) {
 
@@ -109,7 +110,7 @@ namespace gam300 {
 	 * @param file_path The file path to analyze.
 	 * @return Detected resource type, or UNKNOWN if not recognized.
 	 */
-	ResourceType detectResourceTypeFromPath(const std::string& file_path) {
+	inline ResourceType detectResourceTypeFromPath(const std::string& file_path) {
 		//extract extension
 		size_t dot_pos = file_path.find_last_of('.');
 		if (dot_pos == std::string::npos) {

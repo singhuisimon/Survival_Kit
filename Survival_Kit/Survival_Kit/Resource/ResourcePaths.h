@@ -29,7 +29,7 @@ namespace gam300 {
 	class ResourcePaths {
 
 	private: 
-		std::string m_descriptors_root_path; //descritpor files root path
+		std::string m_descriptors_root_path; //descriptor files root path
 		std::string m_intermediate_root_path;	//intermediate files root path
 		std::string m_compiled_root_path;	//compiled files root path
 
@@ -168,7 +168,7 @@ namespace gam300 {
 		std::string getRelativePath(const std::string& from, const std::string& to) const;
 
 
-	    std::string& normalizePath(const std::string& path) const;
+	    std::string normalizePath(const std::string& path) const;
 
 	private:
 			 /**
