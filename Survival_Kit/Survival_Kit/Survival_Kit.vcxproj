@@ -33,6 +33,7 @@
     <ClCompile Include="IMGUI\imgui_tables.cpp" />
     <ClCompile Include="IMGUI\imgui_widgets.cpp" />
     <ClCompile Include="Main\Main.cpp" />
+    <ClCompile Include="Manager\AssetManager.cpp" />
     <ClCompile Include="Manager\ComponentManager.cpp" />
     <ClCompile Include="Manager\DescriptorFileManager.cpp" />
     <ClCompile Include="Manager\ECSManager.cpp" />
@@ -45,6 +46,10 @@
     <ClCompile Include="Manager\SerialisationBinManager.cpp" />
     <ClCompile Include="Manager\SerialisationManager.cpp" />
     <ClCompile Include="Manager\SystemManager.cpp" />
+    <ClCompile Include="Pipeline\AssetDatabase.cpp" />
+    <ClCompile Include="Pipeline\AssetDescriptorGenerator.cpp" />
+    <ClCompile Include="Pipeline\AssetImporter.cpp" />
+    <ClCompile Include="Pipeline\AssetScanner.cpp" />
     <ClCompile Include="System\TransformSystem.cpp" />
     <ClCompile Include="Utility\AssetPath.cpp" />
     <ClCompile Include="Utility\Clock.cpp" />
@@ -78,6 +83,7 @@
     <ClInclude Include="IMGUI\imstb_textedit.h" />
     <ClInclude Include="IMGUI\imstb_truetype.h" />
     <ClInclude Include="Main\Main.h" />
+    <ClInclude Include="Manager\AssetManager.h" />
     <ClInclude Include="Manager\ComponentManager.h" />
     <ClInclude Include="Manager\DescriptorFileManager.h" />
     <ClInclude Include="Manager\ECSManager.h" />
@@ -89,6 +95,10 @@
     <ClInclude Include="Manager\Manager.h" />
     <ClInclude Include="Manager\SerialisationBinManager.h" />
     <ClInclude Include="Manager\SerialisationManager.h" />
+    <ClInclude Include="Pipeline\AssetDatabase.h" />
+    <ClInclude Include="Pipeline\AssetDescriptorGenerator.h" />
+    <ClInclude Include="Pipeline\AssetImporter.h" />
+    <ClInclude Include="Pipeline\AssetScanner.h" />
     <ClInclude Include="Resource\ResourceTypes.h" />
     <ClInclude Include="System\InputSystem.h" />
     <ClInclude Include="System\System.h" />
