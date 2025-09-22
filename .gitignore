@@ -1,22 +1,47 @@
+# Visual Studio files
 *.ipch
 *.suo
 *.db
 *.pdb
 *.exe
 *.ilk
-.vs
-.tmp
-*.tlog
-*.obj
-*.idb
-*.log
 *.exp
 *.iobj
 *.ipdb
-//bin
-Debug
-Release
 *.recipe
 *.log
 *.tlog
-*.lastbuildState
+*.lastbuildstate
+*.obj
+*.idb
+.vs/
+.tmp/
+
+# Build directories
+**/bin/
+**/obj/
+Debug/
+Release/
+**/Debug/
+**/Release/
+**/.bin/
+**/tmp_build/
+
+# NuGet
+packages/
+*.nuget.props
+*.nuget.targets
+project.assets.json
+project.nuget.cache
+*.nuget.dgspec.json
+
+# User-specific files
+*.user
+*.userosscache
+*.sln.docstates
+
+
+
+# Temporary files
+*.tmp
+*.temp
