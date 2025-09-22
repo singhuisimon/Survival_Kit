@@ -86,10 +86,38 @@ namespace Core
     {
         const char* PROJ_PATH =
             "..\\..\\ManagedScripts\\ManagedScripts.csproj";
+
+        // Get current executable directory
+        std::string execPath(MAX_PATH, '\0');
+        GetModuleFileNameA(nullptr, execPath.data(), MAX_PATH);
+        PathRemoveFileSpecA(execPath.data());
+        execPath.resize(std::strlen(execPath.data()));
+
+        std::cout << "Executable path: " << execPath << std::endl;
+
+
+        // Look for dotnet one level up (shared between Debug/Release)
+        std::string sharedDotnetPath = execPath + "\\..\\dotnet\\dotnet.exe";
+        std::wstring dotnetExePath;
+
+        if (std::filesystem::exists(sharedDotnetPath))
+        {
+            dotnetExePath = std::filesystem::absolute(sharedDotnetPath).wstring();
+            std::cout << "Using shared bundled .NET at: " << sharedDotnetPath << std::endl;
+        }
+        else
+        {
+            dotnetExePath = L"C:\\Program Files\\dotnet\\dotnet.exe";
+            std::cout << "Using system .NET" << std::endl;
+        }
+
         std::wstring buildCmd = L" build \"" +
             std::filesystem::absolute(PROJ_PATH).wstring() +
             L"\" -c Debug --no-self-contained " +
             L"-o \"./tmp_build/\" -r \"win-x64\"";
+
+
+
         STARTUPINFOW startInfo;
         PROCESS_INFORMATION pi;
         ZeroMemory(&startInfo, sizeof(startInfo));
