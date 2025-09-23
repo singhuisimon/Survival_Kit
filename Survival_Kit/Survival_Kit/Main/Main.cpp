@@ -91,14 +91,14 @@ int main(void) {
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    //io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // to enable docking 
+    //ImGuiIO& io = ImGui::GetIO(); (void)io;
 
     IMGUIM.startUp(window, io);
 
     // Editor Temporary Windows
     //bool test_window = true;
     bool temporaryMainMenu = true;
+    bool inspectorWindow = true;
     bool assetsBrowser = true; // to load assets
     bool fileWindow = true;
     std::string shownFile{};
@@ -163,6 +163,7 @@ int main(void) {
 
         // Editor Temporary Menu Bar
 #if 0
+        // Editor Temporary Menu Bar
         if (ImGui::BeginMainMenuBar())
         {
             ImGui::Separator();
@@ -170,7 +171,7 @@ int main(void) {
             {
                 if (ImGui::MenuItem("New"))
                 {
-
+                    
                 }
 
                 if (ImGui::MenuItem("Open"))
