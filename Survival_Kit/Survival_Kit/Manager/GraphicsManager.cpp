@@ -15,6 +15,7 @@
 #include <glm-0.9.9.8/glm/gtc/quaternion.hpp>
 #include <glm-0.9.9.8/glm/gtx/quaternion.hpp>
 #include "../Component/Transform3D.h"
+#include "../Manager/ImguiManager.h"
 
 namespace gam300 {
 
@@ -92,26 +93,28 @@ namespace gam300 {
 
         // Add fonts
 
-        //// Set up the framebuffer and game scene texture for imgui viewport
-        //glGenFramebuffers(1, &imgui_fbo);
-        //if (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) {
-        //    LM.write_log("Graphics_Manager::start_up(): FRAME BUFFER CREATION SUCCESSFUL.");
-        //}
-        //glBindFramebuffer(GL_FRAMEBUFFER, imgui_fbo);
+        // Set up the framebuffer and game scene texture for imgui viewport
+        glGenFramebuffers(1, &imguiFbo);
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) {
+            LM.writeLog("Graphics_Manager::start_up(): FRAME BUFFER CREATION SUCCESSFUL.");
+        }
+        glBindFramebuffer(GL_FRAMEBUFFER, imguiFbo);
+        //glfwGetWindowSize()
+        int windowWidth = IMGUIM.getWindowWidthHeight().x;
+        int windowHeight = IMGUIM.getWindowWidthHeight().y;
+        // Creating texture object for imgui
+        glGenTextures(1, &imguiTex);
+        glBindTexture(GL_TEXTURE_2D, imguiTex);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowWidth , windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-        //// Creating texture object for imgui
-        //glGenTextures(1, &imgui_tex);
-        //glBindTexture(GL_TEXTURE_2D, imgui_tex);
-        //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WC.get_win_width(), WC.get_win_height(), 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-        //// Attaching texture object for imgui to framebuffer 
-        //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, imgui_tex, 0);
-        //glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        //glBindTexture(GL_TEXTURE_2D, 0);
+        // Attaching texture object for imgui to framebuffer 
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, imguiTex, 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glBindTexture(GL_TEXTURE_2D, 0);
 
         MeshData cubeData = Shape::make_cube();
         MeshData planeData = Shape::make_plane();
@@ -211,7 +214,7 @@ namespace gam300 {
         glDepthFunc(GL_LESS); // Default comparison
 
         // Clear the color and depth buffer
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // temporary comment for the imgui
 
         for (auto const& mesh : meshStorage) {
 

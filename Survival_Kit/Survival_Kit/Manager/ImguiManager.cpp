@@ -16,6 +16,7 @@
 #include "../Utility/AssetPath.h"
 #include "../Component/Transform3D.h"
 
+
 namespace gam300 {
 
     static bool hierachyWindow = true;
@@ -25,9 +26,9 @@ namespace gam300 {
     // Entity index
     int selectedObjIndex = -1;
 
-    ImguiManager::ImguiManager() : ImguiEcsRef(EM) {}
+    ImguiManager::ImguiManager() : ImguiEcsRef(EM), ImguiGraphicRef(GFXM) {}
 
-    ImguiManager::ImguiManager(ECSManager& ECS) : ImguiEcsRef(ECS) {
+    ImguiManager::ImguiManager(ECSManager& ECS, GraphicsManager& GFM) : ImguiEcsRef(ECS) , ImguiGraphicRef(GFM){
         setType("IMGUI_Manager");
     }
 
@@ -501,6 +502,33 @@ namespace gam300 {
         ImGui::DestroyContext();
     }
 
+    Vector2D ImguiManager::getWindowSize(GLFWwindow& window)
+    {
+        //Vector2D dimension{ 0,0 };
+       
+        glfwGetWindowSize(&window, &width, &height);
+        return Vector2D(width, height);
+        //std::cout << width << ", " << "height\n";
+    }
+
+    void ImguiManager::renderViewport()
+    {
+        auto texture = GFXM.getImguiTex();
+        ImVec2 texture_pos = ImGui::GetCursorScreenPos();
+
+        ImGui::Begin("Viewport");
+
+        if (texture) {
+            ImGui::Image((ImTextureID)(intptr_t)GFXM.getImguiTex(),
+                ImVec2((static_cast<int>(getWindowWidthHeight().x) / 2), (static_cast<int>(getWindowWidthHeight().y) / 2)),
+                ImVec2(0, 1), ImVec2(1, 0));
+        }
+
+        ImGui::End();
+    }
+ 
+    
+
     template<typename componentType>
     void ImguiManager::displayComponentMenu(EntityID entityID, const char* componentName)
     {
@@ -570,4 +598,5 @@ namespace gam300 {
             }
         }
     }
+
 }// end of namespace gam300

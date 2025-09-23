@@ -91,7 +91,7 @@ int main(void) {
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    //ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
 
     IMGUIM.startUp(window, io);
 
@@ -162,7 +162,7 @@ int main(void) {
         //}
 
         // Editor Temporary Menu Bar
-#if 0
+#if 1
         // Editor Temporary Menu Bar
         if (ImGui::BeginMainMenuBar())
         {
@@ -218,7 +218,7 @@ int main(void) {
        
         // Editor Dockspace
        
-        //ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport()); //not working for some reason 
+        ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport()); //not working for some reason 
         //ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_AutoHideTabBar);
 
         if (fileWindow) {
@@ -226,6 +226,7 @@ int main(void) {
             IMGUIM.displayFileList(fileWindow, shownFile); // for now it open at the start of the engine
         }
         
+        IMGUIM.renderViewport();
 
         // Editor Temporary Windows
         IMGUIM.displayPropertiesList();
@@ -241,6 +242,9 @@ int main(void) {
 
         // Editor Start Render
         ImGui::Render();
+
+        IMGUIM.getWindowSize(*window);
+        //std::cout << IMGUIM.getWindowSize(*window).x << "\n";
 
         // Render frame 
         glClear(GL_COLOR_BUFFER_BIT);

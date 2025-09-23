@@ -65,6 +65,8 @@ namespace gam300 {
         // Main light
         Light main_light;
 
+        GLuint imguiFbo{ 0 }, imguiTex{ 0 };
+
     public:
         /**
          * @brief Get the singleton instance of the GraphicsManager.
@@ -90,6 +92,9 @@ namespace gam300 {
 
         // To load all shader program at start up (the pair of 2 strings are the vertex and fragment shaders' filepath)
         bool loadShaderPrograms(std::vector<std::pair<std::string, std::string>> shaders);
+
+        GLuint getImguiTex() { return imguiTex; }
+        GLuint getImguiFbo() { return imguiFbo; }
 
     };
 
