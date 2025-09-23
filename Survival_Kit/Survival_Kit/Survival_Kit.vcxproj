@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Component\RigidBody.cpp" />
     <ClCompile Include="Component\Transform3D.cpp" />
     <ClCompile Include="Entity\Entity.cpp" />
     <ClCompile Include="Glad\glad.c" />
@@ -44,6 +45,7 @@
     <ClCompile Include="Manager\SerialisationBinManager.cpp" />
     <ClCompile Include="Manager\SerialisationManager.cpp" />
     <ClCompile Include="Manager\SystemManager.cpp" />
+    <ClCompile Include="System\PhysicsSystem.cpp" />
     <ClCompile Include="System\TransformSystem.cpp" />
     <ClCompile Include="Utility\AssetPath.cpp" />
     <ClCompile Include="Utility\Clock.cpp" />
@@ -55,6 +57,7 @@
     <ClInclude Include="Component\Component.h" />
     <ClInclude Include="Component\ComponentPool.h" />
     <ClInclude Include="Component\ComponentView.h" />
+    <ClInclude Include="Component\RigidBody.h" />
     <ClInclude Include="Component\Transform3D.h" />
     <ClInclude Include="Component\TransformComponent.h" />
     <ClInclude Include="Entity\Entity.h" />
@@ -87,6 +90,7 @@
     <ClInclude Include="Manager\Manager.h" />
     <ClInclude Include="Manager\SerialisationBinManager.h" />
     <ClInclude Include="Manager\SerialisationManager.h" />
+    <ClInclude Include="System\PhysicsSystem.h" />
     <ClInclude Include="System\System.h" />
     <ClInclude Include="System\TransformSystem.h" />
     <ClInclude Include="Utility\AssetPath.h" />
