@@ -11,6 +11,9 @@ namespace gam300 {
 	}
 
 	bool PhysicsSystem::init(SystemManager&) {
+
+		//Find a way to register the system
+
 		LM.writeLog("PhysicsSystem::init() - Physics System Initialized");
 		return true;
 	}
