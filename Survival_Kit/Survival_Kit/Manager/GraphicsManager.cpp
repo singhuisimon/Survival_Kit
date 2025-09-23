@@ -15,7 +15,6 @@
 #include <glm-0.9.9.8/glm/gtc/quaternion.hpp>
 #include <glm-0.9.9.8/glm/gtx/quaternion.hpp>
 #include "../Component/Transform3D.h"
-#include "../Manager/ImguiManager.h"
 
 namespace gam300 {
 
@@ -96,20 +95,20 @@ namespace gam300 {
 
         // Add fonts
 
-        // Set up the framebuffer and game scene texture for imgui viewport
-        glGenFramebuffers(1, &imguiFbo);
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) {
-            LM.writeLog("Graphics_Manager::start_up(): FRAME BUFFER CREATION SUCCESSFUL.");
+        // Creating framebuffer object for IMGUI viewport
+        auto temp_fbo = FrameBuffer::create();
+        if (temp_fbo->valid()) {
+            imgui_fbo = std::move(temp_fbo);
         }
-        glBindFramebuffer(GL_FRAMEBUFFER, imguiFbo);
+
+        // Set up the framebuffer and game scene texture for imgui viewport
+        glBindFramebuffer(GL_FRAMEBUFFER, imgui_fbo->handle());
         
-        //glfwGetWindowSize()
+        // Creating texture object for imgui
         int windowWidth = 640;
         int windowHeight = 480;
         //int windowWidth = IMGUIM.getWindowWidthHeight().x;
         //int windowHeight = IMGUIM.getWindowWidthHeight().y;
-        
-        // Creating texture object for imgui
         glGenTextures(1, &imguiTex);
         glBindTexture(GL_TEXTURE_2D, imguiTex);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowWidth , windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
@@ -119,7 +118,7 @@ namespace gam300 {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
         // Attaching texture object for imgui to framebuffer 
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, imguiTex, 0);
+        imgui_fbo->attach_color(GL_COLOR_ATTACHMENT0, imguiTex);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -189,12 +188,12 @@ namespace gam300 {
 
         shadersStorage[0].programUse();
 
-        // KENNY TESTING: Temporary transformations for camera
+        // Temporary transformations for camera
         shadersStorage[0].setUniform("M", transform.getTransformationMatrix()); // Model transform
         shadersStorage[0].setUniform("V", main_camera.getLookAt()); // View transform
         shadersStorage[0].setUniform("P", main_camera.getPerspective()); // Perspective transform
 
-        // KENNY TESTING: Temporary input for cursor
+        // Temporary input for cursor to move camera
         if (IM.isKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
             std::cout << IM.getMouseDeltaX() << std::endl;
             main_camera.cameraOnCursor(IM.getMouseDeltaX(), IM.getMouseDeltaY(), &shadersStorage[0]);
@@ -212,9 +211,7 @@ namespace gam300 {
         shadersStorage[0].setUniform("light.Ld", main_light.getLightDiffuse());        // Diffuse
         shadersStorage[0].setUniform("light.Ls", main_light.getLightSpecular());        // Specular
 
-
-        // ------------- LIGHTING ------------- //
-        // KENNY TESTING: Temporary input for light cursor
+        //Temporary input for light cursor
         if (IM.isKeyPressed(GLFW_KEY_L)) {
             //std::cout << IM.getMouseDeltaX() << std::endl;
             main_light.lightOnCursor(IM.getMouseDeltaX(), IM.getMouseDeltaY(), &shadersStorage[0]);
@@ -223,22 +220,8 @@ namespace gam300 {
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS); // Default comparison
 
-        // Temporary toggle on for editor mode (Key 'I')
-        if (IM.isKeyPressed(GLFW_KEY_I)) {
-            editor_mode = 1;
-            //std::cout << "'i' key is pressed" << std::endl;
-        }
-
-        // Temporary toggle off editor mode (Key 'O')
-        if (IM.isKeyPressed(GLFW_KEY_O)) {
-            editor_mode = 0;
-            //std::cout << "'o' key is pressed" << std::endl;
-        }
-
-        // Save framebuffer object if editor mode is on
-        if (editor_mode == 1) {
-            glBindFramebuffer(GL_FRAMEBUFFER, imguiFbo);
-        }
+        // Bind framebuffer object for IMGUI viewport
+        glBindFramebuffer(GL_FRAMEBUFFER, imgui_fbo->handle());
 
         // Clear the color and depth buffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // temporary comment for the imgui
@@ -255,10 +238,8 @@ namespace gam300 {
 
         shadersStorage[0].programFree();
 
-        // Unbind framebuffer object if editor mode is on
-        if (editor_mode == 1) {
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        }
+        // Unbind framebuffer object
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
     bool GraphicsManager::loadShaderPrograms(std::vector<std::pair<std::string, std::string>> shaders) {

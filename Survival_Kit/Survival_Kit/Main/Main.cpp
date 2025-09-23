@@ -226,9 +226,7 @@ int main(void) {
             IMGUIM.displayFileList(fileWindow, shownFile); // for now it open at the start of the engine
         }
         
-        //if (GFXM.getEditorMode() == 1) {
-            IMGUIM.renderViewport();
-        //}
+        IMGUIM.renderViewport();
 
         // Editor Temporary Windows
         IMGUIM.displayPropertiesList();
