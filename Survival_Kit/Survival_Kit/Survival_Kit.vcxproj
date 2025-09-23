@@ -105,7 +105,6 @@
     <ClInclude Include="Pipeline\AssetDescriptorGenerator.h" />
     <ClInclude Include="Pipeline\AssetImporter.h" />
     <ClInclude Include="Pipeline\AssetScanner.h" />
-    <ClInclude Include="Resource\ResourceTypes.h" />
     <ClInclude Include="System\InputSystem.h" />
     <ClInclude Include="System\System.h" />
     <ClInclude Include="System\TransformSystem.h" />
