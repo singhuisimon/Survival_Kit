@@ -47,6 +47,18 @@ namespace Core
 
         static void HelloWorld();
 
+        //file creation
+        static bool CreateMonoBehaviourScript(const std::string& scriptName);
+        static bool CreateScriptableObjectScript(const std::string& scriptName);
+        static bool CreateScriptFromTemplate(const std::string& scriptName, const std::string& templateType);
+
+
+        // Template management
+        static std::string GetTemplatesDirectory();
+        static bool InitializeTemplates();
+        static std::vector<std::string> GetAvailableTemplateTypes();
+
+
     private:
         static std::array<TransformComponent, ENTITY_COUNT> nativeData;
         void compileScriptAssembly();
@@ -57,6 +69,13 @@ namespace Core
         void startScriptEngine();
         void stopScriptEngine();
         std::string buildTpaList(const std::string& directory);
+
+
+        //file creation
+        static std::string ReadTemplateFile(const std::string& templateName);
+        static std::string ProcessTemplate(const std::string& templateContent, const std::string& className);
+        static bool WriteScriptFile(const std::string& scriptName, const std::string& content);
+
 
         // File watching members
         std::thread fileWatcherThread;
