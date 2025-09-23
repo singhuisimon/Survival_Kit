@@ -27,6 +27,7 @@
 #include "../Graphics/Camera.h"
 #include "../Graphics/Light.h"
 #include "../Graphics/Shape.h"
+#include "../Graphics/Framebuffer.h" 
 
 // KENNY TESTING: For testing cursor input
 #include "InputManager.h"
@@ -65,7 +66,11 @@ namespace gam300 {
         // Main light
         Light main_light;
 
+
+        // KENNY TESTING
+        int editor_mode = 0;
         GLuint imguiFbo{ 0 }, imguiTex{ 0 };
+        std::optional<FrameBuffer> imgui_fbo; 
 
     public:
         /**
@@ -95,6 +100,7 @@ namespace gam300 {
 
         GLuint getImguiTex() { return imguiTex; }
         GLuint getImguiFbo() { return imguiFbo; }
+        int getEditorMode() { return editor_mode; }
 
     };
 

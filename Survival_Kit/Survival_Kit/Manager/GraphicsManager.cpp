@@ -46,6 +46,9 @@ namespace gam300 {
             LM.writeLog("GraphicsManager::startUp(): GLAD initialized successfully.");
         }
 
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        //glViewport(0, 0, IMGUIM.getWindowWidthHeight().x, IMGUIM.getWindowWidthHeight().y);
+
         //// Set framebuffer with color (Background color)
         //glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         //glViewport(0, 0, WC.get_win_width(), WC.get_win_height());
@@ -99,9 +102,13 @@ namespace gam300 {
             LM.writeLog("Graphics_Manager::start_up(): FRAME BUFFER CREATION SUCCESSFUL.");
         }
         glBindFramebuffer(GL_FRAMEBUFFER, imguiFbo);
+        
         //glfwGetWindowSize()
-        int windowWidth = IMGUIM.getWindowWidthHeight().x;
-        int windowHeight = IMGUIM.getWindowWidthHeight().y;
+        int windowWidth = 640;
+        int windowHeight = 480;
+        //int windowWidth = IMGUIM.getWindowWidthHeight().x;
+        //int windowHeight = IMGUIM.getWindowWidthHeight().y;
+        
         // Creating texture object for imgui
         glGenTextures(1, &imguiTex);
         glBindTexture(GL_TEXTURE_2D, imguiTex);
@@ -213,8 +220,25 @@ namespace gam300 {
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS); // Default comparison
 
+        // Temporary toggle on for editor mode (Key 'I')
+        if (IM.isKeyPressed(GLFW_KEY_I)) {
+            editor_mode = 1;
+            //std::cout << "'i' key is pressed" << std::endl;
+        }
+
+        // Temporary toggle off editor mode (Key 'O')
+        if (IM.isKeyPressed(GLFW_KEY_O)) {
+            editor_mode = 0;
+            //std::cout << "'o' key is pressed" << std::endl;
+        }
+
+        // Save framebuffer object if editor mode is on
+        if (editor_mode == 1) {
+            glBindFramebuffer(GL_FRAMEBUFFER, imguiFbo);
+        }
+
         // Clear the color and depth buffer
-        // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // temporary comment for the imgui
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // temporary comment for the imgui
 
         for (auto const& mesh : meshStorage) {
 
@@ -227,6 +251,11 @@ namespace gam300 {
         }
 
         shadersStorage[0].programFree();
+
+        // Unbind framebuffer object if editor mode is on
+        if (editor_mode == 1) {
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        }
     }
 
     bool GraphicsManager::loadShaderPrograms(std::vector<std::pair<std::string, std::string>> shaders) {

@@ -226,7 +226,9 @@ int main(void) {
             IMGUIM.displayFileList(fileWindow, shownFile); // for now it open at the start of the engine
         }
         
-        IMGUIM.renderViewport();
+        //if (GFXM.getEditorMode() == 1) {
+            IMGUIM.renderViewport();
+        //}
 
         // Editor Temporary Windows
         IMGUIM.displayPropertiesList();
@@ -245,9 +247,6 @@ int main(void) {
 
         IMGUIM.getWindowSize(*window);
         //std::cout << IMGUIM.getWindowSize(*window).x << "\n";
-
-        // Render frame 
-        glClear(GL_COLOR_BUFFER_BIT);
 
         IMGUIM.finishImguiRender(io);
 
