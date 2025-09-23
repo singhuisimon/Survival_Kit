@@ -98,6 +98,8 @@ int main(void) {
             app.AddScript(0, "TestScript");  // Re-add script after reload
             app.CreateMonoBehaviourScript("PlayerController");
         }
+        app.CheckAndReloadScripts(); // Add this line
+
 
         // Update all systems (including InputSystem)
         EM.updateSystems(GM.getFrameTime() / 1000.0f);

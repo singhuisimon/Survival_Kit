@@ -68,7 +68,7 @@ namespace Core
             executeUpdate();
         }
         stopScriptEngine();
-    }
+    }// not using
     void Application::HelloWorld()
     {
         std::cout << "Hello Native World!" << std::endl;
@@ -438,31 +438,37 @@ namespace Core
 
         while (!shouldStopWatching)
         {
+            std::cout << "File watcher loop iteration..." << std::endl; // Add this debug line
+
+            // In the file watcher, also watch for FILE_NOTIFY_CHANGE_FILE_NAME
             if (ReadDirectoryChangesW(
                 hDir,
                 buffer,
                 sizeof(buffer),
-                TRUE, // Watch subdirectories
-                FILE_NOTIFY_CHANGE_LAST_WRITE | FILE_NOTIFY_CHANGE_CREATION,
+                TRUE,
+                FILE_NOTIFY_CHANGE_LAST_WRITE | FILE_NOTIFY_CHANGE_CREATION | FILE_NOTIFY_CHANGE_FILE_NAME, // Add FILE_NAME
                 &bytesReturned,
                 &overlapped,
                 nullptr))
             {
                 DWORD waitResult = WaitForSingleObject(overlapped.hEvent, 1000);
+                std::cout << "Wait result: " << waitResult << std::endl; // Add this debug line
 
                 if (waitResult == WAIT_OBJECT_0)
                 {
+                    std::cout << "File change detected!" << std::endl; // Add this debug line
+
                     FILE_NOTIFY_INFORMATION* info = reinterpret_cast<FILE_NOTIFY_INFORMATION*>(buffer);
 
                     do
                     {
                         std::wstring filename(info->FileName, info->FileNameLength / sizeof(wchar_t));
+                        std::wcout << L"File changed: " << filename << std::endl; // Enhanced debug
 
-                        // Check if it's a C# file
                         if (filename.length() > 3 &&
                             filename.substr(filename.length() - 3) == L".cs")
                         {
-                            std::wcout << L"Detected change in: " << filename << std::endl;
+                            std::wcout << L"C# file change detected: " << filename << std::endl;
                             scriptsNeedReload = true;
                             break;
                         }
@@ -475,6 +481,10 @@ namespace Core
 
                     } while (true);
                 }
+            }
+            else
+            {
+                std::cout << "ReadDirectoryChangesW failed: " << GetLastError() << std::endl; // Add error logging
             }
 
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
