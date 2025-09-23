@@ -273,9 +273,14 @@ namespace Core
     void Application::InitializeScripting()
     {
         std::cout << "Starting script engine..." << std::endl;
-        startScriptEngine();
 
-        std::cout << "Compiling script assembly..." << std::endl;
+        // Initialize MonoBehaviour templates
+        if (!InitializeTemplates())
+        {
+            std::cout << "Warning: Failed to initialize MonoBehaviour templates" << std::endl;
+        }
+
+        startScriptEngine();
         compileScriptAssembly();
 
         std::cout << "Getting function pointers..." << std::endl;
@@ -288,6 +293,7 @@ namespace Core
         initFunc();
 
         std::cout << "Script system initialized successfully!" << std::endl;
+
         // Initialize file watching
         updateFileTimestamps();
         lastCheck = std::chrono::steady_clock::now();
@@ -537,4 +543,127 @@ namespace Core
             std::cout << "Error updating file timestamps: " << e.what() << std::endl;
         }
     }
+
+    // Script Creation Methods
+    bool Application::CreateMonoBehaviourScript(const std::string& scriptName)
+    {
+        std::cout << "Creating MonoBehaviour script via Application..." << std::endl;
+
+        bool success = MonoBehaviour::CreateScript(scriptName);
+
+        if (success)
+        {
+            std::cout << "MonoBehaviour script created, triggering recompilation..." << std::endl;
+
+            try
+            {
+                compileScriptAssembly();
+                std::cout << "Recompilation completed successfully." << std::endl;
+            }
+            catch (const std::exception& e)
+            {
+                std::cout << "Warning: Recompilation failed: " << e.what() << std::endl;
+            }
+        }
+
+        return success;
+    }
+
+    bool Application::CreateScriptableObjectScript(const std::string& scriptName)
+    {
+        // TODO: Implement ScriptableObject creation
+        std::cout << "ScriptableObject creation not yet implemented" << std::endl;
+        return false;
+    }
+
+    bool Application::CreateScriptFromTemplate(const std::string& scriptName, const std::string& templateType)
+    {
+        if (templateType == "MonoBehaviour")
+        {
+            return CreateMonoBehaviourScript(scriptName);
+        }
+        else if (templateType == "ScriptableObject")
+        {
+            return CreateScriptableObjectScript(scriptName);
+        }
+        else
+        {
+            std::cout << "Unknown template type: " << templateType << std::endl;
+            return false;
+        }
+    }
+
+    std::string Application::GetTemplatesDirectory()
+    {
+        return MonoBehaviour::GetTemplatesDirectory();
+    }
+
+    bool Application::InitializeTemplates()
+    {
+        return MonoBehaviour::InitializeTemplates();
+    }
+
+    std::vector<std::string> Application::GetAvailableTemplateTypes()
+    {
+        return { "MonoBehaviour" }; // Will add ScriptableObject later
+    }
+
+    // Validation and utility methods
+    bool Application::ValidateScriptName(const std::string& scriptName)
+    {
+        return MonoBehaviour::ValidateScriptName(scriptName);
+    }
+
+    std::string Application::GetManagedScriptsDirectory()
+    {
+        return MonoBehaviour::GetScriptsDirectory();
+    }
+
+    bool Application::DoesScriptExist(const std::string& scriptName)
+    {
+        return MonoBehaviour::DoesScriptExist(scriptName);
+    }
+
+    std::vector<std::string> Application::GetExistingScriptFiles()
+    {
+        return MonoBehaviour::GetExistingScripts();
+    }
+
+    void Application::ListExistingScripts()
+    {
+        std::cout << "\n=== Existing Scripts ===" << std::endl;
+        auto scripts = MonoBehaviour::GetExistingScripts();
+
+        if (scripts.empty())
+        {
+            std::cout << "No scripts found in " << MonoBehaviour::GetScriptsDirectory() << std::endl;
+        }
+        else
+        {
+            for (const auto& script : scripts)
+            {
+                std::cout << "  - " << script << ".cs" << std::endl;
+            }
+            std::cout << "Total: " << scripts.size() << " scripts" << std::endl;
+        }
+        std::cout << "========================\n" << std::endl;
+    }
+
+    void Application::ShowScriptCreationHelp()
+    {
+        std::cout << "\n=== Script Creation Help ===" << std::endl;
+        std::cout << "Available script types:" << std::endl;
+        std::cout << "  1. MonoBehaviour - Components that attach to game objects" << std::endl;
+        std::cout << "  2. ScriptableObject - Data containers (coming soon)" << std::endl;
+        std::cout << "\nTemplate location: " << MonoBehaviour::GetTemplatesDirectory() << std::endl;
+        std::cout << "Scripts location: " << MonoBehaviour::GetScriptsDirectory() << std::endl;
+        std::cout << "============================\n" << std::endl;
+    }
+
+    bool Application::OpenScriptInEditor(const std::string& scriptName)
+    {
+        return MonoBehaviour::OpenScriptInEditor(scriptName);
+    }
+
+
 }

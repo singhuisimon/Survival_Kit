@@ -1,0 +1,15 @@
+using ScriptAPI;
+
+public class {CLASS_NAME} : Script
+{
+    // Simple test script - no SerializeField for now
+    private int health = 100;
+    private float speed = 5.0f;
+    private string objectName = "{CLASS_NAME}";
+
+    public override void Update()
+    {
+        // Called every frame
+        // Add your update logic here
+    }
+}

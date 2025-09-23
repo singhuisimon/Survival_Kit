@@ -18,6 +18,8 @@
 #include "../External_Libraries/include/dotnet/coreclrhost.h"    // coreclr_*
 
 #include "ImportExport.h"
+#include "MonoBehaviour.h"
+
 
 namespace Core
 {
@@ -51,17 +53,29 @@ namespace Core
         static bool CreateMonoBehaviourScript(const std::string& scriptName);
         static bool CreateScriptableObjectScript(const std::string& scriptName);
         static bool CreateScriptFromTemplate(const std::string& scriptName, const std::string& templateType);
-
+        // File opening
+        static bool OpenScriptInEditor(const std::string& scriptName);
 
         // Template management
         static std::string GetTemplatesDirectory();
         static bool InitializeTemplates();
-        static std::vector<std::string> GetAvailableTemplateTypes();
+       static std::vector<std::string> GetAvailableTemplateTypes();
+
+
+        // Validation and utility methods
+        static bool ValidateScriptName(const std::string& scriptName);
+        static std::string GetManagedScriptsDirectory();
+        static bool DoesScriptExist(const std::string& scriptName);
+        static std::vector<std::string> GetExistingScriptFiles();
+
+        // Utility methods
+        static void ListExistingScripts();
+        static void ShowScriptCreationHelp();
 
 
     private:
         static std::array<TransformComponent, ENTITY_COUNT> nativeData;
-        void compileScriptAssembly();
+        static void compileScriptAssembly();
         void(*initFunc)() = nullptr;
         bool(*addScriptFunc)(int, const char*) = nullptr;
         void(*executeUpdateFunc)() = nullptr;
@@ -70,11 +84,6 @@ namespace Core
         void stopScriptEngine();
         std::string buildTpaList(const std::string& directory);
 
-
-        //file creation
-        static std::string ReadTemplateFile(const std::string& templateName);
-        static std::string ProcessTemplate(const std::string& templateContent, const std::string& className);
-        static bool WriteScriptFile(const std::string& scriptName, const std::string& content);
 
 
         // File watching members

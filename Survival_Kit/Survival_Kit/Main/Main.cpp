@@ -96,6 +96,7 @@ int main(void) {
         {
             app.ReloadScripts();
             app.AddScript(0, "TestScript");  // Re-add script after reload
+            app.CreateMonoBehaviourScript("PlayerController");
         }
 
         // Update all systems (including InputSystem)
