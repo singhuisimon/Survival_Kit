@@ -35,6 +35,12 @@
     <ClCompile Include="Graphics\ShaderProgram.cpp" />
     <ClCompile Include="Graphics\Shape.cpp" />
     <ClCompile Include="System\TransformSystem.cpp" />
+    <ClCompile Include="Manager\DescriptorFileManager.cpp" />
+    <ClCompile Include="Manager\AssetManager.cpp" />
+    <ClCompile Include="Pipeline\AssetDatabase.cpp" />
+    <ClCompile Include="Pipeline\AssetScanner.cpp" />
+    <ClCompile Include="Pipeline\AssetImporter.cpp" />
+    <ClCompile Include="Pipeline\AssetDescriptorGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component\Component.h" />
@@ -87,6 +93,14 @@
     <ClInclude Include="Utility\Constant.h" />
     <ClInclude Include="Component\TransformComponent.h" />
     <ClInclude Include="System\TransformSystem.h" />
+    <ClInclude Include="Manager\DescriptorFileManager.h" />
+    <ClInclude Include="Resource\ResourceTypes.h" />
+    <ClInclude Include="System\InputSystem.h" />
+    <ClInclude Include="Manager\AssetManager.h" />
+    <ClInclude Include="Pipeline\AssetDatabase.h" />
+    <ClInclude Include="Pipeline\AssetScanner.h" />
+    <ClInclude Include="Pipeline\AssetImporter.h" />
+    <ClInclude Include="Pipeline\AssetDescriptorGenerator.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Scene\Game.scn" />
