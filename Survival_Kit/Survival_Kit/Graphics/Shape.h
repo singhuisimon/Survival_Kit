@@ -10,6 +10,7 @@ namespace gam300 {
 
 		MeshData make_cube();
 		MeshData make_plane();
+		MeshData make_sphere();
 	
 		MeshGL   upload_mesh_data(MeshData& mesh);
 	}

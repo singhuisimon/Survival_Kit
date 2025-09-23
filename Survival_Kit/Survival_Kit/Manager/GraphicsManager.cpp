@@ -125,12 +125,15 @@ namespace gam300 {
 
         MeshData cubeData = Shape::make_cube();
         MeshData planeData = Shape::make_plane();
+        MeshData sphereData = Shape::make_sphere();
 
         MeshGL   cubeGL = Shape::upload_mesh_data(cubeData);
         MeshGL   planeGL = Shape::upload_mesh_data(planeData);
+        MeshGL   sphereGL = Shape::upload_mesh_data(sphereData);
 
-        meshStorage.push_back(std::move(cubeGL));
-        meshStorage.push_back(std::move(planeGL));
+        //meshStorage.push_back(std::move(cubeGL));
+        //meshStorage.push_back(std::move(planeGL));
+        meshStorage.push_back(std::move(sphereGL));
 
 
         // Log startup
@@ -245,7 +248,7 @@ namespace gam300 {
             mesh.vao.bind();
 
             // Draw the actual object
-            glDrawElements(mesh.primitive_type, mesh.draw_count, GL_UNSIGNED_SHORT, NULL);
+            glDrawElements(mesh.primitive_type, mesh.draw_count, mesh.index_type, NULL);
 
             glBindVertexArray(0);
         }

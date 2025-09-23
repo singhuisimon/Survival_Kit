@@ -32,6 +32,9 @@
     <ClCompile Include="Graphics\ShaderProgram.cpp" />
     <ClCompile Include="Graphics\Shape.cpp" />
     <ClCompile Include="System\TransformSystem.cpp" />
+    <ClCompile Include="Graphics\Sampler.cpp" />
+    <ClCompile Include="Graphics\Texture.cpp" />
+    <ClCompile Include="Graphics\Common.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component\Component.h" />
@@ -79,6 +82,11 @@
     <ClInclude Include="Utility\Constant.h" />
     <ClInclude Include="Component\TransformComponent.h" />
     <ClInclude Include="System\TransformSystem.h" />
+    <ClInclude Include="Graphics\Texture.h" />
+    <ClInclude Include="Graphics\Sampler.h" />
+    <ClInclude Include="Graphics\stb_image.h" />
+    <ClInclude Include="Graphics\Common.h" />
+    <ClInclude Include="Graphics\SharedGraphics.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Scene\Game.scn" />
