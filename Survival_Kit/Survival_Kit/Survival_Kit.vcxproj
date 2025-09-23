@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -22,9 +22,12 @@
     <ClCompile Include="Component\Transform3D.cpp" />
     <ClCompile Include="Entity\Entity.cpp" />
     <ClCompile Include="Glad\glad.c" />
+    <ClCompile Include="Graphics\Common.cpp" />
     <ClCompile Include="Graphics\GLResources.cpp" />
+    <ClCompile Include="Graphics\Sampler.cpp" />
     <ClCompile Include="Graphics\ShaderProgram.cpp" />
     <ClCompile Include="Graphics\Shape.cpp" />
+    <ClCompile Include="Graphics\Texture.cpp" />
     <ClCompile Include="IMGUI\imgui.cpp" />
     <ClCompile Include="IMGUI\imgui_demo.cpp" />
     <ClCompile Include="IMGUI\imgui_draw.cpp" />
@@ -60,13 +63,18 @@
     <ClInclude Include="Entity\Entity.h" />
     <ClInclude Include="Glad\glad.h" />
     <ClInclude Include="Graphics\Camera.h" />
+    <ClInclude Include="Graphics\Common.h" />
     <ClInclude Include="Graphics\Framebuffer.h" />
     <ClInclude Include="Graphics\GLResources.h" />
     <ClInclude Include="Graphics\Light.h" />
     <ClInclude Include="Graphics\Material.h" />
     <ClInclude Include="Graphics\MeshData.h" />
+    <ClInclude Include="Graphics\Sampler.h" />
     <ClInclude Include="Graphics\ShaderProgram.h" />
     <ClInclude Include="Graphics\Shape.h" />
+    <ClInclude Include="Graphics\SharedGraphics.h" />
+    <ClInclude Include="Graphics\stb_image.h" />
+    <ClInclude Include="Graphics\Texture.h" />
     <ClInclude Include="IMGUI\imconfig.h" />
     <ClInclude Include="IMGUI\imgui.h" />
     <ClInclude Include="IMGUI\imgui_impl_glfw.h" />
