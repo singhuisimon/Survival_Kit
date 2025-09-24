@@ -96,23 +96,33 @@ namespace gam300 {
         CM.register_component<Transform3D>();
         logManager.writeLog("GameManager::startUp() - Transform3D component registered successfully");
 
-        // Load the scene
-        const std::string scenePath = getAssetFilePath("Scene/Game.scn");
-        logManager.writeLog("GameManager::startUp() - Attempting to load scene from '%s'", scenePath.c_str());
+        //// Create a test entity with Transform3D component for demonstration
+        //Entity& testEntity = EM.createEntity("TestEntity");
+        //Vector3D position(0.0f, 0.0f, 0.0f);
+        //Vector3D rotation(0.0f, 45.0f, 0.0f);  // 45 degrees rotation on Y axis
+        //Vector3D scale(1.0f, 1.0f, 1.0f);
 
-        if (SEM.loadScene(scenePath)) {
-            logManager.writeLog("GameManager::startUp() - Scene loaded successfully from %s", scenePath.c_str());
-        }
-        else {
-            logManager.writeLog("GameManager::startUp() - Failed to load scene, creating default scene");
-            // Save current entities (if any) to create the file
-            if (SEM.saveScene(scenePath)) {
-                logManager.writeLog("GameManager::startUp() - Default scene file created at %s", scenePath.c_str());
-            }
-            else {
-                logManager.writeLog("GameManager::startUp() - WARNING: Failed to create default scene file");
-            }
-        }
+        //Transform3D* transform = EM.addComponent<Transform3D>(testEntity.get_id(), position, rotation, scale);
+        //if (transform) {
+        //    logManager.writeLog("GameManager::startUp() - Test entity created with Transform3D component");
+        //}
+
+        // Load the scene - Commented out to load scene using editor instead (Edited - Lily (15/9))
+        //const std::string scenePath = getAssetFilePath("Scene/Game.scn");
+        //if (SEM.loadScene(scenePath)) {
+        //    logManager.writeLog("GameManager::startUp() - Scene loaded successfully from %s", scenePath.c_str());
+        //}
+        //else {
+        //    logManager.writeLog("GameManager::startUp() - Failed to load scene, creating default scene");
+        //    // Save to the same path
+        //    SEM.saveScene(scenePath);
+        //    if (SEM.loadScene(scenePath)) {
+        //        logManager.writeLog("GameManager::startUp() - Default scene loaded successfully");
+        //    }
+        //    else {
+        //        logManager.writeLog("GameManager::startUp() - WARNING: Failed to load default scene");
+        //    }
+        //}
 
         // Initialize step count
         m_step_count = 0;

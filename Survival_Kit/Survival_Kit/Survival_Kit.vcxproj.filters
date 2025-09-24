@@ -34,6 +34,9 @@
     <ClCompile Include="System\TransformSystem.cpp" />
     <ClCompile Include="Component\RigidBody.cpp" />
     <ClCompile Include="System\PhysicsSystem.cpp" />
+    <ClCompile Include="Graphics\Sampler.cpp" />
+    <ClCompile Include="Graphics\Texture.cpp" />
+    <ClCompile Include="Graphics\Common.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component\Component.h" />
@@ -83,6 +86,11 @@
     <ClInclude Include="System\TransformSystem.h" />
     <ClInclude Include="Component\RigidBody.h" />
     <ClInclude Include="System\PhysicsSystem.h" />
+    <ClInclude Include="Graphics\Texture.h" />
+    <ClInclude Include="Graphics\Sampler.h" />
+    <ClInclude Include="Graphics\stb_image.h" />
+    <ClInclude Include="Graphics\Common.h" />
+    <ClInclude Include="Graphics\SharedGraphics.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Scene\Game.scn" />
