@@ -19,9 +19,18 @@
  //Can be replaced by JoltPhysics RigidBody - Need CMake
 namespace gam300 {
 
+    enum class BodyType
+    {
+        STATIC, 
+        KINEMATIC,
+        DYNAMIC
+
+    };
+
     class RigidBody : public Component {
     private:
 
+        BodyType m_bodyType;
         float m_mass;
         float m_inverse_mass;
 
@@ -35,17 +44,20 @@ namespace gam300 {
         float m_angular_damp;
 
         bool m_gravity;
-        bool m_kinematic;
+        //bool m_kinematic;
+
 
     public:
-
-        RigidBody(const float& mass = 1.0f,
+       
+        
+        RigidBody(BodyType bodyType = BodyType::STATIC,
+            const float& mass = 1.0f,
             const Vector3D& linear_velocity = Vector3D::ZERO,
             const Vector3D& force_accumulator = Vector3D::ZERO,
             const Vector3D& angular_velocity = Vector3D::ZERO,
             const Vector3D& torque_accumulator = Vector3D::ZERO,
             const float& linear_damp = 0.99f, const float& angular_damp = 0.99f,
-            const bool& gravity = true, const bool& kinematic = true);
+            const bool& gravity = true);
 
 
         void init(EntityID entity_id) override;
@@ -61,8 +73,8 @@ namespace gam300 {
         const float& getLinearDamp() const { return m_linear_damp; }
         const float& getAngularDamp() const { return m_angular_damp; }
         const bool& getGravity() const { return m_gravity; }
-        const bool& getKinematic() const { return m_kinematic; }
-
+        //const bool& getKinematic() const { return m_kinematic; }
+        void setType(BodyType type) { m_bodyType = type; }
         void setMass(const float& mass) { m_mass = mass; }
         void setInverseMass(float inverseMass) { m_inverse_mass = inverseMass; }
         void setLinearVelocity(const Vector3D& linearVelocity) { m_linear_velocity = linearVelocity; }
@@ -72,7 +84,7 @@ namespace gam300 {
         void setLinearDamp(float linearDamp) { m_linear_damp = linearDamp; }
         void setAngularDamp(float angularDamp) { m_angular_damp = angularDamp; }
         void setGravity(bool gravity) { m_gravity = gravity; }
-        void setKinematic(bool kinematic) { m_kinematic = kinematic; }
+        //void setKinematic(bool kinematic) { m_kinematic = kinematic; }
 
         void applyForce(const Vector3D& force);
         void applyTorque(const Vector3D& torque);
@@ -82,6 +94,23 @@ namespace gam300 {
 
         void integrateForces(float dt);
         void integrateVelocity(Transform3D& transform, float dt);
+
+        // add to check bodyType 
+        bool isStatic() const { return m_bodyType == BodyType::STATIC; }
+        bool isKinematic() const { return m_bodyType == BodyType::KINEMATIC; }
+        bool isDynamic() const { return m_bodyType == BodyType::DYNAMIC; }
+
+        // to get the type of the Rigid Body - STATIC, KINEMATIC, DYNAMIC
+        const BodyType getRigidBodyType() { return m_bodyType; }
+
+        // to return the enum type to string for serialization
+        static BodyType stringToBodyType(const std::string& str);
+
+        // convert back from string to enum for serialization
+        static std::string bodyTypeToString(BodyType type);
+
+        // set the rigid body type (use in imgui)
+        void setRigidBodyType(BodyType type) { m_bodyType = type; }
     };
 
 } // namespace gam300

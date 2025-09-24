@@ -19,6 +19,8 @@
 #include "../Component/Transform3D.h"
 #include "../Utility/Clock.h"
 #include "../Utility/AssetPath.h"
+#include "../System/MovementSystem.h"
+#include "../Component/RigidBody.h"
 
 namespace gam300 {
 
@@ -95,6 +97,17 @@ namespace gam300 {
         // Register the Transform3D component with the ComponentManager
         CM.register_component<Transform3D>();
         logManager.writeLog("GameManager::startUp() - Transform3D component registered successfully");
+
+        // Register the RigidBody component with the componentManager
+        CM.register_component<RigidBody>();
+        logManager.writeLog("GameManager::startUp() - RigidBody component registered successfully");
+        // Register RigidBody component with the componentManager
+        CM.register_component<RigidBody>();
+        logManager.writeLog("GameManager::startUp() - GraphicsManager started successfully");
+
+
+        // Register the Movement component with the ComponetManager
+        SM.register_system<MovementSystem>();
 
         //// Create a test entity with Transform3D component for demonstration
         //Entity& testEntity = EM.createEntity("TestEntity");

@@ -17,22 +17,31 @@
 
 namespace gam300 {
 
-    RigidBody::RigidBody(const float& mass,
-        const Vector3D& linear_velocity, const Vector3D& force_accumulator,
-        const Vector3D& angular_velocity, const Vector3D& torque_accumulator,
-        const float& linear_damp, const float& angular_damp,
-        const bool& gravity, const bool& kinematic)
-        : m_mass(mass),
-        m_linear_velocity(linear_velocity), m_force_accumulator(force_accumulator),
-        m_angular_velocity(angular_velocity), m_torque_accumulator(torque_accumulator),
-        m_linear_damp(linear_damp), m_angular_damp(angular_damp),
-        m_gravity(gravity), m_kinematic(kinematic)
+    RigidBody::RigidBody(
+        BodyType bodyType,
+        const float& mass,
+        const Vector3D& linear_velocity, 
+        const Vector3D& force_accumulator,
+        const Vector3D& angular_velocity, 
+        const Vector3D& torque_accumulator,
+        const float& linear_damp, 
+        const float& angular_damp,
+        const bool& gravity) : 
+        m_bodyType(bodyType),
+        m_mass(mass),
+        m_linear_velocity(linear_velocity),
+        m_force_accumulator(force_accumulator),
+        m_angular_velocity(angular_velocity),
+        m_torque_accumulator(torque_accumulator),
+        m_linear_damp(linear_damp),
+        m_angular_damp(angular_damp),
+        m_gravity(gravity)
     {
-        if (m_mass <= 0.0f) {
-            m_inverse_mass = 0.0f;
+        if (isStatic() || isKinematic()) {
+            m_inverse_mass = 0.0f; 
         }
-        else {
-            m_inverse_mass = 1.0f / m_mass;
+        else if (isDynamic()){
+            m_inverse_mass = 1.0f / m_mass; 
         }
     }
 
@@ -46,17 +55,17 @@ namespace gam300 {
     }
 
     void RigidBody::applyForce(const Vector3D& force) {
-        if (!m_kinematic) {
+        if (isDynamic()) {
             m_force_accumulator += force;
         }
     }
     void RigidBody::applyTorque(const Vector3D& torque) {
-        if (!m_kinematic) {
+        if (isDynamic()) {
             m_torque_accumulator += torque;
         }
     }
     void RigidBody::applyImpulse(const Vector3D& impulse) {
-        if (!m_kinematic && m_inverse_mass > 0.0f) {
+        if (isDynamic()) {
             m_linear_velocity += impulse * m_inverse_mass;
         }
     }
@@ -67,7 +76,8 @@ namespace gam300 {
     }
 
     void RigidBody::integrateForces(float dt) {
-        if (m_kinematic || m_inverse_mass <= 0.0f) return;
+
+        if (isStatic() || isKinematic()) return;
 
         if (m_gravity) {
             Vector3D gravityForce = { 0.0f, -9.81f * m_mass, 0.0f };
@@ -87,10 +97,34 @@ namespace gam300 {
     }
 
     void RigidBody::integrateVelocity(Transform3D& transform, float dt) {
-        if (m_kinematic) return;
+        if (isStatic() || isKinematic()) return;
 
-        transform.setPosition(transform.getPosition() + (m_linear_velocity * dt));
-        transform.setRotation(transform.getRotation() + (m_angular_velocity * dt));
+        if (isDynamic()) {
+            transform.setPosition(transform.getPosition() + (m_linear_velocity * dt));
+            transform.setRotation(transform.getRotation() + (m_angular_velocity * dt));
+        }
+        
+        //transform.setPosition(transform.getPosition() + (m_linear_velocity * dt));
+        //transform.setRotation(transform.getRotation() + (m_angular_velocity * dt));
+    }
+
+    BodyType RigidBody::stringToBodyType(const std::string& str)
+    {
+        if (str == "STATIC") return BodyType::STATIC;
+        if (str == "KINEMATIC") return BodyType::KINEMATIC;
+        if (str == "DYNAMIC") return BodyType::DYNAMIC;
+
+        return BodyType::STATIC;
+    }
+
+    std::string RigidBody::bodyTypeToString(BodyType type)
+    {
+        switch (type) {
+        case BodyType::STATIC:    return "STATIC";
+        case BodyType::KINEMATIC: return "KINEMATIC";
+        case BodyType::DYNAMIC:   return "DYNAMIC";
+        default:                  return "UNKNOWN";
+        }
     }
 
 } // namespace gam300

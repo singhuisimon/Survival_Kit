@@ -15,10 +15,11 @@
 
 #include "../System/System.h"
 #include "../Component/Transform3D.h"
+#include "../Component/RigidBody.h"
 
 namespace gam300 {
 
-    class MovementSystem : public ComponentSystem<Transform3D> {
+    class MovementSystem : public ComponentSystem<Transform3D, RigidBody>{
 
     public:
         /**
@@ -49,6 +50,9 @@ namespace gam300 {
          * @param entity_id The ID of the entity to process.
          */
         void process_entity(EntityID entity_id) override;
+
+    private:
+        float m_dt = 0; 
     };
 
 

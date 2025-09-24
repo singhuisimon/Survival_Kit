@@ -37,6 +37,7 @@
     <ClCompile Include="Graphics\Sampler.cpp" />
     <ClCompile Include="Graphics\Texture.cpp" />
     <ClCompile Include="Graphics\Common.cpp" />
+    <ClCompile Include="System\MovementSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component\Component.h" />
@@ -91,6 +92,7 @@
     <ClInclude Include="Graphics\stb_image.h" />
     <ClInclude Include="Graphics\Common.h" />
     <ClInclude Include="Graphics\SharedGraphics.h" />
+    <ClInclude Include="System\MovementSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Scene\Game.scn" />

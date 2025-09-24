@@ -182,7 +182,7 @@ int main(void) {
                 if (ImGui::MenuItem("Save"))
                 {
                     //To uncomment after Serialisation is fixed
-                    //SEM.saveScene(shownFile);
+                    SEM.saveScene(shownFile);
                 }
                 ImGui::EndMenu();
                 ImGui::Separator();
@@ -192,29 +192,29 @@ int main(void) {
 
 #endif // use back after solving viewport problem
 
-        ImGui::SetNextWindowSize(ImVec2(600, 400));
-        if (ImGui::Begin("Temporary Menu Bar to test save", &temporaryMainMenu, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize))
-        {
-          
-            if (ImGui::MenuItem("New"))
-            {
+        //ImGui::SetNextWindowSize(ImVec2(600, 400));
+        //if (ImGui::Begin("Temporary Menu Bar to test save", &temporaryMainMenu, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize))
+        //{
+        //  
+        //    if (ImGui::MenuItem("New"))
+        //    {
 
-            }
+        //    }
 
-            if (ImGui::MenuItem("Open"))
-            {
-                fileWindow = true; 
-            }
+        //    if (ImGui::MenuItem("Open"))
+        //    {
+        //        fileWindow = true; 
+        //    }
 
-            if (ImGui::MenuItem("Save"))
-            {
-                //To uncomment after Serialisation is fixed
-                SEM.saveScene(shownFile);
-            }
-                  
-        }
-        
-        ImGui::End();
+        //    if (ImGui::MenuItem("Save"))
+        //    {
+        //        //To uncomment after Serialisation is fixed
+        //        SEM.saveScene(shownFile);
+        //    }
+        //          
+        //}
+        //
+        //ImGui::End();
        
         // Editor Dockspace
        

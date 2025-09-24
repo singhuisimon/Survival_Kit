@@ -15,6 +15,7 @@
 #include <iostream>
 #include "../Utility/AssetPath.h"
 #include "../Component/Transform3D.h"
+#include "../Component/RigidBody.h"
 
 
 namespace gam300 {
@@ -279,6 +280,7 @@ namespace gam300 {
                                         ImguiEcsRef.addComponent<Transform3D>(newEntityID, *oldTransform);
                                     }
                                 }
+                               
 
                                
                                 selectedObjIndex = static_cast<int>(allEntities.size()) - 1;
@@ -466,8 +468,14 @@ namespace gam300 {
                 // Display adjustable value in components  
                 if (ImguiEcsRef.hasComponent<Transform3D>(selectedEntity.get_id())) {
                     displayComponentMenu<Transform3D>(selectedEntity.get_id(), "Transform3D");
-                   
+                    
                 }
+                if (ImguiEcsRef.hasComponent<RigidBody>(selectedEntity.get_id())) {
+                    displayComponentMenu<RigidBody>(selectedEntity.get_id(), "RigidBody");
+                    //displayComponentMenu<RigidBody>(selectedEntity.get_id(), "RigidBody");
+
+                }
+                
                
                 ImGui::Separator();
                 // Adding components 
@@ -480,13 +488,32 @@ namespace gam300 {
 
                 if (ImGui::Button("Add Component", buttonSize))
                 {
-                    ImGui::Text("Component"); // for now only transform3D component
+                    //ImGui::Text("Component"); // for now only transform3D component
 
-                    if (!ImguiEcsRef.hasComponent<Transform3D>(selectedEntity.get_id())) {
-                        ImguiEcsRef.addComponent<Transform3D>(selectedEntity.get_id());
-                    }
+                    //if (!ImguiEcsRef.hasComponent<Transform3D>(selectedEntity.get_id())) {
+                    //    ImguiEcsRef.addComponent<Transform3D>(selectedEntity.get_id());
+                    //}
+                    //if (!ImguiEcsRef.hasComponent<RigidBody>(selectedEntity.get_id()))
+                    //{
+                    //    ImguiEcsRef.addComponent<RigidBody>(selectedEntity.get_id());
+                    //}
+
+                    ImGui::OpenPopup("AddComponentPopup");
                 }
-
+                if (ImGui::BeginPopup("AddComponentPopup")) {
+                    if (ImGui::MenuItem("Transform3D")) {
+                        if (!ImguiEcsRef.hasComponent<Transform3D>(selectedEntity.get_id())) {
+                            ImguiEcsRef.addComponent<Transform3D>(selectedEntity.get_id());
+                        }
+                    }
+                    if (ImGui::MenuItem("RigidBody")) {
+                        if (!ImguiEcsRef.hasComponent<RigidBody>(selectedEntity.get_id())) {
+                            ImguiEcsRef.addComponent<RigidBody>(selectedEntity.get_id());
+                        }
+                    }
+                   
+                    ImGui::EndPopup();
+                }
                 // Removed Component 
 
 
@@ -532,6 +559,8 @@ namespace gam300 {
     template<typename componentType>
     void ImguiManager::displayComponentMenu(EntityID entityID, const char* componentName)
     {
+
+        //const auto& componentTypes = ImguiEcsRef
         // Create column to split the CollapsingHeader and component menu 
         ImGui::Columns(2, nullptr, false);
 
@@ -574,29 +603,60 @@ namespace gam300 {
     {
 
         // Transform Component
-        Transform3D* transform = ImguiEcsRef.getComponent<componentType>(selectedEntityID);
-        if (transform) {
-            // Position
-            Vector3D pos = transform->getPosition();
-            float position[3] = { pos.x, pos.y, pos.z };
-            if (ImGui::DragFloat3("Position", position, 0.1f)) {
-                transform->setPosition(Vector3D(position[0], position[1], position[2]));
-            }
+        if constexpr (std::is_same_v<componentType, Transform3D>) {
+            if (Transform3D* transform = ImguiEcsRef.getComponent<componentType>(selectedEntityID)) {
+                if (transform) {
+                    // Position
+                    Vector3D pos = transform->getPosition();
+                    float position[3] = { pos.x, pos.y, pos.z };
+                    if (ImGui::DragFloat3("Position", position, 0.1f)) {
+                        transform->setPosition(Vector3D(position[0], position[1], position[2]));
+                    }
 
-            // Rotation
-            Vector3D rot = transform->getRotation();
-            float rotation[3] = { rot.x, rot.y, rot.z };
-            if (ImGui::DragFloat3("Rotation", rotation, 1.0f)) {
-                transform->setRotation(Vector3D(rotation[0], rotation[1], rotation[2]));
-            }
+                    // Rotation
+                    Vector3D rot = transform->getRotation();
+                    float rotation[3] = { rot.x, rot.y, rot.z };
+                    if (ImGui::DragFloat3("Rotation", rotation, 1.0f)) {
+                        transform->setRotation(Vector3D(rotation[0], rotation[1], rotation[2]));
+                    }
 
-            // Scale
-            Vector3D scl = transform->getScale();
-            float scale[3] = { scl.x, scl.y, scl.z };
-            if (ImGui::DragFloat3("Scale", scale, 0.1f)) {
-                transform->setScale(Vector3D(scale[0], scale[1], scale[2]));
+                    // Scale
+                    Vector3D scl = transform->getScale();
+                    float scale[3] = { scl.x, scl.y, scl.z };
+                    if (ImGui::DragFloat3("Scale", scale, 0.1f)) {
+                        transform->setScale(Vector3D(scale[0], scale[1], scale[2]));
+                    }
+                }
             }
         }
+        else if constexpr (std::is_same_v<componentType, RigidBody>) {
+            // rigidBody 
+            if (RigidBody* rigidBody = ImguiEcsRef.getComponent<RigidBody>(selectedEntityID)) {
+                //if (rigidBody)
+               // {
+                BodyType  currRigidBodyType = rigidBody->getRigidBodyType();
+
+                    const char* bodyTypeNames[] = { "STATIC", "KINEMATIC", "DYNAMIC" };
+                    int currentTypeIndex = static_cast<int>(currRigidBodyType);
+
+                    // Dropdown for BodyType
+                    if (ImGui::BeginCombo("Rigid Body Type", bodyTypeNames[currentTypeIndex])) {
+                        for (int i = 0; i < 3; i++) {
+                            bool isSelected = (currentTypeIndex == i);
+                            if (ImGui::Selectable(bodyTypeNames[i], isSelected)) {
+                                currentTypeIndex = i;
+                                rigidBody->setRigidBodyType(static_cast<BodyType>(i)); //
+                            }
+                            if (isSelected)
+                                ImGui::SetItemDefaultFocus();
+                        }
+                        ImGui::EndCombo();
+                    }
+
+               //}
+            }
+        }
+
     }
 
 }// end of namespace gam300

@@ -65,6 +65,14 @@ namespace gam300 {
     };
 
     /**
+     * @brief Serializer for RigidBody components.
+     */
+    class RigidBodySerializer : public IComponentSerializer {
+    public:
+        std::string serialize(Component* component) override;
+        Component* deserialize(EntityID entityId, const std::string& jsonData) override;
+    };
+    /**
      * @brief Manager for serializing and deserializing game entities.
      * @details Handles loading entities from scene files and saving them back.
      */
