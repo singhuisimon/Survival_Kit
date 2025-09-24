@@ -1,6 +1,6 @@
 #pragma once
-#ifndef __SERIALISATION_MANAGER_H__
-#define __SERIALISATION_MANAGER_H__
+#ifndef __SERIALISATIONBIN_MANAGER_H__
+#define __SERIALISATIONBIN_MANAGER_H__
 
 #include <array>
 #include <cstdint>
@@ -131,9 +131,9 @@ namespace gam300
 		template <class T>
 		static void write_any(std::ofstream &os, const T &v)
 		{
-			if constexpr (is_contig_resizable_v<T> || is_std_array_v<T>)
+			if constexpr (is_supported_container_v<T>)
 			{
-				// std::string, std::vector<T>, std::array<T, N>
+				// std::string, std::vector<T>, std::array<T,N>, etc.
 				write_container(os, v);
 			}
 			else if constexpr (std::is_trivially_copyable_v<T>)
@@ -149,7 +149,7 @@ namespace gam300
 			else
 			{
 				static_assert(is_reflected_v<T>,
-					"Type is neither trivially copyable, contiguous container, std::array, nor reflected. "
+					"Type is neither trivially copyable, supported container, nor reflected. "
 					"Add REFLECT_TYPE(T, &T::field, ...) or provide a write_any/read_any overload.");
 			}
 		}
@@ -169,14 +169,14 @@ namespace gam300
 		template <class T>
 		static void read_any(std::ifstream &is, T &v)
 		{
-			if constexpr (is_contig_resizable_v<T> || is_std_array_v<T>)
+			if constexpr (is_supported_container_v<T>)
 			{
-				// std::string, std::vector<T>, std::array<T, N>
+				// std::string, std::vector<T>, std::array<T,N>, etc.
 				read_container(is, v);
 			}
 			else if constexpr (std::is_trivially_copyable_v<T>)
 			{
-				// trivially copyable types
+				// PODs / trivially copyable types
 				read_data(is, v);
 			}
 			else if constexpr (is_reflected_v<T>)
@@ -187,7 +187,7 @@ namespace gam300
 			else
 			{
 				static_assert(is_reflected_v<T>,
-					"Type is neither trivially copyable, contiguous container, std::array, nor reflected. "
+					"Type is neither trivially copyable, supported container, nor reflected. "
 					"Add REFLECT_TYPE(T, &T::field, ...) or provide a write_any/read_any overload.");
 			}
 		}
@@ -228,18 +228,10 @@ namespace gam300
 		}
 
 		//===================== traits & tuple utils =====================
-
 		/**************************************************************************
 		 * @brief
-		 * Apply a callable to each element in a tuple (compile-time unrolled).
-		 * @tparam Tuple
-		 * Tuple type.
-		 * @tparam F
-		 * Callable type taking each element.
-		 * @param tp
-		 * Tuple instance.
-		 * @param f
-		 * Callable to invoke per element.
+		 * Detect "contiguous + resizable" containers (e.g., std::string/std::vector).
+		 * Requires: value_type, size(), data(), resize(size_t).
 		 **************************************************************************/
 		template <class C>
 		struct is_contig_resizable
@@ -262,6 +254,19 @@ namespace gam300
 		template <class C>
 		inline static constexpr bool is_contig_resizable_v = is_contig_resizable<C>::value;
 
+		// ---- std::array detection (needed by dispatch) ----
+		template <typename> struct is_std_array : std::false_type {};
+		template <typename T, std::size_t N>
+		struct is_std_array<std::array<T, N>> : std::true_type {};
+		template <typename T>
+		inline static constexpr bool is_std_array_v = is_std_array<T>::value;
+
+		// Unified container trait (string/vector) OR std::array
+		template <typename T>
+		inline static constexpr bool is_supported_container_v =
+			is_contig_resizable_v<T> || is_std_array_v<T>;
+
+		// tuple for_each
 		template <typename Tuple, typename F, std::size_t... Is>
 		static inline void tuple_for_each_impl(Tuple &&tp, F &&f, std::index_sequence<Is...>)
 		{
