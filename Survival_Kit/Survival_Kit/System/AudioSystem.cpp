@@ -269,7 +269,17 @@ namespace gam300 {
 		}
 
 		FMOD::Channel* channel = nullptr;
-		if(m_coresystem->playSound(sound, nullptr, false, &channel) == FMOD_OK) {
+		FMOD::ChannelGroup* group = nullptr;
+
+		if(audio->getType() == AudioType::SFX) {
+			group = m_sfxgroup;
+		} else if (audio->getType() == AudioType::BGM) {
+			// Handle BGM group if needed
+			playEvent(id, audio->getGUID());
+			return;
+		}
+
+		if(m_coresystem->playSound(sound, group, false, &channel) == FMOD_OK) {
 			if (channel) {
 				channel->setVolume(audio->getVolume());
 				channel->setPitch(audio->getPitch());
