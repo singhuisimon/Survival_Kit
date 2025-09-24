@@ -249,108 +249,147 @@ namespace gam300 {
 
         LM.writeLog("SerialisationManager::loadScene() - File loaded, size: %zu characters", fileContent.length());
 
-        // Simple approach: Find each occurrence of a named entity
-        size_t searchPos = 0;
+        /////////////////////////////////////////////////Amanda Code Version/////////////////////////////////////////////////
+        // Parse with RapidJSON instead of string::find
+        rapidjson::Document doc;
+        if (doc.Parse(fileContent.c_str()).HasParseError()) {
+            LM.writeLog("SerialisationManager::loadScene() - JSON parse error: %s",
+                rapidjson::GetParseError_En(doc.GetParseError()));
+            return false;
+        }
+
+        if (!doc.HasMember("objects") || !doc["objects"].IsArray()) {
+            LM.writeLog("SerialisationManager::loadScene() - No 'objects' array found in scene");
+            return false;
+        }
+
+        const auto& objects = doc["objects"];
         int entityCount = 0;
-        bool foundAnyEntities = false;
 
-        while (true) {
-            // Find next "name" field
-            size_t namePos = fileContent.find("\"name\"", searchPos);
-            if (namePos == std::string::npos) {
-                break; // No more entities
-            }
+        for (auto& obj : objects.GetArray()) {
+            if (!obj.HasMember("name") || !obj["name"].IsString()) continue;
 
-            // Extract the entity name
-            size_t colonPos = fileContent.find(':', namePos);
-            size_t nameStartQuote = fileContent.find('"', colonPos);
-            size_t nameEndQuote = fileContent.find('"', nameStartQuote + 1);
-
-            if (colonPos == std::string::npos || nameStartQuote == std::string::npos || nameEndQuote == std::string::npos) {
-                LM.writeLog("SerialisationManager::loadScene() - Malformed name field at position %zu", namePos);
-                searchPos = namePos + 1;
-                continue;
-            }
-
-            std::string entityName = fileContent.substr(nameStartQuote + 1, nameEndQuote - nameStartQuote - 1);
-            LM.writeLog("SerialisationManager::loadScene() - Found entity: '%s'", entityName.c_str());
-
-            // Create the entity
+            std::string entityName = obj["name"].GetString();
             Entity& entity = EM.createEntity(entityName);
+            LM.writeLog("SerialisationManager::loadScene() - Created entity '%s' (ID %d)",
+                entityName.c_str(), entity.get_id());
+
+            if (obj.HasMember("components") && obj["components"].IsObject()) {
+                // Dump the "components" JSON back into a string
+                rapidjson::StringBuffer buffer;
+                rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                obj["components"].Accept(writer);
+
+                // Now let parseComponents handle all registered types
+                parseComponents(entity.get_id(), buffer.GetString());
+            }
+
             entityCount++;
-            foundAnyEntities = true;
-            LM.writeLog("SerialisationManager::loadScene() - Created entity '%s' with ID %d", entityName.c_str(), entity.get_id());
-
-            // Look for Transform3D component
-            size_t transform3DPos = fileContent.find("\"Transform3D\"", namePos);
-            size_t nextNamePos = fileContent.find("\"name\"", namePos + 1);
-
-            // Make sure this Transform3D belongs to this entity (not the next one)
-            if (transform3DPos != std::string::npos &&
-                (nextNamePos == std::string::npos || transform3DPos < nextNamePos)) {
-
-                LM.writeLog("SerialisationManager::loadScene() - Found Transform3D for entity '%s'", entityName.c_str());
-
-                // Extract Transform3D data using simple string search
-                Vector3D position = extractVector3D(fileContent, transform3DPos, "position");
-                Vector3D rotation = extractVector3D(fileContent, transform3DPos, "rotation");
-                Vector3D scale = extractVector3D(fileContent, transform3DPos, "scale");
-
-                LM.writeLog("SerialisationManager::loadScene() - Position: (%.1f, %.1f, %.1f)", position.x, position.y, position.z);
-                LM.writeLog("SerialisationManager::loadScene() - Rotation: (%.1f, %.1f, %.1f)", rotation.x, rotation.y, rotation.z);
-                LM.writeLog("SerialisationManager::loadScene() - Scale: (%.1f, %.1f, %.1f)", scale.x, scale.y, scale.z);
-
-                // Create the Transform3D component
-                Transform3D* transform = EM.addComponent<Transform3D>(entity.get_id(), position, rotation, scale);
-                if (transform) {
-                    LM.writeLog("SerialisationManager::loadScene() - Transform3D component created successfully for entity '%s'", entityName.c_str());
-                }
-                else {
-                    LM.writeLog("SerialisationManager::loadScene() - Failed to create Transform3D component for entity '%s'", entityName.c_str());
-                }
-
-                
-                
-            }
-            else {
-                LM.writeLog("SerialisationManager::loadScene() - No Transform3D component found for entity '%s'", entityName.c_str());
-            }
-
-
-            // Look for RigidBody compoenents
-            size_t rigidBodyPos = fileContent.find("\"RigidBody\"", namePos);
-
-            if (rigidBodyPos != std::string::npos &&
-                (nextNamePos == std::string::npos || rigidBodyPos < nextNamePos))
-            {
-                LM.writeLog("SerialisationManager::loadScene() - Found RigidBody for entity '%s'", entityName.c_str());
-                std::string typeStr = SerialisationManager::extractQuotedValue(fileContent, "rigidBodyType");
-                BodyType rigidBodyType = RigidBody::stringToBodyType(typeStr); // convert string back to enum BodyType
-                //LM.writeLog("SerialisationManager::loadScene() - rigidBodyType: (%d)", rigidBodyType);
-                RigidBody* rigidBody = EM.addComponent<RigidBody>(entity.get_id(), rigidBodyType);
-                if (rigidBody) {
-                    LM.writeLog("SerialisationManager::loadScene() - RigidBody component created successfully for entity '%s'", entityName.c_str());
-                }
-                else {
-                    LM.writeLog("SerialisationManager::loadScene() - Failed to create RigidBody component for entity '%s'", entityName.c_str());
-                }
-            }
-            else {
-                LM.writeLog("SerialisationManager::loadScene() - No RigidBody component found for entity '%s'", entityName.c_str());
-            }
-            
-
-            // Move search position past this entity
-            searchPos = namePos + 1;
         }
 
-        //  PROPER SUCCESS/FAILURE LOGIC
-        if (!foundAnyEntities) {
-            LM.writeLog("SerialisationManager::loadScene() - ERROR: No entities found in scene file");
-            return false; // RETURN FALSE IF NO ENTITIES LOADED
-        }
+        //////////////////////////////////////////////////////////////////////////////////////////////
+        //// Simple approach: Find each occurrence of a named entity
+        //size_t searchPos = 0;
+        //int entityCount = 0;
+        //bool foundAnyEntities = false;
 
-        LM.writeLog("SerialisationManager::loadScene() - Scene loaded successfully, processed %d entities", entityCount);
+        //while (true) {
+        //    // Find next "name" field
+        //    size_t namePos = fileContent.find("\"name\"", searchPos);
+        //    if (namePos == std::string::npos) {
+        //        break; // No more entities
+        //    }
+
+        //    // Extract the entity name
+        //    size_t colonPos = fileContent.find(':', namePos);
+        //    size_t nameStartQuote = fileContent.find('"', colonPos);
+        //    size_t nameEndQuote = fileContent.find('"', nameStartQuote + 1);
+
+        //    if (colonPos == std::string::npos || nameStartQuote == std::string::npos || nameEndQuote == std::string::npos) {
+        //        LM.writeLog("SerialisationManager::loadScene() - Malformed name field at position %zu", namePos);
+        //        searchPos = namePos + 1;
+        //        continue;
+        //    }
+
+        //    std::string entityName = fileContent.substr(nameStartQuote + 1, nameEndQuote - nameStartQuote - 1);
+        //    LM.writeLog("SerialisationManager::loadScene() - Found entity: '%s'", entityName.c_str());
+
+        //    // Create the entity
+        //    Entity& entity = EM.createEntity(entityName);
+        //    entityCount++;
+        //    foundAnyEntities = true;
+        //    LM.writeLog("SerialisationManager::loadScene() - Created entity '%s' with ID %d", entityName.c_str(), entity.get_id());
+
+        //    // Look for Transform3D component
+        //    size_t transform3DPos = fileContent.find("\"Transform3D\"", namePos);
+        //    size_t nextNamePos = fileContent.find("\"name\"", namePos + 1);
+
+        //    // Make sure this Transform3D belongs to this entity (not the next one)
+        //    if (transform3DPos != std::string::npos &&
+        //        (nextNamePos == std::string::npos || transform3DPos < nextNamePos)) {
+
+        //        LM.writeLog("SerialisationManager::loadScene() - Found Transform3D for entity '%s'", entityName.c_str());
+
+        //        // Extract Transform3D data using simple string search
+        //        Vector3D position = extractVector3D(fileContent, transform3DPos, "position");
+        //        Vector3D rotation = extractVector3D(fileContent, transform3DPos, "rotation");
+        //        Vector3D scale = extractVector3D(fileContent, transform3DPos, "scale");
+
+        //        LM.writeLog("SerialisationManager::loadScene() - Position: (%.1f, %.1f, %.1f)", position.x, position.y, position.z);
+        //        LM.writeLog("SerialisationManager::loadScene() - Rotation: (%.1f, %.1f, %.1f)", rotation.x, rotation.y, rotation.z);
+        //        LM.writeLog("SerialisationManager::loadScene() - Scale: (%.1f, %.1f, %.1f)", scale.x, scale.y, scale.z);
+
+        //        // Create the Transform3D component
+        //        Transform3D* transform = EM.addComponent<Transform3D>(entity.get_id(), position, rotation, scale);
+        //        if (transform) {
+        //            LM.writeLog("SerialisationManager::loadScene() - Transform3D component created successfully for entity '%s'", entityName.c_str());
+        //        }
+        //        else {
+        //            LM.writeLog("SerialisationManager::loadScene() - Failed to create Transform3D component for entity '%s'", entityName.c_str());
+        //        }
+
+        //        
+        //        
+        //    }
+        //    else {
+        //        LM.writeLog("SerialisationManager::loadScene() - No Transform3D component found for entity '%s'", entityName.c_str());
+        //    }
+
+
+        //    // Look for RigidBody compoenents
+        //    size_t rigidBodyPos = fileContent.find("\"RigidBody\"", namePos);
+
+        //    if (rigidBodyPos != std::string::npos &&
+        //        (nextNamePos == std::string::npos || rigidBodyPos < nextNamePos))
+        //    {
+        //        LM.writeLog("SerialisationManager::loadScene() - Found RigidBody for entity '%s'", entityName.c_str());
+        //        std::string typeStr = SerialisationManager::extractQuotedValue(fileContent, "rigidBodyType");
+        //        BodyType rigidBodyType = RigidBody::stringToBodyType(typeStr); // convert string back to enum BodyType
+        //        //LM.writeLog("SerialisationManager::loadScene() - rigidBodyType: (%d)", rigidBodyType);
+        //        RigidBody* rigidBody = EM.addComponent<RigidBody>(entity.get_id(), rigidBodyType);
+        //        if (rigidBody) {
+        //            LM.writeLog("SerialisationManager::loadScene() - RigidBody component created successfully for entity '%s'", entityName.c_str());
+        //        }
+        //        else {
+        //            LM.writeLog("SerialisationManager::loadScene() - Failed to create RigidBody component for entity '%s'", entityName.c_str());
+        //        }
+        //    }
+        //    else {
+        //        LM.writeLog("SerialisationManager::loadScene() - No RigidBody component found for entity '%s'", entityName.c_str());
+        //    }
+        //    
+
+        //    // Move search position past this entity
+        //    searchPos = namePos + 1;
+        //}
+
+        ////  PROPER SUCCESS/FAILURE LOGIC
+        //if (!foundAnyEntities) {
+        //    LM.writeLog("SerialisationManager::loadScene() - ERROR: No entities found in scene file");
+        //    return false; // RETURN FALSE IF NO ENTITIES LOADED
+        //}
+
+        //LM.writeLog("SerialisationManager::loadScene() - Scene loaded successfully, processed %d entities", entityCount);
         return true; // ONLY RETURN TRUE IF ENTITIES WERE ACTUALLY LOADED
     }
 
@@ -439,6 +478,7 @@ namespace gam300 {
         file << "}\n";
 
         file.close();
+
         LM.writeLog("SerialisationManager::saveScene() - Scene saved successfully");
         return true;
     }
