@@ -16,6 +16,7 @@
 
 #include "../Component/Component.h"
 #include "../Utility/Vector3D.h"
+#include "../Manager/SerialisationBinManager.h"
 
 namespace gam300 {
 
@@ -148,6 +149,8 @@ namespace gam300 {
          * @return Up direction vector.
          */
         Vector3D getUp() const;
+
+        friend struct reflect<::gam300::Transform3D>;
     };
 
 } // namespace gam300

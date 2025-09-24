@@ -19,6 +19,13 @@
 
 namespace gam300 {
 
+    REFLECT_TYPE(Transform3D,
+        &Transform3D::m_position,
+        &Transform3D::m_prev_position,
+        &Transform3D::m_rotation,
+        &Transform3D::m_scale
+    );
+
     // Constructor
     Transform3D::Transform3D(const Vector3D& position, const Vector3D& rotation, const Vector3D& scale)
         : m_position(position), m_prev_position(position), m_rotation(rotation), m_scale(scale) {

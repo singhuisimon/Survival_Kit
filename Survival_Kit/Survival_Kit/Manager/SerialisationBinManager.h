@@ -14,6 +14,8 @@
 #include <utility>
 #include <vector>
 
+#define SEB gam300::SerializerBin::getInstance()
+
 namespace gam300
 {
 	//===================== Reflection core =====================
@@ -73,6 +75,13 @@ namespace gam300
 	class SerializerBin
 	{
 	public:
+		// Instance
+		SerializerBin &getInstance()
+		{
+			static SerializerBin instance{};
+			return instance;
+		}
+
 		//===================== File helpers =====================
 		/**************************************************************************
 		 * @brief
@@ -656,4 +665,4 @@ namespace gam300
 
 } // namespace gam300
 
-#endif // __SERIALISATION_MANAGER_H__
+#endif // __SERIALISATIONBIN_MANAGER_H__
