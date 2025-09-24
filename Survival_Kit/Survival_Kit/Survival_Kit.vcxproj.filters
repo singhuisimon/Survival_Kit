@@ -32,6 +32,8 @@
     <ClCompile Include="Graphics\ShaderProgram.cpp" />
     <ClCompile Include="Graphics\Shape.cpp" />
     <ClCompile Include="System\TransformSystem.cpp" />
+    <ClCompile Include="Component\AudioComponent.cpp" />
+    <ClCompile Include="System\AudioSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component\Component.h" />
@@ -79,6 +81,8 @@
     <ClInclude Include="Utility\Constant.h" />
     <ClInclude Include="Component\TransformComponent.h" />
     <ClInclude Include="System\TransformSystem.h" />
+    <ClInclude Include="Component\AudioComponent.h" />
+    <ClInclude Include="System\AudioSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Scene\Game.scn" />
@@ -87,5 +91,8 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="Survival_Kit.log" />
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="Assets\Audio\sfx_jumping.wav" />
   </ItemGroup>
 </Project>

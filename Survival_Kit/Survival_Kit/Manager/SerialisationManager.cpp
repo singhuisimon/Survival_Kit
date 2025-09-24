@@ -20,6 +20,7 @@
 #include "LogManager.h"
 #include "ECSManager.h"
 #include "../Component/Transform3D.h"
+#include "../Component/AudioComponent.h"
 #include <fstream>
 #include <sstream>
 #include <functional>
@@ -122,6 +123,128 @@ namespace gam300 {
         return transform;
     }
 
+	//AudioComponentSerializer implementation
+    std::string AudioComponentSerializer::serialize(Component* component) {
+		AudioComponent* audio = static_cast<AudioComponent*>(component);
+        if (!audio) {
+			return "{}";
+        }
+
+        std::stringstream ss;
+        ss << "{\n";
+        ss << "          \"guid\": " << audio->getGUID() << ",\n";
+		//ss << "          \"audioID\": " << audio->getAudioID() << ",\n"; // Placeholder for audioID
+        ss << "          \"type\": " << (audio->getType() == AudioType::BGM ? "BGM" : "SFX") << ",\n";
+        ss << "          \"volume\": " << audio->getVolume() << ",\n";
+        ss << "          \"pitch\": " << audio->getPitch() << ",\n";
+        ss << "          \"loop\": " << (audio->isLooping() ? "true" : "false") << ",\n";
+        ss << "          \"state\": "
+           << (audio->getPlayState() == PlayState::PLAY ? "PLAY" :
+               audio->getPlayState() == PlayState::PAUSE ? "PAUSE" : "STOP")
+           << "\"\n";
+		ss << "          \"is3D\": " << (audio->is3D() ? "true" : "false") << ",\n";
+		ss << "          \"position\": [\n";
+
+		const Vector3D& pos = audio->getPosition();
+		ss << "            " << pos.x << ",\n";
+		ss << "            " << pos.y << ",\n";
+		ss << "            " << pos.z << "\n";\
+
+		ss << "          ]\n";
+        ss << "        }";
+        return ss.str();
+    }
+
+	//AudioComponentDeserializer implementation
+    Component* AudioComponentSerializer::deserialize(EntityID entityId, const std::string& jsonData) {
+        //GUID
+		std::string guid = SerialisationManager::extractQuotedValue(jsonData, "guid");
+
+		/*int64_t audioID = -1;
+		int64_t audioIDData = SerialisationManager::extractObjectValue(jsonData, "audioID");
+        if (!audioIDData.empty()) {
+            try {
+                audioID = std::stoll(audioIDData);
+            }
+            catch (const std::exception&) {
+                LM.writeLog("AudioComponentSerializer::deserialize() - Fail to parse audioID");
+            }
+		}*/
+
+		//Type
+		std::string typeData = SerialisationManager::extractQuotedValue(jsonData, "type");
+		AudioType type = (typeData == "BGM") ? AudioType::BGM : AudioType::SFX;
+    
+		//Volume
+        float volume = 1.0f;
+		std::string volumeData = SerialisationManager::extractNumberValue(jsonData, "volume");
+        if (!volumeData.empty()) {
+            try {
+                volume = std::stof(volumeData);
+            } catch (const std::exception&) {
+                LM.writeLog("AudioComponentSerializer::deserialize() - Fail to parse volume");
+            }
+		}
+
+        //Pitch
+		float pitch = 1.0f;
+        std::string pitchData = SerialisationManager::extractNumberValue(jsonData, "pitch");
+        if (!pitchData.empty()) {
+            try {
+                pitch = std::stof(pitchData);
+            }
+            catch (const std::exception&) {
+                LM.writeLog("AudioComponentSerializer::deserialize() - Fail to parse pitch");
+            }
+        }
+
+		//Loop
+        bool loop = false;
+        std::string loopData = SerialisationManager::extractObjectValue(jsonData, "loop");
+        if (!loopData.empty()) {
+            loop = (loopData == "true");
+		}
+
+		//State
+        PlayState state = PlayState::STOP;
+        std::string stateData = SerialisationManager::extractQuotedValue(jsonData, "state");
+        if (!stateData.empty()) {
+            if (stateData == "PLAY") {
+                state = PlayState::PLAY;
+            } else if (stateData == "PAUSE") {
+                state = PlayState::PAUSE;
+            }
+		}
+
+        //is3D
+	    bool is3D = false;
+		std::string is3DData = SerialisationManager::extractObjectValue(jsonData, "is3D");
+        if (!is3DData.empty()) {
+            is3D = (is3DData == "true");
+		}
+
+		//Position
+		Vector3D position = Vector3D::ZERO;
+		std::string positionData = SerialisationManager::extractObjectValue(jsonData, "position");
+        if (!positionData.empty()) {
+            std::vector<float> posArray = SerialisationManager::parseFloatArray(positionData);
+            if (posArray.size() >= 3) {
+                position = Vector3D(posArray[0], posArray[1], posArray[2]);
+            }
+		}
+
+        // Create the Audio_Component
+        AudioComponent* audio = EM.addComponent<AudioComponent>(entityId, guid, type, volume, pitch, loop);
+        
+		// Set the play state
+        if (audio) {
+			audio->setPlayState(state);
+            std::cout << "playstate and audio read" << std::endl;
+        }
+
+		return audio;
+    }
+
     // Initialize singleton instance
     SerialisationManager::SerialisationManager() {
         setType("SerialisationManager");
@@ -141,6 +264,7 @@ namespace gam300 {
 
         // Register component serializers
         registerComponentSerializer("Transform3D", std::make_shared<Transform3DSerializer>());
+		registerComponentSerializer("AudioComponent", std::make_shared<AudioComponentSerializer>());
 
         // Register component creators
         registerComponentCreator("Transform3D", [this](EntityID entityId, const std::string& componentData) {
@@ -149,6 +273,18 @@ namespace gam300 {
             if (serializer) {
                 serializer->deserialize(entityId, componentData);
                 LM.writeLog("Transform3D created for entity %d", entityId);
+            }
+            });
+
+        registerComponentCreator("AudioComponent", [this](EntityID entityId, const std::string& componentData) {
+            //Use the serializer to create the component
+            auto serializer = m_component_serializers["AudioComponent"];
+            if (serializer) {
+                serializer->deserialize(entityId, componentData);
+                LM.writeLog("Audio_Component created for entity %d", entityId);
+            }
+            else {
+				LM.writeLog("Audio_Component serializer not found for entity %d", entityId);
             }
             });
 
@@ -191,84 +327,128 @@ namespace gam300 {
         std::string fileContent;
         if (!parseJsonFile(filename, fileContent)) {
             LM.writeLog("SerialisationManager::loadScene() - Failed to read scene file");
-            return false; // PROPER ERROR RETURN
+            return false;
         }
 
-        LM.writeLog("SerialisationManager::loadScene() - File loaded, size: %zu characters", fileContent.length());
+        // Parse with RapidJSON instead of string::find
+        rapidjson::Document doc;
+        if (doc.Parse(fileContent.c_str()).HasParseError()) {
+            LM.writeLog("SerialisationManager::loadScene() - JSON parse error: %s",
+                rapidjson::GetParseError_En(doc.GetParseError()));
+            return false;
+        }
 
-        // Simple approach: Find each occurrence of a named entity
-        size_t searchPos = 0;
+        if (!doc.HasMember("objects") || !doc["objects"].IsArray()) {
+            LM.writeLog("SerialisationManager::loadScene() - No 'objects' array found in scene");
+            return false;
+        }
+
+        const auto& objects = doc["objects"];
         int entityCount = 0;
-        bool foundAnyEntities = false;
 
-        while (true) {
-            // Find next "name" field
-            size_t namePos = fileContent.find("\"name\"", searchPos);
-            if (namePos == std::string::npos) {
-                break; // No more entities
-            }
+        for (auto& obj : objects.GetArray()) {
+            if (!obj.HasMember("name") || !obj["name"].IsString()) continue;
 
-            // Extract the entity name
-            size_t colonPos = fileContent.find(':', namePos);
-            size_t nameStartQuote = fileContent.find('"', colonPos);
-            size_t nameEndQuote = fileContent.find('"', nameStartQuote + 1);
-
-            if (colonPos == std::string::npos || nameStartQuote == std::string::npos || nameEndQuote == std::string::npos) {
-                LM.writeLog("SerialisationManager::loadScene() - Malformed name field at position %zu", namePos);
-                searchPos = namePos + 1;
-                continue;
-            }
-
-            std::string entityName = fileContent.substr(nameStartQuote + 1, nameEndQuote - nameStartQuote - 1);
-            LM.writeLog("SerialisationManager::loadScene() - Found entity: '%s'", entityName.c_str());
-
-            // Create the entity
+            std::string entityName = obj["name"].GetString();
             Entity& entity = EM.createEntity(entityName);
+            LM.writeLog("SerialisationManager::loadScene() - Created entity '%s' (ID %d)",
+                entityName.c_str(), entity.get_id());
+
+            if (obj.HasMember("components") && obj["components"].IsObject()) {
+                // Dump the "components" JSON back into a string
+                rapidjson::StringBuffer buffer;
+                rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                obj["components"].Accept(writer);
+
+                // Now let parseComponents handle all registered types
+                parseComponents(entity.get_id(), buffer.GetString());
+            }
+
             entityCount++;
-            foundAnyEntities = true;
-            LM.writeLog("SerialisationManager::loadScene() - Created entity '%s' with ID %d", entityName.c_str(), entity.get_id());
-
-            // Look for Transform3D component
-            size_t transform3DPos = fileContent.find("\"Transform3D\"", namePos);
-            size_t nextNamePos = fileContent.find("\"name\"", namePos + 1);
-
-            // Make sure this Transform3D belongs to this entity (not the next one)
-            if (transform3DPos != std::string::npos &&
-                (nextNamePos == std::string::npos || transform3DPos < nextNamePos)) {
-
-                LM.writeLog("SerialisationManager::loadScene() - Found Transform3D for entity '%s'", entityName.c_str());
-
-                // Extract Transform3D data using simple string search
-                Vector3D position = extractVector3D(fileContent, transform3DPos, "position");
-                Vector3D rotation = extractVector3D(fileContent, transform3DPos, "rotation");
-                Vector3D scale = extractVector3D(fileContent, transform3DPos, "scale");
-
-                LM.writeLog("SerialisationManager::loadScene() - Position: (%.1f, %.1f, %.1f)", position.x, position.y, position.z);
-                LM.writeLog("SerialisationManager::loadScene() - Rotation: (%.1f, %.1f, %.1f)", rotation.x, rotation.y, rotation.z);
-                LM.writeLog("SerialisationManager::loadScene() - Scale: (%.1f, %.1f, %.1f)", scale.x, scale.y, scale.z);
-
-                // Create the Transform3D component
-                Transform3D* transform = EM.addComponent<Transform3D>(entity.get_id(), position, rotation, scale);
-                if (transform) {
-                    LM.writeLog("SerialisationManager::loadScene() - Transform3D component created successfully for entity '%s'", entityName.c_str());
-                }
-                else {
-                    LM.writeLog("SerialisationManager::loadScene() - Failed to create Transform3D component for entity '%s'", entityName.c_str());
-                }
-            }
-            else {
-                LM.writeLog("SerialisationManager::loadScene() - No Transform3D component found for entity '%s'", entityName.c_str());
-            }
-
-            // Move search position past this entity
-            searchPos = namePos + 1;
         }
+        
+        //// Read file content
+        //std::string fileContent;
+        //if (!parseJsonFile(filename, fileContent)) {
+        //    LM.writeLog("SerialisationManager::loadScene() - Failed to read scene file");
+        //    return false; // PROPER ERROR RETURN
+        //}
 
-        //  PROPER SUCCESS/FAILURE LOGIC
-        if (!foundAnyEntities) {
-            LM.writeLog("SerialisationManager::loadScene() - ERROR: No entities found in scene file");
-            return false; // RETURN FALSE IF NO ENTITIES LOADED
-        }
+        //LM.writeLog("SerialisationManager::loadScene() - File loaded, size: %zu characters", fileContent.length());
+
+        //// Simple approach: Find each occurrence of a named entity
+        //size_t searchPos = 0;
+        //int entityCount = 0;
+        //bool foundAnyEntities = false;
+
+        //while (true) {
+        //    // Find next "name" field
+        //    size_t namePos = fileContent.find("\"name\"", searchPos);
+        //    if (namePos == std::string::npos) {
+        //        break; // No more entities
+        //    }
+
+        //    // Extract the entity name
+        //    size_t colonPos = fileContent.find(':', namePos);
+        //    size_t nameStartQuote = fileContent.find('"', colonPos);
+        //    size_t nameEndQuote = fileContent.find('"', nameStartQuote + 1);
+
+        //    if (colonPos == std::string::npos || nameStartQuote == std::string::npos || nameEndQuote == std::string::npos) {
+        //        LM.writeLog("SerialisationManager::loadScene() - Malformed name field at position %zu", namePos);
+        //        searchPos = namePos + 1;
+        //        continue;
+        //    }
+
+        //    std::string entityName = fileContent.substr(nameStartQuote + 1, nameEndQuote - nameStartQuote - 1);
+        //    LM.writeLog("SerialisationManager::loadScene() - Found entity: '%s'", entityName.c_str());
+
+        //    // Create the entity
+        //    Entity& entity = EM.createEntity(entityName);
+        //    entityCount++;
+        //    foundAnyEntities = true;
+        //    LM.writeLog("SerialisationManager::loadScene() - Created entity '%s' with ID %d", entityName.c_str(), entity.get_id());
+
+        //    // Look for Transform3D component
+        //    size_t transform3DPos = fileContent.find("\"Transform3D\"", namePos);
+        //    size_t nextNamePos = fileContent.find("\"name\"", namePos + 1);
+
+        //    // Make sure this Transform3D belongs to this entity (not the next one)
+        //    if (transform3DPos != std::string::npos &&
+        //        (nextNamePos == std::string::npos || transform3DPos < nextNamePos)) {
+
+        //        LM.writeLog("SerialisationManager::loadScene() - Found Transform3D for entity '%s'", entityName.c_str());
+
+        //        // Extract Transform3D data using simple string search
+        //        Vector3D position = extractVector3D(fileContent, transform3DPos, "position");
+        //        Vector3D rotation = extractVector3D(fileContent, transform3DPos, "rotation");
+        //        Vector3D scale = extractVector3D(fileContent, transform3DPos, "scale");
+
+        //        LM.writeLog("SerialisationManager::loadScene() - Position: (%.1f, %.1f, %.1f)", position.x, position.y, position.z);
+        //        LM.writeLog("SerialisationManager::loadScene() - Rotation: (%.1f, %.1f, %.1f)", rotation.x, rotation.y, rotation.z);
+        //        LM.writeLog("SerialisationManager::loadScene() - Scale: (%.1f, %.1f, %.1f)", scale.x, scale.y, scale.z);
+
+        //        // Create the Transform3D component
+        //        Transform3D* transform = EM.addComponent<Transform3D>(entity.get_id(), position, rotation, scale);
+        //        if (transform) {
+        //            LM.writeLog("SerialisationManager::loadScene() - Transform3D component created successfully for entity '%s'", entityName.c_str());
+        //        }
+        //        else {
+        //            LM.writeLog("SerialisationManager::loadScene() - Failed to create Transform3D component for entity '%s'", entityName.c_str());
+        //        }
+        //    }
+        //    else {
+        //        LM.writeLog("SerialisationManager::loadScene() - No Transform3D component found for entity '%s'", entityName.c_str());
+        //    }
+
+        //    // Move search position past this entity
+        //    searchPos = namePos + 1;
+        //}
+
+        ////  PROPER SUCCESS/FAILURE LOGIC
+        //if (!foundAnyEntities) {
+        //    LM.writeLog("SerialisationManager::loadScene() - ERROR: No entities found in scene file");
+        //    return false; // RETURN FALSE IF NO ENTITIES LOADED
+        //}
 
         LM.writeLog("SerialisationManager::loadScene() - Scene loaded successfully, processed %d entities", entityCount);
         return true; // ONLY RETURN TRUE IF ENTITIES WERE ACTUALLY LOADED
@@ -309,6 +489,15 @@ namespace gam300 {
                 if (Transform3D* transform = EM.getComponent<Transform3D>(entity.get_id())) {
                     file << getIndent(4) << "\"Transform3D\": " << serializer->second->serialize(transform);
                     hasComponents = true;
+                }
+            }
+
+			// Check for Audio_Component
+            if (auto serializer = m_component_serializers.find("AudioComponent");
+                serializer != m_component_serializers.end()) {
+                if (AudioComponent* audio = EM.getComponent<AudioComponent>(entity.get_id())) {
+					file << getIndent(4) << "\"Audio_Component\": " << serializer->second->serialize(audio);
+					hasComponents = true;
                 }
             }
 
@@ -630,5 +819,29 @@ namespace gam300 {
 
         return Vector3D(values[0], values[1], values[2]);
     }
+
+    std::string SerialisationManager::extractNumberValue(const std::string& json, const std::string& fieldName) {
+        size_t pos = json.find("\"" + fieldName + "\"");
+        if (pos == std::string::npos) {
+            return "";
+        }
+
+        size_t colonPos = json.find(':', pos);
+        if (colonPos == std::string::npos) {
+            return "";
+        }
+        
+        // Move past colon
+        size_t valueStart = json.find_first_not_of(" \t\n\r", colonPos + 1);
+        if (valueStart == std::string::npos) {
+            return "";
+        }
+
+        size_t valueEnd = json.find_first_of(",}\n\r", valueStart);
+        if (valueEnd == std::string::npos) valueEnd = json.length();
+
+        return json.substr(valueStart, valueEnd - valueStart);
+    }
+
 
 } // end of namespace gam300
