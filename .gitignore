@@ -20,3 +20,5 @@ Release
 *.log
 *.tlog
 *.lastbuildState
+
+/Survival_Kit/External_Libraries/include/xtexture.plugin/
