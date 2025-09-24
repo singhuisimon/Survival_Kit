@@ -11,7 +11,7 @@
  // Include header file
 #include "ImguiManager.h"
 #include "ECSManager.h"
-#include "SerialisationManager.h"
+#include "SerialisationBinManager.h"
 #include <iostream>
 #include "../Utility/AssetPath.h"
 #include "../Component/Transform3D.h"
@@ -127,7 +127,7 @@ namespace gam300 {
 
                     if (sceneFiles[i].second != shownFile) {
 
-                        if (SEM.loadScene(sceneFiles[i].second)) {
+                        if (SEB.loadScene(sceneFiles[i].second)) {
 
                             shownFile = sceneFiles[i].second;
 
@@ -141,8 +141,8 @@ namespace gam300 {
                             LM.writeLog("IMGUI_Manager::displayFileList(): Scene %s failed to load. Loading default scene.", sceneFiles[i].first.c_str());
                             //std::cout << "Scene " << sceneFiles[i].first << "failed to load from displayFileList. Loading default scene." << std::endl;
 
-                            SEM.saveScene(getAssetFilePath("Scene/Game.scn"));
-                            if (SEM.loadScene(getAssetFilePath("Scene/Game.scn"))) {
+                            SEB.saveScene(getAssetFilePath("Scene/Game.scn"));
+                            if (SEB.loadScene(getAssetFilePath("Scene/Game.scn"))) {
 
                                 LM.writeLog("IMGUI_Manager::displayFileList(): Default scene loaded successfully.");
                                 //std::cout << "Default scene loaded successfully from displayFileList" << std::endl;

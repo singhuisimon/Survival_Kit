@@ -14,6 +14,11 @@
 #include <utility>
 #include <vector>
 
+#include "ECSManager.h"
+#include "LogManager.h"
+#include "../Component/Transform3D.h"
+
+
 #define SEB gam300::SerializerBin::getInstance()
 
 namespace gam300
@@ -61,64 +66,93 @@ namespace gam300
 	    }                                              \
 	  }
 
-	 /**************************************************************************
-	  * @brief
-	  * Binary (de)serialization utilities with compile-time type reflection.
-	  * Supports PODs, contiguous containers (std::string/std::vector),
-	  * fixed-size arrays, optionals, pairs, maps/unordered_maps, and user
-	  * types that declare fields via REFLECT_TYPE.
-	  * @details
-	  * Reflection is provided by specializing `reflect<T>::fields()` to return
-	  * a tuple of pointers-to-members. The serializer iterates fields in that
-	  * order and recursively (de)serializes each.
-	  **************************************************************************/
+	struct SceneFileHeader
+	{
+		std::uint32_t magic = 0x424E4353; // 'SCNB' in LE
+		std::uint16_t major = 1;
+		std::uint16_t minor = 0;
+	};
+	REFLECT_TYPE(SceneFileHeader, &SceneFileHeader::magic, &SceneFileHeader::major, &SceneFileHeader::minor);
+
+	// Basic math bin type
+	struct Vector3DBin
+	{
+		float x{}, y{}, z{};
+	};
+	REFLECT_TYPE(Vector3DBin, &Vector3DBin::x, &Vector3DBin::y, &Vector3DBin::z);
+
+	// Transform component payload (binary)
+	struct Transform3DBin
+	{
+		Vector3DBin position{};
+		Vector3DBin prev_position{};   // kept for parity with your JSON
+		Vector3DBin rotation{};
+		Vector3DBin scale{ 1.f, 1.f, 1.f };
+	};	
+	
+	REFLECT_TYPE(Transform3DBin,
+		&Transform3DBin::position,
+		&Transform3DBin::prev_position,
+		&Transform3DBin::rotation,
+		&Transform3DBin::scale
+	);
+
+	// One scene object (entity)
+	struct SceneObjectBin
+	{
+		std::string name;
+		std::optional<Transform3DBin> transform3d; // optional = present or not
+	};
+	REFLECT_TYPE(SceneObjectBin, &SceneObjectBin::name, &SceneObjectBin::transform3d);
+
+	// Whole scene
+	struct SceneBin
+	{
+		std::vector<SceneObjectBin> objects;
+	};
+	REFLECT_TYPE(SceneBin, &SceneBin::objects);
+
+	/**************************************************************************
+	 * @brief
+	 * Binary (de)serialization utilities with compile-time type reflection.
+	 * Supports PODs, contiguous containers (std::string/std::vector),
+	 * fixed-size arrays, optionals, pairs, maps/unordered_maps, and user
+	 * types that declare fields via REFLECT_TYPE.
+	 * @details
+	 * Reflection is provided by specializing `reflect<T>::fields()` to return
+	 * a tuple of pointers-to-members. The serializer iterates fields in that
+	 * order and recursively (de)serializes each.
+	 **************************************************************************/
 	class SerializerBin
 	{
 	public:
 		// Instance
-		SerializerBin &getInstance()
+		static SerializerBin &getInstance() // <-- make static
 		{
 			static SerializerBin instance{};
 			return instance;
 		}
 
+		bool saveScene(const std::string &filename);
+		bool loadScene(const std::string &filename);
+
 		//===================== File helpers =====================
-		/**************************************************************************
-		 * @brief
-		 * Serialize an object to a binary file.
-		 * @tparam T
-		 * Object type.
-		 * @param path
-		 * Output file path.
-		 * @param obj
-		 * Object instance to serialize.
-		 * @details
-		 * Dispatches to `write_any` which selects the correct strategy at compile time.
-		 **************************************************************************/
 		template <class T>
-		static inline void save(const char *path, const T &obj)
+		static inline bool save(const char *path, const T &obj)
 		{
 			std::ofstream os(path, std::ios::binary);
+			if (!os.is_open()) return false;
 			write_any(os, obj);
+			return static_cast<bool>(os);
 		}
 
-		/**************************************************************************
-		 * @brief
-		 * Deserialize an object from a binary file.
-		 * @tparam T
-		 * Object type.
-		 * @param path
-		 * Input file path.
-		 * @param obj
-		 * Destination object to populate.
-		 * @details
-		 * Dispatches to `read_any` which selects the correct strategy at compile time.
-		 **************************************************************************/
 		template <class T>
-		static inline void load(const char *path, T &obj)
+		static inline bool load(const char *path, T &obj)
 		{
 			std::ifstream is(path, std::ios::binary);
+			if (!is.is_open()) return false;
 			read_any(is, obj);
+			return static_cast<bool>(is);
 		}
 
 		//===================== Core dispatch =====================
@@ -662,7 +696,6 @@ namespace gam300
 				});
 		}
 	};
-
 } // namespace gam300
 
 #endif // __SERIALISATIONBIN_MANAGER_H__
