@@ -239,7 +239,6 @@ namespace gam300 {
 		// Set the play state
         if (audio) {
 			audio->setPlayState(state);
-            std::cout << "playstate and audio read" << std::endl;
         }
 
 		return audio;

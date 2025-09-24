@@ -189,6 +189,30 @@ namespace gam300 {
 			return;
 		}
 
+		/*auto channel_it = m_activechannels.find(entity_id);
+		FMOD::Channel* channel = (channel_it != m_activechannels.end()) ? channel_it->second : nullptr;
+
+		if (channel) {
+			bool is_playing = false;
+			channel->isPlaying(&is_playing);
+
+			bool is_paused = false;
+			channel->getPaused(&is_paused);
+
+			if (!is_playing && !is_paused) {
+				audio->setPlayState(PlayState::STOP);
+				m_activechannels.erase(channel_it);
+				LM.writeLog("AudioSystem::process_entity() - Sound on entity %u finished playing", entity_id);
+			}
+			else {
+				if (is_paused && audio->getPlayState() != PlayState::PAUSE) {
+					audio->setPlayState(PlayState::PAUSE);
+				} else if (!is_paused && audio->getPlayState() == PlayState::PAUSE) {
+					audio->setPlayState(PlayState::PLAY);
+				}
+			}
+		}*/
+
 		switch (audio->getPlayState()) {
 			case PlayState::PLAY:
 				playSound(entity_id, audio);
@@ -245,7 +269,7 @@ namespace gam300 {
 		}
 
 		FMOD::Channel* channel = nullptr;
-		if(m_coresystem->playSound(sound, nullptr, true, &channel) == FMOD_OK) {
+		if(m_coresystem->playSound(sound, nullptr, false, &channel) == FMOD_OK) {
 			if (channel) {
 				channel->setVolume(audio->getVolume());
 				channel->setPitch(audio->getPitch());
@@ -457,12 +481,29 @@ namespace gam300 {
 
 		for (const auto& pair : m_activechannels) {
 			bool is_playing = false;
-			if (pair.second && pair.second->isPlaying(&is_playing) == FMOD_OK) {
+			bool is_paused = false;
+
+			pair.second->getPaused(&is_paused);
+			pair.second->isPlaying(&is_playing);
+
+			if(!is_playing && !is_paused) {
+				to_remove.push_back(pair.first);
+			}
+
+			AudioComponent* audio = EM.getComponent<AudioComponent>(pair.first);
+			if (audio && audio->getPlayState() != PlayState::STOP) {
+				audio->setPlayState(PlayState::STOP);
+			}
+
+			/*if (pair.second && pair.second->isPlaying(&is_playing) == FMOD_OK) {
 				if (!is_playing) {
 					to_remove.push_back(pair.first);
 				}
-			}
+			}*/
 		}
+
+		//set the state back to stopped for those removed
+
 
 		for (EntityID id : to_remove) {
 			m_activechannels.erase(id);
