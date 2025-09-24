@@ -1,24 +1,24 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\kuekw\\source\\repos\\here\\Survival_Kit\\Survival_Kit\\ScriptAPI\\ScriptAPI.vcxproj": {}
+    "C:\\Users\\iAmRe\\Documents\\GitHub\\Survival_Kit\\Survival_Kit\\ScriptAPI\\ScriptAPI.vcxproj": {}
   },
   "projects": {
-    "C:\\Users\\kuekw\\source\\repos\\here\\Survival_Kit\\Survival_Kit\\ScriptAPI\\ScriptAPI.vcxproj": {
+    "C:\\Users\\iAmRe\\Documents\\GitHub\\Survival_Kit\\Survival_Kit\\ScriptAPI\\ScriptAPI.vcxproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\kuekw\\source\\repos\\here\\Survival_Kit\\Survival_Kit\\ScriptAPI\\ScriptAPI.vcxproj",
+        "projectUniqueName": "C:\\Users\\iAmRe\\Documents\\GitHub\\Survival_Kit\\Survival_Kit\\ScriptAPI\\ScriptAPI.vcxproj",
         "projectName": "ScriptAPI",
-        "projectPath": "C:\\Users\\kuekw\\source\\repos\\here\\Survival_Kit\\Survival_Kit\\ScriptAPI\\ScriptAPI.vcxproj",
-        "packagesPath": "C:\\Users\\kuekw\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\kuekw\\source\\repos\\here\\Survival_Kit\\Survival_Kit\\ScriptAPI\\obj\\",
+        "projectPath": "C:\\Users\\iAmRe\\Documents\\GitHub\\Survival_Kit\\Survival_Kit\\ScriptAPI\\ScriptAPI.vcxproj",
+        "packagesPath": "C:\\Users\\iAmRe\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\iAmRe\\Documents\\GitHub\\Survival_Kit\\Survival_Kit\\ScriptAPI\\obj\\",
         "projectStyle": "PackageReference",
         "UsingMicrosoftNETSdk": false,
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\kuekw\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\iAmRe\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],

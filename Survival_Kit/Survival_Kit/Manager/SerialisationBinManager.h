@@ -2,33 +2,55 @@
 #ifndef __SERIALISATION_MANAGER_H__
 #define __SERIALISATION_MANAGER_H__
 
+#include <array>
 #include <cstdint>
 #include <fstream>
+#include <map>
+#include <optional>
+#include <string>
 #include <tuple>
 #include <type_traits>
+#include <unordered_map>
+#include <utility>
 #include <vector>
-#include <string>
 
 namespace gam300
 {
+	//===================== Reflection core =====================
+
+	template <typename T>
+	struct reflect
+	{
+		// Specialize with: static constexpr auto fields() { return std::make_tuple(&T::a, &T::b, ...); }
+	};
+
+	template <typename T, typename = void>
+	struct is_reflected : std::false_type {};
+	template <typename T>
+	struct is_reflected<T, std::void_t<decltype(reflect<T>::fields())>> : std::true_type {};
+
+	template <typename T>
+	inline constexpr bool is_reflected_v = is_reflected<T>::value;
+
+	// Helper macro for user types:
+	//   struct Transform { float3 pos, rot, scale; };
+	//   REFLECT_TYPE(Transform, &Transform::pos, &Transform::rot, &Transform::scale)
+#define REFLECT_TYPE(TYPE, ...)                    \
+	  template<> struct ::gam300::reflect<TYPE> {      \
+	    static constexpr auto fields() {               \
+	      return std::make_tuple(__VA_ARGS__);         \
+	    }                                              \
+	  }
 
 	/*!***********************************************************************
-	\brief
-	Binary (de)serialization helpers for PODs, contiguous containers
-	(std::string/std::vector), and user types exposing `as_tuple()`.
+	Binary (de)serialization for PODs, contiguous containers (string/vector),
+	and user types declaring REFLECT_TYPE(T, &T::field, ...).
 	*************************************************************************/
 	class SerializerBin
 	{
 	public:
 		//===================== File helpers =====================
 
-		/*!***********************************************************************
-		\brief
-		Convenience function to serialize any supported object to a binary file.
-		\tparam T  The object type to serialize.
-		\param[in] path  Output file path.
-		\param[in] obj   Object instance to serialize.
-		*************************************************************************/
 		template <class T>
 		static inline void save(const char *path, const T &obj)
 		{
@@ -36,13 +58,6 @@ namespace gam300
 			write_any(os, obj);
 		}
 
-		/*!***********************************************************************
-		\brief
-			Convenience function to deserialize any supported object from a binaryfile.
-		\tparam T  The object type to deserialize.
-		\param[in]  path  Input file path.
-		\param[out] obj   Destination object to populate.
-		*************************************************************************/
 		template <class T>
 		static inline void load(const char *path, T &obj)
 		{
@@ -52,14 +67,6 @@ namespace gam300
 
 		//===================== Core dispatch =====================
 
-		/*!***********************************************************************
-		\brief
-		Generic dispatcher for writing a value to a binary stream.
-		Routes to:
-			- write_container() if T is contiguous+resizable (string/vector),
-			- write_data()      if T is trivially copyable,
-			- write_component() otherwise (field-by-field via as_tuple()).
-		*************************************************************************/
 		template <class T>
 		static void write_any(std::ofstream &os, const T &v)
 		{
@@ -71,20 +78,18 @@ namespace gam300
 			{
 				write_data(os, v);
 			}
+			else if constexpr (is_reflected_v<T>)
+			{
+				write_reflected(os, v);
+			}
 			else
 			{
-				write_component(os, v);
+				static_assert(is_reflected_v<T>,
+					"Type is neither trivially copyable, contiguous container, nor reflected. "
+					"Add REFLECT_TYPE(T, &T::field, ...) for this type.");
 			}
 		}
 
-		/*!***********************************************************************
-		\brief
-		Generic dispatcher for reading a value from a binary stream.
-		Routes to:
-			- read_container() if T is contiguous+resizable (string/vector),
-			- read_data()      if T is trivially copyable,
-			- read_component() otherwise (field-by-field via as_tuple()).
-		*************************************************************************/
 		template <class T>
 		static void read_any(std::ifstream &is, T &v)
 		{
@@ -96,19 +101,21 @@ namespace gam300
 			{
 				read_data(is, v);
 			}
+			else if constexpr (is_reflected_v<T>)
+			{
+				read_reflected(is, v);
+			}
 			else
 			{
-				read_component(is, v);
+				static_assert(is_reflected_v<T>,
+					"Type is neither trivially copyable, contiguous container, nor reflected. "
+					"Add REFLECT_TYPE(T, &T::field, ...) for this type.");
 			}
 		}
 
 	private:
 		//===================== u64 size I/O =====================
 
-		/*!***********************************************************************
-		\brief
-		Writes an integer value to the output stream as a 64-bit unsigned integer.
-		*************************************************************************/
 		template <typename T>
 		static inline void write_u64(std::ofstream &os, T n)
 		{
@@ -117,10 +124,6 @@ namespace gam300
 			os.write(reinterpret_cast<const char *>(&v), sizeof(v));
 		}
 
-		/*!***********************************************************************
-		\brief
-		Reads a 64-bit unsigned integer value from the input stream.
-		*************************************************************************/
 		static inline std::uint64_t read_u64(std::ifstream &is)
 		{
 			std::uint64_t v{};
@@ -152,19 +155,20 @@ namespace gam300
 		template <class C>
 		inline static constexpr bool is_contig_resizable_v = is_contig_resizable<C>::value;
 
-		template <class Tuple, class F>
-		static inline void tuple_for_each(Tuple &&tp, F &&f)
+		template <typename Tuple, typename F, std::size_t... Is>
+		static inline void tuple_for_each_impl(Tuple &&tp, F &&f, std::index_sequence<Is...>)
 		{
-			std::apply(
-				[&](auto&&... elems)
-				{
-					(f(std::forward<decltype(elems)>(elems)), ...);
-				},
-				std::forward<Tuple>(tp)
-			);
+			(f(std::get<Is>(std::forward<Tuple>(tp))), ...);
 		}
 
-		//===================== data (POD) =====================
+		template <typename Tuple, typename F>
+		static inline void tuple_for_each(Tuple &&tp, F &&f)
+		{
+			constexpr auto N = std::tuple_size<std::remove_reference_t<Tuple>>::value;
+			tuple_for_each_impl(std::forward<Tuple>(tp), std::forward<F>(f), std::make_index_sequence<N>{});
+		}
+
+		//===================== POD (trivially copyable) =====================
 
 		template <class T>
 		static std::enable_if_t<std::is_trivially_copyable_v<T> && !is_contig_resizable_v<T>>
@@ -180,7 +184,7 @@ namespace gam300
 			is.read(reinterpret_cast<char *>(&value), sizeof(T));
 		}
 
-		//===================== containers (contiguous, resizable) =====================
+		//===================== Containers (contiguous, resizable) =====================
 
 		// Trivial element -> bulk size + data
 		template <class C>
@@ -189,10 +193,8 @@ namespace gam300
 		{
 			write_u64(os, c.size());
 			if (!c.empty())
-			{
 				os.write(reinterpret_cast<const char *>(c.data()),
 					sizeof(typename C::value_type) * c.size());
-			}
 		}
 
 		template <class C>
@@ -202,11 +204,112 @@ namespace gam300
 			const auto n = static_cast<std::size_t>(read_u64(is));
 			c.resize(n);
 			if (n)
-			{
 				is.read(reinterpret_cast<char *>(c.data()),
 					sizeof(typename C::value_type) * n);
+		}
+
+		// Fixed-size arrays: size is compile-time; stream elements one-by-one.
+		template <class T, std::size_t N>
+		static void write_container(std::ofstream &os, const std::array<T, N> &arr)
+		{
+			if constexpr (std::is_trivially_copyable_v<T>)
+			{
+				os.write(reinterpret_cast<const char *>(arr.data()), sizeof(T) * N);
+			}
+			else
+			{
+				for (auto const &e : arr) write_any(os, e);
 			}
 		}
+
+		template <class T>
+		static void write_any(std::ofstream &os, const std::optional<T> &opt)
+		{
+			std::uint8_t has = opt.has_value() ? 1 : 0;
+			os.write(reinterpret_cast<const char *>(&has), sizeof(has));
+			if (has) write_any(os, *opt);
+		}
+
+		template <class T>
+		static void read_any(std::ifstream &is, std::optional<T> &opt)
+		{
+			std::uint8_t has{};
+			is.read(reinterpret_cast<char *>(&has), sizeof(has));
+			if (has) { T tmp{}; read_any(is, tmp); opt = std::move(tmp); }
+			else { opt.reset(); }
+		}
+
+		template <class A, class B>
+		static void write_any(std::ofstream &os, const std::pair<A, B> &p)
+		{
+			write_any(os, p.first);
+			write_any(os, p.second);
+		}
+
+		template <class A, class B>
+		static void read_any(std::ifstream &is, std::pair<A, B> &p)
+		{
+			read_any(is, p.first);
+			read_any(is, p.second);
+		}
+
+		// std::map
+		template <class K, class V, class Cmp, class Alloc>
+		static void write_container(std::ofstream &os, const std::map<K, V, Cmp, Alloc> &m)
+		{
+			write_u64(os, m.size());
+			for (auto const &kv : m) { write_any(os, kv.first); write_any(os, kv.second); }
+		}
+
+		template <class K, class V, class Cmp, class Alloc>
+		static void read_container(std::ifstream &is, std::map<K, V, Cmp, Alloc> &m)
+		{
+			const auto n = static_cast<std::size_t>(read_u64(is));
+			m.clear();
+			for (std::size_t i = 0; i < n; ++i)
+			{
+				K k{}; V v{};
+				read_any(is, k); read_any(is, v);
+				m.emplace(std::move(k), std::move(v));
+			}
+		}
+
+		// std::unordered_map
+		template <class K, class V, class Hash, class Eq, class Alloc>
+		static void write_container(std::ofstream &os, const std::unordered_map<K, V, Hash, Eq, Alloc> &m)
+		{
+			write_u64(os, m.size());
+			for (auto const &kv : m) { write_any(os, kv.first); write_any(os, kv.second); }
+		}
+
+		template <class K, class V, class Hash, class Eq, class Alloc>
+		static void read_container(std::ifstream &is, std::unordered_map<K, V, Hash, Eq, Alloc> &m)
+		{
+			const auto n = static_cast<std::size_t>(read_u64(is));
+			m.clear();
+			m.reserve(n); // helps performance
+			for (std::size_t i = 0; i < n; ++i)
+			{
+				K k{}; V v{};
+				read_any(is, k); read_any(is, v);
+				m.emplace(std::move(k), std::move(v));
+			}
+		}
+
+
+		template <class T, std::size_t N>
+		static void read_container(std::ifstream &is, std::array<T, N> &arr)
+		{
+			if constexpr (std::is_trivially_copyable_v<T>)
+			{
+				is.read(reinterpret_cast<char *>(arr.data()), sizeof(T) * N);
+			}
+			else
+			{
+				for (auto &e : arr) read_any(is, e);
+			}
+		}
+
 
 		// Non-trivial elements in std::vector -> element-wise recurse
 		template <class T, class Alloc>
@@ -232,28 +335,31 @@ namespace gam300
 			}
 		}
 
-		//===================== components (as_tuple) =====================
+		//===================== Reflected components (member-pointer list) =====================
 
-		template <class T>
-		static void write_component(std::ofstream &os, const T &obj)
+		template <typename T>
+		static void write_reflected(std::ofstream &os, const T &obj)
 		{
-			auto tup = obj.as_tuple(); // tuple of (const) refs
-			tuple_for_each(tup, [&](auto const &f)
+			auto fptrs = reflect<T>::fields(); // tuple of pointers-to-members
+			tuple_for_each(fptrs, [&](auto memptr)
 				{
-					write_any(os, f);
+					const auto &field = obj.*memptr;
+					write_any(os, field);
 				});
 		}
 
-		template <class T>
-		static void read_component(std::ifstream &is, T &obj)
+		template <typename T>
+		static void read_reflected(std::ifstream &is, T &obj)
 		{
-			auto tup = obj.as_tuple(); // tuple of refs
-			tuple_for_each(tup, [&](auto &f)
+			auto fptrs = reflect<T>::fields(); // tuple of pointers-to-members
+			tuple_for_each(fptrs, [&](auto memptr)
 				{
-					read_any(is, f);
+					auto &field = obj.*memptr;
+					read_any(is, field);
 				});
 		}
 	};
 
-} // end of namespace gam300
+} // namespace gam300
+
 #endif // __SERIALISATION_MANAGER_H__
