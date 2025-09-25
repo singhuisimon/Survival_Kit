@@ -4,6 +4,13 @@
 #include <algorithm>
 #include <cctype>
 
+//all the other seperated importer for different asset types
+#include "Importers/AudioImporter.h"
+#include "Importers/MeshImporter.h"
+#include "Importers/SceneImporter.h"
+#include "Importers/ShaderImporter.h"
+#include "Importers/TextureImporter.h"
+
 
 namespace fs = std::filesystem;
 
@@ -19,7 +26,7 @@ namespace gam300 {
 			return ext;
 		}
 
-
+		// -------------- OPTIONAL --------------
 		// Compute a 64-bit FNV-1a hash of a file, returned as 16-hex chars.
 		std::string HashFileFNV1a64(const std::string& path) {
 			static constexpr unsigned long long FNV_OFFSET = 1469598103934665603ull;
@@ -150,22 +157,28 @@ namespace gam300 {
 	// ---------------- Defaults ----------------
 	void RegisterDefaultImporters(AssetImporterRegistry& reg)
 	{
-		// Texture-like formats
-		reg.Register(std::make_unique<CopyImporter>(std::vector<std::string>{
-			".png", ".jpg", ".jpeg", ".bmp", ".tga", ".dds"
-		}));
-		// Audio-like formats
-		reg.Register(std::make_unique<CopyImporter>(std::vector<std::string>{
-			".wav", ".ogg", ".mp3", ".flac"
-		}));
-		// Mesh-like formats
-		reg.Register(std::make_unique<CopyImporter>(std::vector<std::string>{
-			".obj", ".fbx", ".gltf", ".glb"
-		}));
-		// Materials / Shaders / Scenes
-		reg.Register(std::make_unique<CopyImporter>(std::vector<std::string>{
-			".mat", ".vert", ".frag", ".glsl", ".hlsl", ".shader", ".scene", ".scn", ".json"
-		}));
+		reg.Register(std::make_unique<TextureImporter>());
+		reg.Register(std::make_unique<MeshImporter>());
+		reg.Register(std::make_unique<AudioImporter>());
+		reg.Register(std::make_unique<ShaderImporter>());
+		reg.Register(std::make_unique<SceneImporter>());
+
+		//// Texture-like formats
+		//reg.Register(std::make_unique<CopyImporter>(std::vector<std::string>{
+			//".png", ".jpg", ".jpeg", ".bmp", ".tga", ".dds"
+		//}));
+		//// Audio-like formats
+		//reg.Register(std::make_unique<CopyImporter>(std::vector<std::string>{
+			//".wav", ".ogg", ".mp3", ".flac"
+		//}));
+		//// Mesh-like formats
+		//reg.Register(std::make_unique<CopyImporter>(std::vector<std::string>{
+			//".obj", ".fbx", ".gltf", ".glb"
+		//}));
+		//// Materials / Shaders / Scenes
+		//reg.Register(std::make_unique<CopyImporter>(std::vector<std::string>{
+			//".mat", ".vert", ".frag", ".glsl", ".hlsl", ".shader", ".scene", ".scn", ".json"
+		//}));
 	}
 
 }	//end of namespace gam300

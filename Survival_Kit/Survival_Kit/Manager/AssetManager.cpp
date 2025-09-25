@@ -135,10 +135,10 @@ namespace gam300 {
 		// Iterate changes from the scanner and act on them
 		for (const auto& c : m_scanner.Scan()) {
 			switch (c.kind) {
-			case ::game300::ScanChange::Kind::Added:
-			case ::game300::ScanChange::Kind::Modified:
+			case ::gam300::ScanChange::Kind::Added:
+			case ::gam300::ScanChange::Kind::Modified:
 				handleAddedOrModified(c.sourcePath); break;
-			case ::game300::ScanChange::Kind::Removed:
+			case ::gam300::ScanChange::Kind::Removed:
 				handleRemoved(c.sourcePath); break;
 			}
 		}

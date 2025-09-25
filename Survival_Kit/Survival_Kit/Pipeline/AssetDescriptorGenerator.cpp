@@ -17,50 +17,80 @@ namespace gam300 {
 
 
 	bool AssetDescriptorGenerator::GenerateFor(const AssetRecord& rec,
-		const DescriptorExtras* extras,
-		std::string* outPath) const
+		const DescriptorExtras* extras, std::string* outPath) const
 	{
-		const std::string path = DefaultDescPathForSource(rec.sourcePath);
-		if (!EnsureParentDir(path)) return false;
+	    //compute default descriptor file path from record
+        const std::string path = DefaultDescPathForRecord(rec);
+        if (!EnsureParentDir(path)) return false;
 
-		const std::string json = BuildJson(&rec, extras);
-		if (!WriteText(path, json)) return false;
-		if (outPath) *outPath = path;
-		return true;
+        //build JSON contents
+        const std::string json = BuildJson(&rec, extras);
+
+        //write file
+        if (!WriteText(path, json)) return false;
+
+        if (outPath) *outPath = path;
+        return true;
 	}
 
 
 
-	bool AssetDescriptorGenerator::GenerateForPath(const std::string& sourcePath,
-		const DescriptorExtras* extras,
-		std::string* outPath) const
+	bool AssetDescriptorGenerator::GenerateForPath(AssetDatabase& db, const std::string& sourcePath,
+		const DescriptorExtras* extras, std::string* outPath) const
 	{
-		const std::string path = DefaultDescPathForSource(sourcePath);
-		if (!EnsureParentDir(path)) return false;
+        //ensure the database has a stable GUID for this source path
+        AssetId id = db.EnsureIdForPath(sourcePath);
+        AssetRecord* rec = db.FindMutable(id);
+        if (!rec) return false;
 
+        //compute descriptor file path
+        const std::string path = DefaultDescPathForRecord(*rec);
+        if (!EnsureParentDir(path)) return false;
 
-		const std::string json = BuildJson(nullptr, extras);
-		if (!WriteText(path, json)) return false;
-		if (outPath) *outPath = path;
-		return true;
+        //build json for this record
+        const std::string json = BuildJson(rec, extras);
+
+        //write to file
+        if (!WriteText(path, json)) return false;
+
+        if (outPath) *outPath = path;
+        return true;
 	}
 
 
-	std::string AssetDescriptorGenerator::DefaultDescPathForSource(const std::string& sourcePath) const
+    std::string AssetDescriptorGenerator::DefaultDescPathForRecord(const AssetRecord& rec) const
 	{
-		fs::path p(sourcePath);
-		const std::string filename = p.filename().string();
-		const std::string descName = filename + ".desc"; // keep original extension, append .desc
-		if (m_sidecar)
-		{
-			return (p.parent_path() / descName).string();
-		}
-		else
-		{
-			if (m_outputRoot.empty())
-				return (p.parent_path() / descName).string(); // fallback to sidecar-like
-			return (fs::path(m_outputRoot) / descName).string();
-		}
+        //convert the GUID into a 16-character uppercase hex string
+        std::ostringstream ss;
+        ss << std::uppercase << std::hex << std::setw(16) << std::setfill('0') << rec.id;
+        const std::string guid = ss.str();
+
+        //use first 2 + next 2 characters as subfolders (the two directories)
+        const std::string dir1 = guid.substr(0, 2);
+        const std::string dir2 = guid.substr(2, 2);
+
+        //map asset type to folder
+        std::string typeFolder;
+
+        switch (rec.type) {
+            case AssetType::Texture2D: typeFolder = "Texture"; break;
+            case AssetType::Mesh:      typeFolder = "Mesh";    break;
+            case AssetType::Material:  typeFolder = "Material"; break;
+            case AssetType::Shader:    typeFolder = "Shader";  break;
+            case AssetType::Audio:     typeFolder = "Audio";   break;
+            case AssetType::Scene:     typeFolder = "Scene";   break;
+            default:                   typeFolder = "Unknown"; break;
+        }
+
+        //final path
+        fs::path dir = "AssetDescriptors";
+        dir /= typeFolder;
+        dir /= dir1;
+        dir /= dir2;
+        dir /= guid + ".desc";
+
+        fs::create_directories(dir);
+        return (dir / "Descriptor.txt").string();
 	}
 
 	
@@ -82,6 +112,12 @@ namespace gam300 {
         ind(1); o << "\"asset\": ";
         if (recOpt) {
             o << "{"; nl(1);
+
+            // GUID in hex (readable)
+            std::ostringstream ss;
+            ss << std::uppercase << std::hex << std::setw(16) << std::setfill('0') << recOpt->id;
+
+            ind(2); o << "\"guid\": \"" << ss.str() << "\","; nl(1);
             ind(2); o << "\"id\": " << recOpt->id << ","; nl(1);
             ind(2); o << "\"sourcePath\": \"" << EscapeJson(recOpt->sourcePath) << "\","; nl(1);
             ind(2); o << "\"intermediatePath\": \"" << EscapeJson(recOpt->intermediatePath) << "\","; nl(1);
@@ -91,6 +127,7 @@ namespace gam300 {
             ind(2); o << "\"contentHash\": \"" << EscapeJson(recOpt->contentHash) << "\","; nl(1);
             ind(2); o << "\"lastWriteTime\": " << static_cast<unsigned long long>(recOpt->lastWriteTime) << ","; nl(1);
             ind(2); o << "\"valid\": " << (recOpt->valid ? "true" : "false"); nl(1);
+
             ind(1); o << "},"; nl(1);
         }
         else {
@@ -157,15 +194,23 @@ namespace gam300 {
             fs::create_directories(dir, ec);
             return !ec;
         }
-        catch (...) { return false; }
+        catch (...) 
+        { 
+            return false; 
+        }
     }
 
     bool AssetDescriptorGenerator::WriteText(const std::string& path, const std::string& text)
     {
-        std::ofstream out(path, std::ios::binary | std::ios::trunc);
-        if (!out) return false;
-        out.write(text.data(), static_cast<std::streamsize>(text.size()));
-        return static_cast<bool>(out);
+        try {
+            std::ofstream ofs(path, std::ios::out | std::ios::trunc);
+            if (!ofs.is_open()) return false;
+            ofs << text;
+            return true;
+        }
+        catch (...) {
+            return false;
+        }
     }
 
 

@@ -9,7 +9,7 @@
 #include <ctime>
 #include <filesystem>
 
-namespace game300 {
+namespace gam300 {
 
 	/**
 	* @brief Change description for a scanned source file.
@@ -118,6 +118,6 @@ namespace game300 {
 	};
 
 
-} //end of namespace game300
+} //end of namespace gam300
 
 #endif // __ASSET_SCANNER_H__

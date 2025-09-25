@@ -83,7 +83,7 @@ namespace gam300 {
 
 		// State
 		Config m_cfg{};
-		::game300::AssetScanner m_scanner; //!< Scanner lives in namespace *game300*
+		::gam300::AssetScanner m_scanner; //!< Scanner lives in namespace *game300*
 		AssetImporterRegistry m_importers;
 		AssetDatabase m_db;
 		AssetDescriptorGenerator m_descGen;

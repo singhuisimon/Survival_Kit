@@ -43,7 +43,6 @@ namespace gam300 {
 			const std::string& intermediateDir) = 0;
 	};
 
-
 	/**
 	* @brief Registry that holds multiple importers and dispatches by extension.
 	*/
