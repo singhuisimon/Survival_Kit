@@ -15,6 +15,8 @@
 #include <glm-0.9.9.8/glm/gtc/quaternion.hpp>
 #include <glm-0.9.9.8/glm/gtx/quaternion.hpp>
 #include "../Component/Transform3D.h"
+#include "../Graphics/Texture.h"
+
 
 namespace gam300 {
 
@@ -134,7 +136,16 @@ namespace gam300 {
         //meshStorage.push_back(std::move(planeGL));
         meshStorage.push_back(std::move(sphereGL));
 
+        TextureDesc td{};
+        auto tex = Texture::load_from_file("..//Survival_Kit//Assets//text.png", td);
 
+        if (!tex.has_value()) {
+            // do something throw run time error
+        }
+
+        // do something with the texture
+        tex->handle();
+        
         // Log startup
         LM.writeLog("GraphicsManager::startUp() - Graphics Manager started successfully");
         return 0;

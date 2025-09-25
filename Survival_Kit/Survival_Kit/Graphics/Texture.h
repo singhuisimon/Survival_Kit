@@ -63,6 +63,7 @@ namespace gam300 {
 			if (m_handle != kInvalid) { destroy_gpu_texture(m_handle); m_handle = kInvalid; }
 			m_width = m_height = m_mip_levels = 0; m_srgb = false;
 		}
+
 		void move_from(Texture& o) noexcept {
 			m_handle = o.m_handle; m_width = o.m_width; m_height = o.m_height;
 			m_mip_levels = o.m_mip_levels; m_srgb = o.m_srgb;
