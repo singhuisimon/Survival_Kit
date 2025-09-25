@@ -28,6 +28,18 @@
     <ClCompile Include="Utility\MathUtils.cpp" />
     <ClCompile Include="Utility\Vector2D.cpp" />
     <ClCompile Include="Utility\Vector3D.cpp" />
+    <ClCompile Include="Component\Transform3D.cpp" />
+    <ClCompile Include="Manager\GraphicsManager.cpp" />
+    <ClCompile Include="Graphics\GLResources.cpp" />
+    <ClCompile Include="Graphics\ShaderProgram.cpp" />
+    <ClCompile Include="Graphics\Shape.cpp" />
+    <ClCompile Include="System\TransformSystem.cpp" />
+    <ClCompile Include="Component\RigidBody.cpp" />
+    <ClCompile Include="System\PhysicsSystem.cpp" />
+    <ClCompile Include="Graphics\Sampler.cpp" />
+    <ClCompile Include="Graphics\Texture.cpp" />
+    <ClCompile Include="Graphics\Common.cpp" />
+    <ClCompile Include="System\MovementSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component\Component.h" />
@@ -64,6 +76,27 @@
     <ClInclude Include="Utility\ECS_Variables.h" />
     <ClInclude Include="Utility\Vector2D.h" />
     <ClInclude Include="Utility\Vector3D.h" />
+    <ClInclude Include="Component\Transform3D.h" />
+    <ClInclude Include="Manager\GraphicsManager.h" />
+    <ClInclude Include="Graphics\Camera.h" />
+    <ClInclude Include="Graphics\Framebuffer.h" />
+    <ClInclude Include="Graphics\GLResources.h" />
+    <ClInclude Include="Graphics\Light.h" />
+    <ClInclude Include="Graphics\Material.h" />
+    <ClInclude Include="Graphics\MeshData.h" />
+    <ClInclude Include="Graphics\ShaderProgram.h" />
+    <ClInclude Include="Graphics\Shape.h" />
+    <ClInclude Include="Utility\Constant.h" />
+    <ClInclude Include="Component\TransformComponent.h" />
+    <ClInclude Include="System\TransformSystem.h" />
+    <ClInclude Include="Component\RigidBody.h" />
+    <ClInclude Include="System\PhysicsSystem.h" />
+    <ClInclude Include="Graphics\Texture.h" />
+    <ClInclude Include="Graphics\Sampler.h" />
+    <ClInclude Include="Graphics\stb_image.h" />
+    <ClInclude Include="Graphics\Common.h" />
+    <ClInclude Include="Graphics\SharedGraphics.h" />
+    <ClInclude Include="System\MovementSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Scene\Game.scn" />

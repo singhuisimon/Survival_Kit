@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -22,6 +22,16 @@
     <ClCompile Include="Component\InputComponent.cpp" />
     <ClCompile Include="Entity\Entity.cpp" />
     <ClCompile Include="Glad\glad.c" />
+    <ClCompile Include="Component\RigidBody.cpp" />
+    <ClCompile Include="Component\Transform3D.cpp" />
+    <ClCompile Include="Entity\Entity.cpp" />
+    <ClCompile Include="Glad\glad.c" />
+    <ClCompile Include="Graphics\Common.cpp" />
+    <ClCompile Include="Graphics\GLResources.cpp" />
+    <ClCompile Include="Graphics\Sampler.cpp" />
+    <ClCompile Include="Graphics\ShaderProgram.cpp" />
+    <ClCompile Include="Graphics\Shape.cpp" />
+    <ClCompile Include="Graphics\Texture.cpp" />
     <ClCompile Include="IMGUI\imgui.cpp" />
     <ClCompile Include="IMGUI\imgui_demo.cpp" />
     <ClCompile Include="IMGUI\imgui_draw.cpp" />
@@ -41,6 +51,9 @@
     <ClCompile Include="Manager\SerialisationManager.cpp" />
     <ClCompile Include="Manager\SystemManager.cpp" />
     <ClCompile Include="System\InputSystem.cpp" />
+    <ClCompile Include="System\MovementSystem.cpp" />
+    <ClCompile Include="System\PhysicsSystem.cpp" />
+    <ClCompile Include="System\TransformSystem.cpp" />
     <ClCompile Include="Utility\AssetPath.cpp" />
     <ClCompile Include="Utility\Clock.cpp" />
     <ClCompile Include="Utility\MathUtils.cpp" />
@@ -54,6 +67,24 @@
     <ClInclude Include="Component\InputComponent.h" />
     <ClInclude Include="Entity\Entity.h" />
     <ClInclude Include="Glad\glad.h" />
+    <ClInclude Include="Component\RigidBody.h" />
+    <ClInclude Include="Component\Transform3D.h" />
+    <ClInclude Include="Component\TransformComponent.h" />
+    <ClInclude Include="Entity\Entity.h" />
+    <ClInclude Include="Glad\glad.h" />
+    <ClInclude Include="Graphics\Camera.h" />
+    <ClInclude Include="Graphics\Common.h" />
+    <ClInclude Include="Graphics\Framebuffer.h" />
+    <ClInclude Include="Graphics\GLResources.h" />
+    <ClInclude Include="Graphics\Light.h" />
+    <ClInclude Include="Graphics\Material.h" />
+    <ClInclude Include="Graphics\MeshData.h" />
+    <ClInclude Include="Graphics\Sampler.h" />
+    <ClInclude Include="Graphics\ShaderProgram.h" />
+    <ClInclude Include="Graphics\Shape.h" />
+    <ClInclude Include="Graphics\SharedGraphics.h" />
+    <ClInclude Include="Graphics\stb_image.h" />
+    <ClInclude Include="Graphics\Texture.h" />
     <ClInclude Include="IMGUI\imconfig.h" />
     <ClInclude Include="IMGUI\imgui.h" />
     <ClInclude Include="IMGUI\imgui_impl_glfw.h" />
@@ -74,6 +105,8 @@
     <ClInclude Include="Manager\SerialisationBinManager.h" />
     <ClInclude Include="Manager\SerialisationManager.h" />
     <ClInclude Include="System\InputSystem.h" />
+    <ClInclude Include="System\MovementSystem.h" />
+    <ClInclude Include="System\PhysicsSystem.h" />
     <ClInclude Include="System\System.h" />
     <ClInclude Include="Utility\AssetPath.h" />
     <ClInclude Include="Utility\Clock.h" />
@@ -200,8 +233,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)External_Libraries\lib;$(SolutionDir).bin\$(Configuration)-$(Platform)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);ScriptCore.lib;opengl32.lib;glfw3.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)External_Libraries\lib\Jolt_Debug;$(SolutionDir)External_Libraries\lib;$(SolutionDir).bin\$(Configuration)-$(Platform)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);ScriptCore.lib;opengl32.lib;glfw3.lib;Jolt.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -224,7 +257,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir).bin\$(Configuration)-$(Platform)\;$(SolutionDir)External_Libraries\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir).bin\$(Configuration)-$(Platform)\;$(SolutionDir)External_Libraries\lib\Jolt_Release;$(SolutionDir)External_Libraries\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);opengl32.lib;ScriptCore.lib;glfw3.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>

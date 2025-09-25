@@ -18,6 +18,8 @@
 #include "../System/InputSystem.h"
 #include "../Utility/Clock.h"
 #include "../Utility/AssetPath.h"
+#include "../System/MovementSystem.h"
+#include "../Component/RigidBody.h"
 
 namespace gam300 {
 
@@ -88,22 +90,50 @@ namespace gam300 {
             logManager.writeLog("GameManager::startUp() - InputSystem registered successfully");
         }
 
+        logManager.writeLog("GameManager::startUp() - GraphicsManager started successfully");
+
+        // Register the Transform3D component with the ComponentManager
+        CM.register_component<Transform3D>();
+        logManager.writeLog("GameManager::startUp() - Transform3D component registered successfully");
+
+        // Register the RigidBody component with the componentManager
+        CM.register_component<RigidBody>();
+        logManager.writeLog("GameManager::startUp() - RigidBody component registered successfully");
+        // Register RigidBody component with the componentManager
+        CM.register_component<RigidBody>();
+        logManager.writeLog("GameManager::startUp() - GraphicsManager started successfully");
+
+
+        // Register the Movement component with the ComponetManager
+        SM.register_system<MovementSystem>();
+
+        //// Create a test entity with Transform3D component for demonstration
+        //Entity& testEntity = EM.createEntity("TestEntity");
+        //Vector3D position(0.0f, 0.0f, 0.0f);
+        //Vector3D rotation(0.0f, 45.0f, 0.0f);  // 45 degrees rotation on Y axis
+        //Vector3D scale(1.0f, 1.0f, 1.0f);
+
+        //Transform3D* transform = EM.addComponent<Transform3D>(testEntity.get_id(), position, rotation, scale);
+        //if (transform) {
+        //    logManager.writeLog("GameManager::startUp() - Test entity created with Transform3D component");
+        //}
+
         // Load the scene - Commented out to load scene using editor instead (Edited - Lily (15/9))
-        /*const std::string scenePath = getAssetFilePath("Scene/Game.scn");
-        if (SEM.loadScene(scenePath)) {
-            logManager.writeLog("GameManager::startUp() - Scene loaded successfully from %s", scenePath.c_str());
-        }
-        else {
-            logManager.writeLog("GameManager::startUp() - Failed to load scene, creating default scene");
-            // Save to the same path
-            SEM.saveScene(scenePath);
-            if (SEM.loadScene(scenePath)) {
-                logManager.writeLog("GameManager::startUp() - Default scene loaded successfully");
-            }
-            else {
-                logManager.writeLog("GameManager::startUp() - WARNING: Failed to load default scene");
-            }
-        }*/
+        //const std::string scenePath = getAssetFilePath("Scene/Game.scn");
+        //if (SEM.loadScene(scenePath)) {
+        //    logManager.writeLog("GameManager::startUp() - Scene loaded successfully from %s", scenePath.c_str());
+        //}
+        //else {
+        //    logManager.writeLog("GameManager::startUp() - Failed to load scene, creating default scene");
+        //    // Save to the same path
+        //    SEM.saveScene(scenePath);
+        //    if (SEM.loadScene(scenePath)) {
+        //        logManager.writeLog("GameManager::startUp() - Default scene loaded successfully");
+        //    }
+        //    else {
+        //        logManager.writeLog("GameManager::startUp() - WARNING: Failed to load default scene");
+        //    }
+        //}
 
         // Initialize step count
         m_step_count = 0;

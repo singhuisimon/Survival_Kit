@@ -23,6 +23,8 @@
 #include "../Component/InputComponent.h"
 #include "../Utility/InputKeyMappings.h"
 
+#include "../Component/Transform3D.h"
+#include "../Component/RigidBody.h"
 #include <fstream>
 #include <sstream>
 #include <functional>
@@ -154,6 +156,43 @@ namespace gam300 {
         return input;
     }
 
+    // RigidBodySerializer implementation
+    std::string RigidBodySerializer::serialize(Component* component) {
+       
+        RigidBody* rigidBody = static_cast<RigidBody*>(component);
+       
+        if (!rigidBody) { 
+            return "{}";
+        }
+        std::stringstream ss;
+        
+        ss << "{\n";
+
+        //ss << "          \"RigidBody\": {\n";
+        ss << "          \"rigidBodyType\": \"" << rigidBody->bodyTypeToString(rigidBody->getRigidBodyType()) << "\"\n";
+        ss << "        }";
+
+        return ss.str();
+    }
+
+    // RigidBodySerializer implementation
+    Component* RigidBodySerializer::deserialize(EntityID entityId, const std::string& jsonData) {
+
+        // Parse the rigid body type 
+        BodyType rigidBodyType = BodyType::STATIC;
+
+        std::string bodyTypeStr = SerialisationManager::extractQuotedValue(jsonData, "rigidBodyType");
+        if (!bodyTypeStr.empty()) {
+
+            rigidBodyType = RigidBody::stringToBodyType(bodyTypeStr);
+        }
+        RigidBody* rigidBody = EM.addComponent<RigidBody>(entityId, rigidBodyType);
+
+        return rigidBody;
+
+    }
+
+
     // Initialize singleton instance
     SerialisationManager::SerialisationManager() {
         setType("SerialisationManager");
@@ -174,6 +213,9 @@ namespace gam300 {
         // Register component serializers
         registerComponentSerializer("Input", std::make_shared<InputComponentSerializer>());
 
+        registerComponentSerializer("Transform3D", std::make_shared<Transform3DSerializer>());
+        
+        
         // Register component creators
         registerComponentCreator("Input", [this](EntityID entityId, const std::string& componentData) {
             // Use the serializer to create the component
@@ -181,6 +223,20 @@ namespace gam300 {
             if (serializer) {
                 serializer->deserialize(entityId, componentData);
                 LM.writeLog("InputComponent created for entity %d", entityId);
+            }
+            });
+
+        // Register component serializers for RigidBody
+        registerComponentSerializer("RigidBody", std::make_shared<RigidBodySerializer>());
+
+        // Register component creators
+        registerComponentCreator("RigidBody", [this](EntityID entityId, const std::string& componentData) {
+
+            auto serializer = m_component_serializers["RigidBody"];
+            if (serializer)
+            {
+                serializer->deserialize(entityId, componentData);
+                LM.writeLog("RigidBody created for entity %d", entityId);
             }
             });
 
@@ -249,108 +305,250 @@ namespace gam300 {
         }*/
 
         // Extract the objects array content
-        std::string objectsContent = fileContent; //.substr(arrayStart + 1, arrayEnd - arrayStart - 1);
+        // std::string objectsContent = fileContent; //.substr(arrayStart + 1, arrayEnd - arrayStart - 1);
 
-        // Process each object in the array
-        size_t objectStart = 0;
-        while (objectStart < objectsContent.length()) {
-            // Find the beginning of the object
-            objectStart = objectsContent.find('{', objectStart);
-            if (objectStart == std::string::npos) {
-                break; // No more objects
-            }
+        // // Process each object in the array
+        // size_t objectStart = 0;
+        // while (objectStart < objectsContent.length()) {
+        //     // Find the beginning of the object
+        //     objectStart = objectsContent.find('{', objectStart);
+        //     if (objectStart == std::string::npos) {
+        //         break; // No more objects
+        //     }
 
-            // Find the end of the object
-            int braceLevel = 1;
-            size_t objectEnd = objectStart + 1;
-            while (braceLevel > 0 && objectEnd < objectsContent.length()) {
-                if (objectsContent[objectEnd] == '{') {
-                    braceLevel++;
-                }
-                else if (objectsContent[objectEnd] == '}') {
-                    braceLevel--;
-                }
-                objectEnd++;
-            }
+        //     // Find the end of the object
+        //     int braceLevel = 1;
+        //     size_t objectEnd = objectStart + 1;
+        //     while (braceLevel > 0 && objectEnd < objectsContent.length()) {
+        //         if (objectsContent[objectEnd] == '{') {
+        //             braceLevel++;
+        //         }
+        //         else if (objectsContent[objectEnd] == '}') {
+        //             braceLevel--;
+        //         }
+        //         objectEnd++;
+        //     }
 
-            if (braceLevel != 0) {
-                LM.writeLog("SerialisationManager::loadScene() - Invalid object format in scene file");
-                break;
-            }
+        //     if (braceLevel != 0) {
+        //         LM.writeLog("SerialisationManager::loadScene() - Invalid object format in scene file");
+        //         break;
+        //     }
 
-            objectEnd--; // Move back to the closing brace
+        //     objectEnd--; // Move back to the closing brace
 
-            // Extract the object content
-            std::string objectContent = objectsContent.substr(objectStart, objectEnd - objectStart + 1);
+        //     // Extract the object content
+        //     std::string objectContent = objectsContent.substr(objectStart, objectEnd - objectStart + 1);
 
-            // Find the name of the object
-            size_t nameStart = objectContent.find("\"name\"");
-            if (nameStart == std::string::npos) {
-                LM.writeLog("SerialisationManager::loadScene() - Object without name in scene file");
-                objectStart = objectEnd + 1;
-                continue;
-            }
+        //     // Find the name of the object
+        //     size_t nameStart = objectContent.find("\"name\"");
+        //     if (nameStart == std::string::npos) {
+        //         LM.writeLog("SerialisationManager::loadScene() - Object without name in scene file");
+        //         objectStart = objectEnd + 1;
+        //         continue;
+        //     }
 
-            // Extract the name
-            size_t nameValueStart = objectContent.find(':', nameStart);
-            if (nameValueStart == std::string::npos) {
-                objectStart = objectEnd + 1;
-                continue;
-            }
+        //     // Extract the name
+        //     size_t nameValueStart = objectContent.find(':', nameStart);
+        //     if (nameValueStart == std::string::npos) {
+        //         objectStart = objectEnd + 1;
+        //         continue;
+        //     }
 
-            size_t nameStrStart = objectContent.find('"', nameValueStart);
-            if (nameStrStart == std::string::npos) {
-                objectStart = objectEnd + 1;
-                continue;
-            }
+        //     size_t nameStrStart = objectContent.find('"', nameValueStart);
+        //     if (nameStrStart == std::string::npos) {
+        //         objectStart = objectEnd + 1;
+        //         continue;
+        //     }
 
-            size_t nameStrEnd = objectContent.find('"', nameStrStart + 1);
-            if (nameStrEnd == std::string::npos) {
-                objectStart = objectEnd + 1;
-                continue;
-            }
+        //     size_t nameStrEnd = objectContent.find('"', nameStrStart + 1);
+        //     if (nameStrEnd == std::string::npos) {
+        //         objectStart = objectEnd + 1;
+        //         continue;
+        //     }
 
-            std::string entityName = objectContent.substr(nameStrStart + 1, nameStrEnd - nameStrStart - 1);
+        //     std::string entityName = objectContent.substr(nameStrStart + 1, nameStrEnd - nameStrStart - 1);
 
-            // Create the entity
-            Entity& entity = EM.createEntity(entityName);
-            LM.writeLog("SerialisationManager::loadScene() - Created entity '%s' with ID %d", entityName.c_str(), entity.get_id());
+        //     // Create the entity
+        //     Entity& entity = EM.createEntity(entityName);
+        //     LM.writeLog("SerialisationManager::loadScene() - Created entity '%s' with ID %d", entityName.c_str(), entity.get_id());
 
-            // Find the components section
-            size_t componentsStart = objectContent.find("\"components\"");
-            if (componentsStart != std::string::npos) {
-                // Extract the components content
-                size_t componentsBraceStart = objectContent.find('{', componentsStart);
-                if (componentsBraceStart != std::string::npos) {
-                    // Find the closing brace of the components object, accounting for nested braces
-                    int componentBraceLevel = 1;
-                    size_t componentsBraceEnd = componentsBraceStart + 1;
-                    while (componentBraceLevel > 0 && componentsBraceEnd < objectContent.length()) {
-                        if (objectContent[componentsBraceEnd] == '{') {
-                            componentBraceLevel++;
-                        }
-                        else if (objectContent[componentsBraceEnd] == '}') {
-                            componentBraceLevel--;
-                        }
-                        componentsBraceEnd++;
-                    }
+        //     // Find the components section
+        //     size_t componentsStart = objectContent.find("\"components\"");
+        //     if (componentsStart != std::string::npos) {
+        //         // Extract the components content
+        //         size_t componentsBraceStart = objectContent.find('{', componentsStart);
+        //         if (componentsBraceStart != std::string::npos) {
+        //             // Find the closing brace of the components object, accounting for nested braces
+        //             int componentBraceLevel = 1;
+        //             size_t componentsBraceEnd = componentsBraceStart + 1;
+        //             while (componentBraceLevel > 0 && componentsBraceEnd < objectContent.length()) {
+        //                 if (objectContent[componentsBraceEnd] == '{') {
+        //                     componentBraceLevel++;
+        //                 }
+        //                 else if (objectContent[componentsBraceEnd] == '}') {
+        //                     componentBraceLevel--;
+        //                 }
+        //                 componentsBraceEnd++;
+        //             }
 
-                    if (componentBraceLevel == 0) {
-                        componentsBraceEnd--; // Move back to the closing brace
-                        std::string componentsContent = objectContent.substr(componentsBraceStart, componentsBraceEnd - componentsBraceStart + 1);
+        //             if (componentBraceLevel == 0) {
+        //                 componentsBraceEnd--; // Move back to the closing brace
+        //                 std::string componentsContent = objectContent.substr(componentsBraceStart, componentsBraceEnd - componentsBraceStart + 1);
 
-                        // Process the components
-                        parseComponents(entity.get_id(), componentsContent);
-                    }
-                }
-            }
+        //                 // Process the components
+        //                 parseComponents(entity.get_id(), componentsContent);
+        //             }
+        //         }
+        //     }
 
-            // Move to the next object
-            objectStart = objectEnd + 1;
+        //     // Move to the next object
+        //     objectStart = objectEnd + 1;
+        // }
+
+        // LM.writeLog("SerialisationManager::loadScene() - Scene loaded successfully");
+        // return true;
+        /////////////////////////////////////////////////Amanda Code Version/////////////////////////////////////////////////
+        // Parse with RapidJSON instead of string::find
+        rapidjson::Document doc;
+        if (doc.Parse(fileContent.c_str()).HasParseError()) {
+            LM.writeLog("SerialisationManager::loadScene() - JSON parse error: %s",
+                rapidjson::GetParseError_En(doc.GetParseError()));
+            return false;
         }
 
-        LM.writeLog("SerialisationManager::loadScene() - Scene loaded successfully");
-        return true;
+        if (!doc.HasMember("objects") || !doc["objects"].IsArray()) {
+            LM.writeLog("SerialisationManager::loadScene() - No 'objects' array found in scene");
+            return false;
+        }
+
+        const auto& objects = doc["objects"];
+        int entityCount = 0;
+
+        for (auto& obj : objects.GetArray()) {
+            if (!obj.HasMember("name") || !obj["name"].IsString()) continue;
+
+            std::string entityName = obj["name"].GetString();
+            Entity& entity = EM.createEntity(entityName);
+            LM.writeLog("SerialisationManager::loadScene() - Created entity '%s' (ID %d)",
+                entityName.c_str(), entity.get_id());
+
+            if (obj.HasMember("components") && obj["components"].IsObject()) {
+                // Dump the "components" JSON back into a string
+                rapidjson::StringBuffer buffer;
+                rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                obj["components"].Accept(writer);
+
+                // Now let parseComponents handle all registered types
+                parseComponents(entity.get_id(), buffer.GetString());
+            }
+
+            entityCount++;
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////////
+        //// Simple approach: Find each occurrence of a named entity
+        //size_t searchPos = 0;
+        //int entityCount = 0;
+        //bool foundAnyEntities = false;
+
+        //while (true) {
+        //    // Find next "name" field
+        //    size_t namePos = fileContent.find("\"name\"", searchPos);
+        //    if (namePos == std::string::npos) {
+        //        break; // No more entities
+        //    }
+
+        //    // Extract the entity name
+        //    size_t colonPos = fileContent.find(':', namePos);
+        //    size_t nameStartQuote = fileContent.find('"', colonPos);
+        //    size_t nameEndQuote = fileContent.find('"', nameStartQuote + 1);
+
+        //    if (colonPos == std::string::npos || nameStartQuote == std::string::npos || nameEndQuote == std::string::npos) {
+        //        LM.writeLog("SerialisationManager::loadScene() - Malformed name field at position %zu", namePos);
+        //        searchPos = namePos + 1;
+        //        continue;
+        //    }
+
+        //    std::string entityName = fileContent.substr(nameStartQuote + 1, nameEndQuote - nameStartQuote - 1);
+        //    LM.writeLog("SerialisationManager::loadScene() - Found entity: '%s'", entityName.c_str());
+
+        //    // Create the entity
+        //    Entity& entity = EM.createEntity(entityName);
+        //    entityCount++;
+        //    foundAnyEntities = true;
+        //    LM.writeLog("SerialisationManager::loadScene() - Created entity '%s' with ID %d", entityName.c_str(), entity.get_id());
+
+        //    // Look for Transform3D component
+        //    size_t transform3DPos = fileContent.find("\"Transform3D\"", namePos);
+        //    size_t nextNamePos = fileContent.find("\"name\"", namePos + 1);
+
+        //    // Make sure this Transform3D belongs to this entity (not the next one)
+        //    if (transform3DPos != std::string::npos &&
+        //        (nextNamePos == std::string::npos || transform3DPos < nextNamePos)) {
+
+        //        LM.writeLog("SerialisationManager::loadScene() - Found Transform3D for entity '%s'", entityName.c_str());
+
+        //        // Extract Transform3D data using simple string search
+        //        Vector3D position = extractVector3D(fileContent, transform3DPos, "position");
+        //        Vector3D rotation = extractVector3D(fileContent, transform3DPos, "rotation");
+        //        Vector3D scale = extractVector3D(fileContent, transform3DPos, "scale");
+
+        //        LM.writeLog("SerialisationManager::loadScene() - Position: (%.1f, %.1f, %.1f)", position.x, position.y, position.z);
+        //        LM.writeLog("SerialisationManager::loadScene() - Rotation: (%.1f, %.1f, %.1f)", rotation.x, rotation.y, rotation.z);
+        //        LM.writeLog("SerialisationManager::loadScene() - Scale: (%.1f, %.1f, %.1f)", scale.x, scale.y, scale.z);
+
+        //        // Create the Transform3D component
+        //        Transform3D* transform = EM.addComponent<Transform3D>(entity.get_id(), position, rotation, scale);
+        //        if (transform) {
+        //            LM.writeLog("SerialisationManager::loadScene() - Transform3D component created successfully for entity '%s'", entityName.c_str());
+        //        }
+        //        else {
+        //            LM.writeLog("SerialisationManager::loadScene() - Failed to create Transform3D component for entity '%s'", entityName.c_str());
+        //        }
+
+        //        
+        //        
+        //    }
+        //    else {
+        //        LM.writeLog("SerialisationManager::loadScene() - No Transform3D component found for entity '%s'", entityName.c_str());
+        //    }
+
+
+        //    // Look for RigidBody compoenents
+        //    size_t rigidBodyPos = fileContent.find("\"RigidBody\"", namePos);
+
+        //    if (rigidBodyPos != std::string::npos &&
+        //        (nextNamePos == std::string::npos || rigidBodyPos < nextNamePos))
+        //    {
+        //        LM.writeLog("SerialisationManager::loadScene() - Found RigidBody for entity '%s'", entityName.c_str());
+        //        std::string typeStr = SerialisationManager::extractQuotedValue(fileContent, "rigidBodyType");
+        //        BodyType rigidBodyType = RigidBody::stringToBodyType(typeStr); // convert string back to enum BodyType
+        //        //LM.writeLog("SerialisationManager::loadScene() - rigidBodyType: (%d)", rigidBodyType);
+        //        RigidBody* rigidBody = EM.addComponent<RigidBody>(entity.get_id(), rigidBodyType);
+        //        if (rigidBody) {
+        //            LM.writeLog("SerialisationManager::loadScene() - RigidBody component created successfully for entity '%s'", entityName.c_str());
+        //        }
+        //        else {
+        //            LM.writeLog("SerialisationManager::loadScene() - Failed to create RigidBody component for entity '%s'", entityName.c_str());
+        //        }
+        //    }
+        //    else {
+        //        LM.writeLog("SerialisationManager::loadScene() - No RigidBody component found for entity '%s'", entityName.c_str());
+        //    }
+        //    
+
+        //    // Move search position past this entity
+        //    searchPos = namePos + 1;
+        //}
+
+        ////  PROPER SUCCESS/FAILURE LOGIC
+        //if (!foundAnyEntities) {
+        //    LM.writeLog("SerialisationManager::loadScene() - ERROR: No entities found in scene file");
+        //    return false; // RETURN FALSE IF NO ENTITIES LOADED
+        //}
+
+        //LM.writeLog("SerialisationManager::loadScene() - Scene loaded successfully, processed %d entities", entityCount);
+        return true; // ONLY RETURN TRUE IF ENTITIES WERE ACTUALLY LOADED
     }
 
     // Save current entities to a scene file
@@ -367,6 +565,9 @@ namespace gam300 {
         // Get all entities
         const auto& entities = EM.getAllEntities();
 
+
+      
+
         // Start the JSON structure
         file << "{\n";
         file << getIndent(1) << "\"objects\": [\n";
@@ -374,13 +575,16 @@ namespace gam300 {
         // Save each entity
         for (size_t i = 0; i < entities.size(); ++i) {
             const Entity& entity = entities[i];
+            bool hasComponents = false;
+            // to store all the components 
+            std::vector<std::string> componentStrings;
 
             file << getIndent(2) << "{\n";
             file << getIndent(3) << "\"name\": \"" << entity.get_name() << "\",\n";
             file << getIndent(3) << "\"components\": {\n";
 
             // Save each component
-            bool hasComponents = false;
+            //bool hasComponents = false;
 
             // Check for Input component
             if (auto serializer = m_component_serializers.find("Input");
@@ -389,9 +593,38 @@ namespace gam300 {
                     file << getIndent(4) << "\"Input\": " << serializer->second->serialize(input);
                     hasComponents = true;
                 }
+                if (Transform3D* transform = EM.getComponent<Transform3D>(entity.get_id())) {
+                    componentStrings.push_back(getIndent(4) + "\"Transform3D\": " +
+                        serializer->second->serialize(transform));
+                    hasComponents = true;
+                }
             }
 
+           
             // TODO: Add more component types here as needed
+            // check for RigidBody component
+            if (auto serializer = m_component_serializers.find("RigidBody");
+                serializer != m_component_serializers.end()) {
+                if (RigidBody* transform = EM.getComponent<RigidBody>(entity.get_id())) {
+                    componentStrings.push_back(getIndent(4) + "\"RigidBody\": " +
+                        serializer->second->serialize(transform));
+                    hasComponents = true;
+                }
+            }
+
+
+           
+            // Write all components with proper comma separation
+            for (size_t j = 0; j < componentStrings.size(); ++j) {
+                file << componentStrings[j];
+                if (j < componentStrings.size() - 1) {
+                    file << ",";
+                }
+                file << "\n";
+            }
+
+
+
 
             // Close the components object
             file << "\n" << getIndent(3) << "}";
@@ -407,6 +640,7 @@ namespace gam300 {
         file << "}\n";
 
         file.close();
+
         LM.writeLog("SerialisationManager::saveScene() - Scene saved successfully");
         return true;
     }

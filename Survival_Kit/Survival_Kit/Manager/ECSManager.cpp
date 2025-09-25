@@ -126,9 +126,90 @@ namespace gam300 {
         return m_entities;
     }
 
-    std::vector<Entity>& ECSManager::getAllEntitiesOverload()
-    {
-        return m_entities;
+    // Get an entity by its name
+    Entity* ECSManager::getEntityByName(const std::string& name) {
+        auto it = m_entity_name_map.find(name);
+        if (it != m_entity_name_map.end()) {
+            return getEntity(it->second);
+        }
+        return nullptr;
+    }
+
+    // Get an entity ID by its name
+    EntityID ECSManager::getEntityIdByName(const std::string& name) {
+        auto it = m_entity_name_map.find(name);
+        if (it != m_entity_name_map.end()) {
+            return it->second;
+        }
+        return INVALID_ENTITY_ID;
+    }
+
+    // Check if an entity name already exists
+    bool ECSManager::entityNameExists(const std::string& name) {
+        return m_entity_name_map.find(name) != m_entity_name_map.end();
+    }
+
+    // Clear all entities from the ECS
+    void ECSManager::clearAllEntities() {
+        LM.writeLog("ECSManager::clearAllEntities() - Clearing %zu entities", m_entities.size());
+
+        // Destroy all entities properly to ensure cleanup
+        std::vector<EntityID> entityIds;
+        for (const auto& entity : m_entities) {
+            entityIds.push_back(entity.get_id());
+        }
+
+        for (EntityID id : entityIds) {
+            destroyEntity(id);
+        }
+
+        // Ensure everything is clean (should already be empty after destroyEntity calls)
+        // Reset m_next_entity_id to 0 after clearing all entities (Edited - Lily (21/9))
+        m_entities.clear();
+        m_entity_name_map.clear();
+        m_next_entity_id = 0;
+
+        LM.writeLog("ECSManager::clearAllEntities() - All entities cleared");
+    }
+
+    // Rename an existing entity
+    void ECSManager::renameEntity(EntityID entity_id, const std::string& new_name) {
+        Entity* entity = getEntity(entity_id);
+        if (!entity) {
+            LM.writeLog("ECSManager::renameEntity() - Entity %d not found", entity_id);
+            return;
+        }
+
+        std::string oldName = entity->get_name();
+
+        // Remove old name from map
+        if (!oldName.empty()) {
+            m_entity_name_map.erase(oldName);
+        }
+
+        // Check for name conflicts and resolve them
+        std::string finalName = new_name;
+        if (!new_name.empty() && entityNameExists(new_name)) {
+            int counter = 1;
+            do {
+                finalName = new_name + "_" + std::to_string(counter);
+                counter++;
+            } while (entityNameExists(finalName));
+
+            LM.writeLog("ECSManager::renameEntity() - Name conflict resolved: '%s' -> '%s'",
+                new_name.c_str(), finalName.c_str());
+        }
+
+        // Update entity name
+        entity->set_name(finalName);
+
+        // Add new name to map
+        if (!finalName.empty()) {
+            m_entity_name_map[finalName] = entity_id;
+        }
+
+        LM.writeLog("ECSManager::renameEntity() - Entity %d renamed from '%s' to '%s'",
+            entity_id, oldName.c_str(), finalName.c_str());
     }
 
     // Update all systems
