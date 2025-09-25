@@ -27,6 +27,10 @@ namespace gam300 {
     // Entity index
     int selectedObjIndex = -1;
 
+    // For new Entity name
+    static bool file_newly_loaded = false;
+    int new_entity_index = 0;
+
     ImguiManager::ImguiManager() : ImguiEcsRef(EM), ImguiGraphicRef(GFXM) {}
 
     ImguiManager::ImguiManager(ECSManager& ECS, GraphicsManager& GFM) : ImguiEcsRef(ECS), ImguiGraphicRef(GFM) {
@@ -134,6 +138,7 @@ namespace gam300 {
                     if (SEM.loadScene(sceneFiles[i].second)) {
 
                         shownFile = sceneFiles[i].second;
+                        file_newly_loaded = true;
 
                         LM.writeLog("IMGUI_Manager::displayFileList(): Scene %s loaded successfully.", sceneFiles[i].first.c_str());
                         //std::cout << sceneFiles[i].second << std::endl;
@@ -148,6 +153,7 @@ namespace gam300 {
                         SEM.saveScene(getAssetFilePath("Scene/Game.scn"));
                         if (SEM.loadScene(getAssetFilePath("Scene/Game.scn"))) {
 
+                            file_newly_loaded = true;
                             LM.writeLog("IMGUI_Manager::displayFileList(): Default scene loaded successfully.");
                             //std::cout << "Default scene loaded successfully from displayFileList" << std::endl;
                         }
@@ -186,6 +192,11 @@ namespace gam300 {
 
         ImGui::SetNextWindowSize(ImVec2(600, 400));
 
+        if (file_newly_loaded) {
+            new_entity_index = 0;
+            file_newly_loaded = false;
+        }
+
         if (ImGui::Begin("Hierarchy", &hierachyWindow, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize)) {
             const auto& allEntities = ImguiEcsRef.getAllEntities();
 
@@ -199,12 +210,20 @@ namespace gam300 {
             {
                 if (ImGui::MenuItem("Add Entity"))
                 {
-                    Entity& createNewEntity = ImguiEcsRef.createEntity("New Entity");
+                    std::string base_name = "New Entity_";
+
+                    std::stringstream ss_new_entity_name;
+                    ss_new_entity_name << base_name << new_entity_index;
+                    std::string new_entity_name = ss_new_entity_name.str();
+
+                    Entity& createNewEntity = ImguiEcsRef.createEntity(new_entity_name);
 
                     // always add default transform3D
                     if (!ImguiEcsRef.hasComponent<Transform3D>(createNewEntity.get_id())) {
                         ImguiEcsRef.addComponent<Transform3D>(createNewEntity.get_id());
                     }
+
+                    new_entity_index++;
 
                     // always show the new entity that is create 
                     selectedObjIndex = static_cast<int>(allEntities.size()) - 1;
@@ -476,6 +495,13 @@ namespace gam300 {
 
                 }
 
+                ImGui::NewLine();
+                //Option 1: Script Addition
+                if (ImGui::CollapsingHeader("Script Test")) {
+                    if (ImGui::Button("Add Script")) {
+                        std::cout << "Script Added" << std::endl;
+                    }
+                }
 
                 ImGui::Separator();
                 // Adding components 
@@ -511,6 +537,11 @@ namespace gam300 {
                             ImguiEcsRef.addComponent<RigidBody>(selectedEntity.get_id());
                         }
                     }
+
+                    ////Option 2: Script Addition
+                    //if (ImGui::MenuItem("Add Script")) {
+                    //    std::cout << "Name, Create and Add" << std::endl;
+                    //}
 
                     ImGui::EndPopup();
                 }
