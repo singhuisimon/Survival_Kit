@@ -82,6 +82,18 @@ namespace gam300 {
 
         logManager.writeLog("GameManager::startUp() - SerialisationManager started successfully");
 
+        // Start the GraphicsManager
+        if (GFXM.startUp()) {
+            logManager.writeLog("GameManager::startUp() - Failed to start GraphicsManager");
+            EM.shutDown();
+            IM.shutDown();
+            SEM.shutDown();
+            logManager.shutDown();
+            return -1;
+        }
+
+        logManager.writeLog("GameManager::startUp() - GraphicsManager started successfully");
+
         // Register the InputSystem to process our Input components
         auto inputSystem = EM.registerSystem<InputSystem>();
         if (!inputSystem) {
@@ -188,6 +200,9 @@ namespace gam300 {
 
         // Update all ECS systems
         EM.updateSystems(dt);
+
+        // Example: Work with serialized entities using new lookup functionality
+        workWithSerializedEntities(dt);
     }
 
     // Set game over status
@@ -216,6 +231,71 @@ namespace gam300 {
     // Get step count
     int GameManager::getStepCount() const {
         return m_step_count;
+    }
+
+    // Work with serialized entities using new lookup functionality
+    void GameManager::workWithSerializedEntities(float dt) {
+        // Find the Cube entity that was loaded from the scene file
+        Entity* cubeEntity = EM.getEntityByName("Cube");
+        if (cubeEntity) {
+            Transform3D* cubeTransform = EM.getComponent<Transform3D>(cubeEntity->get_id());
+            if (cubeTransform) {
+                // Example: Rotate the cube slowly
+                Vector3D currentRotation = cubeTransform->getRotation();
+                currentRotation.y += dt * 30.0f; // 30 degrees per second
+                cubeTransform->setRotation(currentRotation);
+
+                // Log position every 5 seconds for debugging
+                static float logTimer = 0.0f;
+                logTimer += dt;
+                if (logTimer >= 5.0f) {
+                    const Vector3D& pos = cubeTransform->getPosition();
+                    LM.writeLog("GameManager::workWithSerializedEntities() - Cube position: (%.1f, %.1f, %.1f)",
+                        pos.x, pos.y, pos.z);
+                    logTimer = 0.0f;
+                }
+            }
+        }
+        else {
+            // Log warning if cube entity not found (but only once to avoid spam)
+            static bool warningLogged = false;
+            if (!warningLogged) {
+                LM.writeLog("GameManager::workWithSerializedEntities() - WARNING: Cube entity not found in scene");
+                warningLogged = true;
+            }
+        }
+    }
+
+    // Helper method to clear entities before loading new scene
+    void GameManager::loadNewScene(const std::string& scenePath) {
+        LM.writeLog("GameManager::loadNewScene() - Loading new scene: %s", scenePath.c_str());
+
+        // Clear existing entities before loading new scene
+        EM.clearAllEntities();
+        LM.writeLog("GameManager::loadNewScene() - Existing entities cleared");
+
+        // Load the new scene
+        if (SEM.loadScene(scenePath)) {
+            LM.writeLog("GameManager::loadNewScene() - New scene loaded successfully");
+        }
+        else {
+            LM.writeLog("GameManager::loadNewScene() - Failed to load new scene");
+        }
+    }
+
+    // Helper method to save current game state
+    void GameManager::saveCurrentGame(const std::string& saveSlot) {
+        std::string savePath = getAssetFilePath("Saves/save_" + saveSlot + ".scn");
+        LM.writeLog("GameManager::saveCurrentGame() - Saving game to slot '%s' at path '%s'",
+            saveSlot.c_str(), savePath.c_str());
+
+        // Save current scene (entities remain in memory for continued gameplay)
+        if (SEM.saveScene(savePath)) {
+            LM.writeLog("GameManager::saveCurrentGame() - Game saved successfully");
+        }
+        else {
+            LM.writeLog("GameManager::saveCurrentGame() - Failed to save game");
+        }
     }
 
 } // end of namespace gam300

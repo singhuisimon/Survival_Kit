@@ -26,6 +26,9 @@ namespace gam300 {
         float x;
         float y;
 
+        // Operator to perform a cast to a glm vector
+        explicit operator glm::vec2() const noexcept { return glm::vec2(x, y); }
+
         // Constructors
         Vector2D();                            // Default constructor (0,0)
         Vector2D(float x, float y);            // Constructor with components

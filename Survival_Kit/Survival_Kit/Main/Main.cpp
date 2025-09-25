@@ -12,14 +12,15 @@
 #include "../Manager/SerialisationManager.h"
 
 int main(void) {
-    // Initialize GameManager
-    if (GM.startUp()) {
-        // Failed to start GameManager
-        printf("ERROR: Failed to start GameManager\n");
-        return -1;
-    }
-    bool spacePressed = false;
+    //// Initialize GameManager
+    //if (GM.startUp()) {
+    //    // Failed to start GameManager
+    //    printf("ERROR: Failed to start GameManager\n");
+    //    return -1;
+    //}
 
+
+    bool spacePressed = false;
 
     // Get reference to LogManager (already started by GameManager)
     LM.writeLog("Main: GameManager initialized successfully");
@@ -33,6 +34,18 @@ int main(void) {
 
     LM.writeLog("GLFW initialized successfully");
 
+    // Set OpenGL version and profile
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    // Additional settings
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
+    glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
+    glfwWindowHint(GLFW_RED_BITS, 8); glfwWindowHint(GLFW_GREEN_BITS, 8);
+    glfwWindowHint(GLFW_BLUE_BITS, 8); glfwWindowHint(GLFW_ALPHA_BITS, 8);
+
     // Create window
     GLFWwindow* window = glfwCreateWindow(640, 480, "Survival_Kit", NULL, NULL);
     if (!window) {
@@ -44,6 +57,32 @@ int main(void) {
 
     LM.writeLog("Window created with dimensions 640x480");
     glfwMakeContextCurrent(window);
+
+    // Initialize graphics manager
+    // KENNY TESTING: Remove this start up as GM startup GFXM in the next block
+    //GFXM.startUp(); 
+
+    //// Load OpenGL function pointers with GLAD
+    //if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    //    LM.writeLog("Failed to initialize OpenGL function pointers!");
+    //    std::cerr << "Failed to initialize OpenGL function pointers!" << std::endl;
+    //    glfwDestroyWindow(window);
+    //    glfwTerminate();
+    //    return -1;
+    //}
+    //else {
+    //    LM.writeLog("GLAD initialized successfully.");
+    //    std::cout << "GLAD initialized successfully." << std::endl;
+    //}
+
+    // Initialize GameManager
+    if (GM.startUp()) {
+        // Failed to start GameManager
+        printf("ERROR: Failed to start GameManager\n");
+        glfwDestroyWindow(window);
+        glfwTerminate();
+        return -1;
+    }
 
     // Register window with InputManager
     IM.setWindow(window);
@@ -101,7 +140,6 @@ int main(void) {
         }
         app.CheckAndReloadScripts(); // Add this line
 
-
         // Update all systems (including InputSystem)
         EM.updateSystems(GM.getFrameTime() / 1000.0f);
 
@@ -135,7 +173,7 @@ int main(void) {
             {
                 if (ImGui::MenuItem("New"))
                 {
-                    
+
                 }
 
                 if (ImGui::MenuItem("Open"))
@@ -179,9 +217,9 @@ int main(void) {
         //}
         //
         //ImGui::End();
-       
+
         // Editor Dockspace
-       
+
         ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport()); //not working for some reason 
         //ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_AutoHideTabBar);
 
@@ -189,29 +227,31 @@ int main(void) {
 
             IMGUIM.displayFileList(fileWindow, shownFile); // for now it open at the start of the engine
         }
-        
+
         IMGUIM.renderViewport();
 
         // Editor Temporary Windows
         IMGUIM.displayPropertiesList();
-       
+
         IMGUIM.displayHierarchyList();
 
-     
-      /*  ImGui::SetNextWindowSize(ImVec2(600, 400));
-        if (ImGui::Begin("Assets Browser Test", &assetsBrowser, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize))
-        {
-        }
-        ImGui::End();*/
 
-        // Editor Start Render
+        /*  ImGui::SetNextWindowSize(ImVec2(600, 400));
+          if (ImGui::Begin("Assets Browser Test", &assetsBrowser, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize))
+          {
+          }
+          ImGui::End();*/
+
+          // Editor Start Render
         ImGui::Render();
 
         IMGUIM.getWindowSize(*window);
         //std::cout << IMGUIM.getWindowSize(*window).x << "\n";
 
         IMGUIM.finishImguiRender(io);
-        
+
+        GFXM.update();
+
         // Swap buffers
         glfwSwapBuffers(window);
 
@@ -246,9 +286,9 @@ int main(void) {
 
     // Shut down InputManager
     IM.shutDown();
-    
+
     IMGUIM.shutDown();
-    
+
     // Terminate GLFW
     glfwTerminate();
 

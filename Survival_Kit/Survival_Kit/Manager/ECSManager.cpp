@@ -74,9 +74,30 @@ namespace gam300 {
         // Generate a new entity ID
         EntityID id = m_next_entity_id++;
 
+        // Handle name conflicts if name is provided
+        std::string finalName = name;
+        if (!name.empty()) {
+            if (entityNameExists(name)) {
+                // Generate unique name by appending number
+                int counter = 1;
+                do {
+                    finalName = name + "_" + std::to_string(counter);
+                    counter++;
+                } while (entityNameExists(finalName));
+
+                LM.writeLog("ECSManager::createEntity() - Name conflict resolved: '%s' -> '%s'",
+                    name.c_str(), finalName.c_str());
+            }
+        }
+
         // Create a new entity and add it to the list
         m_entities.emplace_back(id, name);
         Entity& entity = m_entities.back();
+
+        // Add to name lookup map if name is provided
+        if (!finalName.empty()) {
+            m_entity_name_map[finalName] = id;
+        }
 
         // Notify the SystemManager about the new entity
         SM.entity_created(entity);
@@ -95,8 +116,13 @@ namespace gam300 {
             [entity_id](const Entity& e) { return e.get_id() == entity_id; });
 
         if (it != m_entities.end()) {
-            // Get the name for logging
+            // Get the name for logging and cleanup
             std::string name = it->get_name();
+
+            // Remove from name map if it has a name
+            if (!name.empty()) {
+                m_entity_name_map.erase(name);
+            }
 
             // Notify the SystemManager that the entity is being destroyed
             SM.entity_destroyed(entity_id);
@@ -110,6 +136,9 @@ namespace gam300 {
             // Log the destruction
             LM.writeLog("ECSManager::destroyEntity() - Destroyed entity %d with name '%s'",
                 entity_id, name.empty() ? "(unnamed)" : name.c_str());
+        }
+        else {
+            LM.writeLog("ECSManager::destroyEntity() - WARNING: Entity %d not found", entity_id);
         }
     }
 

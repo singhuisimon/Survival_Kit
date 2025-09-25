@@ -77,7 +77,8 @@ namespace gam300 {
             LM.writeLog("GraphicsManager::startUp(): Failed to load shader programs");
             std::cerr << "GraphicsManager::startUp(): Failed to load shader programs" << std::endl;
             return -1;
-        } else {
+        }
+        else {
             LM.writeLog("GraphicsManager::startUp(): Succesfully added shader programs.");
         }
 
@@ -103,7 +104,7 @@ namespace gam300 {
 
         // Set up the framebuffer and game scene texture for imgui viewport
         glBindFramebuffer(GL_FRAMEBUFFER, imgui_fbo->handle());
-        
+
         // Creating texture object for imgui
         int windowWidth = 640;
         int windowHeight = 480;
@@ -111,7 +112,7 @@ namespace gam300 {
         //int windowHeight = IMGUIM.getWindowWidthHeight().y;
         glGenTextures(1, &imguiTex);
         glBindTexture(GL_TEXTURE_2D, imguiTex);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowWidth , windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowWidth, windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -243,14 +244,14 @@ namespace gam300 {
     }
 
     bool GraphicsManager::loadShaderPrograms(std::vector<std::pair<std::string, std::string>> shaders) {
-        for (auto const& file : shaders) { 
+        for (auto const& file : shaders) {
             // Create the shader files vector with types 
-            std::vector<std::pair<GLenum, std::string>> shader_files; 
-            shader_files.emplace_back(std::make_pair(GL_VERTEX_SHADER, file.first)); 
-            shader_files.emplace_back(std::make_pair(GL_FRAGMENT_SHADER, file.second)); 
+            std::vector<std::pair<GLenum, std::string>> shader_files;
+            shader_files.emplace_back(std::make_pair(GL_VERTEX_SHADER, file.first));
+            shader_files.emplace_back(std::make_pair(GL_FRAGMENT_SHADER, file.second));
 
             // Create new shader program
-            ShaderProgram shader_program; 
+            ShaderProgram shader_program;
 
             // Use Graphics_Manager to compile the shader
             if (!shader_program.compileShader(shader_files)) {

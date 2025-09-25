@@ -108,6 +108,8 @@ namespace gam300 {
         // Store previous mouse position
         m_prev_mouse_x = m_mouse_x;
         m_prev_mouse_y = m_mouse_y;
+        // KENNY TESTING: Update mouse cursor
+        glfwGetCursorPos(m_window, &m_mouse_x, &m_mouse_y);
 
         // Update key states from JUST_PRESSED to PRESSED and JUST_RELEASED to RELEASED
         for (auto& key_state : m_key_states) {
