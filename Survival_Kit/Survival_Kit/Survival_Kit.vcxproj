@@ -24,8 +24,6 @@
     <ClCompile Include="Glad\glad.c" />
     <ClCompile Include="Component\RigidBody.cpp" />
     <ClCompile Include="Component\Transform3D.cpp" />
-    <ClCompile Include="Entity\Entity.cpp" />
-    <ClCompile Include="Glad\glad.c" />
     <ClCompile Include="Graphics\Common.cpp" />
     <ClCompile Include="Graphics\GLResources.cpp" />
     <ClCompile Include="Graphics\Sampler.cpp" />
@@ -65,8 +63,6 @@
     <ClInclude Include="Component\ComponentPool.h" />
     <ClInclude Include="Component\ComponentView.h" />
     <ClInclude Include="Component\InputComponent.h" />
-    <ClInclude Include="Entity\Entity.h" />
-    <ClInclude Include="Glad\glad.h" />
     <ClInclude Include="Component\RigidBody.h" />
     <ClInclude Include="Component\Transform3D.h" />
     <ClInclude Include="Component\TransformComponent.h" />
