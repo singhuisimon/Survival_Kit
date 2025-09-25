@@ -96,6 +96,7 @@
     <ClInclude Include="System\MovementSystem.h" />
     <ClInclude Include="Manager\GraphicsManager.h" />
     <ClInclude Include="Utility\Constant.h" />
+    <ClInclude Include="System\TransformSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Scene\Game.scn" />

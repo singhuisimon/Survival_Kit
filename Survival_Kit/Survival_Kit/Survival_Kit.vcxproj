@@ -106,6 +106,7 @@
     <ClInclude Include="System\MovementSystem.h" />
     <ClInclude Include="System\PhysicsSystem.h" />
     <ClInclude Include="System\System.h" />
+    <ClInclude Include="System\TransformSystem.h" />
     <ClInclude Include="Utility\AssetPath.h" />
     <ClInclude Include="Utility\Clock.h" />
     <ClInclude Include="Utility\Constant.h" />
