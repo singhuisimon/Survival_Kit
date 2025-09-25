@@ -65,6 +65,16 @@ namespace gam300 {
     };
 
     /**
+	* @brief Serializer for Audio_Component components.
+	* @author Amanda Leow Boon Suan
+    */
+    class AudioComponentSerializer : public IComponentSerializer {
+    public:
+        std::string serialize(Component* component) override;
+		Component* deserialize(EntityID entityId, const std::string& jsonData) override;
+    };
+
+    /**
      * @brief Manager for serializing and deserializing game entities.
      * @details Handles loading entities from scene files and saving them back.
      */
@@ -140,6 +150,7 @@ namespace gam300 {
         static std::vector<std::string> splitJsonArray(const std::string& jsonArray);
         static std::vector<float> parseFloatArray(const std::string& arrayJson);
         static std::string extractObjectValue(const std::string& json, const std::string& fieldName);
+		static std::string extractNumberValue(const std::string& json, const std::string& fieldName);
 
         // Indentation helper for pretty JSON output
         std::string getIndent(int level) const;

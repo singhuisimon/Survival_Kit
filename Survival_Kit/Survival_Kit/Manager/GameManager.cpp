@@ -17,6 +17,7 @@
 #include "SerialisationManager.h"
 #include "GraphicsManager.h"
 #include "../Component/Transform3D.h"
+#include "../Component/AudioComponent.h"
 #include "../Utility/Clock.h"
 #include "../Utility/AssetPath.h"
 
@@ -80,6 +81,8 @@ namespace gam300 {
 
         logManager.writeLog("GameManager::startUp() - SerialisationManager started successfully");
 
+        // Start the AudioManager
+
         // Start the GraphicsManager
         if (GFXM.startUp()) {
             logManager.writeLog("GameManager::startUp() - Failed to start GraphicsManager");
@@ -95,6 +98,9 @@ namespace gam300 {
         // Register the Transform3D component with the ComponentManager
         CM.register_component<Transform3D>();
         logManager.writeLog("GameManager::startUp() - Transform3D component registered successfully");
+
+		CM.register_component<AudioComponent>();
+		logManager.writeLog("GameManager::startUp() - AudioComponent component registered successfully");
 
         // Load the scene
         const std::string scenePath = getAssetFilePath("Scene/Game.scn");

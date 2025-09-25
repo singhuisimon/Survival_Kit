@@ -1,24 +1,24 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\riosh\\OneDrive\\Desktop\\UNI LESSONS\\Year 3\\CSD3401 - GAM300 (SEP)\\Survival Kit\\Survival_Kit\\Survival_Kit\\ScriptAPI\\ScriptAPI.vcxproj": {}
+    "C:\\Users\\Admin\\source\\repos\\gam_300\\Survival_Kit\\ScriptAPI\\ScriptAPI.vcxproj": {}
   },
   "projects": {
-    "C:\\Users\\riosh\\OneDrive\\Desktop\\UNI LESSONS\\Year 3\\CSD3401 - GAM300 (SEP)\\Survival Kit\\Survival_Kit\\Survival_Kit\\ScriptAPI\\ScriptAPI.vcxproj": {
+    "C:\\Users\\Admin\\source\\repos\\gam_300\\Survival_Kit\\ScriptAPI\\ScriptAPI.vcxproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\riosh\\OneDrive\\Desktop\\UNI LESSONS\\Year 3\\CSD3401 - GAM300 (SEP)\\Survival Kit\\Survival_Kit\\Survival_Kit\\ScriptAPI\\ScriptAPI.vcxproj",
+        "projectUniqueName": "C:\\Users\\Admin\\source\\repos\\gam_300\\Survival_Kit\\ScriptAPI\\ScriptAPI.vcxproj",
         "projectName": "ScriptAPI",
-        "projectPath": "C:\\Users\\riosh\\OneDrive\\Desktop\\UNI LESSONS\\Year 3\\CSD3401 - GAM300 (SEP)\\Survival Kit\\Survival_Kit\\Survival_Kit\\ScriptAPI\\ScriptAPI.vcxproj",
-        "packagesPath": "C:\\Users\\riosh\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\riosh\\OneDrive\\Desktop\\UNI LESSONS\\Year 3\\CSD3401 - GAM300 (SEP)\\Survival Kit\\Survival_Kit\\Survival_Kit\\ScriptAPI\\obj\\",
+        "projectPath": "C:\\Users\\Admin\\source\\repos\\gam_300\\Survival_Kit\\ScriptAPI\\ScriptAPI.vcxproj",
+        "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Admin\\source\\repos\\gam_300\\Survival_Kit\\ScriptAPI\\obj\\",
         "projectStyle": "PackageReference",
         "UsingMicrosoftNETSdk": false,
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\riosh\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -62,7 +62,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.304/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.305/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
