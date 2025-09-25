@@ -7,7 +7,7 @@
  * Reproduction or disclosure of this file or its contents without the
  * prior written consent of DigiPen Institute of Technology is prohibited.
  */
- 
+
  // Include header file
 #include "ImguiManager.h"
 #include "ECSManager.h"
@@ -29,7 +29,7 @@ namespace gam300 {
 
     ImguiManager::ImguiManager() : ImguiEcsRef(EM), ImguiGraphicRef(GFXM) {}
 
-    ImguiManager::ImguiManager(ECSManager& ECS, GraphicsManager& GFM) : ImguiEcsRef(ECS) , ImguiGraphicRef(GFM){
+    ImguiManager::ImguiManager(ECSManager& ECS, GraphicsManager& GFM) : ImguiEcsRef(ECS), ImguiGraphicRef(GFM) {
         setType("IMGUI_Manager");
     }
 
@@ -131,34 +131,34 @@ namespace gam300 {
 
                     //if (sceneFiles[i].second != shownFile) {
 
-                        if (SEM.loadScene(sceneFiles[i].second)) {
+                    if (SEM.loadScene(sceneFiles[i].second)) {
 
-                            shownFile = sceneFiles[i].second;
+                        shownFile = sceneFiles[i].second;
 
-                            LM.writeLog("IMGUI_Manager::displayFileList(): Scene %s loaded successfully.", sceneFiles[i].first.c_str());
-                            //std::cout << sceneFiles[i].second << std::endl;
-                            //std::cout << "Scene " << sceneFiles[i].first << "loaded successfully from displayFileList" << std::endl;
+                        LM.writeLog("IMGUI_Manager::displayFileList(): Scene %s loaded successfully.", sceneFiles[i].first.c_str());
+                        //std::cout << sceneFiles[i].second << std::endl;
+                        //std::cout << "Scene " << sceneFiles[i].first << "loaded successfully from displayFileList" << std::endl;
 
+                    }
+                    else {
+
+                        LM.writeLog("IMGUI_Manager::displayFileList(): Scene %s failed to load. Loading default scene.", sceneFiles[i].first.c_str());
+                        //std::cout << "Scene " << sceneFiles[i].first << "failed to load from displayFileList. Loading default scene." << std::endl;
+
+                        SEM.saveScene(getAssetFilePath("Scene/Game.scn"));
+                        if (SEM.loadScene(getAssetFilePath("Scene/Game.scn"))) {
+
+                            LM.writeLog("IMGUI_Manager::displayFileList(): Default scene loaded successfully.");
+                            //std::cout << "Default scene loaded successfully from displayFileList" << std::endl;
                         }
                         else {
 
-                            LM.writeLog("IMGUI_Manager::displayFileList(): Scene %s failed to load. Loading default scene.", sceneFiles[i].first.c_str());
-                            //std::cout << "Scene " << sceneFiles[i].first << "failed to load from displayFileList. Loading default scene." << std::endl;
-
-                            SEM.saveScene(getAssetFilePath("Scene/Game.scn"));
-                            if (SEM.loadScene(getAssetFilePath("Scene/Game.scn"))) {
-
-                                LM.writeLog("IMGUI_Manager::displayFileList(): Default scene loaded successfully.");
-                                //std::cout << "Default scene loaded successfully from displayFileList" << std::endl;
-                            }
-                            else {
-
-                                LM.writeLog("IMGUI_Manager::displayFileList(): WARNING: Failed to load default scene.");
-                                //std::cout << "WARNING: Failed to load default scene from displayFileList" << std::endl;
-                            }
-
-                            shownFile = getAssetFilePath("Scene/Game.scn");
+                            LM.writeLog("IMGUI_Manager::displayFileList(): WARNING: Failed to load default scene.");
+                            //std::cout << "WARNING: Failed to load default scene from displayFileList" << std::endl;
                         }
+
+                        shownFile = getAssetFilePath("Scene/Game.scn");
+                    }
                     //}
                     //else {
 
@@ -179,11 +179,11 @@ namespace gam300 {
 
             ImGui::End();
         }
-        
+
     }
 
     void ImguiManager::displayHierarchyList() {
- 
+
         ImGui::SetNextWindowSize(ImVec2(600, 400));
 
         if (ImGui::Begin("Hierarchy", &hierachyWindow, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize)) {
@@ -209,11 +209,11 @@ namespace gam300 {
                     // always show the new entity that is create 
                     selectedObjIndex = static_cast<int>(allEntities.size()) - 1;
                 }
-              
+
                 ImGui::EndPopup();
             }
 
-         
+
             // Debug code
             // std::cout << "Entity count: " << allEntities.size() << "\n";
 
@@ -222,10 +222,10 @@ namespace gam300 {
                     std::cout << "Entity Name: " << e_name.get_name() << "\n";
                 }
            */
-            //int currObjIndex = -1;
-            
-            //Toggle Select object
-            //std::cout << "Check entities list from Imgui: " << allEntities.size() << std::endl;
+           //int currObjIndex = -1;
+
+           //Toggle Select object
+           //std::cout << "Check entities list from Imgui: " << allEntities.size() << std::endl;
 
             if (allEntities.empty())
             {
@@ -246,7 +246,7 @@ namespace gam300 {
 
                     // delete entity by right click 
                     if (ImGui::BeginPopupContextItem(("Entity Context" + std::to_string(i)).c_str()))
-                    //if (ImGui::BeginPopup("Selected Entity Menu"))
+                        //if (ImGui::BeginPopup("Selected Entity Menu"))
                     {
                         if (ImGui::MenuItem("Delete"))
                         {
@@ -265,27 +265,27 @@ namespace gam300 {
                                 // to duplicate entity name
                                 std::string idToDuplicate = allEntities[selectedObjIndex].get_name();
                                 Entity& duplicatedEntity = ImguiEcsRef.createEntity(idToDuplicate);
-                             ;
+                                ;
 
                                 // get information for original entity 
                                 const Entity& oriSelectedEntity = allEntities[selectedObjIndex];
                                 EntityID newEntityID = duplicatedEntity.get_id();
-                                
+
                                 if (ImguiEcsRef.hasComponent<Transform3D>(oriSelectedEntity.get_id()))
                                 {
                                     Transform3D* oldTransform = ImguiEcsRef.getComponent<Transform3D>(oriSelectedEntity.get_id());
                                     if (oldTransform)
                                     {
-                                        
+
                                         ImguiEcsRef.addComponent<Transform3D>(newEntityID, *oldTransform);
                                     }
                                 }
-                               
 
-                               
+
+
                                 selectedObjIndex = static_cast<int>(allEntities.size()) - 1;
 
-                            } 
+                            }
                         }
                         ImGui::EndPopup();
                     }
@@ -294,7 +294,7 @@ namespace gam300 {
                     //++currObjIndex;
                 }
             }
-           
+
         }
 
         ImGui::End();
@@ -315,14 +315,20 @@ namespace gam300 {
                 ImGui::Text("No Entity Available");
                 selectedObjIndex = -1;
             }
-           
+            else if (selectedObjIndex < 0 || selectedObjIndex >= static_cast<int>(allEntities.size())) {
+                ImGui::Text("No Entity Selected or Invalid Selection");
+                selectedObjIndex = -1;
+            }
+            else {
+                // Get the selected entity (Fix: proper array access)
+                const Entity& selectedEntity = allEntities[selectedObjIndex];
 
                 // Display entity information using input text (Fix: strncpy_s parameters)
                 char nameBuffer[128];
                 const std::string& entityName = selectedEntity.get_name();
 
                 // Fix: strncpy_s requires 3 parameters: destination, size, source
-                strcpy_s(nameBuffer, sizeof(nameBuffer), entityName.c_str()); 
+                strcpy_s(nameBuffer, sizeof(nameBuffer), entityName.c_str());
 
                 if (ImGui::InputText("Entity Name", nameBuffer, sizeof(nameBuffer))) {
                     const std::string newName = nameBuffer;
@@ -337,10 +343,10 @@ namespace gam300 {
                 // Display component information
                 ImGui::Separator();
                 ImGui::Text("Components:");
-               /* if (ImGui::Button("Test"))
-                {
-                    std::cout << "test is success\n";
-                }*/
+                /* if (ImGui::Button("Test"))
+                 {
+                     std::cout << "test is success\n";
+                 }*/
 
                  //Example: Check for Transform3D component and display its properties
                 if (ImguiEcsRef.hasComponent<Transform3D>(selectedEntity.get_id())) {
@@ -394,12 +400,12 @@ namespace gam300 {
                     }
                 }
 
-            
+
                 // Add component button
                 ImGui::Separator();
                 if (ImGui::Button("Add Component")) {
                     ImGui::Text("Component");
-                
+
                     if (!ImguiEcsRef.hasComponent<Transform3D>(selectedEntity.get_id())) {
                         ImguiEcsRef.addComponent<Transform3D>(selectedEntity.get_id());
                     }
@@ -407,7 +413,6 @@ namespace gam300 {
             }
         }
         ImGui::End();
-
     }
 #endif 
 
@@ -417,16 +422,16 @@ namespace gam300 {
     {
         ImGui::SetNextWindowSize(ImVec2(600, 400));
 
-        
 
-        if (ImGui::Begin("Properties/ Inspector", &inspectorWindow, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize)) 
+
+        if (ImGui::Begin("Properties/ Inspector", &inspectorWindow, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize))
         {
             // to get all the entities 
             const std::vector<Entity>& allEntities = ImguiEcsRef.getAllEntities();
             if (allEntities.empty() || selectedObjIndex < 0 || selectedObjIndex >= static_cast<int>(allEntities.size()))
             {
                 selectedObjIndex = -1;
-          
+
             }
             else
             {
@@ -463,15 +468,15 @@ namespace gam300 {
                 // Display adjustable value in components  
                 if (ImguiEcsRef.hasComponent<Transform3D>(selectedEntity.get_id())) {
                     displayComponentMenu<Transform3D>(selectedEntity.get_id(), "Transform3D");
-                    
+
                 }
                 if (ImguiEcsRef.hasComponent<RigidBody>(selectedEntity.get_id())) {
                     displayComponentMenu<RigidBody>(selectedEntity.get_id(), "RigidBody");
                     //displayComponentMenu<RigidBody>(selectedEntity.get_id(), "RigidBody");
 
                 }
-                
-               
+
+
                 ImGui::Separator();
                 // Adding components 
 
@@ -506,7 +511,7 @@ namespace gam300 {
                             ImguiEcsRef.addComponent<RigidBody>(selectedEntity.get_id());
                         }
                     }
-                   
+
                     ImGui::EndPopup();
                 }
                 // Removed Component 
@@ -527,7 +532,7 @@ namespace gam300 {
     Vector2D ImguiManager::getWindowSize(GLFWwindow& window)
     {
         //Vector2D dimension{ 0,0 };
-       
+
         glfwGetWindowSize(&window, &width, &height);
         return Vector2D(width, height);
         //std::cout << width << ", " << "height\n";
@@ -548,8 +553,8 @@ namespace gam300 {
 
         ImGui::End();
     }
- 
-    
+
+
 
     template<typename componentType>
     void ImguiManager::displayComponentMenu(EntityID entityID, const char* componentName)
@@ -568,7 +573,7 @@ namespace gam300 {
             ImGui::OpenPopup(componentName);
         }
 
-     
+
         ImGui::NextColumn(); // move to right 
 
         // Right column
@@ -588,8 +593,8 @@ namespace gam300 {
 
         // display the editable value
         if (openHeader) {
-            displayComponentContent<componentType>(entityID); 
-          
+            displayComponentContent<componentType>(entityID);
+
         }
     }
 
@@ -631,24 +636,24 @@ namespace gam300 {
                // {
                 BodyType  currRigidBodyType = rigidBody->getRigidBodyType();
 
-                    const char* bodyTypeNames[] = { "STATIC", "KINEMATIC", "DYNAMIC" };
-                    int currentTypeIndex = static_cast<int>(currRigidBodyType);
+                const char* bodyTypeNames[] = { "STATIC", "KINEMATIC", "DYNAMIC" };
+                int currentTypeIndex = static_cast<int>(currRigidBodyType);
 
-                    // Dropdown for BodyType
-                    if (ImGui::BeginCombo("Rigid Body Type", bodyTypeNames[currentTypeIndex])) {
-                        for (int i = 0; i < 3; i++) {
-                            bool isSelected = (currentTypeIndex == i);
-                            if (ImGui::Selectable(bodyTypeNames[i], isSelected)) {
-                                currentTypeIndex = i;
-                                rigidBody->setRigidBodyType(static_cast<BodyType>(i)); //
-                            }
-                            if (isSelected)
-                                ImGui::SetItemDefaultFocus();
+                // Dropdown for BodyType
+                if (ImGui::BeginCombo("Rigid Body Type", bodyTypeNames[currentTypeIndex])) {
+                    for (int i = 0; i < 3; i++) {
+                        bool isSelected = (currentTypeIndex == i);
+                        if (ImGui::Selectable(bodyTypeNames[i], isSelected)) {
+                            currentTypeIndex = i;
+                            rigidBody->setRigidBodyType(static_cast<BodyType>(i)); //
                         }
-                        ImGui::EndCombo();
+                        if (isSelected)
+                            ImGui::SetItemDefaultFocus();
                     }
+                    ImGui::EndCombo();
+                }
 
-               //}
+                //}
             }
         }
 

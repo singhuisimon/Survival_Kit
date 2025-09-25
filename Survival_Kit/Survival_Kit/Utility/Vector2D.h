@@ -16,6 +16,8 @@
 #include <cmath>
 #include <iostream>
 
+#include <glm-0.9.9.8/glm/glm.hpp>
+
 namespace gam300 {
 
     class Vector2D {

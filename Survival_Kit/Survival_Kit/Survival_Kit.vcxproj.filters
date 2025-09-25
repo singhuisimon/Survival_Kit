@@ -101,6 +101,8 @@
   <ItemGroup>
     <None Include="Assets\Scene\Game.scn" />
     <None Include="game.scn" />
+    <None Include="Assets\Shaders\survival_kit_obj.frag" />
+    <None Include="Assets\Shaders\survival_kit_obj.vert" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Survival_Kit.log" />

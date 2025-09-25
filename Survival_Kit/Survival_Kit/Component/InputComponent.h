@@ -13,7 +13,7 @@
 #define __INPUT_COMPONENT_H__
 
 #include "../Component/Component.h"
-#include <GLFW/glfw3.h>
+//#include <GLFW/glfw3.h>
 #include <functional>
 #include <unordered_map>
 #include <string>

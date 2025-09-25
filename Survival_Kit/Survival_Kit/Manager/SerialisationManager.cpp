@@ -31,6 +31,102 @@
 
 namespace gam300 {
 
+    // Transform3DSerializer implementation
+    std::string Transform3DSerializer::serialize(Component* component) {
+        Transform3D* transform = static_cast<Transform3D*>(component);
+        if (!transform) {
+            return "{}";
+        }
+
+        std::stringstream ss;
+        ss << "{\n";
+
+        // Serialize position
+        const Vector3D& pos = transform->getPosition();
+        ss << "          \"position\": [\n";
+        ss << "            " << pos.x << ",\n";
+        ss << "            " << pos.y << ",\n";
+        ss << "            " << pos.z << "\n";
+        ss << "          ],\n";
+
+        // Serialize previous position
+        const Vector3D& prevPos = transform->getPrevPosition();
+        ss << "          \"prev_position\": [\n";
+        ss << "            " << prevPos.x << ",\n";
+        ss << "            " << prevPos.y << ",\n";
+        ss << "            " << prevPos.z << "\n";
+        ss << "          ],\n";
+
+        // Serialize rotation
+        const Vector3D& rotation = transform->getRotation();
+        ss << "          \"rotation\": [\n";
+        ss << "            " << rotation.x << ",\n";
+        ss << "            " << rotation.y << ",\n";
+        ss << "            " << rotation.z << "\n";
+        ss << "          ],\n";
+
+        // Serialize scale
+        const Vector3D& scale = transform->getScale();
+        ss << "          \"scale\": [\n";
+        ss << "            " << scale.x << ",\n";
+        ss << "            " << scale.y << ",\n";
+        ss << "            " << scale.z << "\n";
+        ss << "          ]\n";
+
+        ss << "        }";
+
+        return ss.str();
+    }
+
+    // Transform3DDeserializer implementation
+    Component* Transform3DSerializer::deserialize(EntityID entityId, const std::string& jsonData) {
+        // Parse position
+        Vector3D position = Vector3D::ZERO;
+        std::string positionData = SerialisationManager::extractObjectValue(jsonData, "position");
+        if (!positionData.empty()) {
+            std::vector<float> posArray = SerialisationManager::parseFloatArray(positionData);
+            if (posArray.size() >= 3) {
+                position = Vector3D(posArray[0], posArray[1], posArray[2]);
+            }
+        }
+
+        // Parse rotation
+        Vector3D rotation = Vector3D::ZERO;
+        std::string rotationData = SerialisationManager::extractObjectValue(jsonData, "rotation");
+        if (!rotationData.empty()) {
+            std::vector<float> rotArray = SerialisationManager::parseFloatArray(rotationData);
+            if (rotArray.size() >= 3) {
+                rotation = Vector3D(rotArray[0], rotArray[1], rotArray[2]);
+            }
+        }
+
+        // Parse scale
+        Vector3D scale = Vector3D::ONE;
+        std::string scaleData = SerialisationManager::extractObjectValue(jsonData, "scale");
+        if (!scaleData.empty()) {
+            std::vector<float> scaleArray = SerialisationManager::parseFloatArray(scaleData);
+            if (scaleArray.size() >= 3) {
+                scale = Vector3D(scaleArray[0], scaleArray[1], scaleArray[2]);
+            }
+        }
+
+        // Create the Transform3D component
+        Transform3D* transform = EM.addComponent<Transform3D>(entityId, position, rotation, scale);
+
+        // Parse and set previous position if available
+        std::string prevPosData = SerialisationManager::extractObjectValue(jsonData, "prev_position");
+        if (!prevPosData.empty()) {
+            std::vector<float> prevPosArray = SerialisationManager::parseFloatArray(prevPosData);
+            if (prevPosArray.size() >= 3) {
+                // Since there's no direct setter for prev_position, we'll just log it
+                // In a real implementation, you might add a setPrevPosition method
+                LM.writeLog("Transform3D::deserialize() - Previous position loaded but not set (no direct setter)");
+            }
+        }
+
+        return transform;
+    }
+
     // InputComponentSerializer implementation
     std::string InputComponentSerializer::serialize(Component* component) {
         InputComponent* input = static_cast<InputComponent*>(component);
@@ -211,10 +307,21 @@ namespace gam300 {
             return -1;
 
         // Register component serializers
-        registerComponentSerializer("Input", std::make_shared<InputComponentSerializer>());
-
         registerComponentSerializer("Transform3D", std::make_shared<Transform3DSerializer>());
-        
+
+
+        // Register component creators
+        registerComponentCreator("Transform3D", [this](EntityID entityId, const std::string& componentData) {
+            // Use the serializer to create the component
+            auto serializer = m_component_serializers["Transform3D"];
+            if (serializer) {
+                serializer->deserialize(entityId, componentData);
+                LM.writeLog("Transform3D created for entity %d", entityId);
+            }
+            });
+
+        // Register component serializers
+        registerComponentSerializer("Input", std::make_shared<InputComponentSerializer>());
         
         // Register component creators
         registerComponentCreator("Input", [this](EntityID entityId, const std::string& componentData) {
@@ -281,6 +388,8 @@ namespace gam300 {
             LM.writeLog("SerialisationManager::loadScene() - Failed to read scene file");
             return false;
         }
+
+        LM.writeLog("SerialisationManager::loadScene() - File loaded, size: %zu characters", fileContent.length());
 
         // Very simple JSON parsing - in a real implementation we would use a proper JSON parser
         // Find the objects array
@@ -586,16 +695,21 @@ namespace gam300 {
             // Save each component
             //bool hasComponents = false;
 
+            // Check for Transform3D component
+            if (auto serializer = m_component_serializers.find("Transform3D");
+                serializer != m_component_serializers.end()) {
+                if (Transform3D* transform = EM.getComponent<Transform3D>(entity.get_id())) {
+                    componentStrings.push_back(getIndent(4) + "\"Transform3D\": " +
+                        serializer->second->serialize(transform));
+                    hasComponents = true;
+                }
+            }
+
             // Check for Input component
             if (auto serializer = m_component_serializers.find("Input");
                 serializer != m_component_serializers.end()) {
                 if (InputComponent* input = EM.getComponent<InputComponent>(entity.get_id())) {
                     file << getIndent(4) << "\"Input\": " << serializer->second->serialize(input);
-                    hasComponents = true;
-                }
-                if (Transform3D* transform = EM.getComponent<Transform3D>(entity.get_id())) {
-                    componentStrings.push_back(getIndent(4) + "\"Transform3D\": " +
-                        serializer->second->serialize(transform));
                     hasComponents = true;
                 }
             }
@@ -903,6 +1017,131 @@ namespace gam300 {
             indent += "  "; // Two spaces per level
         }
         return indent;
+    }
+
+    // Helper function to extract object/array value
+    std::string SerialisationManager::extractObjectValue(const std::string& json, const std::string& fieldName) {
+        size_t pos = json.find("\"" + fieldName + "\"");
+        if (pos == std::string::npos) {
+            return ""; // Field not found
+        }
+
+        // Find the colon after the field name
+        size_t colonPos = json.find(':', pos);
+        if (colonPos == std::string::npos) {
+            return ""; // Invalid JSON format
+        }
+
+        // Find the beginning of the array
+        size_t arrayStart = json.find('[', colonPos);
+        if (arrayStart == std::string::npos) {
+            return ""; // Array not found
+        }
+
+        // Find the end of the array, accounting for nested arrays
+        int bracketLevel = 1;
+        size_t arrayEnd = arrayStart + 1;
+
+        while (bracketLevel > 0 && arrayEnd < json.length()) {
+            if (json[arrayEnd] == '[') {
+                bracketLevel++;
+            }
+            else if (json[arrayEnd] == ']') {
+                bracketLevel--;
+            }
+            arrayEnd++;
+        }
+
+        if (bracketLevel != 0) {
+            return ""; // Unbalanced brackets
+        }
+
+        return json.substr(arrayStart, arrayEnd - arrayStart);
+    }
+
+    // Helper function to parse float array
+    std::vector<float> SerialisationManager::parseFloatArray(const std::string& arrayJson) {
+        std::vector<float> result;
+
+        // Remove brackets and spaces
+        std::string content = arrayJson;
+        if (content.front() == '[') content = content.substr(1);
+        if (content.back() == ']') content.pop_back();
+
+        // Split by comma and parse floats
+        std::stringstream ss(content);
+        std::string token;
+
+        while (std::getline(ss, token, ',')) {
+            // Remove leading/trailing whitespace
+            size_t start = token.find_first_not_of(" \t\n\r");
+            size_t end = token.find_last_not_of(" \t\n\r");
+
+            if (start != std::string::npos && end != std::string::npos) {
+                token = token.substr(start, end - start + 1);
+                try {
+                    result.push_back(std::stof(token));
+                }
+                catch (const std::exception&) {
+                    // Skip invalid numbers
+                }
+            }
+        }
+
+        return result;
+    }
+
+    Vector3D SerialisationManager::extractVector3D(const std::string& json, size_t startPos, const std::string& fieldName) {
+        // Find the field
+        size_t fieldPos = json.find("\"" + fieldName + "\"", startPos);
+        if (fieldPos == std::string::npos) {
+            LM.writeLog("SerialisationManager::extractVector3D() - Field '%s' not found", fieldName.c_str());
+            return Vector3D::ZERO;
+        }
+
+        // Find the opening bracket
+        size_t bracketStart = json.find('[', fieldPos);
+        if (bracketStart == std::string::npos) {
+            return Vector3D::ZERO;
+        }
+
+        // Find the closing bracket
+        size_t bracketEnd = json.find(']', bracketStart);
+        if (bracketEnd == std::string::npos) {
+            return Vector3D::ZERO;
+        }
+
+        // Extract array content
+        std::string arrayContent = json.substr(bracketStart + 1, bracketEnd - bracketStart - 1);
+
+        // Parse the three float values
+        std::vector<float> values;
+        std::stringstream ss(arrayContent);
+        std::string token;
+
+        while (std::getline(ss, token, ',')) {
+            // Remove whitespace
+            size_t start = token.find_first_not_of(" \t\n\r");
+            size_t end = token.find_last_not_of(" \t\n\r");
+
+            if (start != std::string::npos && end != std::string::npos) {
+                token = token.substr(start, end - start + 1);
+                try {
+                    values.push_back(std::stof(token));
+                }
+                catch (const std::exception&) {
+                    LM.writeLog("SerialisationManager::extractVector3D() - Failed to parse float: '%s'", token.c_str());
+                    values.push_back(0.0f);
+                }
+            }
+        }
+
+        // Ensure we have at least 3 values
+        while (values.size() < 3) {
+            values.push_back(0.0f);
+        }
+
+        return Vector3D(values[0], values[1], values[2]);
     }
 
 } // end of namespace gam300

@@ -19,6 +19,7 @@
 #include <functional>
 #include <memory>
 #include "../Utility/ECS_Variables.h"
+#include "../Utility/Vector3D.h"
 
  // Two-letter acronym for easier access to manager.
 #define SEM gam300::SerialisationManager::getInstance()
@@ -55,6 +56,15 @@ namespace gam300 {
     };
 
     /**
+     * @brief Serializer for Transform3D components.
+     */
+    class Transform3DSerializer : public IComponentSerializer {
+    public:
+        std::string serialize(Component* component) override;
+        Component* deserialize(EntityID entityId, const std::string& jsonData) override;
+    };
+
+    /**
      * @brief Serializer for Input components.
      */
     class InputComponentSerializer : public IComponentSerializer {
@@ -87,6 +97,9 @@ namespace gam300 {
 
         // Component serializers
         std::unordered_map<std::string, std::shared_ptr<IComponentSerializer>> m_component_serializers;
+
+        // Helper method for extracting Vector3D from JSON  
+        Vector3D extractVector3D(const std::string& json, size_t startPos, const std::string& fieldName);
 
     public:
         /**
@@ -144,6 +157,8 @@ namespace gam300 {
         static std::vector<std::string> splitJsonArray(const std::string& jsonArray);
         static void parseKeyMappings(const std::string& keyMappingsJson, InputComponent* input);
         static void parseMouseMappings(const std::string& mouseMappingsJson, InputComponent* input);
+        static std::vector<float> parseFloatArray(const std::string& arrayJson);
+        static std::string extractObjectValue(const std::string& json, const std::string& fieldName);
 
         // Indentation helper for pretty JSON output
         std::string getIndent(int level) const;

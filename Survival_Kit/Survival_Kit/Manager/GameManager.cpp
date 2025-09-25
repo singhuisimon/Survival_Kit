@@ -15,6 +15,7 @@
 #include "InputManager.h" 
 #include "ECSManager.h"
 #include "SerialisationManager.h"
+#include "GraphicsManager.h"
 #include "../System/InputSystem.h"
 #include "../Utility/Clock.h"
 #include "../Utility/AssetPath.h"

@@ -14,6 +14,7 @@
 #define __GAME_MANAGER_H__
 
 #include "Manager.h"
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <thread>
 #include <chrono>
@@ -100,6 +101,28 @@ namespace gam300 {
          * @return The current game loop step count.
          */
         int getStepCount() const;
+
+        // Added: Scene management helper methods
+        /**
+         * @brief Work with entities loaded from serialization.
+         * @param dt Delta time in seconds.
+         * @details Demonstrates how to use entity lookup functionality.
+         */
+        void workWithSerializedEntities(float dt);
+
+        /**
+         * @brief Load a new scene, clearing existing entities first.
+         * @param scenePath Path to the scene file to load.
+         * @details Clears all existing entities before loading new scene.
+         */
+        void loadNewScene(const std::string& scenePath);
+
+        /**
+         * @brief Save current game state to a save slot.
+         * @param saveSlot Name of the save slot (e.g., "slot1", "quicksave").
+         * @details Saves current entities without clearing them from memory.
+         */
+        void saveCurrentGame(const std::string& saveSlot);
     };
 
 } // end of namespace gam300
