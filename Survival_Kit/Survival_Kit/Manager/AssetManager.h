@@ -2,7 +2,6 @@
 #ifndef __ASSET_MANAGER_H__
 #define __ASSET_MANAGER_H__
 
-
 #include <string>
 #include <vector>
 #include <ctime>
@@ -21,9 +20,9 @@
 namespace gam300 {
 
 	/**
-* @class AssetManager
-* @brief Central editor tool coordinating scanning, importing and DB.
-*/
+	* @class AssetManager
+	* @brief Central editor tool coordinating scanning, importing and DB.
+	*/
 	class AssetManager : public Manager {
 	private:
 		AssetManager(); // singleton
