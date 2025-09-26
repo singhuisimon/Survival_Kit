@@ -197,6 +197,7 @@ namespace gam300 {
         if (IM.isKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
             std::cout << IM.getMouseDeltaX() << std::endl;
             main_camera.cameraOnCursor(IM.getMouseDeltaX(), IM.getMouseDeltaY(), &shadersStorage[0]);
+        }
         // MOUSE: Camera control with left mouse button held down
         if (IM.isMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT)) {
             double mouseDeltaX = IM.getMouseDeltaX();

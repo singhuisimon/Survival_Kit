@@ -263,7 +263,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir).bin\$(Configuration)-$(Platform)\;$(SolutionDir)External_Libraries\lib\Jolt_Release;$(SolutionDir)External_Libraries\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);opengl32.lib;ScriptCore.lib;glfw3.lib;fmod_vc.lib;fmodstudio_vc.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);opengl32.lib;ScriptCore.lib;glfw3.lib;fmod_vc.lib;fmodstudio_vc.lib;Jolt.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /y /d "$(SolutionDir)External_Libraries\bin\FMOD\*.dll" "$(OutDir)"</Command>
