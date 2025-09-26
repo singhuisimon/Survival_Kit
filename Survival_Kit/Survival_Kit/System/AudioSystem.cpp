@@ -45,6 +45,10 @@ namespace gam300 {
 			return false;
 		}
 
+		//for testing rn
+		//Entity test = EM.createEntity("sound");
+		//AudioComponent* audio = EM.addComponent<AudioComponent>(test.get_id(), "Audio\\sfx_jumping.wav", AudioType::SFX, 1.0, 1.0, false);
+
 		LM.writeLog("AudioSystem::init() - Audio System Initialized");
 		return true;
 	}
@@ -80,18 +84,20 @@ namespace gam300 {
 		//	}
 		//}
 
-		if (IM.isKeyPressed(GLFW_KEY_P)) {
-			LM.writeLog("AudioSystem::update() - Play sound on Cube pressed");
-			Entity* retrievecube = EM.getEntityByName("Cube");
-			if (retrievecube) {
-				if (retrievecube->has_component(get_component_type_id<AudioComponent>())) {
-					AudioComponent* audio = EM.getComponent<AudioComponent>(retrievecube->get_id());
-					if (audio) {
-						audio->setPlayState(PlayState::PLAY);
-					}
-				}
-			}
-		}
+		//for testing rn
+		//if (IM.isKeyPressed(GLFW_KEY_P)){//} && !m_p_pressed) {
+		//	LM.writeLog("AudioSystem::update() - Play sound when p pressed");
+		//	Entity* sound = EM.getEntityByName("sound");
+		//	if (sound) {
+		//		if (sound->has_component(get_component_type_id<AudioComponent>())) {
+		//			AudioComponent* audio = EM.getComponent<AudioComponent>(sound->get_id());
+		//			if (audio) {
+		//				audio->setPlayState(PlayState::PLAY);
+		//			}
+		//		}
+		//	}
+		//	m_p_pressed = true;
+		//}
 
 		//Iterate through all entities with AudioComponent
 		auto entities = EM.getEntitiesWithComponent<AudioComponent>();
@@ -494,7 +500,7 @@ namespace gam300 {
 			bool is_paused = false;
 
 			pair.second->getPaused(&is_paused);
-			pair.second->isPlaying(&is_playing);
+			pair.second->isPlaying(&is_playing); //does not factor if it is paused.
 
 			if(!is_playing && !is_paused) {
 				to_remove.push_back(pair.first);
@@ -504,16 +510,10 @@ namespace gam300 {
 			if (audio && audio->getPlayState() != PlayState::STOP) {
 				audio->setPlayState(PlayState::STOP);
 			}
-
-			/*if (pair.second && pair.second->isPlaying(&is_playing) == FMOD_OK) {
-				if (!is_playing) {
-					to_remove.push_back(pair.first);
-				}
-			}*/
+			else {
+				LM.writeLog("AudioSystem::cleanupInactiveChannels() fail to retrieve audio comp from %u", pair.first);
+			}
 		}
-
-		//set the state back to stopped for those removed
-
 
 		for (EntityID id : to_remove) {
 			m_activechannels.erase(id);

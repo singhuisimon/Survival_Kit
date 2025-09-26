@@ -96,7 +96,8 @@ namespace gam300 {
 		float m_bgmvolume = 1.0f;
 		float m_sfxgroupvolume = 1.0f;
 
-		
+		//for testing
+		//bool m_p_pressed = false;
 	};
 
 }
