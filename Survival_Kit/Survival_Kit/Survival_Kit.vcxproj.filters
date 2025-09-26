@@ -41,6 +41,7 @@
     <ClCompile Include="Component\AudioComponent.cpp" />
     <ClCompile Include="System\AudioSystem.cpp" />
     <ClCompile Include="IMGUI\ImGuizmo.cpp" />
+    <ClCompile Include="Manager\PrefabManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component\Component.h" />
@@ -99,6 +100,7 @@
     <ClInclude Include="Component\AudioComponent.h" />
     <ClInclude Include="System\AudioSystem.h" />
     <ClInclude Include="IMGUI\ImGuizmo.h" />
+    <ClInclude Include="Manager\PrefabManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Scene\Game.scn" />
