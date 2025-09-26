@@ -13,6 +13,8 @@
 #include "LogManager.h"
 #include <algorithm>
 
+#include "../System/AudioSystem.h"
+
 namespace gam300 {
 
     // Initialize singleton instance
@@ -49,6 +51,16 @@ namespace gam300 {
         }
 
         LM.writeLog("ECSManager::startUp() - SystemManager started successfully");
+        
+        // register audio system
+        auto audioSystem = EM.registerSystem<AudioSystem>();
+        if (!audioSystem) {
+            LM.writeLog("ECSManager::startUp() - Failed to register AudioSystem");
+        }
+        else {
+            LM.writeLog("ECSManager::startUp() - AudioSystem registered successfully");
+        }
+        
         LM.writeLog("ECSManager::startUp() - ECS Manager started successfully");
 
         return 0;

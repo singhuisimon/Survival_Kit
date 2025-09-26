@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Component\RigidBody.cpp" />
+    <ClCompile Include="Component\AudioComponent.cpp" />
     <ClCompile Include="Component\Transform3D.cpp" />
     <ClCompile Include="Entity\Entity.cpp" />
     <ClCompile Include="Glad\glad.c" />
@@ -50,6 +51,7 @@
     <ClCompile Include="Manager\SystemManager.cpp" />
     <ClCompile Include="System\MovementSystem.cpp" />
     <ClCompile Include="System\PhysicsSystem.cpp" />
+    <ClCompile Include="System\AudioSystem.cpp" />
     <ClCompile Include="System\TransformSystem.cpp" />
     <ClCompile Include="Utility\AssetPath.cpp" />
     <ClCompile Include="Utility\Clock.cpp" />
@@ -58,6 +60,7 @@
     <ClCompile Include="Utility\Vector3D.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Component\AudioComponent.h" />
     <ClInclude Include="Component\Component.h" />
     <ClInclude Include="Component\ComponentPool.h" />
     <ClInclude Include="Component\ComponentView.h" />
@@ -101,6 +104,7 @@
     <ClInclude Include="Manager\SerialisationManager.h" />
     <ClInclude Include="System\MovementSystem.h" />
     <ClInclude Include="System\PhysicsSystem.h" />
+    <ClInclude Include="System\AudioSystem.h" />
     <ClInclude Include="System\System.h" />
     <ClInclude Include="System\TransformSystem.h" />
     <ClInclude Include="Utility\AssetPath.h" />
@@ -124,6 +128,9 @@
     <ProjectReference Include="..\ScriptCore\ScriptCore.vcxproj">
       <Project>{cd45b5b8-24d0-4291-ad94-d2597784cbe2}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="Assets\Audio\sfx_jumping.wav" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -224,7 +231,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)ScriptCore;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)ScriptCore;$(SolutionDir)External_Libraries\include\FMOD API\core;$(SolutionDir)External_Libraries\include\FMOD API\studio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -234,8 +241,7 @@
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);ScriptCore.lib;opengl32.lib;glfw3.lib;Jolt.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>xcopy /y /d "$(SolutionDir)External_Libraries\bin\FMOD\*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -246,7 +252,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)ScriptCore;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)ScriptCore;$(SolutionDir)External_Libraries\include\FMOD API\core;$(SolutionDir)External_Libraries\include\FMOD API\studio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -258,8 +264,7 @@
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);opengl32.lib;ScriptCore.lib;glfw3.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>xcopy /y /d "$(SolutionDir)External_Libraries\bin\FMOD\*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

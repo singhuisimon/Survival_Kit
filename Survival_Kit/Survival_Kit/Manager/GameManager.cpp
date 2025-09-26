@@ -17,6 +17,7 @@
 #include "SerialisationManager.h"
 #include "GraphicsManager.h"
 #include "../Component/Transform3D.h"
+#include "../Component/AudioComponent.h"
 #include "../Utility/Clock.h"
 #include "../Utility/AssetPath.h"
 #include "../System/MovementSystem.h"
@@ -82,6 +83,8 @@ namespace gam300 {
 
         logManager.writeLog("GameManager::startUp() - SerialisationManager started successfully");
 
+        // Start the AudioManager
+
         // Start the GraphicsManager
         if (GFXM.startUp()) {
             logManager.writeLog("GameManager::startUp() - Failed to start GraphicsManager");
@@ -97,13 +100,15 @@ namespace gam300 {
         // Register the Transform3D component with the ComponentManager
         CM.register_component<Transform3D>();
         logManager.writeLog("GameManager::startUp() - Transform3D component registered successfully");
-
-        // Register the RigidBody component with the componentManager
-        CM.register_component<RigidBody>();
-        logManager.writeLog("GameManager::startUp() - RigidBody component registered successfully");
         // Register RigidBody component with the componentManager
         CM.register_component<RigidBody>();
         logManager.writeLog("GameManager::startUp() - GraphicsManager started successfully");
+		CM.register_component<AudioComponent>();
+		logManager.writeLog("GameManager::startUp() - AudioComponent component registered successfully");
+
+        // Load the scene
+        const std::string scenePath = getAssetFilePath("Scene/Game.scn");
+        logManager.writeLog("GameManager::startUp() - Attempting to load scene from '%s'", scenePath.c_str());
 
 
         // Register the Movement component with the ComponetManager

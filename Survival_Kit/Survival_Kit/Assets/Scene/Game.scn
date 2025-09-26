@@ -24,6 +24,20 @@
             1.0,
             1.0
           ]
+        },
+        "AudioComponent": {
+          "guid": "C:\\Users\\Admin\\source\\repos\\gam_300\\Survival_Kit\\Survival_Kit\\Assets\\Audio\\sfx_jumping.wav",
+          "type": "SFX",
+          "volume": 1.0,
+          "pitch": 1.0,
+          "loop": "false",
+          "state": "STOP",
+          "is3D": "false",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ]
         }
       }
     }
