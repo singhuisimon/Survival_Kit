@@ -117,9 +117,6 @@ int main(void) {
     //std::cout << "Initial script added" << std::endl;
 
     while (!GM.getGameOver() && !glfwWindowShouldClose(window)) {
-        // Process events
-        glfwPollEvents();
-
         // Update input system
         IM.update();
 
