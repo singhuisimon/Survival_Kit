@@ -25,6 +25,7 @@
         ],
         "sources": {
           "https://api.nuget.org/v3/index.json": {}
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {}
         },
         "frameworks": {
           "net8.0-windows7.0": {

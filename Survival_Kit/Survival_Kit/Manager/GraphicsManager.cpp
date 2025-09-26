@@ -197,13 +197,48 @@ namespace gam300 {
         if (IM.isKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
             std::cout << IM.getMouseDeltaX() << std::endl;
             main_camera.cameraOnCursor(IM.getMouseDeltaX(), IM.getMouseDeltaY(), &shadersStorage[0]);
+        // MOUSE: Camera control with left mouse button held down
+        if (IM.isMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT)) {
+            double mouseDeltaX = IM.getMouseDeltaX();
+            double mouseDeltaY = IM.getMouseDeltaY();
+
+            if (std::abs(mouseDeltaX) > 0.1 || std::abs(mouseDeltaY) > 0.1) {
+                // INCREASE SENSITIVITY
+                float extraSensitivity = 500.0f;
+
+                main_camera.cameraOnCursor(mouseDeltaX * extraSensitivity,
+                    mouseDeltaY * extraSensitivity,
+                    &shadersStorage[0]);
+            }
         }
 
-        //// KENNY TESTING: Temporary input for scroll
-        //if (IM.isKeyPressed(GLFW_KEY_RIGHT_SHIFT)) {
-        //    std::cout << IM.getScrollY() << std::endl;
-        //    main_camera.cameraOnScroll(IM.getScrollY(), &shadersStorage[0]);
-        //}
+        // KEYBOARD: Camera control with arrow keys
+        float keyboardSensitivity = 8.0f; // Adjust this value for keyboard speed
+        bool keyPressed = false;
+        double keyDeltaX = 0.0;
+        double keyDeltaY = 0.0;
+
+        if (IM.isKeyPressed(GLFW_KEY_LEFT)) {
+            keyDeltaX = -keyboardSensitivity;
+            keyPressed = true;
+        }
+        if (IM.isKeyPressed(GLFW_KEY_RIGHT)) {
+            keyDeltaX = keyboardSensitivity;
+            keyPressed = true;
+        }
+        if (IM.isKeyPressed(GLFW_KEY_UP)) {
+            keyDeltaY = -keyboardSensitivity;
+            keyPressed = true;
+        }
+        if (IM.isKeyPressed(GLFW_KEY_DOWN)) {
+            keyDeltaY = keyboardSensitivity;
+            keyPressed = true;
+        }
+
+        // Handle diagonal movement (multiple keys pressed)
+        if (keyPressed) {
+            main_camera.cameraOnCursor(keyDeltaX, keyDeltaY, &shadersStorage[0]);
+        }
 
         // Set uniform to shader after update light values
         shadersStorage[0].setUniform("light.position", main_light.getLightPos());  // Position
