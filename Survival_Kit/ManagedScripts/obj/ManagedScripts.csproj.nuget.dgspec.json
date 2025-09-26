@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Admin\\source\\repos\\gam_300\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj": {}
+    "C:\\Users\\Admin\\Source\\Repos\\Survival_Kit\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Admin\\source\\repos\\gam_300\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj": {
+    "C:\\Users\\Admin\\Source\\Repos\\Survival_Kit\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Admin\\source\\repos\\gam_300\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj",
+        "projectUniqueName": "C:\\Users\\Admin\\Source\\Repos\\Survival_Kit\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj",
         "projectName": "ManagedScripts",
-        "projectPath": "C:\\Users\\Admin\\source\\repos\\gam_300\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj",
+        "projectPath": "C:\\Users\\Admin\\Source\\Repos\\Survival_Kit\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj",
         "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Admin\\source\\repos\\gam_300\\Survival_Kit\\ManagedScripts\\obj\\",
+        "outputPath": "C:\\Users\\Admin\\Source\\Repos\\Survival_Kit\\Survival_Kit\\ManagedScripts\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -25,8 +25,7 @@
           "net8.0-windows"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "https://api.nuget.org/v3/index.json": {}
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {}
         },
         "frameworks": {
           "net8.0-windows7.0": {
