@@ -12,12 +12,14 @@
 #include "../Manager/SerialisationManager.h"
 
 int main(void) {
-    // Initialize GameManager
-    if (GM.startUp()) {
-        // Failed to start GameManager
-        printf("ERROR: Failed to start GameManager\n");
-        return -1;
-    }
+    //// Initialize GameManager
+    //if (GM.startUp()) {
+    //    // Failed to start GameManager
+    //    printf("ERROR: Failed to start GameManager\n");
+    //    return -1;
+    //}
+	
+
     bool spacePressed = false;
 
 
@@ -56,12 +58,8 @@ int main(void) {
 
     IMGUIM.startUp(window, io);
 
-    // Editor Temporary Windows
-    //bool test_window = true;
-    bool inspectorWindow = true;
-    bool assetsBrowser = true; // to load assets
-    bool fileWindow = true;
-    std::string shownFile{};
+
+
 
     //bool test_done = false;
     // Create a clock for timing
@@ -112,58 +110,25 @@ int main(void) {
 
         IMGUIM.startImguiFrame();
 
-        // Editor Temporary Menu Bar
-        if (ImGui::BeginMainMenuBar())
-        {
-            ImGui::Separator();
-            if (ImGui::BeginMenu("File_Test"))
-            {
-                if (ImGui::MenuItem("New"))
-                {
-                    
-                }
+        IMGUIM.displayTopMenu();
 
-                if (ImGui::MenuItem("Open"))
-                {
-                    fileWindow = true;
-                }
-
-                if (ImGui::MenuItem("Save"))
-                {
-                    //To uncomment after Serialisation is fixed
-                    //SEM.saveScene(shownFile);
-                }
-                ImGui::EndMenu();
-                ImGui::Separator();
-            }
-            ImGui::EndMainMenuBar();
-        }
        
         // Editor Dockspace
-        ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
+        ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport()); //not working for some reason 
 
-        if (fileWindow) {
-            IMGUIM.displayFileList(fileWindow, shownFile);
-        }
-        
-        IMGUIM.displayHierarchyList();
+        IMGUIM.renderViewport();
 
         // Editor Temporary Windows
         IMGUIM.displayPropertiesList();
        
+        IMGUIM.displayHierarchyList();
 
-     
-        ImGui::SetNextWindowSize(ImVec2(600, 400));
-        if (ImGui::Begin("Assets Browser Test", &assetsBrowser, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize))
-        {
-        }
-        ImGui::End();
 
         // Editor Start Render
         ImGui::Render();
 
-        // Render frame 
-        glClear(GL_COLOR_BUFFER_BIT);
+        IMGUIM.getWindowSize(*window);
+        //std::cout << IMGUIM.getWindowSize(*window).x << "\n";
 
         IMGUIM.finishImguiRender(io);
         

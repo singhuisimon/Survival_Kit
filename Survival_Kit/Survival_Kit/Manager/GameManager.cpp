@@ -15,9 +15,13 @@
 #include "InputManager.h" 
 #include "ECSManager.h"
 #include "SerialisationManager.h"
-#include "../System/InputSystem.h"
+#include "GraphicsManager.h"
+#include "../Component/Transform3D.h"
+#include "../Component/AudioComponent.h"
 #include "../Utility/Clock.h"
 #include "../Utility/AssetPath.h"
+#include "../System/MovementSystem.h"
+#include "../Component/RigidBody.h"
 
 namespace gam300 {
 
@@ -79,31 +83,64 @@ namespace gam300 {
 
         logManager.writeLog("GameManager::startUp() - SerialisationManager started successfully");
 
-        // Register the InputSystem to process our Input components
-        auto inputSystem = EM.registerSystem<InputSystem>();
-        if (!inputSystem) {
-            logManager.writeLog("GameManager::startUp() - Failed to register InputSystem");
-        }
-        else {
-            logManager.writeLog("GameManager::startUp() - InputSystem registered successfully");
+        // Start the AudioManager
+
+        // Start the GraphicsManager
+        if (GFXM.startUp()) {
+            logManager.writeLog("GameManager::startUp() - Failed to start GraphicsManager");
+            EM.shutDown();
+            IM.shutDown();
+            SEM.shutDown();
+            logManager.shutDown();
+            return -1;
         }
 
+        logManager.writeLog("GameManager::startUp() - GraphicsManager started successfully");
+
+        // Register the Transform3D component with the ComponentManager
+        CM.register_component<Transform3D>();
+        logManager.writeLog("GameManager::startUp() - Transform3D component registered successfully");
+        // Register RigidBody component with the componentManager
+        CM.register_component<RigidBody>();
+        logManager.writeLog("GameManager::startUp() - GraphicsManager started successfully");
+		CM.register_component<AudioComponent>();
+		logManager.writeLog("GameManager::startUp() - AudioComponent component registered successfully");
+
+        // Load the scene
+        const std::string scenePath = getAssetFilePath("Scene/Game.scn");
+        logManager.writeLog("GameManager::startUp() - Attempting to load scene from '%s'", scenePath.c_str());
+
+
+        // Register the Movement component with the ComponetManager
+        SM.register_system<MovementSystem>();
+
+        //// Create a test entity with Transform3D component for demonstration
+        //Entity& testEntity = EM.createEntity("TestEntity");
+        //Vector3D position(0.0f, 0.0f, 0.0f);
+        //Vector3D rotation(0.0f, 45.0f, 0.0f);  // 45 degrees rotation on Y axis
+        //Vector3D scale(1.0f, 1.0f, 1.0f);
+
+        //Transform3D* transform = EM.addComponent<Transform3D>(testEntity.get_id(), position, rotation, scale);
+        //if (transform) {
+        //    logManager.writeLog("GameManager::startUp() - Test entity created with Transform3D component");
+        //}
+
         // Load the scene - Commented out to load scene using editor instead (Edited - Lily (15/9))
-        /*const std::string scenePath = getAssetFilePath("Scene/Game.scn");
-        if (SEM.loadScene(scenePath)) {
-            logManager.writeLog("GameManager::startUp() - Scene loaded successfully from %s", scenePath.c_str());
-        }
-        else {
-            logManager.writeLog("GameManager::startUp() - Failed to load scene, creating default scene");
-            // Save to the same path
-            SEM.saveScene(scenePath);
-            if (SEM.loadScene(scenePath)) {
-                logManager.writeLog("GameManager::startUp() - Default scene loaded successfully");
-            }
-            else {
-                logManager.writeLog("GameManager::startUp() - WARNING: Failed to load default scene");
-            }
-        }*/
+        //const std::string scenePath = getAssetFilePath("Scene/Game.scn");
+        //if (SEM.loadScene(scenePath)) {
+        //    logManager.writeLog("GameManager::startUp() - Scene loaded successfully from %s", scenePath.c_str());
+        //}
+        //else {
+        //    logManager.writeLog("GameManager::startUp() - Failed to load scene, creating default scene");
+        //    // Save to the same path
+        //    SEM.saveScene(scenePath);
+        //    if (SEM.loadScene(scenePath)) {
+        //        logManager.writeLog("GameManager::startUp() - Default scene loaded successfully");
+        //    }
+        //    else {
+        //        logManager.writeLog("GameManager::startUp() - WARNING: Failed to load default scene");
+        //    }
+        //}
 
         // Initialize step count
         m_step_count = 0;
@@ -157,6 +194,9 @@ namespace gam300 {
 
         // Update all ECS systems
         EM.updateSystems(dt);
+
+        // Example: Work with serialized entities using new lookup functionality
+        workWithSerializedEntities(dt);
     }
 
     // Set game over status
@@ -185,6 +225,71 @@ namespace gam300 {
     // Get step count
     int GameManager::getStepCount() const {
         return m_step_count;
+    }
+
+    // Work with serialized entities using new lookup functionality
+    void GameManager::workWithSerializedEntities(float dt) {
+        // Find the Cube entity that was loaded from the scene file
+        Entity* cubeEntity = EM.getEntityByName("Cube");
+        if (cubeEntity) {
+            Transform3D* cubeTransform = EM.getComponent<Transform3D>(cubeEntity->get_id());
+            if (cubeTransform) {
+                // Example: Rotate the cube slowly
+                Vector3D currentRotation = cubeTransform->getRotation();
+                currentRotation.y += dt * 30.0f; // 30 degrees per second
+                cubeTransform->setRotation(currentRotation);
+
+                // Log position every 5 seconds for debugging
+                static float logTimer = 0.0f;
+                logTimer += dt;
+                if (logTimer >= 5.0f) {
+                    const Vector3D& pos = cubeTransform->getPosition();
+                    LM.writeLog("GameManager::workWithSerializedEntities() - Cube position: (%.1f, %.1f, %.1f)",
+                        pos.x, pos.y, pos.z);
+                    logTimer = 0.0f;
+                }
+            }
+        }
+        else {
+            // Log warning if cube entity not found (but only once to avoid spam)
+            static bool warningLogged = false;
+            if (!warningLogged) {
+                LM.writeLog("GameManager::workWithSerializedEntities() - WARNING: Cube entity not found in scene");
+                warningLogged = true;
+            }
+        }
+    }
+
+    // Helper method to clear entities before loading new scene
+    void GameManager::loadNewScene(const std::string& scenePath) {
+        LM.writeLog("GameManager::loadNewScene() - Loading new scene: %s", scenePath.c_str());
+
+        // Clear existing entities before loading new scene
+        EM.clearAllEntities();
+        LM.writeLog("GameManager::loadNewScene() - Existing entities cleared");
+
+        // Load the new scene
+        if (SEM.loadScene(scenePath)) {
+            LM.writeLog("GameManager::loadNewScene() - New scene loaded successfully");
+        }
+        else {
+            LM.writeLog("GameManager::loadNewScene() - Failed to load new scene");
+        }
+    }
+
+    // Helper method to save current game state
+    void GameManager::saveCurrentGame(const std::string& saveSlot) {
+        std::string savePath = getAssetFilePath("Saves/save_" + saveSlot + ".scn");
+        LM.writeLog("GameManager::saveCurrentGame() - Saving game to slot '%s' at path '%s'",
+            saveSlot.c_str(), savePath.c_str());
+
+        // Save current scene (entities remain in memory for continued gameplay)
+        if (SEM.saveScene(savePath)) {
+            LM.writeLog("GameManager::saveCurrentGame() - Game saved successfully");
+        }
+        else {
+            LM.writeLog("GameManager::saveCurrentGame() - Failed to save game");
+        }
     }
 
 } // end of namespace gam300
