@@ -1,44 +1,34 @@
 {
   "objects": [
     {
-      "name": "Cube",
+      "name": "New Entity",
       "components": {
         "Transform3D": {
           "position": [
-            0.0,
-            0.0,
-            0.0
+            12.32,
+            13.7,
+            0
           ],
           "prev_position": [
-            0.0,
-            0.0,
-            0.0
+            12.265,
+            13.7,
+            0
           ],
           "rotation": [
-            0.0,
-            0.0,
-            0.0
+            0,
+            0,
+            0
           ],
           "scale": [
-            1.0,
-            1.0,
-            1.0
+            1,
+            1,
+            1
           ]
         },
-        "AudioComponent": {
-          "guid": "C:\\Users\\Admin\\source\\repos\\gam_300\\Survival_Kit\\Survival_Kit\\Assets\\Audio\\sfx_jumping.wav",
-          "type": "SFX",
-          "volume": 1.0,
-          "pitch": 1.0,
-          "loop": "false",
-          "state": "STOP",
-          "is3D": "false",
-          "position": [
-            0.0,
-            0.0,
-            0.0
-          ]
+        "RigidBody": {
+          "rigidBodyType": "STATIC"
         }
+
       }
     }
   ]
