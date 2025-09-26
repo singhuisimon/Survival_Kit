@@ -300,121 +300,7 @@ namespace gam300 {
         ImGui::End();
     }
 
-#if 0// to clean up the code 
-    void ImguiManager::displayPropertiesList()
-    {
-        //ImGui::SetNextWindowPos(ImVec2(0, 0));
-        ImGui::SetNextWindowSize(ImVec2(600, 800));
-        if (ImGui::Begin("Properties/ Inspector", &inspectorWindow, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize)) {
 
-            // Get all entities (Fix: use getAllEntities() instead of getAllEntitiesOverload())
-            const std::vector<Entity>& allEntities = ImguiEcsRef.getAllEntities();
-            //std::cout << "Testing if is rendering?\n";
-            // Check if we have valid selection and entities
-            if (allEntities.empty()) {
-                ImGui::Text("No Entity Available");
-                selectedObjIndex = -1;
-            }
-            else if (selectedObjIndex < 0 || selectedObjIndex >= static_cast<int>(allEntities.size())) {
-                ImGui::Text("No Entity Selected or Invalid Selection");
-                selectedObjIndex = -1;
-            }
-            else {
-                // Get the selected entity (Fix: proper array access)
-                const Entity& selectedEntity = allEntities[selectedObjIndex];
-
-                // Display entity information using input text (Fix: strncpy_s parameters)
-                char nameBuffer[128];
-                const std::string& entityName = selectedEntity.get_name();
-
-                // Fix: strncpy_s requires 3 parameters: destination, size, source
-                strcpy_s(nameBuffer, sizeof(nameBuffer), entityName.c_str()); 
-
-                if (ImGui::InputText("Entity Name", nameBuffer, sizeof(nameBuffer))) {
-                    const std::string newName = nameBuffer;
-
-                    // Fix: Can't modify const entity directly, need to use ECS manager
-                    ImguiEcsRef.renameEntity(selectedEntity.get_id(), newName);
-                }
-
-                // Display entity ID
-                ImGui::Text("Entity ID: %u", selectedEntity.get_id());
-
-                // Display component information
-                ImGui::Separator();
-                ImGui::Text("Components:");
-               /* if (ImGui::Button("Test"))
-                {
-                    std::cout << "test is success\n";
-                }*/
-
-                 //Example: Check for Transform3D component and display its properties
-                if (ImguiEcsRef.hasComponent<Transform3D>(selectedEntity.get_id())) {
-                    if (ImGui::CollapsingHeader("Transform3D")) {
-
-                        ImGui::SameLine(ImGui::GetWindowWidth() - 30.0f);
-                        if (ImGui::Button("...")) {
-                            std::cout << "Button clicked!" << std::endl;
-                            ImGui::OpenPopup("Transform3DOptions");
-                        }
-                        //else if (ImGui::IsItemHovered()) {
-                        //    std::cout << "Button is hovered!" << std::endl; // Debugging hover state
-                        //}
-                        if (ImGui::BeginPopup("Transform3DOptions")) {
-                            if (ImGui::MenuItem("Remove")) {
-                                ImguiEcsRef.removeComponent<Transform3D>(selectedEntity.get_id());
-                            }
-                            ImGui::EndPopup();
-                        }
-                        // This is to remove component by right click at the transform 3D
-                        if (ImGui::BeginPopupContextItem() || ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
-                            if (ImGui::MenuItem("Remove")) {
-                                ImguiEcsRef.removeComponent<Transform3D>(selectedEntity.get_id());
-                            }
-                            ImGui::EndPopup();
-                        }
-
-                        Transform3D* transform = ImguiEcsRef.getComponent<Transform3D>(selectedEntity.get_id());
-                        if (transform) {
-                            // Position
-                            Vector3D pos = transform->getPosition();
-                            float position[3] = { pos.x, pos.y, pos.z };
-                            if (ImGui::DragFloat3("Position", position, 0.1f)) {
-                                transform->setPosition(Vector3D(position[0], position[1], position[2]));
-                            }
-
-                            // Rotation
-                            Vector3D rot = transform->getRotation();
-                            float rotation[3] = { rot.x, rot.y, rot.z };
-                            if (ImGui::DragFloat3("Rotation", rotation, 1.0f)) {
-                                transform->setRotation(Vector3D(rotation[0], rotation[1], rotation[2]));
-                            }
-
-                            // Scale
-                            Vector3D scl = transform->getScale();
-                            float scale[3] = { scl.x, scl.y, scl.z };
-                            if (ImGui::DragFloat3("Scale", scale, 0.1f)) {
-                                transform->setScale(Vector3D(scale[0], scale[1], scale[2]));
-                            }
-                        }
-                    }
-                }
-
-            
-                // Add component button
-                ImGui::Separator();
-                if (ImGui::Button("Add Component")) {
-                    ImGui::Text("Component");
-                
-                    if (!ImguiEcsRef.hasComponent<Transform3D>(selectedEntity.get_id())) {
-                        ImguiEcsRef.addComponent<Transform3D>(selectedEntity.get_id());
-                    }
-                }
-            }
-        }
-        ImGui::End();
-    }
-#endif 
 
 
 #if 1
@@ -523,6 +409,43 @@ namespace gam300 {
         ImGui::End();
     }
 #endif
+
+    void ImguiManager::displayTopMenu()
+    {
+        if (ImGui::BeginMainMenuBar())
+        {
+            ImGui::Separator();
+            if (ImGui::BeginMenu("File"))
+            {
+                if (ImGui::MenuItem("New"))
+                {
+                    std::string sceneFolder = getAssetFilePath("Scene");
+
+                }
+
+                if (ImGui::MenuItem("Open"))
+                {
+                    fileWindow = true;
+                }
+
+                if (ImGui::MenuItem("Save"))
+                {
+                    //To uncomment after Serialisation is fixed
+                    SEM.saveScene(shownFile);
+                }
+                ImGui::EndMenu();
+                ImGui::Separator();
+            }
+            ImGui::EndMainMenuBar();
+        }
+
+        if (fileWindow) {
+
+            IMGUIM.displayFileList(fileWindow, shownFile); // for now it open at the start of the engine
+        }
+
+    }
+
     void ImguiManager::shutDown() {
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();

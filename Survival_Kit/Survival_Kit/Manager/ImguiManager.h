@@ -59,6 +59,9 @@ namespace gam300
 		class GraphicsManager& ImguiGraphicRef;
 		int width = 0;
 		int height = 0;
+
+		bool fileWindow = false;
+		std::string shownFile{};
 		
 	
 	public:
@@ -89,6 +92,8 @@ namespace gam300
 		void displayPropertiesList();
 
 		void displayAssetsBrowserList();
+
+		void displayTopMenu();
 
 		void finishImguiRender(ImGuiIO& imgui_io);
 
