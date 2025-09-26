@@ -1,24 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\huish\\Downloads\\SIT Y3 T1\\SEP5\\Sep Prj\\Survival_Kit\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj": {}
+    "C:\\Users\\Admin\\source\\repos\\gam_300\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj": {}
   },
   "projects": {
-    "C:\\Users\\huish\\Downloads\\SIT Y3 T1\\SEP5\\Sep Prj\\Survival_Kit\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj": {
+    "C:\\Users\\Admin\\source\\repos\\gam_300\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\huish\\Downloads\\SIT Y3 T1\\SEP5\\Sep Prj\\Survival_Kit\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj",
+        "projectUniqueName": "C:\\Users\\Admin\\source\\repos\\gam_300\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj",
         "projectName": "ManagedScripts",
-        "projectPath": "C:\\Users\\huish\\Downloads\\SIT Y3 T1\\SEP5\\Sep Prj\\Survival_Kit\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj",
-        "packagesPath": "C:\\Users\\huish\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\huish\\Downloads\\SIT Y3 T1\\SEP5\\Sep Prj\\Survival_Kit\\Survival_Kit\\ManagedScripts\\obj\\",
+        "projectPath": "C:\\Users\\Admin\\source\\repos\\gam_300\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj",
+        "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Admin\\source\\repos\\gam_300\\Survival_Kit\\ManagedScripts\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\huish\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config"
+          "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net8.0-windows"
