@@ -1,43 +1,92 @@
 {
   "objects": [
     {
-      "name": "Cube",
+      "name": "Test",
       "components": {
         "Transform3D": {
           "position": [
-            0.0,
-            0.0,
-            0.0
+            11.732,
+            12.2881,
+            0
           ],
           "prev_position": [
-            0.0,
-            0.0,
-            0.0
+            11.732,
+            12.2661,
+            0
           ],
           "rotation": [
-            0.0,
-            0.0,
-            0.0
+            0,
+            0,
+            0
           ],
           "scale": [
-            1.0,
-            1.0,
-            1.0
+            1,
+            1,
+            1
           ]
         },
-        "AudioComponent": {
-          "guid": "Audio\\sfx_jumping.wav",
-          "type": "SFX",
-          "volume": 1.0,
-          "pitch": 1.0,
-          "loop": "false",
-          "state": "STOP",
-          "is3D": "false",
+        "RigidBody": {
+          "rigidBodyType": "KINEMATIC"
+        }
+      }
+    },
+    {
+      "name": "Test2",
+      "components": {
+        "Transform3D": {
           "position": [
-            0.0,
-            0.0,
-            0.0
+            1.232,
+            6.02799,
+            0
+          ],
+          "prev_position": [
+            1.232,
+            6.00599,
+            0
+          ],
+          "rotation": [
+            0,
+            98,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
           ]
+        },
+        "RigidBody": {
+          "rigidBodyType": "KINEMATIC"
+        }
+      }
+    },
+    {
+      "name": "Test3",
+      "components": {
+        "Transform3D": {
+          "position": [
+            16.328,
+            6.02799,
+            0
+          ],
+          "prev_position": [
+            16.328,
+            6.00599,
+            0
+          ],
+          "rotation": [
+            0,
+            98,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "RigidBody": {
+          "rigidBodyType": "KINEMATIC"
         }
       }
     }

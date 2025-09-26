@@ -65,9 +65,16 @@ namespace gam300 {
     };
 
     /**
-	* @brief Serializer for Audio_Component components.
+     * @brief Serializer for RigidBody components.
+     */
+    class RigidBodySerializer : public IComponentSerializer {
+    public:
+        std::string serialize(Component* component) override;
+        Component* deserialize(EntityID entityId, const std::string& jsonData) override;
+    };
+	/* @brief Serializer for Audio_Component components.
 	* @author Amanda Leow Boon Suan
-    */
+*/    
     class AudioComponentSerializer : public IComponentSerializer {
     public:
         std::string serialize(Component* component) override;

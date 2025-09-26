@@ -20,6 +20,7 @@
 #include "LogManager.h"
 #include "ECSManager.h"
 #include "../Component/Transform3D.h"
+#include "../Component/RigidBody.h"
 #include "../Component/AudioComponent.h"
 #include <fstream>
 #include <sstream>
@@ -122,6 +123,43 @@ namespace gam300 {
 
         return transform;
     }
+
+    // RigidBodySerializer implementation
+    std::string RigidBodySerializer::serialize(Component* component) {
+       
+        RigidBody* rigidBody = static_cast<RigidBody*>(component);
+       
+        if (!rigidBody) { 
+            return "{}";
+        }
+        std::stringstream ss;
+        
+        ss << "{\n";
+
+        //ss << "          \"RigidBody\": {\n";
+        ss << "          \"rigidBodyType\": \"" << rigidBody->bodyTypeToString(rigidBody->getRigidBodyType()) << "\"\n";
+        ss << "        }";
+
+        return ss.str();
+    }
+
+    // RigidBodySerializer implementation
+    Component* RigidBodySerializer::deserialize(EntityID entityId, const std::string& jsonData) {
+
+        // Parse the rigid body type 
+        BodyType rigidBodyType = BodyType::STATIC;
+
+        std::string bodyTypeStr = SerialisationManager::extractQuotedValue(jsonData, "rigidBodyType");
+        if (!bodyTypeStr.empty()) {
+
+            rigidBodyType = RigidBody::stringToBodyType(bodyTypeStr);
+        }
+        RigidBody* rigidBody = EM.addComponent<RigidBody>(entityId, rigidBodyType);
+
+        return rigidBody;
+
+    }
+
 
 	//AudioComponentSerializer implementation
     std::string AudioComponentSerializer::serialize(Component* component) {
@@ -263,7 +301,10 @@ namespace gam300 {
 
         // Register component serializers
         registerComponentSerializer("Transform3D", std::make_shared<Transform3DSerializer>());
-		registerComponentSerializer("AudioComponent", std::make_shared<AudioComponentSerializer>());
+
+
+        registerComponentSerializer("AudioComponent", std::make_shared<AudioComponentSerializer>());
+
 
         // Register component creators
         registerComponentCreator("Transform3D", [this](EntityID entityId, const std::string& componentData) {
@@ -274,6 +315,21 @@ namespace gam300 {
                 LM.writeLog("Transform3D created for entity %d", entityId);
             }
             });
+
+        // Register component serializers for RigidBody
+        registerComponentSerializer("RigidBody", std::make_shared<RigidBodySerializer>());
+
+        // Register component creators
+        registerComponentCreator("RigidBody", [this](EntityID entityId, const std::string& componentData) {
+
+            auto serializer = m_component_serializers["RigidBody"];
+            if (serializer)
+            {
+                serializer->deserialize(entityId, componentData);
+                LM.writeLog("RigidBody created for entity %d", entityId);
+            }
+            });
+    
 
         registerComponentCreator("AudioComponent", [this](EntityID entityId, const std::string& componentData) {
             //Use the serializer to create the component
@@ -329,6 +385,9 @@ namespace gam300 {
             return false;
         }
 
+     
+
+        /////////////////////////////////////////////////Amanda Code Version/////////////////////////////////////////////////
         // Parse with RapidJSON instead of string::find
         rapidjson::Document doc;
         if (doc.Parse(fileContent.c_str()).HasParseError()) {
@@ -373,6 +432,7 @@ namespace gam300 {
         //    return false; // PROPER ERROR RETURN
         //}
 
+        //////////////////////////////////////////////////////////////////////////////////////////////
         //LM.writeLog("SerialisationManager::loadScene() - File loaded, size: %zu characters", fileContent.length());
 
         //// Simple approach: Find each occurrence of a named entity
@@ -449,7 +509,103 @@ namespace gam300 {
         //    return false; // RETURN FALSE IF NO ENTITIES LOADED
         //}
 
-        LM.writeLog("SerialisationManager::loadScene() - Scene loaded successfully, processed %d entities", entityCount);
+        //while (true) {
+        //    // Find next "name" field
+        //    size_t namePos = fileContent.find("\"name\"", searchPos);
+        //    if (namePos == std::string::npos) {
+        //        break; // No more entities
+        //    }
+
+        //    // Extract the entity name
+        //    size_t colonPos = fileContent.find(':', namePos);
+        //    size_t nameStartQuote = fileContent.find('"', colonPos);
+        //    size_t nameEndQuote = fileContent.find('"', nameStartQuote + 1);
+
+        //    if (colonPos == std::string::npos || nameStartQuote == std::string::npos || nameEndQuote == std::string::npos) {
+        //        LM.writeLog("SerialisationManager::loadScene() - Malformed name field at position %zu", namePos);
+        //        searchPos = namePos + 1;
+        //        continue;
+        //    }
+
+        //    std::string entityName = fileContent.substr(nameStartQuote + 1, nameEndQuote - nameStartQuote - 1);
+        //    LM.writeLog("SerialisationManager::loadScene() - Found entity: '%s'", entityName.c_str());
+
+        //    // Create the entity
+        //    Entity& entity = EM.createEntity(entityName);
+        //    entityCount++;
+        //    foundAnyEntities = true;
+        //    LM.writeLog("SerialisationManager::loadScene() - Created entity '%s' with ID %d", entityName.c_str(), entity.get_id());
+
+        //    // Look for Transform3D component
+        //    size_t transform3DPos = fileContent.find("\"Transform3D\"", namePos);
+        //    size_t nextNamePos = fileContent.find("\"name\"", namePos + 1);
+
+        //    // Make sure this Transform3D belongs to this entity (not the next one)
+        //    if (transform3DPos != std::string::npos &&
+        //        (nextNamePos == std::string::npos || transform3DPos < nextNamePos)) {
+
+        //        LM.writeLog("SerialisationManager::loadScene() - Found Transform3D for entity '%s'", entityName.c_str());
+
+        //        // Extract Transform3D data using simple string search
+        //        Vector3D position = extractVector3D(fileContent, transform3DPos, "position");
+        //        Vector3D rotation = extractVector3D(fileContent, transform3DPos, "rotation");
+        //        Vector3D scale = extractVector3D(fileContent, transform3DPos, "scale");
+
+        //        LM.writeLog("SerialisationManager::loadScene() - Position: (%.1f, %.1f, %.1f)", position.x, position.y, position.z);
+        //        LM.writeLog("SerialisationManager::loadScene() - Rotation: (%.1f, %.1f, %.1f)", rotation.x, rotation.y, rotation.z);
+        //        LM.writeLog("SerialisationManager::loadScene() - Scale: (%.1f, %.1f, %.1f)", scale.x, scale.y, scale.z);
+
+        //        // Create the Transform3D component
+        //        Transform3D* transform = EM.addComponent<Transform3D>(entity.get_id(), position, rotation, scale);
+        //        if (transform) {
+        //            LM.writeLog("SerialisationManager::loadScene() - Transform3D component created successfully for entity '%s'", entityName.c_str());
+        //        }
+        //        else {
+        //            LM.writeLog("SerialisationManager::loadScene() - Failed to create Transform3D component for entity '%s'", entityName.c_str());
+        //        }
+
+        //        
+        //        
+        //    }
+        //    else {
+        //        LM.writeLog("SerialisationManager::loadScene() - No Transform3D component found for entity '%s'", entityName.c_str());
+        //    }
+
+
+        //    // Look for RigidBody compoenents
+        //    size_t rigidBodyPos = fileContent.find("\"RigidBody\"", namePos);
+
+        //    if (rigidBodyPos != std::string::npos &&
+        //        (nextNamePos == std::string::npos || rigidBodyPos < nextNamePos))
+        //    {
+        //        LM.writeLog("SerialisationManager::loadScene() - Found RigidBody for entity '%s'", entityName.c_str());
+        //        std::string typeStr = SerialisationManager::extractQuotedValue(fileContent, "rigidBodyType");
+        //        BodyType rigidBodyType = RigidBody::stringToBodyType(typeStr); // convert string back to enum BodyType
+        //        //LM.writeLog("SerialisationManager::loadScene() - rigidBodyType: (%d)", rigidBodyType);
+        //        RigidBody* rigidBody = EM.addComponent<RigidBody>(entity.get_id(), rigidBodyType);
+        //        if (rigidBody) {
+        //            LM.writeLog("SerialisationManager::loadScene() - RigidBody component created successfully for entity '%s'", entityName.c_str());
+        //        }
+        //        else {
+        //            LM.writeLog("SerialisationManager::loadScene() - Failed to create RigidBody component for entity '%s'", entityName.c_str());
+        //        }
+        //    }
+        //    else {
+        //        LM.writeLog("SerialisationManager::loadScene() - No RigidBody component found for entity '%s'", entityName.c_str());
+        //    }
+        //    
+
+        //    // Move search position past this entity
+        //    searchPos = namePos + 1;
+        //}
+
+        ////  PROPER SUCCESS/FAILURE LOGIC
+        //if (!foundAnyEntities) {
+        //    LM.writeLog("SerialisationManager::loadScene() - ERROR: No entities found in scene file");
+        //    return false; // RETURN FALSE IF NO ENTITIES LOADED
+        //}
+
+        //LM.writeLog("SerialisationManager::loadScene() - Scene loaded successfully, processed %d entities", entityCount);
         return true; // ONLY RETURN TRUE IF ENTITIES WERE ACTUALLY LOADED
     }
 
@@ -474,41 +630,67 @@ namespace gam300 {
         // Save each entity
         for (size_t i = 0; i < entities.size(); ++i) {
             const Entity& entity = entities[i];
+            bool hasComponents = false;
+
+            // Vector to store all the components 
+            std::vector<std::string> componentStrings;
 
             file << getIndent(2) << "{\n";
             file << getIndent(3) << "\"name\": \"" << entity.get_name() << "\",\n";
             file << getIndent(3) << "\"components\": {\n";
 
-            // Save each component
-            bool hasComponents = false;
-
             // Check for Transform3D component
             if (auto serializer = m_component_serializers.find("Transform3D");
                 serializer != m_component_serializers.end()) {
                 if (Transform3D* transform = EM.getComponent<Transform3D>(entity.get_id())) {
-                    file << getIndent(4) << "\"Transform3D\": " << serializer->second->serialize(transform);
+                    componentStrings.push_back(getIndent(4) + "\"Transform3D\": " +
+                        serializer->second->serialize(transform));
                     hasComponents = true;
                 }
             }
 
-			// Check for Audio_Component
+            // Check for Audio_Component (FIXED: Now properly added to componentStrings)
             if (auto serializer = m_component_serializers.find("AudioComponent");
                 serializer != m_component_serializers.end()) {
                 if (AudioComponent* audio = EM.getComponent<AudioComponent>(entity.get_id())) {
-					file << getIndent(4) << "\"Audio_Component\": " << serializer->second->serialize(audio);
-					hasComponents = true;
+                    componentStrings.push_back(getIndent(4) + "\"Audio_Component\": " +
+                        serializer->second->serialize(audio));
+                    hasComponents = true;
+                }
+            }
+
+            // Check for RigidBody component
+            if (auto serializer = m_component_serializers.find("RigidBody");
+                serializer != m_component_serializers.end()) {
+                if (RigidBody* rigidBody = EM.getComponent<RigidBody>(entity.get_id())) {
+                    componentStrings.push_back(getIndent(4) + "\"RigidBody\": " +
+                        serializer->second->serialize(rigidBody));
+                    hasComponents = true;
                 }
             }
 
             // TODO: Add more component types here as needed
 
-            // Close the components object
-            file << "\n" << getIndent(3) << "}";
+            // Write all components with proper comma separation
+            for (size_t j = 0; j < componentStrings.size(); ++j) {
+                file << componentStrings[j];
+                if (j < componentStrings.size() - 1) {
+                    file << ",";
+                }
+                file << "\n";
+            }
 
-            // Add comma if not the last entity
-            file << (i < entities.size() - 1 ? "," : "") << "\n";
+            // Close the components object
+            file << getIndent(3) << "}\n";
+
+            // Close the entity object
             file << getIndent(2) << "}";
-            file << (i < entities.size() - 1 ? "," : "") << "\n";
+
+            // Add comma if not the last entity (FIXED: Only one comma logic now)
+            if (i < entities.size() - 1) {
+                file << ",";
+            }
+            file << "\n";
         }
 
         // Close the JSON structure
@@ -516,6 +698,7 @@ namespace gam300 {
         file << "}\n";
 
         file.close();
+
         LM.writeLog("SerialisationManager::saveScene() - Scene saved successfully");
         return true;
     }
