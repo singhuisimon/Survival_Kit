@@ -367,7 +367,7 @@ namespace gam300 {
 		}
 
 		FMOD::Studio::Bank* bank = nullptr;
-		if (m_studiosystem->loadBankFile(path.c_str(), FMOD_STUDIO_LOAD_BANK_NORMAL, &bank) != FMOD_OK) {
+		if (m_studiosystem->loadBankFile(getAssetFilePath(path).c_str(), FMOD_STUDIO_LOAD_BANK_NORMAL, &bank) != FMOD_OK) {
 			LM.writeLog("AudioSystem::loadBankTemp() - Failed to load bank %s", path.c_str());
 			return false;
 		}
