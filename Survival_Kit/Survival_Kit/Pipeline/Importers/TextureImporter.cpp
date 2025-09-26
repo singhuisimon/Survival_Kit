@@ -24,7 +24,7 @@ namespace gam300
 
             r.ok = true;
             r.intermediatePath = out.string();
-            r.type = AssetType::Texture2D;
+            r.type = AssetType::Texture;
         }
         catch (const std::exception& e) {
             r.ok = false;

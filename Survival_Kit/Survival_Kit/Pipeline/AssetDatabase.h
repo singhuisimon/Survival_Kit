@@ -14,7 +14,7 @@ namespace gam300 {
 
 	// Broad categories of assets the pipeline recognizes.
 	// Expand as needed for your project.
-	enum class AssetType { Unknown, Shader, Texture2D, Audio, Mesh, Material, Scene };
+	enum class AssetType { Unknown, Shader, Texture, Audio, Mesh, Material, Scene };
 
 	/**
 	* @brief Per-asset metadata tracked by the pipeline/editor.

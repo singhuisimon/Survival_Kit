@@ -73,7 +73,7 @@ namespace gam300 {
         std::string typeFolder;
 
         switch (rec.type) {
-            case AssetType::Texture2D: typeFolder = "Texture"; break;
+            case AssetType::Texture: typeFolder = "Texture"; break;
             case AssetType::Mesh:      typeFolder = "Mesh";    break;
             case AssetType::Material:  typeFolder = "Material"; break;
             case AssetType::Shader:    typeFolder = "Shader";  break;

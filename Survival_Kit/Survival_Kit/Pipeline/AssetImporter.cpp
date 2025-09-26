@@ -74,7 +74,7 @@ namespace gam300 {
 		AssetType GuessTypeFromExt(const std::string& extNoDotLower) {
 			const std::string e = extNoDotLower;
 			if (e == "png" || e == "jpg" || e == "jpeg" || e == "bmp" || e == "tga" || e == "dds")
-				return AssetType::Texture2D;
+				return AssetType::Texture;
 			if (e == "wav" || e == "ogg" || e == "mp3" || e == "flac")
 				return AssetType::Audio;
 			if (e == "obj" || e == "fbx" || e == "gltf" || e == "glb")

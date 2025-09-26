@@ -57,7 +57,7 @@ namespace gam300 {
 	/**
 	* @brief Convenience helper to add a basic set of importers.
 	* @details These default importers currently \"copy-as-intermediate\" while
-	* tagging the AssetType appropriately (PNG/JPG > Texture2D,
+	* tagging the AssetType appropriately (PNG/JPG > Texture,
 	* WAV/OGG > Audio, OBJ/FBX/GLTF > Mesh, etc.). They also compute a
 	* fast 64-bit FNV-1a content hash of the source file.
 	*/

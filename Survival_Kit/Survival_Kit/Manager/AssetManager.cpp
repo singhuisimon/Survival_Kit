@@ -25,11 +25,40 @@ namespace gam300 {
 
 		// Logging header
 		LM.writeLog("AssetManager::startUp() - begin");
+		
+		//find base root
+		auto AutoDetectRepoRoot = []() -> fs::path {
+			fs::path p = fs::current_path();
+			while (!p.empty()) {
+				if (fs::exists(p / ".git") ||
+					fs::exists(p / "Survival_Kit")) {
+					return p;
+				}
+				p = p.parent_path();
+			}
+			return fs::current_path(); // fallback
+			};
+
+		fs::path base = m_cfg.repoRoot.empty() ? AutoDetectRepoRoot() : fs::path(m_cfg.repoRoot);
+
+		auto Resolve = [&](const std::string& in) -> std::string {
+			if (in.empty()) return in;
+			fs::path p(in);
+			return p.is_absolute() ? p.string() : (base / p).string();
+			};
 
 
 		// Ensure some sensible defaults
 		if (m_cfg.sourceRoots.empty())
 			m_cfg.sourceRoots = { "Assets" };
+
+		//normnalize all paths
+		for (auto& r : m_cfg.sourceRoots) r = Resolve(r);
+		m_cfg.intermediateDirectory = Resolve(m_cfg.intermediateDirectory);
+		m_cfg.databaseFile = Resolve(m_cfg.databaseFile);
+		m_cfg.snapshotFile = Resolve(m_cfg.snapshotFile);
+		if (!m_cfg.descriptorSidecar && !m_cfg.descriptorRoot.empty())
+			m_cfg.descriptorRoot = Resolve(m_cfg.descriptorRoot);
 
 
 		// Configure scanner (note: scanner is in namespace game300 and uses lowerCamel APIs)
@@ -152,7 +181,7 @@ namespace gam300 {
 	const char* AssetManager::typeName(AssetType t) {
 		switch (t) {
 		case AssetType::Shader: return "Shader";
-		case AssetType::Texture2D: return "Texture2D";
+		case AssetType::Texture: return "Texture";
 		case AssetType::Audio: return "Audio";
 		case AssetType::Mesh: return "Mesh";
 		case AssetType::Material: return "Material";

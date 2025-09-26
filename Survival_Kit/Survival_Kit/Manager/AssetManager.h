@@ -52,6 +52,8 @@ namespace gam300 {
 			bool writeDescriptors = true; //!< Emit .desc files
 			bool descriptorSidecar = true; //!< `foo.png.desc` next to source
 			std::string descriptorRoot; //!< Used when sidecar = false
+
+			std::string repoRoot; //!< Base path to resolve relative asset paths
 		};
 
 		/** Apply configuration before startUp() */
