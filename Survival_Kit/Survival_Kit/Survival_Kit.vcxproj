@@ -31,6 +31,7 @@
     <ClCompile Include="Graphics\Shape.cpp" />
     <ClCompile Include="Graphics\Texture.cpp" />
     <ClCompile Include="IMGUI\imgui.cpp" />
+    <ClCompile Include="IMGUI\ImGuizmo.cpp" />
     <ClCompile Include="IMGUI\imgui_demo.cpp" />
     <ClCompile Include="IMGUI\imgui_draw.cpp" />
     <ClCompile Include="IMGUI\imgui_impl_glfw.cpp" />
@@ -84,6 +85,7 @@
     <ClInclude Include="Graphics\Texture.h" />
     <ClInclude Include="IMGUI\imconfig.h" />
     <ClInclude Include="IMGUI\imgui.h" />
+    <ClInclude Include="IMGUI\ImGuizmo.h" />
     <ClInclude Include="IMGUI\imgui_impl_glfw.h" />
     <ClInclude Include="IMGUI\imgui_impl_opengl3.h" />
     <ClInclude Include="IMGUI\imgui_impl_opengl3_loader.h" />

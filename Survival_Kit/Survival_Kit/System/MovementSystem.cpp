@@ -51,20 +51,20 @@ namespace gam300 {
 			// Move left
 			if (IM.isKeyPressed(GLFW_KEY_A))  { 
 				//std::cout << IM.getMouseDeltaX() << std::endl;
-				transform->setPosition(transform->getPosition() + Vector3D(-1.0f, 0.0f, 0.0f) * m_dt);
+				transform->setPosition(transform->getPosition() + Vector3D(-2.0f, 0.0f, 0.0f) * m_dt);
 			}
 			if (IM.isKeyPressed(GLFW_KEY_D))
 			{
 				//std::cout << "is this work for input?" << "\n";
-				transform->setPosition(transform->getPosition() + Vector3D(1.0f, 0.0f, 0.0f) * m_dt);
+				transform->setPosition(transform->getPosition() + Vector3D(2.0f, 0.0f, 0.0f) * m_dt);
 			}
 			if (IM.isKeyPressed(GLFW_KEY_W))
 			{
-				transform->setPosition(transform->getPosition() + Vector3D(0.0f, 1.0f, 0.0f) * m_dt);
+				transform->setPosition(transform->getPosition() + Vector3D(0.0f, 2.0f, 0.0f) * m_dt);
 			}
 			if (IM.isKeyPressed(GLFW_KEY_S))
 			{
-				transform->setPosition(transform->getPosition() + Vector3D(0.0f, -1.0f, 0.0f) * m_dt);
+				transform->setPosition(transform->getPosition() + Vector3D(0.0f, -2.0f, 0.0f) * m_dt);
 			}
 
 			break;

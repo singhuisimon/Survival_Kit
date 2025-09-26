@@ -40,6 +40,7 @@
     <ClCompile Include="System\MovementSystem.cpp" />
     <ClCompile Include="Component\AudioComponent.cpp" />
     <ClCompile Include="System\AudioSystem.cpp" />
+    <ClCompile Include="IMGUI\ImGuizmo.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component\Component.h" />
@@ -97,6 +98,7 @@
     <ClInclude Include="System\MovementSystem.h" />
     <ClInclude Include="Component\AudioComponent.h" />
     <ClInclude Include="System\AudioSystem.h" />
+    <ClInclude Include="IMGUI\ImGuizmo.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Scene\Game.scn" />

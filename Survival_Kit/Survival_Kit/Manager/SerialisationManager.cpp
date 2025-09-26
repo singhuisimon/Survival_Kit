@@ -623,9 +623,6 @@ namespace gam300 {
         // Get all entities
         const auto& entities = EM.getAllEntities();
 
-
-      
-
         // Start the JSON structure
         file << "{\n";
         file << getIndent(1) << "\"objects\": [\n";
@@ -634,15 +631,13 @@ namespace gam300 {
         for (size_t i = 0; i < entities.size(); ++i) {
             const Entity& entity = entities[i];
             bool hasComponents = false;
-            // to store all the components 
+
+            // Vector to store all the components 
             std::vector<std::string> componentStrings;
 
             file << getIndent(2) << "{\n";
             file << getIndent(3) << "\"name\": \"" << entity.get_name() << "\",\n";
             file << getIndent(3) << "\"components\": {\n";
-
-            // Save each component
-            //bool hasComponents = false;
 
             // Check for Transform3D component
             if (auto serializer = m_component_serializers.find("Transform3D");
@@ -654,29 +649,28 @@ namespace gam300 {
                 }
             }
 
-           
-			// Check for Audio_Component
+            // Check for Audio_Component (FIXED: Now properly added to componentStrings)
             if (auto serializer = m_component_serializers.find("AudioComponent");
                 serializer != m_component_serializers.end()) {
                 if (AudioComponent* audio = EM.getComponent<AudioComponent>(entity.get_id())) {
-					file << getIndent(4) << "\"Audio_Component\": " << serializer->second->serialize(audio);
-					hasComponents = true;
-                }
-            }
-
-            // TODO: Add more component types here as needed
-            // check for RigidBody component
-            if (auto serializer = m_component_serializers.find("RigidBody");
-                serializer != m_component_serializers.end()) {
-                if (RigidBody* transform = EM.getComponent<RigidBody>(entity.get_id())) {
-                    componentStrings.push_back(getIndent(4) + "\"RigidBody\": " +
-                        serializer->second->serialize(transform));
+                    componentStrings.push_back(getIndent(4) + "\"Audio_Component\": " +
+                        serializer->second->serialize(audio));
                     hasComponents = true;
                 }
             }
 
+            // Check for RigidBody component
+            if (auto serializer = m_component_serializers.find("RigidBody");
+                serializer != m_component_serializers.end()) {
+                if (RigidBody* rigidBody = EM.getComponent<RigidBody>(entity.get_id())) {
+                    componentStrings.push_back(getIndent(4) + "\"RigidBody\": " +
+                        serializer->second->serialize(rigidBody));
+                    hasComponents = true;
+                }
+            }
 
-           
+            // TODO: Add more component types here as needed
+
             // Write all components with proper comma separation
             for (size_t j = 0; j < componentStrings.size(); ++j) {
                 file << componentStrings[j];
@@ -686,16 +680,17 @@ namespace gam300 {
                 file << "\n";
             }
 
-
-
-
             // Close the components object
-            file << "\n" << getIndent(3) << "}";
+            file << getIndent(3) << "}\n";
 
-            // Add comma if not the last entity
-            file << (i < entities.size() - 1 ? "," : "") << "\n";
+            // Close the entity object
             file << getIndent(2) << "}";
-            file << (i < entities.size() - 1 ? "," : "") << "\n";
+
+            // Add comma if not the last entity (FIXED: Only one comma logic now)
+            if (i < entities.size() - 1) {
+                file << ",";
+            }
+            file << "\n";
         }
 
         // Close the JSON structure

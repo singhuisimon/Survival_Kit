@@ -1,17 +1,17 @@
 {
   "objects": [
     {
-      "name": "New Entity",
+      "name": "Test",
       "components": {
         "Transform3D": {
           "position": [
-            12.32,
-            13.7,
+            11.732,
+            12.2881,
             0
           ],
           "prev_position": [
-            12.265,
-            13.7,
+            11.732,
+            12.2661,
             0
           ],
           "rotation": [
@@ -26,9 +26,68 @@
           ]
         },
         "RigidBody": {
-          "rigidBodyType": "STATIC"
+          "rigidBodyType": "KINEMATIC"
         }
-
+      }
+    },
+    {
+      "name": "Test2",
+      "components": {
+        "Transform3D": {
+          "position": [
+            1.232,
+            6.02799,
+            0
+          ],
+          "prev_position": [
+            1.232,
+            6.00599,
+            0
+          ],
+          "rotation": [
+            0,
+            98,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "RigidBody": {
+          "rigidBodyType": "KINEMATIC"
+        }
+      }
+    },
+    {
+      "name": "Test3",
+      "components": {
+        "Transform3D": {
+          "position": [
+            16.328,
+            6.02799,
+            0
+          ],
+          "prev_position": [
+            16.328,
+            6.00599,
+            0
+          ],
+          "rotation": [
+            0,
+            98,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "RigidBody": {
+          "rigidBodyType": "KINEMATIC"
+        }
       }
     }
   ]
