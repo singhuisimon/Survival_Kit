@@ -16,6 +16,7 @@
 #include "../System/System.h"
 #include "../Component/AudioComponent.h"
 #include "../Component/Transform3D.h"
+#include "../Utility/AssetPath.h"
 
 #include <fmod.hpp>
 #include <fmod_studio.hpp>

@@ -52,7 +52,7 @@ namespace gam300 {
 	void AudioSystem::update(float dt) {
 		(void)dt;
 
-		LM.writeLog("AudioSystem::update() - Updating Audio System");
+		//LM.writeLog("AudioSystem::update() - Updating Audio System");
 
 		//if (IM.isKeyJustReleased(GLFW_KEY_P)) {
 		//	LM.writeLog("AudioSystem::update() - Play sound on Cube release");
@@ -391,7 +391,7 @@ namespace gam300 {
 		}
 
 		FMOD::Sound* sound = nullptr;
-		if (m_coresystem->createSound(path.c_str(), mode, nullptr, &sound) != FMOD_OK) {
+		if (m_coresystem->createSound(getAssetFilePath(path).c_str(), mode, nullptr, &sound) != FMOD_OK) {
 			LM.writeLog("AudioSystem::loadSoundTemp() - Failed to load %s", path.c_str());
 			return false;
 		}
