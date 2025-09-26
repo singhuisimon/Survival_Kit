@@ -1,6 +1,7 @@
 #include "../System/MovementSystem.h"
 #include "../Manager/ComponentManager.h"
 #include "../Manager/LogManager.h"
+#include "../Manager/InputManager.h"
 
 namespace gam300 {
 
@@ -43,12 +44,33 @@ namespace gam300 {
 		case BodyType::STATIC:
 			break;
 		case BodyType::KINEMATIC:
-			transform->setPosition(transform->getPosition() + Vector3D(5.0f, 0.0f, 0.0f) * m_dt);
+			
 			// transform->setPosition(transform->getPosition() + rigidBody->getLinearVelocity() * m_dt); // use it after update rigidBody component
+			// use this system to test input for now
+
+			// Move left
+			if (IM.isKeyPressed(GLFW_KEY_A))  { 
+				//std::cout << IM.getMouseDeltaX() << std::endl;
+				transform->setPosition(transform->getPosition() + Vector3D(-1.0f, 0.0f, 0.0f) * m_dt);
+			}
+			if (IM.isKeyPressed(GLFW_KEY_D))
+			{
+				//std::cout << "is this work for input?" << "\n";
+				transform->setPosition(transform->getPosition() + Vector3D(1.0f, 0.0f, 0.0f) * m_dt);
+			}
+			if (IM.isKeyPressed(GLFW_KEY_W))
+			{
+				transform->setPosition(transform->getPosition() + Vector3D(0.0f, 1.0f, 0.0f) * m_dt);
+			}
+			if (IM.isKeyPressed(GLFW_KEY_S))
+			{
+				transform->setPosition(transform->getPosition() + Vector3D(0.0f, -1.0f, 0.0f) * m_dt);
+			}
+
 			break;
 		case BodyType::DYNAMIC:
 			rigidBody->applyForce(Vector3D(5.0f, 0.0f, 0.0f)); // for now testing
-			transform->setPosition(transform->getPosition() + Vector3D(0.0f, 3.0f, 0.0f) * m_dt); // for testing
+			transform->setPosition(transform->getPosition() + Vector3D(2.0f, 0.0f, 0.0f) * m_dt); // for testing
 			//transform->setPosition(transform->getPosition() + rigidBody->getLinearVelocitys() * m_dt);
 			break;
 		}
