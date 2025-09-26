@@ -301,9 +301,10 @@ namespace gam300 {
 
         // Register component serializers
         registerComponentSerializer("Transform3D", std::make_shared<Transform3DSerializer>());
-        
-        
-		registerComponentSerializer("AudioComponent", std::make_shared<AudioComponentSerializer>());
+
+
+        registerComponentSerializer("AudioComponent", std::make_shared<AudioComponentSerializer>());
+
 
         // Register component creators
         registerComponentCreator("Transform3D", [this](EntityID entityId, const std::string& componentData) {
@@ -326,6 +327,10 @@ namespace gam300 {
             {
                 serializer->deserialize(entityId, componentData);
                 LM.writeLog("RigidBody created for entity %d", entityId);
+            }
+            });
+    
+
         registerComponentCreator("AudioComponent", [this](EntityID entityId, const std::string& componentData) {
             //Use the serializer to create the component
             auto serializer = m_component_serializers["AudioComponent"];
@@ -380,13 +385,7 @@ namespace gam300 {
             return false;
         }
 
-        // Parse with RapidJSON instead of string::find
-        rapidjson::Document doc;
-        if (doc.Parse(fileContent.c_str()).HasParseError()) {
-            LM.writeLog("SerialisationManager::loadScene() - JSON parse error: %s",
-                rapidjson::GetParseError_En(doc.GetParseError()));
-            return false;
-        }
+     
 
         /////////////////////////////////////////////////Amanda Code Version/////////////////////////////////////////////////
         // Parse with RapidJSON instead of string::find
