@@ -1,7 +1,7 @@
 {
   "asset": {
-    "guid": "01257058ECB30003",
-    "id": 82595695406809091,
+    "guid": "FCF90058EDFE4003",
+    "id": 18228601348708777987,
     "sourcePath": "C:/Survival_Kit/Survival_Kit/Survival_Kit/Assets/Textures/game_background_1.png",
     "intermediatePath": "C:\\Survival_Kit\\Cache/Intermediate\\game_background_1.png",
     "compiledPath": "",
@@ -15,15 +15,15 @@
     "displayName": "game_background_1.png",
     "category": "Texture",
     "tags": [],
-    "lastImported": 1759000792,
+    "lastImported": 1759001977,
     "user": {}
   }
   ,"textureSettings": {
-    "usageType": "",
-    "compression": "",
-    "quality": 1,
-    "generateMipmaps": false,
-    "srgb": false,
-    "inputFiles": []
+    "usageType": "COLOR",
+    "compression": "BC1",
+    "quality": 0.8,
+    "generateMipmaps": true,
+    "srgb": true,
+    "inputFiles": ["game_background_1.png"]
   }
 }
