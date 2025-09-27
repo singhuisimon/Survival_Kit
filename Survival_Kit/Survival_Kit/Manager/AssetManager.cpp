@@ -207,10 +207,10 @@ namespace gam300 {
 			}
 		}
 
-		//NEW to check for missing descriptors of unchanged files 
-		if (m_cfg.writeDescriptors) {
-			validateExistingDescriptors();
-		}
+		////NEW to check for missing descriptors of unchanged files 
+		//if (m_cfg.writeDescriptors) {
+		//	validateExistingDescriptors();
+		//}
 
 		// Persist after a pass (cheap for small DBs; adjust cadence if needed)
 		if (!m_cfg.databaseFile.empty())
