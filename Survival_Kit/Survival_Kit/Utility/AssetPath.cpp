@@ -116,6 +116,17 @@ namespace gam300 {
         return intermediatePath.generic_string();
     }
 
+    std::string getDescriptorsPath() {
+        // Get the base Assets path and append Descriptors
+        std::string assetsPath = getAssetsPath();
+
+        // Ensure path ends with separator
+        if (!assetsPath.empty() && assetsPath.back() != '/' && assetsPath.back() != '\\') {
+            assetsPath += "/";
+        }
+
+        return assetsPath + "Descriptors/";
+    }
 
     //build a descriptor file path with the required structure: Assets/Descriptors/AssetType/Dir1/Dir2/GUID.desc/filename
     std::string buildDescriptorPath(const std::string& assetType,

@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Digipen\\Survival_Kit\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj": {}
+    "C:\\Survival_Kit\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj": {}
   },
   "projects": {
-    "C:\\Digipen\\Survival_Kit\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj": {
+    "C:\\Survival_Kit\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Digipen\\Survival_Kit\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj",
+        "projectUniqueName": "C:\\Survival_Kit\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj",
         "projectName": "ManagedScripts",
-        "projectPath": "C:\\Digipen\\Survival_Kit\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj",
-        "packagesPath": "C:\\Users\\riosh\\.nuget\\packages\\",
-        "outputPath": "C:\\Digipen\\Survival_Kit\\Survival_Kit\\ManagedScripts\\obj\\",
+        "projectPath": "C:\\Survival_Kit\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj",
+        "packagesPath": "C:\\Users\\kimkh\\.nuget\\packages\\",
+        "outputPath": "C:\\Survival_Kit\\Survival_Kit\\ManagedScripts\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\riosh\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\kimkh\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],

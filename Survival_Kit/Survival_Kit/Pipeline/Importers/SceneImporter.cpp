@@ -8,7 +8,7 @@ namespace gam300
     bool SceneImporter::CanImport(const std::string& ext) const {
         std::string lower = ext;
         std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
-        return (lower == ".scene" || lower == ".lvl" || lower == ".json");
+        return (lower == ".scene" || lower == ".scn" || lower == ".lvl" || lower == ".json");
     }
 
     ImportResult SceneImporter::Import(const std::string& srcPath, const std::string& intermediateDir) {

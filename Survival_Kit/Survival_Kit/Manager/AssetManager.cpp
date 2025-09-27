@@ -191,6 +191,10 @@ namespace gam300 {
 			}
 		}
 
+		//NEW to check for missing descriptors of unchanged files 
+		if (m_cfg.writeDescriptors) {
+			validateExistingDescriptors();
+		}
 
 		// Persist after a pass (cheap for small DBs; adjust cadence if needed)
 		if (!m_cfg.databaseFile.empty())
@@ -206,6 +210,36 @@ namespace gam300 {
 		case AssetType::Material: return "Material";
 		case AssetType::Scene: return "Scene";
 		default: return "Unknown";
+		}
+	}
+
+	// NEW METHOD: Check if descriptors exist for all database entries
+	void AssetManager::validateExistingDescriptors() {
+		auto records = m_db.AllMutable();
+
+		for (auto* rec : records) {
+			if (!rec || !rec->valid) continue;
+
+			// Check if descriptor file exists
+			DescriptorExtras extras;
+			extras.displayName = fs::path(rec->sourcePath).filename().string();
+			extras.category = typeName(rec->type);
+			extras.lastImported = std::time(nullptr);
+
+			std::string expectedDescriptorPath;
+			if (!m_descGen.GenerateFor(*rec, &extras, &expectedDescriptorPath)) {
+				// Descriptor generation failed - this shouldn't happen
+				continue;
+			}
+
+			// Check if the descriptor file actually exists
+			if (!fs::exists(expectedDescriptorPath)) {
+				LM.writeLog("AssetManager - Missing descriptor for %s, regenerating...",
+					rec->sourcePath.c_str());
+
+				// Regenerate the missing descriptor
+				m_descGen.GenerateFor(*rec, &extras);
+			}
 		}
 	}
 

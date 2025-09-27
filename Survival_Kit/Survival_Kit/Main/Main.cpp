@@ -11,6 +11,14 @@
 #include "Main.h"
 #include "../Manager/SerialisationManager.h"
 
+
+
+#include "../Pipeline/Importers/AudioImporter.h"
+#include "../Pipeline/Importers/TextureImporter.h" 
+#include "../Pipeline/Importers/SceneImporter.h"
+#include "../Pipeline/Importers/ShaderImporter.h"  // ? This was missing!
+#include "../Pipeline/Importers/MeshImporter.h"
+
 int main(void) {
     //// Initialize GameManager
     //if (GM.startUp()) {
@@ -120,23 +128,24 @@ int main(void) {
     app.AddScript(0, "TestScript");
     //std::cout << "Initial script added" << std::endl;
 
-    // ------------------ CODE TO TEST FOR ASSETMANAGER - COMMENTED FOR NOW ------------------
+    // -------------------------Set up Asset Manager ------------------------------------------
 
-    //auto& AM = gam300::AssetManager::getInstance();
+    //this creates the default configuration for the asset manager to know the asset filepath and such
+    gam300::AssetManager::Config cfg = AM.createDefaultConfig();
 
-    //gam300::AssetManager::Config cfg{};
-    //cfg.repoRoot = "";                 
-    //cfg.descriptorSidecar = false;     
-    //cfg.writeDescriptors = true;
+    AM.setConfig(cfg);
+    AM.startUp();
 
-    //AM.setConfig(cfg);
-    //AM.startUp();
-    //AM.scanAndProcess();
-    //AM.shutDown();
+    AM.scanAndProcess();
+
+    std::cout << "\nFinal database count: " << AM.db().Count() << std::endl;
+
+    AM.shutDown();
 
     // ---------------------------------------------------------------------------------------
 
-    while (!GM.getGameOver() && !glfwWindowShouldClose(window)) {
+
+       while (!GM.getGameOver() && !glfwWindowShouldClose(window)) {
         // Process events
         glfwPollEvents();
 

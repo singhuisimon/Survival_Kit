@@ -118,10 +118,6 @@
     <ClInclude Include="Pipeline\Importers\SceneImporter.h" />
     <ClInclude Include="Pipeline\Importers\ShaderImporter.h" />
     <ClInclude Include="Pipeline\Importers\TextureImporter.h" />
-    <ClInclude Include="Resource\ResourceData.h" />
-    <ClInclude Include="Resource\ResourceMetadata.h" />
-    <ClInclude Include="Resource\ResourcePaths.h" />
-    <ClInclude Include="Resource\ResourceTypes.h" />
     <ClInclude Include="System\AudioSystem.h" />
     <ClInclude Include="System\System.h" />
     <ClInclude Include="System\TransformSystem.h" />
