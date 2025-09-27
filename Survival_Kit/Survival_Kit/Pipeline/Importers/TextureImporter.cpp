@@ -25,6 +25,17 @@ namespace gam300
             r.ok = true;
             r.intermediatePath = out.string();
             r.type = AssetType::Texture;
+
+            // ----------- DEFAULT VALUES FOR NOW -----------
+            // for texture settings
+            TextureSettings ts;
+            ts.usageType = "COLOR";
+            ts.compression = "BC1";
+            ts.quality = 0.8f;
+            ts.generateMipmaps = true;
+            ts.srgb = true;
+            ts.inputFiles = { src.filename().string() };
+            r.textureSettings = std::move(ts);
         }
         catch (const std::exception& e) {
             r.ok = false;

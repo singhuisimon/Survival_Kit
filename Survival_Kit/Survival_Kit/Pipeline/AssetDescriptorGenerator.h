@@ -29,6 +29,16 @@ namespace gam300 {
 		std::vector<std::string> tags; //!< Free-form tags
 		std::time_t lastImported = 0; //!< When importer last ran (epoch seconds)
 		std::unordered_map<std::string, std::string> user; //!< Arbitrary key/value pairs
+	
+		//added texture settings -- needed for compiler
+		std::string usageType;
+		std::string compression;
+		float quality = 1.0f;
+		bool generateMipmaps = false;
+		bool srgb = false;
+		std::vector<std::string> inputFiles;
+
+	
 	};
 
 	/**

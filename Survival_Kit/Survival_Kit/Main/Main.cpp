@@ -11,14 +11,6 @@
 #include "Main.h"
 #include "../Manager/SerialisationManager.h"
 
-
-
-#include "../Pipeline/Importers/AudioImporter.h"
-#include "../Pipeline/Importers/TextureImporter.h" 
-#include "../Pipeline/Importers/SceneImporter.h"
-#include "../Pipeline/Importers/ShaderImporter.h"  // ? This was missing!
-#include "../Pipeline/Importers/MeshImporter.h"
-
 int main(void) {
     //// Initialize GameManager
     //if (GM.startUp()) {

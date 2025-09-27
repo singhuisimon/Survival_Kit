@@ -167,6 +167,20 @@ namespace gam300 {
 			x.displayName = fs::path(rec->sourcePath).filename().string();
 			x.category = typeName(rec->type);
 			x.lastImported = std::time(nullptr);
+
+			//ADDED 
+			//If this is a texture and the importer provided settings,
+			if (rec->type == AssetType::Texture && r.textureSettings.has_value()) {
+				const auto& ts = *r.textureSettings;
+				x.usageType = ts.usageType;
+				x.compression = ts.compression;
+				x.quality = ts.quality;
+				x.generateMipmaps = ts.generateMipmaps;
+				x.srgb = ts.srgb;
+				x.inputFiles = ts.inputFiles;
+			}
+
+
 			m_descGen.GenerateFor(*rec, &x);
 		}
 

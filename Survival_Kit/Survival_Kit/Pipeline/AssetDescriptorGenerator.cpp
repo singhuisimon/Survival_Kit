@@ -184,6 +184,26 @@ namespace gam300 {
             }
             nl(0); o << "}"; nl(1);
             ind(1); o << "}"; nl(1);
+
+            //ADDED - this is focused for the Descriptor from the asset type from the Texture folder
+            if (recOpt && recOpt->type == AssetType::Texture) {
+                ind(1); o << ",\"textureSettings\": {"; nl(1);
+                ind(2); o << "\"usageType\": \"" << EscapeJson(extras->usageType) << "\","; nl(1);
+                ind(2); o << "\"compression\": \"" << EscapeJson(extras->compression) << "\","; nl(1);
+                ind(2); o << "\"quality\": " << extras->quality << ","; nl(1);
+                ind(2); o << "\"generateMipmaps\": " << (extras->generateMipmaps ? "true" : "false") << ","; nl(1);
+                ind(2); o << "\"srgb\": " << (extras->srgb ? "true" : "false") << ","; nl(1);
+
+                ind(2); o << "\"inputFiles\": [";
+                for (size_t i = 0; i < extras->inputFiles.size(); ++i) {
+                    if (i) o << ",";
+                    o << "\"" << EscapeJson(extras->inputFiles[i]) << "\"";
+                }
+                o << "]"; nl(1);
+
+                ind(1); o << "}"; nl(1);
+            }
+
         }
         else {
             o << "null"; nl(1);
