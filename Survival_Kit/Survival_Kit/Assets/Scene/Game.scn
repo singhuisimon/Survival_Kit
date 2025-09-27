@@ -1,7 +1,7 @@
 {
   "objects": [
     {
-      "name": "Cube",
+      "name": "Obj_1",
       "components": {
         "Transform3D": {
           "position": [
@@ -24,19 +24,33 @@
             1.0,
             1.0
           ]
-        },
-        "AudioComponent": {
-          "guid": "C:\\Users\\Admin\\source\\repos\\gam_300\\Survival_Kit\\Survival_Kit\\Assets\\Audio\\sfx_jumping.wav",
-          "type": "SFX",
-          "volume": 1.0,
-          "pitch": 1.0,
-          "loop": "false",
-          "state": "STOP",
-          "is3D": "false",
+        }
+      }
+    },
+
+    {
+      "name": "Obj_2",
+      "components": {
+        "Transform3D": {
           "position": [
+            1.5,
+            0.0,
+            0.0
+          ],
+          "prev_position": [
+            1.5,
+            0.0,
+            0.0
+          ],
+          "rotation": [
             0.0,
             0.0,
             0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
           ]
         }
       }

@@ -45,6 +45,9 @@ namespace gam300 {
             LM.writeLog("GraphicsManager::startUp(): GLAD initialized successfully.");
         }
 
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        //glViewport(0, 0, IMGUIM.getWindowWidthHeight().x, IMGUIM.getWindowWidthHeight().y);
+
         //// Set framebuffer with color (Background color)
         //glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         //glViewport(0, 0, WC.get_win_width(), WC.get_win_height());
@@ -79,7 +82,13 @@ namespace gam300 {
         }
 
         // Set camera as orbiting
-        main_camera = Camera3D(ORBITING, glm::vec3(0.0f, 5.0f, 5.0f), glm::vec3(0.f, 0.f, 0.0f), 45.0f, 0.5f, 100.0f);
+        main_camera = Camera3D(ORBITING, glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.f, 0.f, 0.0f), 45.0f, 0.5f, 100.0f);
+
+        // Set light
+        main_light = Light(glm::vec3(0.0f, 5.0f, 0.0f),
+            glm::vec3(0.4f, 0.4f, 0.4f),
+            glm::vec3(1.0f, 1.0f, 1.0f),
+            glm::vec3(1.0f, 1.0f, 1.0f));
 
         //// File path for assets
         //std::string mesh_path = ASM.get_full_path(ASM.MODEL_PATH, DEFAULT_MODEL_MSH_FILE);
@@ -92,35 +101,44 @@ namespace gam300 {
 
         // Add fonts
 
-        //// Set up the framebuffer and game scene texture for imgui viewport
-        //glGenFramebuffers(1, &imgui_fbo);
-        //if (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) {
-        //    LM.write_log("Graphics_Manager::start_up(): FRAME BUFFER CREATION SUCCESSFUL.");
-        //}
-        //glBindFramebuffer(GL_FRAMEBUFFER, imgui_fbo);
+        // Creating framebuffer object for IMGUI viewport
+        auto temp_fbo = FrameBuffer::create();
+        if (temp_fbo->valid()) {
+            imgui_fbo = std::move(temp_fbo);
+        }
 
-        //// Creating texture object for imgui
-        //glGenTextures(1, &imgui_tex);
-        //glBindTexture(GL_TEXTURE_2D, imgui_tex);
-        //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WC.get_win_width(), WC.get_win_height(), 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        // Set up the framebuffer and game scene texture for imgui viewport
+        glBindFramebuffer(GL_FRAMEBUFFER, imgui_fbo->handle());
+        
+        // Creating texture object for imgui
+        int windowWidth = 640;
+        int windowHeight = 480;
+        //int windowWidth = IMGUIM.getWindowWidthHeight().x;
+        //int windowHeight = IMGUIM.getWindowWidthHeight().y;
+        glGenTextures(1, &imguiTex);
+        glBindTexture(GL_TEXTURE_2D, imguiTex);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowWidth , windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-        //// Attaching texture object for imgui to framebuffer 
-        //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, imgui_tex, 0);
-        //glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        //glBindTexture(GL_TEXTURE_2D, 0);
+        // Attaching texture object for imgui to framebuffer 
+        imgui_fbo->attach_color(GL_COLOR_ATTACHMENT0, imguiTex);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glBindTexture(GL_TEXTURE_2D, 0);
 
         MeshData cubeData = Shape::make_cube();
         MeshData planeData = Shape::make_plane();
+        MeshData sphereData = Shape::make_sphere();
 
         MeshGL   cubeGL = Shape::upload_mesh_data(cubeData);
         MeshGL   planeGL = Shape::upload_mesh_data(planeData);
+        MeshGL   sphereGL = Shape::upload_mesh_data(sphereData);
 
         meshStorage.push_back(std::move(cubeGL));
         meshStorage.push_back(std::move(planeGL));
+        meshStorage.push_back(std::move(sphereGL));
 
 
         // Log startup
@@ -156,42 +174,61 @@ namespace gam300 {
         -
         */
 
-        auto x = glm::angleAxis(glm::radians(0.0f), glm::vec3(0, 0, 1));
-        auto y = glm::angleAxis(glm::radians(0.0f), glm::vec3(0, 1, 0));
-
-        auto xy = x * y;
-
-        // Calculate the model to world transform
-        glm::mat4 scale_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-        glm::mat4 rot_matrix = glm::toMat4(xy);
-        glm::mat4 trans_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.f, 0.f));
-
-        glm::mat4 TRS = trans_matrix * rot_matrix * scale_matrix;
-
-        Transform3D transform;
-
-        transform.setPosition(Vector3D(0.0f, 0.0f, 0.0f));
-        transform.setScale(Vector3D(1.0f, 1.0f, 1.0f)); // Don't set any values to 0
-        transform.setRotation(Vector3D(0.0f, 0.0f, 0.0f));
-
-        shadersStorage[0].programUse();
-
-        // KENNY TESTING: Temporary transformations for camera
-        shadersStorage[0].setUniform("M", transform.getTransformationMatrix()); // Model transform
-        shadersStorage[0].setUniform("V", main_camera.getLookAt()); // View transform
-        shadersStorage[0].setUniform("P", main_camera.getPerspective()); // Perspective transform
-
-        // KENNY TESTING: Temporary input for cursor
+        // Temporary input for cursor to move camera
         if (IM.isKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
-            std::cout << IM.getMouseDeltaX() << std::endl;
-            main_camera.cameraOnCursor(IM.getMouseDeltaX(), IM.getMouseDeltaY(), &shadersStorage[0]);
+
+            // MOUSE: Camera control with left mouse button held down
+            if (IM.isMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT)) {
+                double mouseDeltaX = IM.getMouseDeltaX();
+                double mouseDeltaY = IM.getMouseDeltaY();
+
+                if (std::abs(mouseDeltaX) > 0.1 || std::abs(mouseDeltaY) > 0.1) {
+                    // INCREASE SENSITIVITY
+                    float extraSensitivity = 500.0f;
+
+                    main_camera.cameraOnCursor(mouseDeltaX * extraSensitivity,
+                        mouseDeltaY * extraSensitivity,
+                        &shadersStorage[0]);
+                }
+            }
         }
 
-        //// KENNY TESTING: Temporary input for scroll
-        //if (IM.isKeyPressed(GLFW_KEY_RIGHT_SHIFT)) {
-        //    std::cout << IM.getScrollY() << std::endl;
-        //    main_camera.cameraOnScroll(IM.getScrollY(), &shadersStorage[0]);
-        //}
+
+        // KEYBOARD: Camera control with arrow keys
+        float keyboardSensitivity = 8.0f; // Adjust this value for keyboard speed
+        bool keyPressed = false;
+        double keyDeltaX = 0.0;
+        double keyDeltaY = 0.0;
+
+        if (IM.isKeyPressed(GLFW_KEY_LEFT)) {
+            keyDeltaX = -keyboardSensitivity;
+            keyPressed = true;
+        }
+        if (IM.isKeyPressed(GLFW_KEY_RIGHT)) {
+            keyDeltaX = keyboardSensitivity;
+            keyPressed = true;
+        }
+        if (IM.isKeyPressed(GLFW_KEY_UP)) {
+            keyDeltaY = -keyboardSensitivity;
+            keyPressed = true;
+        }
+        if (IM.isKeyPressed(GLFW_KEY_DOWN)) {
+            keyDeltaY = keyboardSensitivity;
+            keyPressed = true;
+        }
+
+        // Handle diagonal movement (multiple keys pressed)
+        if (keyPressed) {
+            main_camera.cameraOnCursor(keyDeltaX, keyDeltaY, &shadersStorage[0]);
+        }
+
+        // Set up shader program
+        shadersStorage[0].programUse();
+
+        // Temporary transformations for camera
+        //shadersStorage[0].setUniform("M", transform.getTransformationMatrix()); // Model transform
+        shadersStorage[0].setUniform("V", main_camera.getLookAt()); // View transform
+        shadersStorage[0].setUniform("P", main_camera.getPerspective()); // Perspective transform
 
         // Set uniform to shader after update light values
         shadersStorage[0].setUniform("light.position", main_light.getLightPos());  // Position
@@ -199,9 +236,7 @@ namespace gam300 {
         shadersStorage[0].setUniform("light.Ld", main_light.getLightDiffuse());        // Diffuse
         shadersStorage[0].setUniform("light.Ls", main_light.getLightSpecular());        // Specular
 
-
-        // ------------- LIGHTING ------------- //
-        // KENNY TESTING: Temporary input for light cursor
+        //Temporary input for light cursor
         if (IM.isKeyPressed(GLFW_KEY_L)) {
             //std::cout << IM.getMouseDeltaX() << std::endl;
             main_light.lightOnCursor(IM.getMouseDeltaX(), IM.getMouseDeltaY(), &shadersStorage[0]);
@@ -210,20 +245,50 @@ namespace gam300 {
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS); // Default comparison
 
+        // Bind framebuffer object for IMGUI viewport
+        glBindFramebuffer(GL_FRAMEBUFFER, imgui_fbo->handle());
+
         // Clear the color and depth buffer
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // temporary comment for the imgui
 
-        for (auto const& mesh : meshStorage) {
+        // Enable choosing of mesh
+        if (IM.isKeyPressed(GLFW_KEY_1)) {
+            selected_mesh = 0;
+        }
+        if (IM.isKeyPressed(GLFW_KEY_2)) {
+            selected_mesh = 1;
+        }
+        if (IM.isKeyPressed(GLFW_KEY_3)) {
+            selected_mesh = 2;
+        }
 
+        const MeshGL& mesh = meshStorage[selected_mesh];
+
+        // KENNY TESTING: ACCESSING ENTITIES AND UPDATING THEIR TRANSFORMS PER FRAME     
+        const auto transform_entities_IDs = EM.getEntitiesWithComponent<Transform3D>();
+        for (const auto transform_ID : transform_entities_IDs) {
+
+            // Get entity's transform component using ID
+            if (EM.hasComponent<Transform3D>(transform_ID)) { // Extra check just in case 
+                Transform3D* transform = EM.getComponent<Transform3D>(transform_ID);
+                shadersStorage[0].setUniform("M", transform->getTransformationMatrix()); // Model transform
+            }
+
+            // Bind selected mesh
             mesh.vao.bind();
 
             // Draw the actual object
-            glDrawElements(mesh.primitive_type, mesh.draw_count, GL_UNSIGNED_SHORT, NULL);
+            glDrawElements(mesh.primitive_type, mesh.draw_count, mesh.index_type, NULL);
 
+            // Unbind mesh
             glBindVertexArray(0);
+
         }
 
         shadersStorage[0].programFree();
+
+        // Unbind framebuffer object
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
     bool GraphicsManager::loadShaderPrograms(std::vector<std::pair<std::string, std::string>> shaders) {

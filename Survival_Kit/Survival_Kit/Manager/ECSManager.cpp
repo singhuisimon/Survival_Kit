@@ -205,8 +205,10 @@ namespace gam300 {
         }
 
         // Ensure everything is clean (should already be empty after destroyEntity calls)
+        // Reset m_next_entity_id to 0 after clearing all entities (Edited - Lily (21/9))
         m_entities.clear();
         m_entity_name_map.clear();
+        m_next_entity_id = 0;
 
         LM.writeLog("ECSManager::clearAllEntities() - All entities cleared");
     }

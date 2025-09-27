@@ -35,6 +35,12 @@
     <ClCompile Include="Graphics\ShaderProgram.cpp" />
     <ClCompile Include="Graphics\Shape.cpp" />
     <ClCompile Include="System\TransformSystem.cpp" />
+    <ClCompile Include="Component\RigidBody.cpp" />
+    <ClCompile Include="System\PhysicsSystem.cpp" />
+    <ClCompile Include="Graphics\Sampler.cpp" />
+    <ClCompile Include="Graphics\Texture.cpp" />
+    <ClCompile Include="Graphics\Common.cpp" />
+    <ClCompile Include="System\MovementSystem.cpp" />
     <ClCompile Include="Component\AudioComponent.cpp" />
     <ClCompile Include="System\AudioSystem.cpp" />
     <ClCompile Include="Manager\AssetManager.cpp" />
@@ -47,6 +53,8 @@
     <ClCompile Include="Pipeline\Importers\AudioImporter.cpp" />
     <ClCompile Include="Pipeline\Importers\ShaderImporter.cpp" />
     <ClCompile Include="Pipeline\Importers\SceneImporter.cpp" />
+    <ClCompile Include="IMGUI\ImGuizmo.cpp" />
+    <ClCompile Include="Manager\PrefabManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component\Component.h" />
@@ -95,6 +103,14 @@
     <ClInclude Include="Utility\Constant.h" />
     <ClInclude Include="Component\TransformComponent.h" />
     <ClInclude Include="System\TransformSystem.h" />
+    <ClInclude Include="Component\RigidBody.h" />
+    <ClInclude Include="System\PhysicsSystem.h" />
+    <ClInclude Include="Graphics\Texture.h" />
+    <ClInclude Include="Graphics\Sampler.h" />
+    <ClInclude Include="Graphics\stb_image.h" />
+    <ClInclude Include="Graphics\Common.h" />
+    <ClInclude Include="Graphics\SharedGraphics.h" />
+    <ClInclude Include="System\MovementSystem.h" />
     <ClInclude Include="Component\AudioComponent.h" />
     <ClInclude Include="System\AudioSystem.h" />
     <ClInclude Include="Manager\AssetManager.h" />
@@ -111,6 +127,8 @@
     <ClInclude Include="Pipeline\Importers\AudioImporter.h" />
     <ClInclude Include="Pipeline\Importers\ShaderImporter.h" />
     <ClInclude Include="Pipeline\Importers\SceneImporter.h" />
+    <ClInclude Include="IMGUI\ImGuizmo.h" />
+    <ClInclude Include="Manager\PrefabManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Scene\Game.scn" />

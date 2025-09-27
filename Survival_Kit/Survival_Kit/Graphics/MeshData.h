@@ -21,7 +21,7 @@ namespace gam300 {
 		std::vector<glm::vec3> normals;
 		std::vector<glm::vec3> colors;
 		std::vector<glm::vec2> texcoords;
-		std::vector<GLushort>  indices;
+		std::vector<uint32_t>  indices;
 	};
 
 	struct MeshGL {
@@ -31,7 +31,9 @@ namespace gam300 {
 		VBO ebo{};
 
 		GLsizei draw_count = 0;
+
 		GLenum  primitive_type = GL_TRIANGLES;
+		GLenum  index_type     = GL_UNSIGNED_INT;
 
 		MeshGL(const MeshGL&) = delete;
 		MeshGL& operator=(const MeshGL&) = delete;

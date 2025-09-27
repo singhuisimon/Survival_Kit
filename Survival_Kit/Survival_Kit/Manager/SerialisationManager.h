@@ -65,9 +65,16 @@ namespace gam300 {
     };
 
     /**
-	* @brief Serializer for Audio_Component components.
+     * @brief Serializer for RigidBody components.
+     */
+    class RigidBodySerializer : public IComponentSerializer {
+    public:
+        std::string serialize(Component* component) override;
+        Component* deserialize(EntityID entityId, const std::string& jsonData) override;
+    };
+	/* @brief Serializer for Audio_Component components.
 	* @author Amanda Leow Boon Suan
-    */
+*/    
     class AudioComponentSerializer : public IComponentSerializer {
     public:
         std::string serialize(Component* component) override;
@@ -139,6 +146,13 @@ namespace gam300 {
          * @param serializer The serializer for this component type.
          */
         void registerComponentSerializer(const std::string& componentName, std::shared_ptr<IComponentSerializer> serializer);
+
+        /**
+         * @brief Get a component serializer by name.
+         * @param componentName The name of the component type.
+         * @return Shared pointer to the serializer, or nullptr if not found.
+         */
+        std::shared_ptr<IComponentSerializer> getComponentSerializer(const std::string& componentName);
 
         // Helper methods for parsing
         bool parseJsonFile(const std::string& filename, std::string& jsonContent);
