@@ -5,16 +5,17 @@
 #include <sstream>
 #include <algorithm>
 
+//external library for GUID
+#include "../include/xresource_guid-main/source/xresource_guid.h"
 
 namespace gam300 {
 
-	// Deterministic id generator (stable across runs for repeatability during dev).
-	// If you need truly unique ids across runs, seed with std::random_device.
+	//generate Asset IDs from the GUID library 
 	static AssetId GenId()
 	{
-		static std::mt19937_64 rng{ 0x57AF1A1DULL };
-		static std::uniform_int_distribution<unsigned long long> d;
-		return d(rng);
+		const xresource::instance_guid inst = xresource::instance_guid::GenerateGUIDCopy();
+
+		return static_cast<AssetId>(inst.m_Value);
 	}
 
 	std::string AssetDatabase::NormalizePath(const std::string& path)

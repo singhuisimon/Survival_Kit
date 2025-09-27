@@ -1,6 +1,7 @@
 #include "AssetManager.h"
 #include <filesystem>
 
+#include "../Utility/AssetPath.h" //for path management
 
 namespace fs = std::filesystem;
 
@@ -8,6 +9,7 @@ namespace gam300 {
 
 	//singleton plumbing
 	AssetManager::AssetManager() { setType("AssetManager"); }
+
 	AssetManager& AssetManager::getInstance() {
 		static AssetManager s_mgr; return s_mgr;
 	}
@@ -25,11 +27,57 @@ namespace gam300 {
 
 		// Logging header
 		LM.writeLog("AssetManager::startUp() - begin");
+		
+		//find base root
+		auto AutoDetectRepoRoot = []() -> fs::path {
+			fs::path p = fs::current_path();
+			while (!p.empty()) {
+				if (fs::exists(p / ".git") 
+					//||
+					//fs::exists(p / "Survival_Kit")
+					) {
+					return p;
+				}
+				p = p.parent_path();
+			}
+			return fs::current_path(); // fallback
+			};
+
+		fs::path base = m_cfg.repoRoot.empty() ? AutoDetectRepoRoot() : fs::path(m_cfg.repoRoot);
+
+
+		// Prefer project-aware defaults when fields are empty
+		if (m_cfg.sourceRoots.empty())
+			m_cfg.sourceRoots = { "Assets" };
+
+		if (m_cfg.intermediateDirectory.empty())
+			m_cfg.intermediateDirectory = getIntermediatePath();      // Cache/Intermediate
+
+		if (m_cfg.databaseFile.empty())
+			m_cfg.databaseFile = (fs::path(getLocalCachePath()) / "assetdb.txt").string();
+
+		if (!m_cfg.descriptorSidecar && m_cfg.descriptorRoot.empty())
+			m_cfg.descriptorRoot = (fs::path(getAssetsPath()) / "Descriptors").string();
+
+
+		auto Resolve = [&](const std::string& in) -> std::string {
+			if (in.empty()) return in;
+			fs::path p(in);
+			return p.is_absolute() ? p.string() : (base / p).string();
+			};
 
 
 		// Ensure some sensible defaults
 		if (m_cfg.sourceRoots.empty())
 			m_cfg.sourceRoots = { "Assets" };
+
+		//normnalize all paths
+		for (auto& r : m_cfg.sourceRoots) r = Resolve(r);
+		m_cfg.intermediateDirectory = Resolve(m_cfg.intermediateDirectory);
+		m_cfg.databaseFile = Resolve(m_cfg.databaseFile);
+		m_cfg.snapshotFile = Resolve(m_cfg.snapshotFile);
+		if (!m_cfg.descriptorSidecar && !m_cfg.descriptorRoot.empty())
+			m_cfg.descriptorRoot = Resolve(m_cfg.descriptorRoot);
 
 
 		// Configure scanner (note: scanner is in namespace game300 and uses lowerCamel APIs)
@@ -135,10 +183,10 @@ namespace gam300 {
 		// Iterate changes from the scanner and act on them
 		for (const auto& c : m_scanner.Scan()) {
 			switch (c.kind) {
-			case ::game300::ScanChange::Kind::Added:
-			case ::game300::ScanChange::Kind::Modified:
+			case ::gam300::ScanChange::Kind::Added:
+			case ::gam300::ScanChange::Kind::Modified:
 				handleAddedOrModified(c.sourcePath); break;
-			case ::game300::ScanChange::Kind::Removed:
+			case ::gam300::ScanChange::Kind::Removed:
 				handleRemoved(c.sourcePath); break;
 			}
 		}
@@ -152,7 +200,7 @@ namespace gam300 {
 	const char* AssetManager::typeName(AssetType t) {
 		switch (t) {
 		case AssetType::Shader: return "Shader";
-		case AssetType::Texture2D: return "Texture2D";
+		case AssetType::Texture: return "Texture";
 		case AssetType::Audio: return "Audio";
 		case AssetType::Mesh: return "Mesh";
 		case AssetType::Material: return "Material";

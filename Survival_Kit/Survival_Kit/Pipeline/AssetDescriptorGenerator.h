@@ -5,6 +5,12 @@
 #include <vector>
 #include <unordered_map>
 #include <ctime>
+#include <iomanip>
+#include "AssetDatabase.h"
+#include "../Utility/AssetPath.h"
+
+//external library for GUID
+#include "../include/xresource_guid-main/source/xresource_guid.h"
 
 
 namespace gam300 {
@@ -65,16 +71,14 @@ namespace gam300 {
 		* @param extras Optional extra fields to embed.
 		* @param outPath Optional output path string.
 		*/
-		bool GenerateForPath(const std::string& sourcePath, const DescriptorExtras* extras = nullptr,
-			std::string* outPath = nullptr) const;
+		bool GenerateForPath(AssetDatabase& db, const std::string& sourcePath,
+			const DescriptorExtras* extras = nullptr, std::string* outPath = nullptr) const;
 
 
 		/**
 		* @brief Compute the default descriptor path for a source file.
-		* @details If sidecar: /a/b/c/texture.png.desc
-		* If centralized: m_outputRoot/texture.png.desc
 		*/
-		std::string DefaultDescPathForSource(const std::string& sourcePath) const;
+		std::string DefaultDescPathForRecord(const AssetRecord& rec) const;
 
 	private:
 		// ---- Helpers (implementation only) ----

@@ -2,7 +2,6 @@
 #ifndef __ASSET_MANAGER_H__
 #define __ASSET_MANAGER_H__
 
-
 #include <string>
 #include <vector>
 #include <ctime>
@@ -18,12 +17,15 @@
 #include "../Pipeline/AssetScanner.h"
 #include "../Pipeline/AssetDescriptorGenerator.h" 
 
+//asset path
+#include "../Utility/AssetPath.h"
+
 namespace gam300 {
 
 	/**
-* @class AssetManager
-* @brief Central editor tool coordinating scanning, importing and DB.
-*/
+	* @class AssetManager
+	* @brief Central editor tool coordinating scanning, importing and DB.
+	*/
 	class AssetManager : public Manager {
 	private:
 		AssetManager(); // singleton
@@ -32,6 +34,7 @@ namespace gam300 {
 
 
 	public:
+
 		// Singleton accessor (same pattern as other managers)
 		static AssetManager& getInstance();
 
@@ -53,6 +56,8 @@ namespace gam300 {
 			bool writeDescriptors = true; //!< Emit .desc files
 			bool descriptorSidecar = true; //!< `foo.png.desc` next to source
 			std::string descriptorRoot; //!< Used when sidecar = false
+
+			std::string repoRoot; //!< Base path to resolve relative asset paths
 		};
 
 		/** Apply configuration before startUp() */
@@ -84,7 +89,7 @@ namespace gam300 {
 
 		// State
 		Config m_cfg{};
-		::game300::AssetScanner m_scanner; //!< Scanner lives in namespace *game300*
+		::gam300::AssetScanner m_scanner; //!< Scanner lives in namespace *game300*
 		AssetImporterRegistry m_importers;
 		AssetDatabase m_db;
 		AssetDescriptorGenerator m_descGen;
