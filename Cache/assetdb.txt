@@ -1,9 +1,0 @@
-16305687452613918721|C:/Survival_Kit/Survival_Kit/Survival_Kit/Assets/Audio/sfx_jumping.wav|C:\Survival_Kit\Cache/Intermediate\sfx_jumping.wav||3||0|1
-164786388118061065|C:/Survival_Kit/Survival_Kit/Survival_Kit/Assets/Textures/game_background_3_2.png|C:\Survival_Kit\Cache/Intermediate\game_background_3_2.png||2||0|1
-13999844443400224771|C:/Survival_Kit/Survival_Kit/Survival_Kit/Assets/Textures/game_background_1.png|C:\Survival_Kit\Cache/Intermediate\game_background_1.png||2||0|1
-7658776168062566411|C:/Survival_Kit/Survival_Kit/Survival_Kit/Assets/Textures/game_background_4.png|C:\Survival_Kit\Cache/Intermediate\game_background_4.png||2||0|1
-15729226700310495237|C:/Survival_Kit/Survival_Kit/Survival_Kit/Assets/Textures/game_background_2.png|C:\Survival_Kit\Cache/Intermediate\game_background_2.png||2||0|1
-11694001434186530829|C:/Survival_Kit/Survival_Kit/Survival_Kit/Assets/Scene/Game.scn|C:\Survival_Kit\Cache/Intermediate\Game.scn||6||0|1
-17458608957220765703|C:/Survival_Kit/Survival_Kit/Survival_Kit/Assets/Textures/game_background_3_1.png|C:\Survival_Kit\Cache/Intermediate\game_background_3_1.png||2||0|1
-164786388118061071|C:/Survival_Kit/Survival_Kit/Survival_Kit/Assets/Shaders/survival_kit_obj.frag|C:\Survival_Kit\Cache/Intermediate\survival_kit_obj.frag||1||0|1
-16305687452613918737|C:/Survival_Kit/Survival_Kit/Survival_Kit/Assets/Shaders/survival_kit_obj.vert|C:\Survival_Kit\Cache/Intermediate\survival_kit_obj.vert||1||0|1
