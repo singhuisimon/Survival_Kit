@@ -17,6 +17,9 @@
 #include "../Pipeline/AssetScanner.h"
 #include "../Pipeline/AssetDescriptorGenerator.h" 
 
+//asset path
+#include "../Utility/AssetPath.h"
+
 namespace gam300 {
 
 	/**
@@ -31,6 +34,7 @@ namespace gam300 {
 
 
 	public:
+
 		// Singleton accessor (same pattern as other managers)
 		static AssetManager& getInstance();
 

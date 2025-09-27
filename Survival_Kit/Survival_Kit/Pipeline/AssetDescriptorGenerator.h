@@ -7,6 +7,7 @@
 #include <ctime>
 #include <iomanip>
 #include "AssetDatabase.h"
+#include "../Utility/AssetPath.h"
 
 //external library for GUID
 #include "../include/xresource_guid-main/source/xresource_guid.h"

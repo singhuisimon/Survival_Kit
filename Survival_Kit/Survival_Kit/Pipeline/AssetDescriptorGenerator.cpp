@@ -29,6 +29,8 @@ namespace gam300 {
         //write file
         if (!WriteText(path, json)) return false;
 
+        //build info.txt here
+
         if (outPath) *outPath = path;
         return true;
 	}
@@ -65,15 +67,15 @@ namespace gam300 {
         ss << std::uppercase << std::hex << std::setw(16) << std::setfill('0') << rec.id;
         const std::string guid = ss.str();
 
-        //use first 2 + next 2 characters as subfolders (the two directories)
-        const std::string dir1 = guid.substr(0, 2);
-        const std::string dir2 = guid.substr(2, 2);
+        //use last 2 + before last 2 characters as subfolders (the two directories)
+        const std::string dir1 = guid.substr(14, 2);
+        const std::string dir2 = guid.substr(12, 2);
 
         //map asset type to folder
         std::string typeFolder;
 
         switch (rec.type) {
-            case AssetType::Texture: typeFolder = "Texture"; break;
+            case AssetType::Texture:   typeFolder = "Texture"; break;
             case AssetType::Mesh:      typeFolder = "Mesh";    break;
             case AssetType::Material:  typeFolder = "Material"; break;
             case AssetType::Shader:    typeFolder = "Shader";  break;
@@ -82,15 +84,41 @@ namespace gam300 {
             default:                   typeFolder = "Unknown"; break;
         }
 
-        //final path
-        fs::path dir = "AssetDescriptors";
-        dir /= typeFolder;
-        dir /= dir1;
-        dir /= dir2;
-        dir /= guid + ".desc";
+        //determine base path
 
-        fs::create_directories(dir);
-        return (dir / "Descriptor.txt").string();
+        fs::path base;
+        if (m_sidecar) {
+            // if sidecar mode, put it next to source file
+            base = fs::path(rec.sourcePath).parent_path();
+            fs::path descriptorPath = base / (guid + ".desc");
+            std::error_code ec;
+            fs::create_directories(descriptorPath, ec);
+            return (descriptorPath / "Descriptor.txt").string();
+        }
+        
+
+        fs::path root = m_outputRoot.empty()
+            ? fs::path(getAssetsPath()) / "Descriptors"
+            : fs::path(m_outputRoot);
+        base = root;
+
+         //use AssetPath to get the proper Assets folder path
+         //ensure it works on everyone's machine
+         //std::string assetsPath = getAssetsPath();
+        
+        //build complete path: Assets/AssetType/Dir1/Dir2/GUID.desc/Descriptor.txt
+        fs::path descriptorPath = root / typeFolder / dir1 / dir2 / (guid + ".desc");
+
+        // create all necessary directories
+        std::error_code ec;
+        fs::create_directories(descriptorPath, ec);
+
+        //return full path including Descriptor.txt
+        return (descriptorPath / "Descriptor.txt").string();
+
+    
+
+
 	}
 
 	

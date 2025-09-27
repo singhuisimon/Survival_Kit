@@ -120,6 +120,22 @@ int main(void) {
     app.AddScript(0, "TestScript");
     //std::cout << "Initial script added" << std::endl;
 
+    // ------------------ CODE TO TEST FOR ASSETMANAGER - COMMENTED FOR NOW ------------------
+
+    //auto& AM = gam300::AssetManager::getInstance();
+
+    //gam300::AssetManager::Config cfg{};
+    //cfg.repoRoot = "";                 
+    //cfg.descriptorSidecar = false;     
+    //cfg.writeDescriptors = true;
+
+    //AM.setConfig(cfg);
+    //AM.startUp();
+    //AM.scanAndProcess();
+    //AM.shutDown();
+
+    // ---------------------------------------------------------------------------------------
+
     while (!GM.getGameOver() && !glfwWindowShouldClose(window)) {
         // Process events
         glfwPollEvents();
@@ -136,7 +152,6 @@ int main(void) {
             app.ReloadScripts();
             app.AddScript(0, "TestScript");  // Re-add script after reload
         }
-
         // Update all systems (including InputSystem)
         EM.updateSystems(GM.getFrameTime() / 1000.0f);
 
