@@ -181,7 +181,6 @@ namespace gam300 {
 		}
 	}
 
-#if 0
 	void AssetManager::scanAndProcess() {
 		// Iterate changes from the scanner and act on them
 		for (const auto& c : m_scanner.Scan()) {
@@ -203,40 +202,7 @@ namespace gam300 {
 		if (!m_cfg.databaseFile.empty())
 			m_db.Save(m_cfg.databaseFile);
 	}
-#endif
 
-	void AssetManager::scanAndProcess() {
-		std::cout << "=== SCAN AND PROCESS DEBUG ===" << std::endl;
-
-		auto changes = m_scanner.Scan();
-		std::cout << "Scanner found " << changes.size() << " changes:" << std::endl;
-
-		for (const auto& c : changes) {
-			std::cout << "  " << (c.kind == ScanChange::Kind::Added ? "ADDED" :
-				c.kind == ScanChange::Kind::Modified ? "MODIFIED" : "REMOVED")
-				<< ": " << c.sourcePath << std::endl;
-		}
-
-		// Process changes
-		for (const auto& c : changes) {
-			switch (c.kind) {
-			case ScanChange::Kind::Added:
-			case ScanChange::Kind::Modified:
-				std::cout << "Processing: " << c.sourcePath << std::endl;
-				handleAddedOrModified(c.sourcePath);
-				break;
-			case ScanChange::Kind::Removed:
-				handleRemoved(c.sourcePath);
-				break;
-			}
-		}
-
-		// Check if validateExistingDescriptors is being called
-		if (m_cfg.writeDescriptors) {
-			std::cout << "Calling validateExistingDescriptors..." << std::endl;
-			// validateExistingDescriptors(); // ? Is this line present?
-		}
-	}
 
 	const char* AssetManager::typeName(AssetType t) {
 		switch (t) {
