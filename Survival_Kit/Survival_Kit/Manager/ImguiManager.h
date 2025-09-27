@@ -25,11 +25,13 @@
 #include <fstream>
 #include <sstream>
 #include <filesystem>
-#include <GLFW/glfw3.h>
+//#include <GLFW/glfw3.h>
 
 // Include other necessary headers
 #include "../Component/Transform3D.h"
 #include "../Utility/Vector3D.h"
+#include "../Manager/GraphicsManager.h"
+
 
 #define IMGUIM gam300::ImguiManager::getInstance()
 
@@ -54,11 +56,17 @@ namespace gam300
 
 		// reference to the existing ECS Manger to access entitties
 		class ECSManager& ImguiEcsRef;
+		class GraphicsManager& ImguiGraphicRef;
+		int width = 0;
+		int height = 0;
+
+		bool fileWindow = false;
+		std::string shownFile{};
 		
 	
 	public:
 
-		ImguiManager(ECSManager& ecsManager);
+		ImguiManager(ECSManager& ecsManager, GraphicsManager& GFM);
 
 		ImguiManager(const ImguiManager&) = delete;
 
@@ -72,9 +80,9 @@ namespace gam300
 
 		void startImguiFrame();
 
-		void renderUi(unsigned int scrWidth, unsigned int scrHeight);
+		void renderViewport();
 
-		void displayTopMenuBar();
+		//void displayTopMenuBar();
 
 		void displayFileList(bool& fileWindow, std::string& shownFile);
 		//void displayFileList();
@@ -85,10 +93,27 @@ namespace gam300
 
 		void displayAssetsBrowserList();
 
+		void displayTopMenu();
+
 		void finishImguiRender(ImGuiIO& imgui_io);
 
 		void shutDown() override;
 
+		// to get the window size from main.cpp
+		Vector2D getWindowSize(GLFWwindow& window);
+		
+		// to retuen the width and height for imguiTex and imguiFbo
+		Vector2D getWindowWidthHeight() { return Vector2D(width, height); }
+
+		// template to add the remove component menu right beside collapsing menu
+		template<typename componentType>
+		void displayComponentMenu(EntityID entityID, const char* componentName);
+
+		template<typename componentType>
+		void displayComponentContent(EntityID selectedEntityID);
+
 	};
+
+
 } // end of namespace gam300
 #endif // LOF_IMGUI_MANAGER_h
