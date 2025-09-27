@@ -1,0 +1,21 @@
+{
+  "asset": {
+    "guid": "A9257058ECB30001",
+    "id": 12188271493778702337,
+    "sourcePath": "C:/Survival_Kit/Survival_Kit/Survival_Kit/Assets/Audio/sfx_jumping.wav",
+    "intermediatePath": "C:\\Survival_Kit\\Cache/Intermediate\\sfx_jumping.wav",
+    "compiledPath": "",
+    "type": 3,
+    "ext": ".wav",
+    "contentHash": "",
+    "lastWriteTime": 0,
+    "valid": true
+  },
+  "extras": {
+    "displayName": "sfx_jumping.wav",
+    "category": "Audio",
+    "tags": [],
+    "lastImported": 1759000792,
+    "user": {}
+  }
+}
