@@ -22,6 +22,7 @@
 #include "../Utility/Clock.h"
 #include "../Utility/AssetPath.h"
 #include "../System/MovementSystem.h"
+#include "../System/PhysicsSystem.h"
 #include "../Component/RigidBody.h"
 
 namespace gam300 {

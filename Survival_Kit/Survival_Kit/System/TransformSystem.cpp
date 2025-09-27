@@ -7,7 +7,7 @@
 namespace gam300 {
 
 	TransformSystem::TransformSystem() : ComponentSystem<Transform3D>("TransformSystem") {
-		set_priority(101);
+		set_priority(102);
 	}
 
 	bool TransformSystem::init(SystemManager&) {
