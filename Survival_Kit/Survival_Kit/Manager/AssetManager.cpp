@@ -1,6 +1,8 @@
 #include "AssetManager.h"
 #include <filesystem>
 
+#include <iostream>
+
 #include "../Utility/AssetPath.h" //for path management
 
 namespace fs = std::filesystem;
@@ -179,6 +181,7 @@ namespace gam300 {
 		}
 	}
 
+#if 0
 	void AssetManager::scanAndProcess() {
 		// Iterate changes from the scanner and act on them
 		for (const auto& c : m_scanner.Scan()) {
@@ -200,6 +203,40 @@ namespace gam300 {
 		if (!m_cfg.databaseFile.empty())
 			m_db.Save(m_cfg.databaseFile);
 	}
+#endif
+
+	void AssetManager::scanAndProcess() {
+		std::cout << "=== SCAN AND PROCESS DEBUG ===" << std::endl;
+
+		auto changes = m_scanner.Scan();
+		std::cout << "Scanner found " << changes.size() << " changes:" << std::endl;
+
+		for (const auto& c : changes) {
+			std::cout << "  " << (c.kind == ScanChange::Kind::Added ? "ADDED" :
+				c.kind == ScanChange::Kind::Modified ? "MODIFIED" : "REMOVED")
+				<< ": " << c.sourcePath << std::endl;
+		}
+
+		// Process changes
+		for (const auto& c : changes) {
+			switch (c.kind) {
+			case ScanChange::Kind::Added:
+			case ScanChange::Kind::Modified:
+				std::cout << "Processing: " << c.sourcePath << std::endl;
+				handleAddedOrModified(c.sourcePath);
+				break;
+			case ScanChange::Kind::Removed:
+				handleRemoved(c.sourcePath);
+				break;
+			}
+		}
+
+		// Check if validateExistingDescriptors is being called
+		if (m_cfg.writeDescriptors) {
+			std::cout << "Calling validateExistingDescriptors..." << std::endl;
+			// validateExistingDescriptors(); // ? Is this line present?
+		}
+	}
 
 	const char* AssetManager::typeName(AssetType t) {
 		switch (t) {
@@ -213,31 +250,25 @@ namespace gam300 {
 		}
 	}
 
-	// NEW METHOD: Check if descriptors exist for all database entries
 	void AssetManager::validateExistingDescriptors() {
 		auto records = m_db.AllMutable();
-
 		for (auto* rec : records) {
 			if (!rec || !rec->valid) continue;
 
-			// Check if descriptor file exists
-			DescriptorExtras extras;
-			extras.displayName = fs::path(rec->sourcePath).filename().string();
-			extras.category = typeName(rec->type);
-			extras.lastImported = std::time(nullptr);
-
-			std::string expectedDescriptorPath;
-			if (!m_descGen.GenerateFor(*rec, &extras, &expectedDescriptorPath)) {
-				// Descriptor generation failed - this shouldn't happen
-				continue;
-			}
+			// Get the expected path WITHOUT generating the file
+			std::string expectedDescriptorPath = m_descGen.DefaultDescPathForRecord(*rec);
 
 			// Check if the descriptor file actually exists
 			if (!fs::exists(expectedDescriptorPath)) {
 				LM.writeLog("AssetManager - Missing descriptor for %s, regenerating...",
 					rec->sourcePath.c_str());
 
-				// Regenerate the missing descriptor
+				// Only NOW generate the missing descriptor
+				DescriptorExtras extras;
+				extras.displayName = fs::path(rec->sourcePath).filename().string();
+				extras.category = typeName(rec->type);
+				extras.lastImported = std::time(nullptr);
+
 				m_descGen.GenerateFor(*rec, &extras);
 			}
 		}
