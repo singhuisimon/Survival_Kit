@@ -158,7 +158,7 @@ namespace gam300 {
                                 //std::cout << "WARNING: Failed to load default scene from displayFileList" << std::endl;
                             }
 
-                            shownFile = getAssetFilePath("Scene/GameB.scn");
+                            shownFile = getAssetFilePath("Scene/Game.scn");
                         }
                         //if (SEB.loadScene(sceneFiles[i].second))
                         //{
