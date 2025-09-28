@@ -51,6 +51,10 @@ namespace gam300 {
          */
         void process_entity(EntityID entity_id) override;
 
+        void handleDynamic(Transform3D* transform, RigidBody* rigidBody);
+        void handleKinematic(Transform3D* transform, RigidBody* rigidBody);
+        Vector3D getMovementInput();
+
     private:
         float m_dt = 0; 
     };
