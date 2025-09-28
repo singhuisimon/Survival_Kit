@@ -125,6 +125,8 @@ namespace gam300 {
         // Register the Movement component with the ComponetManager
         SM.register_system<MovementSystem>();
 
+        SM.register_system<PhysicsSystem>();
+
         //// Create a test entity with Transform3D component for demonstration
         //Entity& testEntity = EM.createEntity("TestEntity");
         //Vector3D position(0.0f, 0.0f, 0.0f);
