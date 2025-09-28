@@ -118,17 +118,24 @@ int main(void) {
 
     // ------------------ CODE TO TEST FOR ASSETMANAGER - COMMENTED FOR NOW ------------------
 
-    //auto& AM = gam300::AssetManager::getInstance();
+    //another sample
+    auto& AM = gam300::AssetManager::getInstance();
 
-    //gam300::AssetManager::Config cfg{};
-    //cfg.repoRoot = "";                 
-    //cfg.descriptorSidecar = false;     
-    //cfg.writeDescriptors = true;
+    gam300::AssetManager::Config cfg;
+    cfg.sourceRoots = { "C:\\Digipen\\Survival_Kit\\Survival_Kit\\Survival_Kit\\Assets" };
+    cfg.intermediateDirectory = "Cache/Intermediate";
+    cfg.databaseFile = "Cache/assetdb.txt";
+    cfg.snapshotFile = "Cache/scan.snapshot";
+    cfg.writeDescriptors = true;        // <-- make descriptors
+    cfg.descriptorSidecar = false;      // true = next to source, false = central Descriptors/
+    cfg.descriptorRoot = "Assets/Descriptors"; // used when sidecar=false
 
-    //AM.setConfig(cfg);
-    //AM.startUp();
-    //AM.scanAndProcess();
-    //AM.shutDown();
+
+
+    AM.setConfig(cfg);
+    AM.startUp();            // loads DB/snapshot, registers importers, sets up generator
+    AM.scanAndProcess();     // scans changes, imports, writes Descriptor.txt files
+    AM.shutDown();           // saves DB and snapshot
 
     // ---------------------------------------------------------------------------------------
 
