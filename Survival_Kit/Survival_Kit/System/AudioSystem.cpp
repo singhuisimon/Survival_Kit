@@ -26,30 +26,74 @@ namespace gam300 {
 	}
 
 	bool AudioSystem::init(SystemManager& /*system_manager*/) {
+		LM.writeLog("AudioSystem::init() - Compiled against FMOD version: %08x", FMOD_VERSION);
 
-		//Create FMOD systems
-		if (FMOD::Studio::System::create(&m_studiosystem) != FMOD_OK) {
-			//LM write log
+		// Create Core system first
+		FMOD_RESULT result = FMOD::System_Create(&m_coresystem);
+		if (result != FMOD_OK) {
+			LM.writeLog("AudioSystem::init() - Failed to create Core system: %s", FMOD_ErrorString(result));
 			return false;
 		}
 
-		if (m_studiosystem->initialize(512, FMOD_STUDIO_INIT_NORMAL, FMOD_INIT_NORMAL, nullptr) != FMOD_OK) {
+		// Initialize Core system
+		result = m_coresystem->init(512, FMOD_INIT_NORMAL, 0);
+		if (result != FMOD_OK) {
+			LM.writeLog("AudioSystem::init() - Failed to initialize Core system: %s", FMOD_ErrorString(result));
+			m_coresystem->release();
+			m_coresystem = nullptr;
 			return false;
 		}
 
-		if (m_studiosystem->getCoreSystem(&m_coresystem) != FMOD_OK) {
+		// Verify Core system is working
+		unsigned int core_version = 0;
+		result = m_coresystem->getVersion(&core_version);
+		if (result != FMOD_OK) {
+			LM.writeLog("AudioSystem::init() - Core system version check failed: %s", FMOD_ErrorString(result));
+			m_coresystem->release();
+			m_coresystem = nullptr;
+			return false;
+		}
+		LM.writeLog("AudioSystem::init() - Core system version: %08x", core_version);
+
+		// Create SFX channel group
+		result = m_coresystem->createChannelGroup("SFXGroup", &m_sfxgroup);
+		if (result != FMOD_OK) {
+			LM.writeLog("AudioSystem::init() - Failed to create SFX channel group: %s", FMOD_ErrorString(result));
+			m_coresystem->release();
+			m_coresystem = nullptr;
 			return false;
 		}
 
-		if(m_coresystem->createChannelGroup("SFXGroup", &m_sfxgroup) != FMOD_OK) {
+		// Create Studio system
+		result = FMOD::Studio::System::create(&m_studiosystem);
+		if (result != FMOD_OK) {
+			LM.writeLog("AudioSystem::init() - Failed to create Studio system: %s", FMOD_ErrorString(result));
+			// Cleanup Core system
+			if (m_sfxgroup) {
+				m_sfxgroup = nullptr; // Channel groups are released automatically with Core system
+			}
+			m_coresystem->release();
+			m_coresystem = nullptr;
 			return false;
 		}
 
-		//for testing rn
-		//Entity test = EM.createEntity("sound");
-		//AudioComponent* audio = EM.addComponent<AudioComponent>(test.get_id(), "Audio\\sfx_jumping.wav", AudioType::SFX, 1.0, 1.0, false);
+		// Initialize Studio system
+		result = m_studiosystem->initialize(512, FMOD_STUDIO_INIT_NORMAL, FMOD_INIT_NORMAL, nullptr);
+		if (result != FMOD_OK) {
+			LM.writeLog("AudioSystem::init() - Failed to initialize Studio system: %s", FMOD_ErrorString(result));
+			// Cleanup both systems
+			m_studiosystem->release();
+			m_studiosystem = nullptr;
+			if (m_sfxgroup) {
+				m_sfxgroup = nullptr;
+			}
+			m_coresystem->release();
+			m_coresystem = nullptr;
+			return false;
+		}
 
-		LM.writeLog("AudioSystem::init() - Audio System Initialized");
+		LM.writeLog("AudioSystem::init() - Audio System Initialized successfully");
+		LM.writeLog("AudioSystem::init() - Core system: %p, Studio system: %p", (void*)m_coresystem, (void*)m_studiosystem);
 		return true;
 	}
 
@@ -58,76 +102,52 @@ namespace gam300 {
 
 		//LM.writeLog("AudioSystem::update() - Updating Audio System");
 
-		//if (IM.isKeyJustReleased(GLFW_KEY_P)) {
-		//	LM.writeLog("AudioSystem::update() - Play sound on Cube release");
-		//	Entity* retrievecube = EM.getEntityByName("Cube");
-		//	if (retrievecube) {
-		//		if(retrievecube->has_component(get_component_type_id<AudioComponent>())) {
-		//			AudioComponent* audio = EM.getComponent<AudioComponent>(retrievecube->get_id());
-		//			if (audio) {
-		//				audio->setPlayState(PlayState::PLAY);
-		//			}
-		//		}
-		//	}
-		//}
+		if (IM.isKeyJustReleased(GLFW_KEY_P)) {
+			LM.writeLog("AudioSystem::update() - Play sound on Cube release");
+			/*Entity* retrievecube = EM.getEntityByName("Cube");
+			if (retrievecube) {
+				if(retrievecube->has_component(get_component_type_id<AudioComponent>())) {
+					AudioComponent* audio = EM.getComponent<AudioComponent>(retrievecube->get_id());
+					if (audio) {
+						audio->setPlayState(PlayState::PLAY);
+					}
+				}
+			}*/
+		}
 
-		//if (IM.isKeyJustPressed(GLFW_KEY_P)) {
-		//	LM.writeLog("AudioSystem::update() - Play sound on Cube just press");
-		//	Entity* retrievecube = EM.getEntityByName("Cube");
-		//	if (retrievecube) {
-		//		if (retrievecube->has_component(get_component_type_id<AudioComponent>())) {
-		//			AudioComponent* audio = EM.getComponent<AudioComponent>(retrievecube->get_id());
-		//			if (audio) {
-		//				audio->setPlayState(PlayState::PLAY);
-		//			}
-		//		}
-		//	}
-		//}
+		if (IM.isKeyJustPressed(GLFW_KEY_P)) {
+			LM.writeLog("AudioSystem::update() - Play sound on Cube just press");
+			/*Entity* retrievecube = EM.getEntityByName("Cube");
+			if (retrievecube) {
+				if (retrievecube->has_component(get_component_type_id<AudioComponent>())) {
+					AudioComponent* audio = EM.getComponent<AudioComponent>(retrievecube->get_id());
+					if (audio) {
+						audio->setPlayState(PlayState::PLAY);
+					}
+				}
+			}*/
+		}
 
 		//for testing rn
-		//if (IM.isKeyPressed(GLFW_KEY_P)){//} && !m_p_pressed) {
-		//	LM.writeLog("AudioSystem::update() - Play sound when p pressed");
-		//	Entity* sound = EM.getEntityByName("sound");
-		//	if (sound) {
-		//		if (sound->has_component(get_component_type_id<AudioComponent>())) {
-		//			AudioComponent* audio = EM.getComponent<AudioComponent>(sound->get_id());
-		//			if (audio) {
-		//				audio->setPlayState(PlayState::PLAY);
-		//			}
-		//		}
-		//	}
-		//	m_p_pressed = true;
-		//}
+		if (IM.isKeyPressed(GLFW_KEY_P)){//} && !m_p_pressed) {
+			LM.writeLog("AudioSystem::update() - Play sound when p pressed");
+			/*Entity* sound = EM.getEntityByName("sound");
+			if (sound) {
+				if (sound->has_component(get_component_type_id<AudioComponent>())) {
+					AudioComponent* audio = EM.getComponent<AudioComponent>(sound->get_id());
+					if (audio) {
+						audio->setPlayState(PlayState::PLAY);
+					}
+				}
+			}
+			m_p_pressed = true;*/
+		}
 
 		//Iterate through all entities with AudioComponent
 		auto entities = EM.getEntitiesWithComponent<AudioComponent>();
 		for (EntityID id : entities) {
 			
 			process_entity(id);
-			
-			//AudioComponent* audio = EM.getComponent<AudioComponent>(id);
-			//if (!audio) {
-			//	continue;
-			//}
-
-			//switch (audio->getPlayState()) {
-			//	case PlayState::PLAY:
-			//		playSound(id, audio);
-			//		break;
-			//	case PlayState::PAUSE:
-			//		pauseSound(id, true);
-			//		break;
-			//	case PlayState::STOP:
-			//		stopSound(id);
-			//		break;
-			//}
-
-			//auto channel_it = m_activechannels.find(id);
-			//if(channel_it != m_activechannels.end() && channel_it->second) {
-			//	// Update volume and pitch in case they changed
-			//	channel_it->second->setVolume(audio->getVolume());
-			//	channel_it->second->setPitch(audio->getPitch());
-			//}
 
 		}
 
@@ -135,16 +155,26 @@ namespace gam300 {
 		cleanupInactiveEvents();
 		updateVolumes();
 
-		if (m_studiosystem) {
-			m_studiosystem->update();
-		}
-
 		if (m_coresystem) {
 			m_coresystem->update();
+		}
+
+		if (m_studiosystem) {
+			m_studiosystem->update();
 		}
 	}
 
 	void AudioSystem::shutdown() {
+
+		// Stop and release all active events
+		for(auto& pair : m_activeevents) {
+			if (pair.second) {
+				pair.second->stop(FMOD_STUDIO_STOP_IMMEDIATE);
+				pair.second->release();
+			}
+		}
+
+		m_activeevents.clear();
 
 		// Stop and release all active channels
 		for(auto& pair : m_activechannels) {
@@ -164,6 +194,7 @@ namespace gam300 {
 
 		m_loadedsounds.clear();
 
+		//Unload all loaded banks
 		for (auto& pair : m_loadedbanks) {
 			if (pair.second) {
 				pair.second->unload();
@@ -171,18 +202,25 @@ namespace gam300 {
 		}
 
 		m_loadedbanks.clear();
+
 		m_eventdes.clear();
-		m_activeevents.clear();
 		m_buses.clear();
 
 		if (m_studiosystem) {
 			m_studiosystem->unloadAll();
 			m_studiosystem->release();
 			m_studiosystem = nullptr;
+			LM.writeLog("AudioSystem::shutdown() - Studio system released");
 		}
 
-		m_coresystem = nullptr;
 		m_sfxgroup = nullptr;
+
+		if(m_coresystem){
+			m_coresystem->close();
+			m_coresystem->release();
+			m_coresystem = nullptr;
+			LM.writeLog("AudioSystem::shutdown() - Core system released");
+		}
 
 		LM.writeLog("AudioSystem::shutdown() - Audio System shut down");
 	}
@@ -285,7 +323,7 @@ namespace gam300 {
 			return;
 		}
 
-		if(m_coresystem->playSound(sound, group, false, &channel) == FMOD_OK) {
+		if (m_coresystem && m_coresystem->playSound(sound, group, false, &channel) == FMOD_OK) {
 			if (channel) {
 				channel->setVolume(audio->getVolume());
 				channel->setPitch(audio->getPitch());
@@ -314,6 +352,11 @@ namespace gam300 {
 	}
 
 	bool AudioSystem::playEvent(EntityID id, const std::string& eventpath) {
+
+		if (!m_studiosystem) {
+			LM.writeLog("AudioSystem::playEvent() - Studio system not initialized");
+			return false;
+		}
 
 		auto it = m_eventdes.find(eventpath);
 		if (it == m_eventdes.end()) {
