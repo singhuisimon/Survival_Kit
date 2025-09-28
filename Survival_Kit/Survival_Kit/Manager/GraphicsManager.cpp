@@ -82,7 +82,13 @@ namespace gam300 {
         }
 
         // Set camera as orbiting
-        main_camera = Camera3D(ORBITING, glm::vec3(0.0f, 5.0f, 5.0f), glm::vec3(0.f, 0.f, 0.0f), 45.0f, 0.5f, 100.0f);
+        main_camera = Camera3D(ORBITING, glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.f, 0.f, 0.0f), 45.0f, 0.5f, 100.0f);
+
+        // Set light
+        main_light = Light(glm::vec3(0.0f, 5.0f, 0.0f),
+            glm::vec3(0.4f, 0.4f, 0.4f),
+            glm::vec3(1.0f, 1.0f, 1.0f),
+            glm::vec3(1.0f, 1.0f, 1.0f));
 
         //// File path for assets
         //std::string mesh_path = ASM.get_full_path(ASM.MODEL_PATH, DEFAULT_MODEL_MSH_FILE);
@@ -130,8 +136,8 @@ namespace gam300 {
         MeshGL   planeGL = Shape::upload_mesh_data(planeData);
         MeshGL   sphereGL = Shape::upload_mesh_data(sphereData);
 
-        //meshStorage.push_back(std::move(cubeGL));
-        //meshStorage.push_back(std::move(planeGL));
+        meshStorage.push_back(std::move(cubeGL));
+        meshStorage.push_back(std::move(planeGL));
         meshStorage.push_back(std::move(sphereGL));
 
 
@@ -168,50 +174,25 @@ namespace gam300 {
         -
         */
 
-        auto x = glm::angleAxis(glm::radians(0.0f), glm::vec3(0, 0, 1));
-        auto y = glm::angleAxis(glm::radians(0.0f), glm::vec3(0, 1, 0));
-
-        auto xy = x * y;
-
-        // Calculate the model to world transform
-        glm::mat4 scale_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-        glm::mat4 rot_matrix = glm::toMat4(xy);
-        glm::mat4 trans_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.f, 0.f));
-
-        glm::mat4 TRS = trans_matrix * rot_matrix * scale_matrix;
-
-        Transform3D transform;
-
-        transform.setPosition(Vector3D(0.0f, 0.0f, 0.0f));
-        transform.setScale(Vector3D(1.0f, 1.0f, 1.0f)); // Don't set any values to 0
-        transform.setRotation(Vector3D(0.0f, 0.0f, 0.0f));
-
-        shadersStorage[0].programUse();
-
-        // Temporary transformations for camera
-        shadersStorage[0].setUniform("M", transform.getTransformationMatrix()); // Model transform
-        shadersStorage[0].setUniform("V", main_camera.getLookAt()); // View transform
-        shadersStorage[0].setUniform("P", main_camera.getPerspective()); // Perspective transform
-
         // Temporary input for cursor to move camera
         if (IM.isKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
-            std::cout << IM.getMouseDeltaX() << std::endl;
-            main_camera.cameraOnCursor(IM.getMouseDeltaX(), IM.getMouseDeltaY(), &shadersStorage[0]);
-        }
-        // MOUSE: Camera control with left mouse button held down
-        if (IM.isMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT)) {
-            double mouseDeltaX = IM.getMouseDeltaX();
-            double mouseDeltaY = IM.getMouseDeltaY();
 
-            if (std::abs(mouseDeltaX) > 0.1 || std::abs(mouseDeltaY) > 0.1) {
-                // INCREASE SENSITIVITY
-                float extraSensitivity = 500.0f;
+            // MOUSE: Camera control with left mouse button held down
+            if (IM.isMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT)) {
+                double mouseDeltaX = IM.getMouseDeltaX();
+                double mouseDeltaY = IM.getMouseDeltaY();
 
-                main_camera.cameraOnCursor(mouseDeltaX * extraSensitivity,
-                    mouseDeltaY * extraSensitivity,
-                    &shadersStorage[0]);
+                if (std::abs(mouseDeltaX) > 0.1 || std::abs(mouseDeltaY) > 0.1) {
+                    // INCREASE SENSITIVITY
+                    float extraSensitivity = 500.0f;
+
+                    main_camera.cameraOnCursor(mouseDeltaX * extraSensitivity,
+                        mouseDeltaY * extraSensitivity,
+                        &shadersStorage[0]);
+                }
             }
         }
+
 
         // KEYBOARD: Camera control with arrow keys
         float keyboardSensitivity = 8.0f; // Adjust this value for keyboard speed
@@ -241,6 +222,14 @@ namespace gam300 {
             main_camera.cameraOnCursor(keyDeltaX, keyDeltaY, &shadersStorage[0]);
         }
 
+        // Set up shader program
+        shadersStorage[0].programUse();
+
+        // Temporary transformations for camera
+        //shadersStorage[0].setUniform("M", transform.getTransformationMatrix()); // Model transform
+        shadersStorage[0].setUniform("V", main_camera.getLookAt()); // View transform
+        shadersStorage[0].setUniform("P", main_camera.getPerspective()); // Perspective transform
+
         // Set uniform to shader after update light values
         shadersStorage[0].setUniform("light.position", main_light.getLightPos());  // Position
         shadersStorage[0].setUniform("light.La", main_light.getLightAmbient());        // Ambient
@@ -262,14 +251,38 @@ namespace gam300 {
         // Clear the color and depth buffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // temporary comment for the imgui
 
-        for (auto const& mesh : meshStorage) {
+        // Enable choosing of mesh
+        if (IM.isKeyPressed(GLFW_KEY_1)) {
+            selected_mesh = 0;
+        }
+        if (IM.isKeyPressed(GLFW_KEY_2)) {
+            selected_mesh = 1;
+        }
+        if (IM.isKeyPressed(GLFW_KEY_3)) {
+            selected_mesh = 2;
+        }
 
+        const MeshGL& mesh = meshStorage[selected_mesh];
+
+        // KENNY TESTING: ACCESSING ENTITIES AND UPDATING THEIR TRANSFORMS PER FRAME     
+        const auto transform_entities_IDs = EM.getEntitiesWithComponent<Transform3D>();
+        for (const auto transform_ID : transform_entities_IDs) {
+
+            // Get entity's transform component using ID
+            if (EM.hasComponent<Transform3D>(transform_ID)) { // Extra check just in case 
+                Transform3D* transform = EM.getComponent<Transform3D>(transform_ID);
+                shadersStorage[0].setUniform("M", transform->getTransformationMatrix()); // Model transform
+            }
+
+            // Bind selected mesh
             mesh.vao.bind();
 
             // Draw the actual object
             glDrawElements(mesh.primitive_type, mesh.draw_count, mesh.index_type, NULL);
 
+            // Unbind mesh
             glBindVertexArray(0);
+
         }
 
         shadersStorage[0].programFree();

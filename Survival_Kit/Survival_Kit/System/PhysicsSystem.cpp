@@ -7,12 +7,25 @@
 namespace gam300 {
 
 	PhysicsSystem::PhysicsSystem() : ComponentSystem<RigidBody>("PhysicsSystem"), PhysicsEcsRef(EM) {
-		//set_priority(101);
+		set_priority(101);
 	}
 
 	bool PhysicsSystem::init(SystemManager&) {
 
-		//Find a way to register the system
+		JPH::RegisterDefaultAllocator();
+		JPH::Factory::sInstance = new JPH::Factory();
+		JPH::RegisterTypes();
+
+		tempAllocator = new JPH::TempAllocatorImpl(10 * 1024 * 1024);
+		jobSystem = new JPH::JobSystemThreadPool(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers, 4);
+
+		// Create simple implementations
+		auto* bpInterface = new SimpleBroadPhaseLayerInterface();
+		auto* objVsBpFilter = new SimpleObjectVsBroadPhaseLayerFilter();
+		auto* objPairFilter = new SimpleObjectLayerPairFilter();
+
+		joltPhysics = new JPH::PhysicsSystem();
+		joltPhysics->Init(1024, 0, 1024, 1024, *bpInterface, *objVsBpFilter, *objPairFilter);
 
 		LM.writeLog("PhysicsSystem::init() - Physics System Initialized");
 		return true;
@@ -20,11 +33,27 @@ namespace gam300 {
 
 	void PhysicsSystem::update(float dt) {
 
-		(void)dt;
+		/*(void)dt;
 
 		for (EntityID entity_id : m_entities) {
 			process_entity(entity_id, dt);
+		}*/
+
+		
+		joltPhysics->Update(dt, 1, tempAllocator, jobSystem);
+
+		for (EntityID entity_id : m_entities) {
+			if (PhysicsEcsRef.hasComponent<RigidBody>(entity_id)) {
+				Transform3D* transform = PhysicsEcsRef.getComponent<Transform3D>(entity_id);
+				RigidBody* rb = PhysicsEcsRef.getComponent<RigidBody>(entity_id);
+
+				if (rb != nullptr && rb->getRigidBodyType() != BodyType::STATIC) {
+					Vector3D pos = rb->getPosition();
+					transform->setPosition(pos);
+				}
+			}
 		}
+		
 	}
 
 	void PhysicsSystem::shutdown() {
@@ -36,9 +65,9 @@ namespace gam300 {
 			Transform3D* transform = PhysicsEcsRef.getComponent<Transform3D>(entity_id);
 			RigidBody* rigidBody = PhysicsEcsRef.getComponent<RigidBody>(entity_id);
 
-			rigidBody->clearAccumulators();
+			/*rigidBody->clearAccumulators();
 			rigidBody->integrateForces(dt);
-			rigidBody->integrateVelocity(*transform, dt);
+			rigidBody->integrateVelocity(*transform, dt);*/
 		}
 	}
 
