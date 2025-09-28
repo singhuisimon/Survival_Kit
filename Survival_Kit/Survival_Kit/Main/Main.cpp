@@ -116,7 +116,25 @@ int main(void) {
     app.AddScript(0, "TestScript");
     //std::cout << "Initial script added" << std::endl;
 
-    while (!GM.getGameOver() && !glfwWindowShouldClose(window)) {
+    // -------------------------Set up Asset Manager ------------------------------------------
+
+    //this creates the default configuration for the asset manager to know the asset filepath and such
+    gam300::AssetManager::Config cfg = AM.createDefaultConfig();
+
+    AM.setConfig(cfg);
+    AM.startUp();
+
+    AM.scanAndProcess();
+
+    std::cout << "\nFinal database count: " << AM.db().Count() << std::endl;
+
+    AM.shutDown();
+
+    // ---------------------------------------------------------------------------------------
+
+
+       while (!GM.getGameOver() && !glfwWindowShouldClose(window)) {
+
         // Update input system
         IM.update();
 
@@ -129,7 +147,6 @@ int main(void) {
             app.ReloadScripts();
             app.AddScript(0, "TestScript");  // Re-add script after reload
         }
-
         // Update all systems (including InputSystem)
         EM.updateSystems(GM.getFrameTime() / 1000.0f);
 
