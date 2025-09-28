@@ -1,0 +1,21 @@
+{
+  "asset": {
+    "guid": "487F785927410013",
+    "id": 5224026417079058451,
+    "sourcePath": "C:/Digipen/Survival_Kit/Survival_Kit/Survival_Kit/Assets/Shaders/survival_kit_obj.vert",
+    "intermediatePath": "C:\\Digipen\\Survival_Kit\\Cache/Intermediate\\survival_kit_obj.vert",
+    "compiledPath": "",
+    "type": 1,
+    "ext": ".vert",
+    "contentHash": "",
+    "lastWriteTime": 0,
+    "valid": true
+  },
+  "extras": {
+    "displayName": "survival_kit_obj.vert",
+    "category": "Shader",
+    "tags": [],
+    "lastImported": 1759060612,
+    "user": {}
+  }
+}

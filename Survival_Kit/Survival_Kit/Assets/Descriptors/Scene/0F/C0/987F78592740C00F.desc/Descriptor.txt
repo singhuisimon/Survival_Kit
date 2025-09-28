@@ -1,0 +1,21 @@
+{
+  "asset": {
+    "guid": "987F78592740C00F",
+    "id": 10988633940113276943,
+    "sourcePath": "C:/Digipen/Survival_Kit/Survival_Kit/Survival_Kit/Assets/Scene/GameB.scn",
+    "intermediatePath": "C:\\Digipen\\Survival_Kit\\Cache/Intermediate\\GameB.scn",
+    "compiledPath": "",
+    "type": 6,
+    "ext": ".scn",
+    "contentHash": "",
+    "lastWriteTime": 0,
+    "valid": true
+  },
+  "extras": {
+    "displayName": "GameB.scn",
+    "category": "Scene",
+    "tags": [],
+    "lastImported": 1759060611,
+    "user": {}
+  }
+}

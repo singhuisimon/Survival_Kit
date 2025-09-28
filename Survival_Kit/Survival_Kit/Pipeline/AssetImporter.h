@@ -25,18 +25,6 @@ namespace gam300 {
 	};
 
 	/**
-	* @brief To be added in the Descriptor file as Texture settings
-	*/
-	struct TextureSettings {
-		std::string usageType;
-		std::string compression;
-		float quality = 1.0f;
-		bool generateMipmaps = false;
-		bool srgb = false;
-		std::vector<std::string> inputFiles;
-	};
-
-	/**
 	* @brief Result of a single import operation.
 	*/
 	struct ImportResult {
