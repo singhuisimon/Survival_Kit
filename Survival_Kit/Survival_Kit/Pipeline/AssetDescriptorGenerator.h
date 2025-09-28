@@ -37,6 +37,8 @@ namespace gam300 {
 		bool generateMipmaps = false;
 		bool srgb = false;
 		std::vector<std::string> inputFiles;
+
+	
 	};
 
 	/**

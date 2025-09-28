@@ -20,6 +20,10 @@
 //asset path
 #include "../Utility/AssetPath.h"
 
+
+//define acronnym for easier access 
+#define AM gam300::AssetManager::getInstance()
+
 namespace gam300 {
 
 	/**
@@ -60,6 +64,39 @@ namespace gam300 {
 			std::string repoRoot; //!< Base path to resolve relative asset paths
 		};
 
+		/**
+		* @brief Create default configuration for the project
+		* @return Configured AssetManager::Config with sensible defaults
+		*/
+		static Config createDefaultConfig() {
+			Config cfg{};
+
+			std::string assetsPath = getAssetsPath();
+
+			// Source directories to scan
+			cfg.sourceRoots = {
+				assetsPath + "Audio",
+				assetsPath + "Textures",
+				assetsPath + "Scene",
+				assetsPath + "Shaders"
+			};
+
+			// Descriptor configuration
+			cfg.descriptorRoot = assetsPath + "Descriptors";
+			cfg.descriptorSidecar = false;
+			cfg.writeDescriptors = true;
+
+			// Ignore patterns to prevent infinite loops
+			cfg.ignoreSubstrings = {
+				"/Descriptors/", "\\Descriptors\\",   // Don't scan descriptor output
+				"/Cache/", "\\Cache\\",               // Don't scan cache folders
+				".desc/", ".desc\\",                  // Don't scan .desc directories
+				"Descriptor.txt"                      // Don't scan descriptor files
+			};
+
+			return cfg;
+		}
+
 		/** Apply configuration before startUp() */
 		void setConfig(const Config& cfg);
 
@@ -80,6 +117,9 @@ namespace gam300 {
 		AssetImporterRegistry& importers() { return m_importers; }
 		const Config& config() const { return m_cfg; }
 
+
+		//--------------Validating Descriptors ----------
+		void validateExistingDescriptors();
 	private:
 
 		void handleAddedOrModified(const std::string& src);

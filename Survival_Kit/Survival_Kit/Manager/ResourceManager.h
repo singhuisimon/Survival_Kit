@@ -18,7 +18,7 @@
 #include <fstream>
 
 //define acronym for easier access
-#define RM gam300::ResourceManager::getInstance();
+#define RM gam300::ResourceManager::getInstance()
 
 namespace gam300 {
 

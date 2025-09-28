@@ -1,6 +1,8 @@
 #include "AssetManager.h"
 #include <filesystem>
 
+#include <iostream>
+
 #include "../Utility/AssetPath.h" //for path management
 
 namespace fs = std::filesystem;
@@ -166,18 +168,18 @@ namespace gam300 {
 			x.category = typeName(rec->type);
 			x.lastImported = std::time(nullptr);
 
-
 			//ADDED 
 			//If this is a texture and the importer provided settings,
 			if (rec->type == AssetType::Texture && r.textureSettings.has_value()) {
 				const auto& ts = *r.textureSettings;
-				x.usageType = ts.usageType;       
-				x.compression = ts.compression;      
-				x.quality = ts.quality;          
-				x.generateMipmaps = ts.generateMipmaps;  
-				x.srgb = ts.srgb;            
-				x.inputFiles = ts.inputFiles;       
+				x.usageType = ts.usageType;
+				x.compression = ts.compression;
+				x.quality = ts.quality;
+				x.generateMipmaps = ts.generateMipmaps;
+				x.srgb = ts.srgb;
+				x.inputFiles = ts.inputFiles;
 			}
+
 
 			m_descGen.GenerateFor(*rec, &x);
 		}
@@ -206,11 +208,16 @@ namespace gam300 {
 			}
 		}
 
+		////NEW to check for missing descriptors of unchanged files 
+		//if (m_cfg.writeDescriptors) {
+		//	validateExistingDescriptors();
+		//}
 
 		// Persist after a pass (cheap for small DBs; adjust cadence if needed)
 		if (!m_cfg.databaseFile.empty())
 			m_db.Save(m_cfg.databaseFile);
 	}
+
 
 	const char* AssetManager::typeName(AssetType t) {
 		switch (t) {
@@ -221,6 +228,30 @@ namespace gam300 {
 		case AssetType::Material: return "Material";
 		case AssetType::Scene: return "Scene";
 		default: return "Unknown";
+		}
+	}
+
+	void AssetManager::validateExistingDescriptors() {
+		auto records = m_db.AllMutable();
+		for (auto* rec : records) {
+			if (!rec || !rec->valid) continue;
+
+			// Get the expected path WITHOUT generating the file
+			std::string expectedDescriptorPath = m_descGen.DefaultDescPathForRecord(*rec);
+
+			// Check if the descriptor file actually exists
+			if (!fs::exists(expectedDescriptorPath)) {
+				LM.writeLog("AssetManager - Missing descriptor for %s, regenerating...",
+					rec->sourcePath.c_str());
+
+				// Only NOW generate the missing descriptor
+				DescriptorExtras extras;
+				extras.displayName = fs::path(rec->sourcePath).filename().string();
+				extras.category = typeName(rec->type);
+				extras.lastImported = std::time(nullptr);
+
+				m_descGen.GenerateFor(*rec, &extras);
+			}
 		}
 	}
 

@@ -21,6 +21,9 @@
 #include <iostream>
 #include "LogManager.h"
 
+// For accessing entities
+#include "ECSManager.h"
+
 // To support graphical operations
 #include "../Utility/Constant.h"
 #include "../Graphics/ShaderProgram.h"
@@ -30,7 +33,7 @@
 #include "../Graphics/Framebuffer.h" 
 
 // For IMGUI operations
-#include "../Manager/ImguiManager.h"
+#include "ImguiManager.h"
 
 // KENNY TESTING: For testing cursor input
 #include "InputManager.h"
@@ -69,10 +72,12 @@ namespace gam300 {
         // Main light
         Light main_light;
 
-
-        // KENNY TESTING
-        GLuint /*imguiFbo{ 0 },*/ imguiTex{ 0 };
+        // Framebuffer object and texture for IMGUI
+        GLuint imguiTex{ 0 };
         std::optional<FrameBuffer> imgui_fbo; 
+
+        // Mesh selection
+        int selected_mesh{ 0 };
 
     public:
         /**

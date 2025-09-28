@@ -25,6 +25,18 @@ namespace gam300 {
 	};
 
 	/**
+	* @brief To be added in the Descriptor file as Texture settings
+	*/
+	struct TextureSettings {
+		std::string usageType;
+		std::string compression;
+		float quality = 1.0f;
+		bool generateMipmaps = false;
+		bool srgb = false;
+		std::vector<std::string> inputFiles;
+	};
+
+	/**
 	* @brief Result of a single import operation.
 	*/
 	struct ImportResult {
@@ -33,8 +45,8 @@ namespace gam300 {
 		AssetType type = AssetType::Unknown; //!< Classified asset type
 		std::string contentHash; //!< Optional content hash (hex)
 		std::string error; //!< Short error message when ok==false
-
 		std::optional<TextureSettings> textureSettings; //ADDED
+	
 	};
 
 

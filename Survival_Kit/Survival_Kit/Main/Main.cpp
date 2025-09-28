@@ -116,30 +116,25 @@ int main(void) {
     app.AddScript(0, "TestScript");
     //std::cout << "Initial script added" << std::endl;
 
-    // ------------------ CODE TO TEST FOR ASSETMANAGER - COMMENTED FOR NOW ------------------
+    // -------------------------Set up Asset Manager ------------------------------------------
 
-    //another sample
-    auto& AM = gam300::AssetManager::getInstance();
-
-    gam300::AssetManager::Config cfg;
-    cfg.sourceRoots = { "C:\\Digipen\\Survival_Kit\\Survival_Kit\\Survival_Kit\\Assets" };
-    cfg.intermediateDirectory = "Cache/Intermediate";
-    cfg.databaseFile = "Cache/assetdb.txt";
-    cfg.snapshotFile = "Cache/scan.snapshot";
-    cfg.writeDescriptors = true;        // <-- make descriptors
-    cfg.descriptorSidecar = false;      // true = next to source, false = central Descriptors/
-    cfg.descriptorRoot = "Assets/Descriptors"; // used when sidecar=false
-
-
+    //this creates the default configuration for the asset manager to know the asset filepath and such
+    gam300::AssetManager::Config cfg = AM.createDefaultConfig();
 
     AM.setConfig(cfg);
-    AM.startUp();            // loads DB/snapshot, registers importers, sets up generator
-    AM.scanAndProcess();     // scans changes, imports, writes Descriptor.txt files
-    AM.shutDown();           // saves DB and snapshot
+    AM.startUp();
+
+    AM.scanAndProcess();
+
+    std::cout << "\nFinal database count: " << AM.db().Count() << std::endl;
+
+    AM.shutDown();
 
     // ---------------------------------------------------------------------------------------
 
-    while (!GM.getGameOver() && !glfwWindowShouldClose(window)) {
+
+       while (!GM.getGameOver() && !glfwWindowShouldClose(window)) {
+
         // Update input system
         IM.update();
 

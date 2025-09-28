@@ -36,7 +36,6 @@ namespace gam300
             ts.srgb = true;
             ts.inputFiles = { src.filename().string() };
             r.textureSettings = std::move(ts);
-
         }
         catch (const std::exception& e) {
             r.ok = false;
