@@ -510,7 +510,14 @@ namespace gam300 {
         ImGui::End();
     }
  
-    
+    void ImguiManager::displayAssetsBrowserList() {
+        
+        ImGui::Begin("Asset Browser");
+
+        //Asset broswer code goes here
+
+        ImGui::End();
+    }
 
     template<typename componentType>
     void ImguiManager::displayComponentMenu(EntityID entityID, const char* componentName)

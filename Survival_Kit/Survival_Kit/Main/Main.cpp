@@ -171,6 +171,7 @@ int main(void) {
        
         IMGUIM.displayHierarchyList();
 
+        IMGUIM.displayAssetsBrowserList();
 
         // Editor Start Render
         ImGui::Render();
