@@ -38,6 +38,8 @@
 // KENNY TESTING: For testing cursor input
 #include "InputManager.h"
 
+// For creating asset path
+#include "../Utility/AssetPath.h"
 
 // Things to include or KIV for creating a scene
 /* 
