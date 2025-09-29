@@ -34,12 +34,10 @@ namespace gam300
 	{}
 
 	void RigidBody::init(EntityID)
-	{
-	}
+	{}
 
 	void RigidBody::update(float)
-	{
-	}
+	{}
 
 	void RigidBody::setMass(float m)
 	{
@@ -53,73 +51,78 @@ namespace gam300
 		m_invInertiaDiag = Vector3D(inv_or_zero(I.x), inv_or_zero(I.y), inv_or_zero(I.z));
 	}
 
-    void RigidBody::Integrate(Transform3D &tr, float dt)
-    {
-        if (dt <= 0.0f) return;
+	void RigidBody::Integrate(Transform3D &tr, float dt)
+	{
+		if (dt <= 0.0f) return;
 
-        // -------- linear --------
-        // Provide current velocity so drag-like forces can use it.
-        m_forceMgr.SetCurrentVelocity(m_velocity);
+		// -------- linear --------
+		m_forceMgr.SetCurrentVelocity(m_velocity);
 
-        Vector3D totalF(0.0f, 0.0f, 0.0f);
+		Vector3D totalF(0.0f, 0.0f, 0.0f);
+		if (!isStatic() && m_forceMask != 0u)
+		{
+			// If your ForceManager lacks CalculateForceByMask, swap for GetTotalForce()
+			const Vector3D f = m_forceMgr.CalculateForceByMask(m_forceMask);
+			totalF.x += f.x; totalF.y += f.y; totalF.z += f.z;
+		}
 
-        // Sum all active forces whose mask intersects with this body's force mask.
-        if (m_forceMask != 0u)
-        {
-            const Vector3D f = m_forceMgr.CalculateForceByMask(m_forceMask);
-            totalF.x += f.x; totalF.y += f.y; totalF.z += f.z;
-        }
+		if (!isStatic())
+		{
+			m_acceleration.x = totalF.x * m_invMass;
+			m_acceleration.y = totalF.y * m_invMass;
+			m_acceleration.z = totalF.z * m_invMass;
 
-        // a = F * invMass (skip if static/massless)
-        if (!isStatic())
-        {
-            m_acceleration.x = totalF.x * m_invMass;
-            m_acceleration.y = totalF.y * m_invMass;
-            m_acceleration.z = totalF.z * m_invMass;
+			m_velocity.x += m_acceleration.x * dt;
+			m_velocity.y += m_acceleration.y * dt;
+			m_velocity.z += m_acceleration.z * dt;
 
-            // v += a*dt
-            m_velocity.x += m_acceleration.x * dt;
-            m_velocity.y += m_acceleration.y * dt;
-            m_velocity.z += m_acceleration.z * dt;
+			Vector3D pos = tr.getPosition();
+			pos.x += m_velocity.x * dt;
+			pos.y += m_velocity.y * dt;
+			pos.z += m_velocity.z * dt;
+			tr.setPosition(pos);
+		}
+		else
+		{
+			m_acceleration = Vector3D(0.0f, 0.0f, 0.0f);
+		}
 
-            // x += v*dt (use accessors to avoid relying on public fields)
-            Vector3D pos = tr.getPosition();
-            pos.x += m_velocity.x * dt;
-            pos.y += m_velocity.y * dt;
-            pos.z += m_velocity.z * dt;
-            tr.setPosition(pos);
-        }
-        else
-        {
-            m_acceleration = Vector3D(0.0f, 0.0f, 0.0f);
-        }
+		// Remove only inactive Temp forces; Perm stay
+		m_forceMgr.CleanupForces();
 
-        // Cleanup removes only inactive Temp forces; Perm ones remain and keep stacking.
-        m_forceMgr.CleanupForces();
+		// -------- angular --------
+		m_torqueMgr.SetCurrentAngularVelocity(m_angularVelocity);
 
-        // -------- angular --------
-        m_torqueMgr.SetCurrentAngularVelocity(m_angularVelocity);
+		Vector3D T(0.0f, 0.0f, 0.0f);
+		if (m_torqueMask != 0u)
+		{
+			T = m_torqueMgr.CalculateTorqueByMask(m_torqueMask);
+		}
 
-        Vector3D totalTau(0.0f, 0.0f, 0.0f);
-        if (m_torqueMask != 0u)
-        {
-            const Vector3D tau = m_torqueMgr.CalculateTorqueByMask(m_torqueMask);
-            totalTau.x += tau.x; totalTau.y += tau.y; totalTau.z += tau.z;
-        }
+		// If all inverse inertias are zero, choose a harmless default so torque has effect.
+		if (m_invInertiaDiag.x == 0.0f && m_invInertiaDiag.y == 0.0f && m_invInertiaDiag.z == 0.0f)
+		{
+			m_inertiaDiag = Vector3D(1.0f, 1.0f, 1.0f);
+			m_invInertiaDiag = Vector3D(1.0f, 1.0f, 1.0f);
+		}
 
-        // alpha = I^-1 .* tau (per-axis; zero inv inertia => locked axis)
-        m_angularAcceleration.x = totalTau.x * m_invInertiaDiag.x;
-        m_angularAcceleration.y = totalTau.y * m_invInertiaDiag.y;
-        m_angularAcceleration.z = totalTau.z * m_invInertiaDiag.z;
+		// alpha = I^-1 * T  (diagonal inertia)
+		m_angularAcceleration.x = T.x * m_invInertiaDiag.x;
+		m_angularAcceleration.y = T.y * m_invInertiaDiag.y;
+		m_angularAcceleration.z = T.z * m_invInertiaDiag.z;
 
-        // omega += alpha * dt
-        m_angularVelocity.x += m_angularAcceleration.x * dt;
-        m_angularVelocity.y += m_angularAcceleration.y * dt;
-        m_angularVelocity.z += m_angularAcceleration.z * dt;
+		m_angularVelocity.x += m_angularAcceleration.x * dt;
+		m_angularVelocity.y += m_angularAcceleration.y * dt;
+		m_angularVelocity.z += m_angularAcceleration.z * dt;
 
-        // NOTE: rotation write-back (Euler/quaternion) is left to caller/system.
-        // m_torqueMgr.CleanupTorques() removes only inactive Temp torques.
-        m_torqueMgr.CleanupTorques();
-    }
+		// Euler add (swap to quat path if your Transform exposes quats)
+		Vector3D r = tr.getRotation();
+		r.x += m_angularVelocity.x * dt;
+		r.y += m_angularVelocity.y * dt;
+		r.z += m_angularVelocity.z * dt;
+		tr.setRotation(r);
 
+		// Remove only inactive Temp torques; Perm stay
+		m_torqueMgr.CleanupTorques();
+	}
 }

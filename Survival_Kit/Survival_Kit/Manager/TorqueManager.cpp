@@ -1,7 +1,9 @@
 #include "TorqueManager.h"
+#include <cmath> // std::sqrt, std::abs
 
 namespace gam300
 {
+    // ---- helpers ----
     static inline Vector3D NormalizeSafe(const Vector3D &v)
     {
         const float len2 = v.x * v.x + v.y * v.y + v.z * v.z;
@@ -10,21 +12,21 @@ namespace gam300
         return Vector3D(v.x * invLen, v.y * invLen, v.z * invLen);
     }
 
-    // Torque (base)
+    // ---- Torque base ----
     Torque::Torque(DURATION type, unsigned mask)
         : durationType(type), lifetime(0.0f), isActive(true), age(0.0f), torqueMask(mask)
     {
         if (durationType == Perm) lifetime = -1.0f;
     }
 
-    float Torque::GetLifetime() const { return lifetime; }
-    void  Torque::SetLifetime(float value) { if (durationType != Perm) lifetime = value; }
+    float    Torque::GetLifetime() const { return lifetime; }
+    void     Torque::SetLifetime(float value) { if (durationType != Perm) lifetime = value; }
 
-    bool  Torque::GetIsActive() const { return isActive; }
-    void  Torque::SetIsActive(bool value) { isActive = value; }
+    bool     Torque::GetIsActive() const { return isActive; }
+    void     Torque::SetIsActive(bool value) { isActive = value; }
 
-    float Torque::GetAge() const { return age; }
-    void  Torque::SetAge(float value) { age = value; }
+    float    Torque::GetAge() const { return age; }
+    void     Torque::SetAge(float value) { age = value; }
 
     unsigned Torque::GetTorqueMask() const { return torqueMask; }
     Torque::DURATION Torque::GetDurationType() const { return durationType; }
@@ -48,24 +50,23 @@ namespace gam300
         }
     }
 
-    // AngularDirectionalTorque
-    AngularDirectionalTorque::AngularDirectionalTorque(const Vector3D &axis,
+    // ---- AngularDirectionalTorque ----
+    AngularDirectionalTorque::AngularDirectionalTorque(const Vector3D &axisUnit,
         float mag,
         unsigned mask,
         DURATION type)
-        : Torque(type, mask), unitAxis(NormalizeSafe(axis)), magnitude(mag)
+        : Torque(type, mask)
+        , unitAxis(NormalizeSafe(axisUnit))
+        , magnitude(mag)
     {}
 
     Vector3D AngularDirectionalTorque::GetUnitAxis() const { return unitAxis; }
-    void     AngularDirectionalTorque::SetUnitAxis(const Vector3D &axis)
-    {
-        unitAxis = NormalizeSafe(axis);
-    }
+    void     AngularDirectionalTorque::SetUnitAxis(const Vector3D &axis) { unitAxis = NormalizeSafe(axis); }
 
     float    AngularDirectionalTorque::GetMagnitude() const { return magnitude; }
     void     AngularDirectionalTorque::SetMagnitude(float value) { magnitude = value; }
 
-    Vector3D AngularDirectionalTorque::CalculateTorque(const Vector3D & /*w*/) const
+    Vector3D AngularDirectionalTorque::CalculateTorque(const Vector3D & /*currentAngularVelocity*/) const
     {
         return Vector3D(unitAxis.x * magnitude,
             unitAxis.y * magnitude,
@@ -77,7 +78,7 @@ namespace gam300
         return std::make_unique<AngularDirectionalTorque>(*this);
     }
 
-    // AngularDrag
+    // ---- AngularDrag ----
     AngularDrag::AngularDrag(float cx, float cy, float cz, unsigned mask, DURATION type)
         : Torque(type, mask), dragX(cx), dragY(cy), dragZ(cz)
     {
@@ -93,6 +94,7 @@ namespace gam300
 
     Vector3D AngularDrag::CalculateTorque(const Vector3D &w) const
     {
+        // torque = -C .* w  (per-axis angular drag)
         return Vector3D(-dragX * w.x, -dragY * w.y, -dragZ * w.z);
     }
 
@@ -101,7 +103,7 @@ namespace gam300
         return std::make_unique<AngularDrag>(*this);
     }
 
-    // TorqueManager
+    // ---- TorqueManager ----
     TorqueManager::TorqueManager()
         : currentAngularVelocity(0.0f, 0.0f, 0.0f)
     {}
@@ -153,7 +155,8 @@ namespace gam300
 
     size_t TorqueManager::GetActiveTorqueCount() const
     {
-        return static_cast<size_t>(std::count_if(torques.begin(), torques.end(),
+        return static_cast<size_t>(std::count_if(
+            torques.begin(), torques.end(),
             [](const std::unique_ptr<Torque> &t) { return t->GetIsActive(); }));
     }
 
@@ -189,17 +192,13 @@ namespace gam300
     void TorqueManager::ActivateByMask(unsigned mask, bool active)
     {
         for (auto &t : torques)
-        {
             if ((t->GetTorqueMask() & mask) != 0u) t->SetIsActive(active);
-        }
     }
 
     void TorqueManager::SetLifeTimeByMask(unsigned mask, float lifetime)
     {
         for (auto &t : torques)
-        {
             if ((t->GetTorqueMask() & mask) != 0u) t->SetLifetime(lifetime);
-        }
     }
 
     Vector3D TorqueManager::CalculateTorqueByMask(unsigned mask) const

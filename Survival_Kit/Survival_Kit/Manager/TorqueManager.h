@@ -49,11 +49,11 @@ namespace gam300
     class AngularDirectionalTorque : public Torque
     {
     private:
-        Vector3D unitAxis;
-        float    magnitude; // N·m
+        Vector3D unitAxis;   // must be unit
+        float    magnitude;  // N·m
 
     public:
-        AngularDirectionalTorque(const Vector3D &axis, float magnitude,
+        AngularDirectionalTorque(const Vector3D &axisUnit, float magnitude,
             unsigned mask, DURATION type);
 
         Vector3D GetUnitAxis() const;
@@ -94,7 +94,7 @@ namespace gam300
         std::vector<std::unique_ptr<Torque>> torques;
         Vector3D currentAngularVelocity;
 
-        // NEW: mask <-> name registries
+        // mask <-> name registries (optional convenience, mirrors ForceManager)
         std::unordered_map<unsigned, std::string> maskToName;
         std::unordered_map<std::string, unsigned> nameToMask;
 
@@ -113,23 +113,27 @@ namespace gam300
             torques.push_back(std::make_unique<T>(std::forward<Args>(args)...));
         }
 
-        void AddTorque(const Torque &t);
+        void   AddTorque(const Torque &t);
 
         size_t GetActiveTorqueCount() const;
         size_t GetTotalTorqueCount() const;
 
         void   CleanupTorques();
 
+        // mask-based controls ((t.mask & mask) != 0)
         void   RemoveTorquesByMask(unsigned mask);
         void   ActivateByMask(unsigned mask, bool active);
         void   SetLifeTimeByMask(unsigned mask, float lifetime);
 
+        // sums
         Vector3D CalculateTorqueByMask(unsigned mask) const;
         Vector3D GetTotalTorque() const;
 
-        void    SetCurrentAngularVelocity(const Vector3D &w);
-        const   Vector3D &GetCurrentAngularVelocity() const;
+        // angular velocity for drag-like torques
+        void          SetCurrentAngularVelocity(const Vector3D &w);
+        const Vector3D &GetCurrentAngularVelocity() const;
 
+        // mask <-> name helpers
         void        RegisterMaskName(unsigned mask, const std::string &name);
         bool        UnregisterMaskName(unsigned mask);
         std::string GetMaskName(unsigned mask) const;
