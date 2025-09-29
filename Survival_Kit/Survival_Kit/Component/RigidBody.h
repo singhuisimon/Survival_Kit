@@ -1,118 +1,107 @@
-/**
- * @file ...
- * @brief ...
- * @details ...
- * @author
- * @date
- * Copyright (C) 2025 DigiPen Institute of Technology.
- * Reproduction or disclosure of this file or its contents without the
- * prior written consent of DigiPen Institute of Technology is prohibited.
- */
+/******************************************************************************/
+/*!
+\file       RigidBody.h
+\author     (you)
+\date       Oct 03 2025
+\brief      Rigid body component with linear + angular forces (mask-based).
+            Inherits Component. Provides full getters/setters. Linear motion
+            writes position in Integrate(); angular state is updated here,
+            but rotation write-back is left to the caller/system.
+/******************************************************************************/
 #pragma once
-#ifndef __RIGIDBODY_H__
-#define __RIGIDBODY_H__
+#ifndef RigidBody_H
+#define RigidBody_H
 
 #include "../Component/Component.h"
-#include "../Component/Transform3D.h"
 #include "../Utility/Vector3D.h"
+#include "../Manager/ForceManager.h"
+#include "../Manager/TorqueManager.h"
 
- //Can be replaced by JoltPhysics RigidBody - Need CMake
-namespace gam300 {
+namespace gam300
+{
+    struct Transform3D; // forward decl
 
-    enum class BodyType
+    class RigidBody : public Component
     {
-        STATIC, 
-        KINEMATIC,
-        DYNAMIC
-
-    };
-
-    class RigidBody : public Component {
-    private:
-
-        BodyType m_bodyType;
-        float m_mass;
-        float m_inverse_mass;
-
-        Vector3D m_linear_velocity;
-        Vector3D m_force_accumulator;
-
-        Vector3D m_angular_velocity;
-        Vector3D m_torque_accumulator;
-
-        float m_linear_damp;
-        float m_angular_damp;
-
-        bool m_gravity;
-        //bool m_kinematic;
-
-
     public:
-       
-        
-        RigidBody(BodyType bodyType = BodyType::STATIC,
-            const float& mass = 1.0f,
-            const Vector3D& linear_velocity = Vector3D::ZERO,
-            const Vector3D& force_accumulator = Vector3D::ZERO,
-            const Vector3D& angular_velocity = Vector3D::ZERO,
-            const Vector3D& torque_accumulator = Vector3D::ZERO,
-            const float& linear_damp = 0.99f, const float& angular_damp = 0.99f,
-            const bool& gravity = true);
+        RigidBody(
+            float          mass = 0.0f,
+            const Vector3D &velocity = Vector3D(0.0f, 0.0f, 0.0f),
+            const Vector3D &acceleration = Vector3D(0.0f, 0.0f, 0.0f),
+            const Vector3D &inertiaDiag = Vector3D(0.0f, 0.0f, 0.0f),
+            const Vector3D &angularVelocity = Vector3D(0.0f, 0.0f, 0.0f),
+            unsigned        forceMask = 0xFFFFFFFFu,
+            unsigned        torqueMask = 0xFFFFFFFFu,
+            int             layer = 0
+        );
 
-
+        // ---- Component interface ----
         void init(EntityID entity_id) override;
-
         void update(float dt) override;
 
-        const float& getMass() const { return m_mass; }
-        const float& getInverseMass() const { return m_inverse_mass; }
-        const Vector3D& getLinearVelocity() const { return m_linear_velocity; }
-        const Vector3D& getForceAccumulator() const { return m_force_accumulator; }
-        const Vector3D& getAngularVelocity() const { return m_angular_velocity; }
-        const Vector3D& getTorqueAccumulator() const { return m_torque_accumulator; }
-        const float& getLinearDamp() const { return m_linear_damp; }
-        const float& getAngularDamp() const { return m_angular_damp; }
-        const bool& getGravity() const { return m_gravity; }
-        //const bool& getKinematic() const { return m_kinematic; }
-        void setType(BodyType type) { m_bodyType = type; }
-        void setMass(const float& mass) { m_mass = mass; }
-        void setInverseMass(float inverseMass) { m_inverse_mass = inverseMass; }
-        void setLinearVelocity(const Vector3D& linearVelocity) { m_linear_velocity = linearVelocity; }
-        void setForceAccumulator(const Vector3D& forceAccumulator) { m_force_accumulator = forceAccumulator; }
-        void setAngularVelocity(const Vector3D& angularVelocity) { m_angular_velocity = angularVelocity; }
-        void setTorqueAccumulator(const Vector3D& torqueAccumulator) { m_torque_accumulator = torqueAccumulator; }
-        void setLinearDamp(float linearDamp) { m_linear_damp = linearDamp; }
-        void setAngularDamp(float angularDamp) { m_angular_damp = angularDamp; }
-        void setGravity(bool gravity) { m_gravity = gravity; }
-        //void setKinematic(bool kinematic) { m_kinematic = kinematic; }
+        // ---- Integration entry point (call from your physics pass) ----
+        void Integrate(Transform3D &tr, float dt);
 
-        void applyForce(const Vector3D& force);
-        void applyTorque(const Vector3D& torque);
-        void applyImpulse(const Vector3D& impulse);
+        // ---- Getters / Setters (linear) ----
+        float          getMass() const { return m_mass; }
+        float          getInvMass() const { return m_invMass; }
+        const Vector3D &getVelocity() const { return m_velocity; }
+        const Vector3D &getAcceleration() const { return m_acceleration; }
+        unsigned       getForceMask() const { return m_forceMask; }
+        int            getLayer() const { return m_layer; }
+        ForceManager &getForceManager() { return m_forceMgr; }
+        const ForceManager &getForceManager() const { return m_forceMgr; }
 
-        void clearAccumulators();
+        void setMass(float m);
+        void setVelocity(const Vector3D &v) { m_velocity = v; }
+        void setAcceleration(const Vector3D &a) { m_acceleration = a; }
+        void setForceMask(unsigned mask) { m_forceMask = mask; }
+        void setLayer(int layer) { m_layer = layer; }
 
-        void integrateForces(float dt);
-        void integrateVelocity(Transform3D& transform, float dt);
+        // ---- Getters / Setters (angular) ----
+        const Vector3D &getInertiaDiagonal() const { return m_inertiaDiag; }
+        const Vector3D &getInvInertiaDiagonal() const { return m_invInertiaDiag; }
+        const Vector3D &getAngularVelocity() const { return m_angularVelocity; }
+        const Vector3D &getAngularAcceleration() const { return m_angularAcceleration; }
+        unsigned        getTorqueMask() const { return m_torqueMask; }
+        TorqueManager &getTorqueManager() { return m_torqueMgr; }
+        const TorqueManager &getTorqueManager() const { return m_torqueMgr; }
 
-        // add to check bodyType 
-        bool isStatic() const { return m_bodyType == BodyType::STATIC; }
-        bool isKinematic() const { return m_bodyType == BodyType::KINEMATIC; }
-        bool isDynamic() const { return m_bodyType == BodyType::DYNAMIC; }
+        void setInertiaDiagonal(const Vector3D &I);
+        void setAngularVelocity(const Vector3D &w) { m_angularVelocity = w; }
+        void setAngularAcceleration(const Vector3D &a) { m_angularAcceleration = a; }
+        void setTorqueMask(unsigned mask) { m_torqueMask = mask; }
 
-        // to get the type of the Rigid Body - STATIC, KINEMATIC, DYNAMIC
-        const BodyType getRigidBodyType() { return m_bodyType; }
+        // convenience
+        bool isStatic() const { return m_invMass <= 0.0f; }
+        Vector3D GetAngularDelta(float dt) const
+        {
+            return Vector3D(m_angularVelocity.x * dt,
+                m_angularVelocity.y * dt,
+                m_angularVelocity.z * dt);
+        }
 
-        // to return the enum type to string for serialization
-        static BodyType stringToBodyType(const std::string& str);
+    private:
+        static inline float inv_or_zero(float x) { return (x > 0.0f) ? (1.0f / x) : 0.0f; }
 
-        // convert back from string to enum for serialization
-        static std::string bodyTypeToString(BodyType type);
+        // linear
+        float    m_mass;
+        float    m_invMass;
+        Vector3D m_velocity;
+        Vector3D m_acceleration;
+        unsigned m_forceMask;
+        int      m_layer;
+        ForceManager m_forceMgr;
 
-        // set the rigid body type (use in imgui)
-        void setRigidBodyType(BodyType type) { m_bodyType = type; }
+        // angular
+        Vector3D m_inertiaDiag;
+        Vector3D m_invInertiaDiag;
+        Vector3D m_angularVelocity;
+        Vector3D m_angularAcceleration;
+        unsigned m_torqueMask;
+        TorqueManager m_torqueMgr;
     };
 
 } // namespace gam300
 
-#endif // __RIGIDBODY_H__
+#endif // RigidBody_H

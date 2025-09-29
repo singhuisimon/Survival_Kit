@@ -1,45 +1,63 @@
+/******************************************************************************/
+/*!
+\file       PhysicsSystem.cpp
+\author     (you)
+\date       Oct 03 2025
+\brief      Implementation of PhysicsSystem for RigidBodyComponent.
+/******************************************************************************/
+
 #include "../System/PhysicsSystem.h"
 #include "../Manager/ComponentManager.h"
 #include "../Manager/LogManager.h"
 #include "../Manager/ECSManager.h"
-#include <glm-0.9.9.8/glm/gtx/quaternion.hpp>
 
-namespace gam300 {
+// If you later apply angular rotation via quaternions, include glm when needed.
+// #include <glm-0.9.9.8/glm/gtx/quaternion.hpp>
 
-	PhysicsSystem::PhysicsSystem() : ComponentSystem<RigidBody>("PhysicsSystem"), PhysicsEcsRef(EM) {
-		//set_priority(101);
-	}
+namespace gam300
+{
+    PhysicsSystem::PhysicsSystem()
+        : ComponentSystem<RigidBody>("PhysicsSystem")
+        , PhysicsEcsRef(EM)
+    {
+        // set_priority(101); // optional
+    }
 
-	bool PhysicsSystem::init(SystemManager&) {
+    bool PhysicsSystem::init(SystemManager & /*sysMgr*/)
+    {
+        LM.writeLog("PhysicsSystem::init() - Physics System Initialized");
+        return true;
+    }
 
-		//Find a way to register the system
+    void PhysicsSystem::update(float dt)
+    {
+        if (dt <= 0.0f) return;
 
-		LM.writeLog("PhysicsSystem::init() - Physics System Initialized");
-		return true;
-	}
+        for (EntityID entity_id : m_entities)
+        {
+            process_entity(entity_id, dt);
+        }
+    }
 
-	void PhysicsSystem::update(float dt) {
+    void PhysicsSystem::shutdown()
+    {
+        LM.writeLog("PhysicsSystem::shutdown() - Physics System shut down");
+    }
 
-		(void)dt;
+    void PhysicsSystem::process_entity(EntityID entity_id, float dt)
+    {
+        // Require both Transform3D and RigidBodyComponent
+        if (!PhysicsEcsRef.hasComponent<Transform3D>(entity_id) ||
+            !PhysicsEcsRef.hasComponent<RigidBody>(entity_id))
+        {
+            return;
+        }
 
-		for (EntityID entity_id : m_entities) {
-			process_entity(entity_id, dt);
-		}
-	}
+        Transform3D *transform = PhysicsEcsRef.getComponent<Transform3D>(entity_id);
+        RigidBody *rigidBody = PhysicsEcsRef.getComponent<RigidBody>(entity_id);
+        if (!transform || !rigidBody) return;
 
-	void PhysicsSystem::shutdown() {
-		LM.writeLog("TransformSystem::shutdown() - Transform System shut down");
-	}
-
-	void PhysicsSystem::process_entity(EntityID entity_id, float dt) {
-		if (PhysicsEcsRef.hasComponent<Transform3D>(entity_id) && PhysicsEcsRef.hasComponent<RigidBody>(entity_id)) {
-			Transform3D* transform = PhysicsEcsRef.getComponent<Transform3D>(entity_id);
-			RigidBody* rigidBody = PhysicsEcsRef.getComponent<RigidBody>(entity_id);
-
-			rigidBody->clearAccumulators();
-			rigidBody->integrateForces(dt);
-			rigidBody->integrateVelocity(*transform, dt);
-		}
-	}
-
-}
+        // Integrate linear and angular state (position is updated inside)
+        rigidBody->Integrate(*transform, dt);
+    }
+} // namespace gam300

@@ -42,6 +42,8 @@
     <ClCompile Include="System\AudioSystem.cpp" />
     <ClCompile Include="IMGUI\ImGuizmo.cpp" />
     <ClCompile Include="Manager\PrefabManager.cpp" />
+    <ClCompile Include="Manager\ForceManager.cpp" />
+    <ClCompile Include="Manager\TorqueManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component\Component.h" />
@@ -101,6 +103,8 @@
     <ClInclude Include="System\AudioSystem.h" />
     <ClInclude Include="IMGUI\ImGuizmo.h" />
     <ClInclude Include="Manager\PrefabManager.h" />
+    <ClInclude Include="Manager\ForceManager.h" />
+    <ClInclude Include="Manager\TorqueManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Scene\Game.scn" />

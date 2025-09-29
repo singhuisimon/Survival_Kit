@@ -585,33 +585,33 @@ namespace gam300 {
                 }
             }
         }
-        else if constexpr (std::is_same_v<componentType, RigidBody>) {
-            // rigidBody 
-            if (RigidBody* rigidBody = ImguiEcsRef.getComponent<RigidBody>(selectedEntityID)) {
-                //if (rigidBody)
-               // {
-                BodyType  currRigidBodyType = rigidBody->getRigidBodyType();
+        //else if constexpr (std::is_same_v<componentType, RigidBody>) {
+        //    // rigidBody 
+        //    if (RigidBody* rigidBody = ImguiEcsRef.getComponent<RigidBody>(selectedEntityID)) {
+        //        //if (rigidBody)
+        //       // {
+        //        BodyType  currRigidBodyType = rigidBody->getRigidBodyType();
 
-                    const char* bodyTypeNames[] = { "STATIC", "KINEMATIC", "DYNAMIC" };
-                    int currentTypeIndex = static_cast<int>(currRigidBodyType);
+        //            const char* bodyTypeNames[] = { "STATIC", "KINEMATIC", "DYNAMIC" };
+        //            int currentTypeIndex = static_cast<int>(currRigidBodyType);
 
-                    // Dropdown for BodyType
-                    if (ImGui::BeginCombo("Rigid Body Type", bodyTypeNames[currentTypeIndex])) {
-                        for (int i = 0; i < 3; i++) {
-                            bool isSelected = (currentTypeIndex == i);
-                            if (ImGui::Selectable(bodyTypeNames[i], isSelected)) {
-                                currentTypeIndex = i;
-                                rigidBody->setRigidBodyType(static_cast<BodyType>(i)); //
-                            }
-                            if (isSelected)
-                                ImGui::SetItemDefaultFocus();
-                        }
-                        ImGui::EndCombo();
-                    }
+        //            // Dropdown for BodyType
+        //            if (ImGui::BeginCombo("Rigid Body Type", bodyTypeNames[currentTypeIndex])) {
+        //                for (int i = 0; i < 3; i++) {
+        //                    bool isSelected = (currentTypeIndex == i);
+        //                    if (ImGui::Selectable(bodyTypeNames[i], isSelected)) {
+        //                        currentTypeIndex = i;
+        //                        rigidBody->setRigidBodyType(static_cast<BodyType>(i)); //
+        //                    }
+        //                    if (isSelected)
+        //                        ImGui::SetItemDefaultFocus();
+        //                }
+        //                ImGui::EndCombo();
+        //            }
 
-               //}
-            }
-        }
+        //       //}
+        //    }
+        //}
 
     }
 
