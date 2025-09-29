@@ -130,7 +130,6 @@
     <ClInclude Include="Pipeline\Importers\ShaderImporter.h" />
     <ClInclude Include="Pipeline\Importers\SceneImporter.h" />
     <ClInclude Include="IMGUI\ImGuizmo.h" />
-    <ClInclude Include="Manager\PrefabManager.h" />
     <ClInclude Include="Manager\ForceManager.h" />
     <ClInclude Include="Manager\TorqueManager.h" />
   </ItemGroup>
