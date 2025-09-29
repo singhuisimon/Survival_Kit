@@ -72,18 +72,18 @@ namespace gam300 {
 			};
 
 			m.indices = {
-				// front (0..3)
+				// right (0..3) X+
 				0,1,2,  0,2,3,
-				// back (4..7)  (note the swap to keep CCW from *outside*)
-				4,6,5,  4,7,6,
-				// left (8..11)
+				// left (4..7) X-
+				4,5,6,  4,6,7,
+				// top (8..11) Y+
 				8,9,10,  8,10,11,
-				// right (12..15)
-				12,14,13,  12,15,14,
-				// bottom (16..19)
+				// bottom (12..15) Y-
+				12,13,14,  12,14,15,
+				// front (16..19) Z+
 				16,17,18,  16,18,19,
-				// top (20..23)
-				20,22,21,  20,23,22
+				// back (20..23) Z- (note the swap to keep CCW from *outside*)
+				20,21,22,  20,22,23
 			};
 
 			return m;
@@ -223,7 +223,7 @@ namespace gam300 {
 
 			GLsizeiptr color_data_offset = position_data_size;
 			GLsizeiptr color_attribute_size = sizeof(glm::vec3);
-			GLsizeiptr color_data_size = color_attribute_size * static_cast<GLsizeiptr>(mesh.colors.size());
+			GLsizeiptr color_data_size = color_attribute_size * static_cast<GLsizeiptr>(mesh.normals.size());
 
 			GLsizeiptr buffer_size = position_data_size + color_data_size;
 
@@ -232,7 +232,7 @@ namespace gam300 {
 
 			// Load data into sub buffer		
 			mgl.vbo.sub_data(position_data_offset, position_data_size, mesh.positions.data());
-			mgl.vbo.sub_data(color_data_offset, color_data_size, mesh.colors.data());
+			mgl.vbo.sub_data(color_data_offset, color_data_size, mesh.normals.data());
 
 			// Set up the VAO
 			mgl.vao.create();
