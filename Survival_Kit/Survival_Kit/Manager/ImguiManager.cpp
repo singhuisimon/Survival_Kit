@@ -1079,8 +1079,22 @@ namespace gam300 {
                     
                     //TODO: Ensure that this only loads for SCENE FILES
                     selectedAssetIndex = i;
-                    ImguiEcsRef.clearAllEntities();
-                    SEM.loadScene(assetEntry.path().string());
+
+                    // to ge the type of the file e.g. .scn, .wav
+                    std::string extension = assetEntry.path().extension().string();
+
+                    
+                    //std::cout << extension << "\n";
+                    if (extension == ".scn") // if it is scene
+                    {
+                        ImguiEcsRef.clearAllEntities();
+                        SEM.loadScene(assetEntry.path().string());
+
+                    }
+                    if (extension == ".png" || extension == ".jpeg") //to open the image
+                    {
+
+                    }
                 }
 
                 // ------- show toolip detail ---------- 
@@ -1167,6 +1181,8 @@ namespace gam300 {
         //const auto& componentTypes = ImguiEcsRef
         // Create column to split the CollapsingHeader and component menu 
         ImGui::Columns(2, nullptr, false);
+        ImGui::PushID(componentName);
+
 
         // Left column 
         ImGui::SetColumnWidth(0, 560.0f);
@@ -1174,7 +1190,7 @@ namespace gam300 {
 
         ImGui::SetItemAllowOverlap(); // allow overlapping hover for button
         if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
-            ImGui::OpenPopup(componentName);
+            ImGui::OpenPopup("Popup");
         }
 
      
@@ -1183,10 +1199,10 @@ namespace gam300 {
         // Right column
         if (ImGui::Button("...")) {
             //std::cout << "Clicked remove for " << componentName << "\n";
-            ImGui::OpenPopup(componentName); // unique popup ID
+            ImGui::OpenPopup("Popup"); 
         }
 
-        if (ImGui::BeginPopup(componentName)) {
+        if (ImGui::BeginPopup("Popup")) {
             if (ImGui::MenuItem("Remove Component")) {
                 ImguiEcsRef.removeComponent<componentType>(entityID);
             }
@@ -1200,6 +1216,8 @@ namespace gam300 {
             displayComponentContent<componentType>(entityID); 
           
         }
+
+        ImGui::PopID();
     }
 
     template<typename componentType>
