@@ -19,7 +19,6 @@ int main(void) {
     //    return -1;
     //}
 	
-
     bool spacePressed = false;
 
     // Get reference to LogManager (already started by GameManager)
@@ -114,6 +113,12 @@ int main(void) {
     Core::Application app;
     app.InitializeScripting();
     app.AddScript(0, "TestScript");
+
+    int frame_count = 0;
+    double fps_timer = 0.0;
+    double current_fps = 0.0;
+    char window_title[256];
+
     //std::cout << "Initial script added" << std::endl;
 
     // -------------------------Set up Asset Manager ------------------------------------------
@@ -188,6 +193,22 @@ int main(void) {
 
         // End of loop timing
         elapsed_time = clock.split();
+
+        frame_count++;
+        fps_timer += elapsed_time / 1000000.0;
+
+        if (fps_timer >= 0.1) {
+            current_fps = frame_count / fps_timer;
+
+            sprintf_s(window_title, sizeof(window_title),
+                "Survival_Kit :: FPS: %.1f :: Frame: %.2fms",
+                current_fps, (fps_timer / frame_count) * 1000.0);
+
+            glfwSetWindowTitle(window, window_title);
+
+            frame_count = 0;
+            fps_timer = 0.0;
+        }
 
         // Convert frame time from milliseconds to microseconds
         int64_t frame_time_us = GM.getFrameTime() * 1000;
