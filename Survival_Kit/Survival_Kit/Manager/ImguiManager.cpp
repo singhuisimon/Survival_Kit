@@ -38,6 +38,9 @@ namespace gam300 {
     static float assetIconSize = 64.0f;
     static int selectedAssetIndex = -1;
 
+    static bool asset_editor = false;
+    static std::filesystem::directory_entry currentAsset;
+
     // Asset Type names for display
     const char* ImguiManager::getAssetTypeName(AssetType type)
     {
@@ -1105,7 +1108,8 @@ namespace gam300 {
                     }
                     if (extension == ".png" || extension == ".jpeg") //to open the image
                     {
-
+                        asset_editor = true;
+                        currentAsset = assetEntry;
                     }
                 }
 
@@ -1157,6 +1161,10 @@ namespace gam300 {
                 ImGui::PopID();
             }
             ImGui::Columns(1);
+
+            if (asset_editor) {
+                dispalyAssetEditor(currentAsset);
+            }
         }
 
         ImGui::EndChild();
@@ -1167,6 +1175,17 @@ namespace gam300 {
 
 #endif
     
+    void ImguiManager::dispalyAssetEditor(const std::filesystem::directory_entry& assetFilepath)
+    {
+        if (ImGui::Begin("Asset Editor", &asset_editor)) {
+            ImGui::Text("Editing: %s", assetFilepath.path().string().c_str());
+        }
+        ImGui::End();
+
+        if (!asset_editor) {
+            currentAsset = std::filesystem::directory_entry();
+        }
+    }
 
     void ImguiManager::handleViewPortClick(ImVec2 mousePos, ImVec2 viewportSize)
     {

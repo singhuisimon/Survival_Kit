@@ -114,7 +114,7 @@ namespace gam300
 
 		void handleViewPortClick(ImVec2 mousePos, ImVec2 viewportSize);
 
-		
+		void dispalyAssetEditor(const std::filesystem::directory_entry& assetFilepath);
 
 		//EntityID pickEntityFromViewport(ImVec2 mouseViewportPos, ImVec2 viewportSize, Camera3D& camera);
 
