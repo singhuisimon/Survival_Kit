@@ -124,41 +124,41 @@ namespace gam300 {
         return transform;
     }
 
-    // RigidBodySerializer implementation
-    std::string RigidBodySerializer::serialize(Component* component) {
-       
-        RigidBody* rigidBody = static_cast<RigidBody*>(component);
-       
-        if (!rigidBody) { 
-            return "{}";
-        }
-        std::stringstream ss;
-        
-        ss << "{\n";
+    //// RigidBodySerializer implementation
+    //std::string RigidBodySerializer::serialize(Component* component) {
+    //   
+    //    RigidBody* rigidBody = static_cast<RigidBody*>(component);
+    //   
+    //    if (!rigidBody) { 
+    //        return "{}";
+    //    }
+    //    std::stringstream ss;
+    //    
+    //    ss << "{\n";
 
-        //ss << "          \"RigidBody\": {\n";
-        ss << "          \"rigidBodyType\": \"" << rigidBody->bodyTypeToString(rigidBody->getRigidBodyType()) << "\"\n";
-        ss << "        }";
+    //    //ss << "          \"RigidBody\": {\n";
+    //    ss << "          \"rigidBodyType\": \"" << rigidBody->bodyTypeToString(rigidBody->getRigidBodyType()) << "\"\n";
+    //    ss << "        }";
 
-        return ss.str();
-    }
+    //    return ss.str();
+    //}
 
-    // RigidBodySerializer implementation
-    Component* RigidBodySerializer::deserialize(EntityID entityId, const std::string& jsonData) {
+    //// RigidBodySerializer implementation
+    //Component* RigidBodySerializer::deserialize(EntityID entityId, const std::string& jsonData) {
 
-        // Parse the rigid body type 
-        BodyType rigidBodyType = BodyType::STATIC;
+    //    // Parse the rigid body type 
+    //    BodyType rigidBodyType = BodyType::STATIC;
 
-        std::string bodyTypeStr = SerialisationManager::extractQuotedValue(jsonData, "rigidBodyType");
-        if (!bodyTypeStr.empty()) {
+    //    std::string bodyTypeStr = SerialisationManager::extractQuotedValue(jsonData, "rigidBodyType");
+    //    if (!bodyTypeStr.empty()) {
 
-            rigidBodyType = RigidBody::stringToBodyType(bodyTypeStr);
-        }
-        RigidBody* rigidBody = EM.addComponent<RigidBody>(entityId, rigidBodyType);
+    //        rigidBodyType = RigidBody::stringToBodyType(bodyTypeStr);
+    //    }
+    //    RigidBody* rigidBody = EM.addComponent<RigidBody>(entityId, rigidBodyType);
 
-        return rigidBody;
+    //    return rigidBody;
 
-    }
+    //}
 
 
 	//AudioComponentSerializer implementation
@@ -317,7 +317,7 @@ namespace gam300 {
             });
 
         // Register component serializers for RigidBody
-        registerComponentSerializer("RigidBody", std::make_shared<RigidBodySerializer>());
+        //registerComponentSerializer("RigidBody", std::make_shared<RigidBodySerializer>());
 
         // Register component creators
         registerComponentCreator("RigidBody", [this](EntityID entityId, const std::string& componentData) {

@@ -122,10 +122,8 @@ namespace gam300 {
         logManager.writeLog("GameManager::startUp() - Attempting to load scene from '%s'", scenePath.c_str());
 
 
-        // Register the Movement component with the ComponetManager
-        SM.register_system<MovementSystem>();
-
         SM.register_system<PhysicsSystem>();
+        SM.register_system<MovementSystem>();
 
         //// Create a test entity with Transform3D component for demonstration
         //Entity& testEntity = EM.createEntity("TestEntity");

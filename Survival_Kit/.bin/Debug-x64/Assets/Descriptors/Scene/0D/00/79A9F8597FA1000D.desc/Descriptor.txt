@@ -1,0 +1,21 @@
+{
+  "asset": {
+    "guid": "79A9F8597FA1000D",
+    "id": 8766811212930416653,
+    "sourcePath": "C:/Users/iAmRe/Documents/GitHub/Survival_Kit/Survival_Kit/Survival_Kit/Assets/Scene/Game.scn",
+    "intermediatePath": "C:\\Users\\iAmRe\\Documents\\GitHub\\Survival_Kit\\Cache/Intermediate\\Game.scn",
+    "compiledPath": "",
+    "type": 6,
+    "ext": ".scn",
+    "contentHash": "",
+    "lastWriteTime": 0,
+    "valid": true
+  },
+  "extras": {
+    "displayName": "Game.scn",
+    "category": "Scene",
+    "tags": [],
+    "lastImported": 1759174322,
+    "user": {}
+  }
+}

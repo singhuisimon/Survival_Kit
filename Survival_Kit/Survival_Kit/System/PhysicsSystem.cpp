@@ -1,95 +1,63 @@
+/******************************************************************************/
+/*!
+\file       PhysicsSystem.cpp
+\author     (you)
+\date       Oct 03 2025
+\brief      Implementation of PhysicsSystem for RigidBodyComponent.
+/******************************************************************************/
+
 #include "../System/PhysicsSystem.h"
 #include "../Manager/ComponentManager.h"
 #include "../Manager/LogManager.h"
 #include "../Manager/ECSManager.h"
-#include <glm-0.9.9.8/glm/gtx/quaternion.hpp>
 
+// If you later apply angular rotation via quaternions, include glm when needed.
+// #include <glm-0.9.9.8/glm/gtx/quaternion.hpp>
 
 namespace gam300
 {
-	PhysicsSystem::PhysicsSystem() : ComponentSystem < RigidBody>("PhysicsSystem")
+	PhysicsSystem::PhysicsSystem()
+		: ComponentSystem<RigidBody>("PhysicsSystem")
+		, PhysicsEcsRef(EM)
 	{
-		set_priority(50);
+		// set_priority(101); // optional
 	}
 
-	bool PhysicsSystem::init(SystemManager& system_manager) {
-
-		////Find a way to register the system
-		////system_manager.register_system("MovementSystem");
-
-		//JPH::RegisterDefaultAllocator();
-		//JPH::Factory::sInstance = new JPH::Factory();
-		//JPH::RegisterTypes();
-
-		////tempAllocator = new JPH::TempAllocatorImpl(10 * 1024 * 1024);
-		////jobSystem = new JPH::JobSystemThreadPool(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers, 4);
-
-		//////// Create simple implementations
-		////auto* bpInterface = new SimpleBroadPhaseLayerInterface();
-		////auto* objVsBpFilter = new SimpleObjectVsBroadPhaseLayerFilter();
-		////auto* objPairFilter = new SimpleObjectLayerPairFilter();
-
-		////joltPhysics = new JPH::PhysicsSystem();
-		////joltPhysics->Init(1024, 0, 1024, 1024, *bpInterface, *objVsBpFilter, *objPairFilter);
-
-		//LM.writeLog("PhysicsSystem::init() - Physics System Initialized");
-		//return true;
-
-		//tempAllocator = new JPH::TempAllocatorImpl(16 * 1024 * 1024);
-
-		//// Create job system thread pool
-		//jobSystem = new JPH::JobSystemThreadPool();
-		//jobSystem->Init(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers,
-		//	std::thread::hardware_concurrency() - 1);
-
-		//// Create broad phase layer interface
-		//broadPhaseLayerInterface = new SimpleBroadPhaseLayerInterface();
-
-		//// Initialize physics system
-		//joltPhysics = new JPH::PhysicsSystem();
-		//joltPhysics->Init(1024, 0, 1024, 1024,
-		//	*broadPhaseLayerInterface,
-		//	SimpleObjectVsBroadPhaseLayerFilter(),
-		//	SimpleObjectLayerPairFilter());
-
+	bool PhysicsSystem::init(SystemManager & /*sysMgr*/)
+	{
 		LM.writeLog("PhysicsSystem::init() - Physics System Initialized");
 		return true;
-
 	}
-	void PhysicsSystem::update(float dt) {
 
-		(void)dt;
+	void PhysicsSystem::update(float dt)
+	{
+		if (dt <= 0.0f) return;
 		m_dt = dt;
-		for (EntityID entity_id : m_entities) {
+		for (EntityID entity_id : m_entities)
+		{
 			process_entity(entity_id);
 		}
 	}
-	void PhysicsSystem::shutdown() {
-		/*	if (joltPhysics) {
-				delete joltPhysics;
-				joltPhysics = nullptr;
-			}
 
-			if (jobSystem) {
-				delete jobSystem;
-				jobSystem = nullptr;
-			}
-
-			if (tempAllocator) {
-				delete tempAllocator;
-				tempAllocator = nullptr;
-			}
-
-			if (broadPhaseLayerInterface) {
-				delete broadPhaseLayerInterface;
-				broadPhaseLayerInterface = nullptr;
-			}*/
-		LM.writeLog("PhysicsSystem::shutdown() - PhysicsSystem shut down");
-	}
-	void PhysicsSystem::process_entity(EntityID entity_id) {
-
-
+	void PhysicsSystem::shutdown()
+	{
+		LM.writeLog("PhysicsSystem::shutdown() - Physics System shut down");
 	}
 
+	void PhysicsSystem::process_entity(EntityID entity_id)
+	{
+		// Require both Transform3D and RigidBodyComponent
+		if (!PhysicsEcsRef.hasComponent<Transform3D>(entity_id) ||
+			!PhysicsEcsRef.hasComponent<RigidBody>(entity_id))
+		{
+			return;
+		}
 
-} // end of namespace gam300
+		Transform3D *transform = PhysicsEcsRef.getComponent<Transform3D>(entity_id);
+		RigidBody *rigidBody = PhysicsEcsRef.getComponent<RigidBody>(entity_id);
+		if (!transform || !rigidBody) return;
+
+		// Integrate linear and angular state (position is updated inside)
+		rigidBody->Integrate(*transform, m_dt);
+	}
+} // namespace gam300
