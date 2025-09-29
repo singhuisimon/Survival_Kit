@@ -11,13 +11,16 @@
  // Include header file
 #include "ImguiManager.h"
 #include "ECSManager.h"
+
+
 #include "SerialisationManager.h"
 #include "SerialisationBinManager.h"
-#include <iostream>
+#include "../Manager/AssetManager.h"
 #include "../Utility/AssetPath.h"
 #include "../Component/Transform3D.h"
 #include "../Component/RigidBody.h"
 
+#include <iostream>
 
 namespace gam300 {
 
@@ -106,6 +109,8 @@ namespace gam300 {
         }
     }
 
+
+#if 1 // old code
     void ImguiManager::displayFileList(bool& fileWindow, std::string& shownFile) {
 
         std::string scenePath = getAssetFilePath("Scene");
@@ -123,6 +128,7 @@ namespace gam300 {
         ImGui::SetNextWindowSize(ImVec2(800, 400));
 
         if (ImGui::Begin("Level Select", &fileWindow, ImGuiWindowFlags_NoDocking)) {
+
             for (int i = 0; i < sceneFiles.size(); i++)
             {
                 std::string fileName = sceneFiles[i].first;
@@ -214,6 +220,53 @@ namespace gam300 {
         }
         
     }
+
+#endif
+
+#if 0 // new code for display file list
+    void ImguiManager::displayFileList(bool& fileWindow, std::string& shownFile)
+    {
+        std::string scenePath = getAssetFilePath("Scene");
+        std::vector<std::pair<std::string, std::string>> sceneFiles;
+
+        if (std::filesystem::exists(scenePath) && std::filesystem::is_directory(scenePath))
+        {
+            for (const auto& file : std::filesystem::directory_iterator(scenePath)) {
+                if (std::filesystem::is_regular_file(file.path())) {
+                    sceneFiles.push_back(std::make_pair(file.path().filename().string(), file.path().string()));
+                }
+            }
+        }
+        ImGui::SetNextWindowSize(ImVec2(800, 400));
+
+        if (ImGui::Begin("Level Select", &fileWindow, ImGuiWindowFlags_NoDocking))
+        {
+            static std::string pendingScene = "";
+            static bool showConfirmPanel = false;
+
+            for (int i = 0; i < sceneFiles.size(); i++) {
+                std::string fileName = sceneFiles[i].first;
+
+                if (ImGui::Selectable(fileName.c_str())) {
+                    pendingScene = sceneFiles[i].second;
+                    showConfirmPanel = true;
+                    ImGui::OpenPopup("Save Current Scene?");
+                }
+            }
+
+            if (showConfirmPanel)
+            {
+                if (ImGui::BeginPopupModal("Save Current Scene?", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+                {
+                    ImGui::Text("Do you want to save the current scene?");
+                    ImGui::Separator();
+
+
+                }
+            }
+        }
+    }
+#endif
 
     void ImguiManager::displayHierarchyList() {
  
@@ -459,12 +512,20 @@ namespace gam300 {
                 if (ImGui::MenuItem("Open"))
                 {
                     fileWindow = true;
+     
+                    
                 }
-
+                ImGui::Separator();
                 if (ImGui::MenuItem("Save"))
                 {
                     //To uncomment after Serialisation is fixed
                     SEM.saveScene(shownFile);
+
+                }
+                if (ImGui::MenuItem("Save as"))
+                {
+                    showSaveAsPanel = true;
+
                 }
                 ImGui::EndMenu();
                 ImGui::Separator();
@@ -476,6 +537,83 @@ namespace gam300 {
 
             IMGUIM.displayFileList(fileWindow, shownFile); // for now it open at the start of the engine
         }
+
+        std::string newPath = getAssetFilePath("Scene/") + saveAsDefaultName;
+        // if click save as 
+        if (showSaveAsPanel)
+        {
+            ImGui::OpenPopup("Save Scene As");
+
+            if (ImGui::BeginPopupModal("Save Scene As", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+            {
+                ImGui::InputText("File name", saveAsDefaultName, IM_ARRAYSIZE(saveAsDefaultName));
+
+                if (ImGui::Button("Save", ImVec2(120, 0)))
+                {
+
+                    if (!std::filesystem::path(newPath).has_extension()) {
+                        newPath += ".scn"; // ensure .scn extension
+                    }
+
+                    if (std::filesystem::exists(newPath))
+                    {
+                        ImGui::OpenPopup("Confirm Overwrite");
+                    }
+                    else
+                    {
+                        SEM.saveScene(newPath);
+                        shownFile = newPath; // update current scene
+                        LM.writeLog("Scene saved as: %s", newPath.c_str());
+                        showSaveAsPanel = false;
+                        ImGui::CloseCurrentPopup();
+
+                    }
+
+
+                }
+
+                ImGui::SameLine();
+                if (ImGui::Button("Cancel", ImVec2(120, 0)))
+                {
+                    showSaveAsPanel = false;
+                    ImGui::CloseCurrentPopup();
+                }
+
+                // overwrite 
+                if (ImGui::BeginPopupModal("Confirm Overwrite", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+                {
+                    ImGui::Text("File %s already exists.\nDo you want to replace it?", saveAsDefaultName);
+                    ImGui::Separator();
+
+                    if (ImGui::Button("Yes", ImVec2(120, 0)))
+                    {
+                        //newPath = getAssetFilePath("Scene/") + saveAsDefaultName;
+                        if (!std::filesystem::path(newPath).has_extension()) {
+                            newPath += ".scn";
+                        }
+
+                        SEM.saveScene(newPath);
+                        shownFile = newPath;
+                        LM.writeLog("Scene overwritten: %s", newPath.c_str());
+
+                        showSaveAsPanel = false;
+                        ImGui::CloseCurrentPopup(); // close confirm
+                        ImGui::CloseCurrentPopup(); // close Save As
+                    }
+
+                    ImGui::SameLine();
+                    if (ImGui::Button("No", ImVec2(120, 0)))
+                    {
+                        ImGui::CloseCurrentPopup(); // only close confirm, keep Save As open
+                    }
+
+                    ImGui::EndPopup();
+                }
+
+                ImGui::EndPopup();
+            }
+        }
+    
 
     }
 
@@ -499,13 +637,29 @@ namespace gam300 {
         auto texture = GFXM.getImguiTex();
         ImVec2 texture_pos = ImGui::GetCursorScreenPos();
 
+        ImVec2 viewportSize =
+        {
+             static_cast<float>(getWindowWidthHeight().x) / 2.0f,
+             static_cast<float>(getWindowWidthHeight().y) / 2.0f
+        }; 
+       /* int windowWidth = getWindowWidthHeight().x / 2;
+        int windowHeight = getWindowWidthHeight().y / 2;*/
+
         ImGui::Begin("Viewport");
 
         if (texture) {
+
+            ImVec2 imagePos = ImGui::GetCursorScreenPos();
+
             ImGui::Image((ImTextureID)(intptr_t)GFXM.getImguiTex(),
-                ImVec2((static_cast<int>(getWindowWidthHeight().x) / 2), (static_cast<int>(getWindowWidthHeight().y) / 2)),
+                viewportSize,
                 ImVec2(0, 1), ImVec2(1, 0));
+
+            handleViewPortClick(imagePos, viewportSize);
         }
+
+        //ImVec2 mousePos, viewportSize;
+        //void(mousePos);
 
         ImGui::End();
     }
@@ -519,6 +673,24 @@ namespace gam300 {
         ImGui::End();
     }
 
+    void ImguiManager::handleViewPortClick(ImVec2 mousePos, ImVec2 viewportSize)
+    {
+        // Check the mouse hover position for reference
+        if (ImGui::IsItemHovered())
+        {
+            ImVec2 mouseScreen = ImGui::GetIO().MousePos;
+
+            ImVec2 mouseInViewportPos;
+            mouseInViewportPos.x = mouseScreen.x - mousePos.x;
+            mouseInViewportPos.y = mouseScreen.y - mousePos.y;
+
+            ImGui::Text("Mouse local: (%.1f, %.1f)", mouseInViewportPos.x, mouseInViewportPos.y);
+            float aspectRatio = viewportSize.x / viewportSize.y;
+           
+        }
+    }
+
+ 
     template<typename componentType>
     void ImguiManager::displayComponentMenu(EntityID entityID, const char* componentName)
     {

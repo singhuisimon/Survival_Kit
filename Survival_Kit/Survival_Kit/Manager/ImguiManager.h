@@ -62,6 +62,8 @@ namespace gam300
 
 		bool fileWindow = false;
 		std::string shownFile{};
+		bool showSaveAsPanel = false;
+		char saveAsDefaultName[128] = "NewScene.scn"; // default save as name
 		
 	
 	public:
@@ -96,6 +98,12 @@ namespace gam300
 		void displayTopMenu();
 
 		void finishImguiRender(ImGuiIO& imgui_io);
+
+		void handleViewPortClick(ImVec2 mousePos, ImVec2 viewportSize);
+
+		
+
+		//EntityID pickEntityFromViewport(ImVec2 mouseViewportPos, ImVec2 viewportSize, Camera3D& camera);
 
 		void shutDown() override;
 
