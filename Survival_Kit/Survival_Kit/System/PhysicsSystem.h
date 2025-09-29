@@ -20,11 +20,36 @@
 
 namespace gam300 {
 
-    //IDK how Transform3D also fits into this
+    class SimpleBroadPhaseLayerInterface : public JPH::BroadPhaseLayerInterface {
+    public:
+        JPH::uint GetNumBroadPhaseLayers() const override { return 2; }
+        JPH::BroadPhaseLayer GetBroadPhaseLayer(JPH::ObjectLayer layer) const override {
+            return JPH::BroadPhaseLayer(layer < 2 ? layer : 0);
+        }
+    };
+
+    class SimpleObjectVsBroadPhaseLayerFilter : public JPH::ObjectVsBroadPhaseLayerFilter {
+    public:
+        bool ShouldCollide(JPH::ObjectLayer, JPH::BroadPhaseLayer) const override {
+            return true; // Allow all collisions for now
+        }
+    };
+
+    class SimpleObjectLayerPairFilter : public JPH::ObjectLayerPairFilter {
+    public:
+        bool ShouldCollide(JPH::ObjectLayer, JPH::ObjectLayer) const override {
+            return true; // Allow all collisions for now
+        }
+    };
+
     class PhysicsSystem : ComponentSystem<RigidBody> {
 
     private:
         class ECSManager& PhysicsEcsRef;
+        JPH::PhysicsSystem* joltPhysics;
+        JPH::TempAllocatorImpl* tempAllocator;
+        JPH::JobSystemThreadPool* jobSystem;
+
     public:
         /**
          * @brief Constructor for PhysicsSystem.
@@ -52,6 +77,7 @@ namespace gam300 {
         //void process_entity(EntityID entity_id) override;
 
         void process_entity(EntityID entity_id, float dt);
+
     };
 }
 

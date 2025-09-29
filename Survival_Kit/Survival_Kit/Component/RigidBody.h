@@ -16,7 +16,15 @@
 #include "../Component/Transform3D.h"
 #include "../Utility/Vector3D.h"
 
- //Can be replaced by JoltPhysics RigidBody - Need CMake
+#include "Jolt/Jolt.h"
+#include "Jolt/RegisterTypes.h"
+#include "Jolt/Core/Factory.h"
+#include "Jolt/Core/TempAllocator.h"
+#include "Jolt/Core/JobSystemThreadPool.h"
+#include "Jolt/Physics/PhysicsSettings.h"
+#include "Jolt/Physics/PhysicsSystem.h"
+#include "Jolt/Physics/Body/BodyID.h"
+
 namespace gam300 {
 
     enum class BodyType
@@ -30,70 +38,55 @@ namespace gam300 {
     class RigidBody : public Component {
     private:
 
+        JPH::BodyID m_bodyID;           // Jolt body ID
+        JPH::Body* m_body = nullptr;    // Direct reference
         BodyType m_bodyType;
-        float m_mass;
-        float m_inverse_mass;
-
-        Vector3D m_linear_velocity;
-        Vector3D m_force_accumulator;
-
-        Vector3D m_angular_velocity;
-        Vector3D m_torque_accumulator;
-
-        float m_linear_damp;
-        float m_angular_damp;
-
         bool m_gravity;
-        //bool m_kinematic;
-
 
     public:
-       
         
-        RigidBody(BodyType bodyType = BodyType::STATIC,
-            const float& mass = 1.0f,
-            const Vector3D& linear_velocity = Vector3D::ZERO,
-            const Vector3D& force_accumulator = Vector3D::ZERO,
-            const Vector3D& angular_velocity = Vector3D::ZERO,
-            const Vector3D& torque_accumulator = Vector3D::ZERO,
-            const float& linear_damp = 0.99f, const float& angular_damp = 0.99f,
+        RigidBody();
+        RigidBody(JPH::BodyID bodyID, JPH::Body* body,
+            BodyType bodyType = BodyType::STATIC,
             const bool& gravity = true);
 
+        RigidBody(BodyType bodyType)
+            : m_bodyID(JPH::BodyID()), m_body(nullptr),
+              m_bodyType(bodyType), m_gravity(true)
+        {}
+
+
+            // Explicit move semantics
+        RigidBody(RigidBody&&) = default;
+        RigidBody& operator=(RigidBody&&) = default;
+
+        // Optional copy semantics (if ECS requires)
+        RigidBody(const RigidBody&) = default;
+        RigidBody& operator=(const RigidBody&) = default;
 
         void init(EntityID entity_id) override;
 
         void update(float dt) override;
 
-        const float& getMass() const { return m_mass; }
-        const float& getInverseMass() const { return m_inverse_mass; }
-        const Vector3D& getLinearVelocity() const { return m_linear_velocity; }
-        const Vector3D& getForceAccumulator() const { return m_force_accumulator; }
-        const Vector3D& getAngularVelocity() const { return m_angular_velocity; }
-        const Vector3D& getTorqueAccumulator() const { return m_torque_accumulator; }
-        const float& getLinearDamp() const { return m_linear_damp; }
-        const float& getAngularDamp() const { return m_angular_damp; }
         const bool& getGravity() const { return m_gravity; }
-        //const bool& getKinematic() const { return m_kinematic; }
         void setType(BodyType type) { m_bodyType = type; }
-        void setMass(const float& mass) { m_mass = mass; }
-        void setInverseMass(float inverseMass) { m_inverse_mass = inverseMass; }
-        void setLinearVelocity(const Vector3D& linearVelocity) { m_linear_velocity = linearVelocity; }
-        void setForceAccumulator(const Vector3D& forceAccumulator) { m_force_accumulator = forceAccumulator; }
-        void setAngularVelocity(const Vector3D& angularVelocity) { m_angular_velocity = angularVelocity; }
-        void setTorqueAccumulator(const Vector3D& torqueAccumulator) { m_torque_accumulator = torqueAccumulator; }
-        void setLinearDamp(float linearDamp) { m_linear_damp = linearDamp; }
-        void setAngularDamp(float angularDamp) { m_angular_damp = angularDamp; }
         void setGravity(bool gravity) { m_gravity = gravity; }
-        //void setKinematic(bool kinematic) { m_kinematic = kinematic; }
+
+        const float& getMass() const { return m_body ? 1.0f / m_body->GetMotionProperties()->GetInverseMass() : 0.0f; }
+        const float& getInverseMass() const { return m_body ? m_body->GetMotionProperties()->GetInverseMass() : 0.0f; }
+        Vector3D getLinearVelocity() const { return m_body ? convert(m_body->GetLinearVelocity()) : Vector3D(); }
+        Vector3D getAngularVelocity() const { return m_body ? convert(m_body->GetAngularVelocity()) : Vector3D(); }
+        const float& getLinearDamp() const { return m_body ? m_body->GetMotionProperties()->GetLinearDamping() : 0.0f; ; }
+        const float& getAngularDamp() const { return m_body ? m_body->GetMotionProperties()->GetAngularDamping() : 0.0f; ; }
+       
+        void setLinearVelocity(const Vector3D& linearVelocity) { if (m_body) m_body->SetLinearVelocity(convert(linearVelocity)); }
+        void setAngularVelocity(const Vector3D& angularVelocity) { if (m_body) m_body->SetAngularVelocity(convert(angularVelocity)); }
+        void setLinearDamp(float linearDamp) { if (m_body) m_body->GetMotionProperties()->SetLinearDamping(linearDamp); }
+        void setAngularDamp(float angularDamp) { if (m_body) m_body->GetMotionProperties()->SetAngularDamping(angularDamp); }
 
         void applyForce(const Vector3D& force);
         void applyTorque(const Vector3D& torque);
         void applyImpulse(const Vector3D& impulse);
-
-        void clearAccumulators();
-
-        void integrateForces(float dt);
-        void integrateVelocity(Transform3D& transform, float dt);
 
         // add to check bodyType 
         bool isStatic() const { return m_bodyType == BodyType::STATIC; }
@@ -111,6 +104,19 @@ namespace gam300 {
 
         // set the rigid body type (use in imgui)
         void setRigidBodyType(BodyType type) { m_bodyType = type; }
+
+        Vector3D getPosition() const {
+            return m_body ? convert(m_body->GetPosition()) : Vector3D();
+        }
+
+        void setPosition(const Vector3D& pos, JPH::PhysicsSystem& system)
+        {
+            JPH::BodyInterface& body_interface = system.GetBodyInterface();
+            body_interface.SetPosition(m_bodyID, convert(pos), JPH::EActivation::Activate);
+        }
+
+        static JPH::Vec3 convert(const Vector3D& v) { return JPH::Vec3(v.x, v.y, v.z); }
+        static Vector3D convert(const JPH::Vec3& v) { return Vector3D(v.GetX(), v.GetY(), v.GetZ()); }
     };
 
 } // namespace gam300
