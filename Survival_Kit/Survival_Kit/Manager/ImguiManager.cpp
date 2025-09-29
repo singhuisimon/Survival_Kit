@@ -562,6 +562,11 @@ namespace gam300 {
                     //displayComponentMenu<RigidBody>(selectedEntity.get_id(), "RigidBody");
 
                 }
+                if (ImguiEcsRef.hasComponent<Collider>(selectedEntity.get_id())) {
+                    displayComponentMenu<Collider>(selectedEntity.get_id(), "Collider");
+                    //displayComponentMenu<RigidBody>(selectedEntity.get_id(), "RigidBody");
+
+                }
                 
                
                 ImGui::Separator();
@@ -617,9 +622,13 @@ namespace gam300 {
 
     void ImguiManager::displayTopMenu()
     {
+        //static std::string shownFile = getAssetFilePath("Scene/") + "default.scn";
+      
+
         if (ImGui::BeginMainMenuBar())
         {
             ImGui::Separator();
+            
             if (ImGui::BeginMenu("File"))
             {
                 if (ImGui::MenuItem("New"))
@@ -637,6 +646,7 @@ namespace gam300 {
                 ImGui::Separator();
                 if (ImGui::MenuItem("Save"))
                 {
+                    
                     //To uncomment after Serialisation is fixed
                     SEM.saveScene(shownFile);
                     std::cout << shownFile << "\n";
@@ -649,9 +659,33 @@ namespace gam300 {
                 }
                 ImGui::EndMenu();
                 ImGui::Separator();
+               
             }
+            //ImGui::SameLine(); // make it appear on the same bar
+
+            std::string displayedScene = shownFile;
+            size_t pos = shownFile.find("Assets"); // find "Assets" in the path
+            if (pos != std::string::npos) {
+                displayedScene = shownFile.substr(pos); // keep everything from "Assets" onwards
+            }
+
+            // Get the window width and text width
+            float windowWidth = ImGui::GetWindowWidth();
+            float textWidth = ImGui::CalcTextSize(displayedScene.c_str()).x;
+
+            // Move cursor to the right
+            ImGui::SetCursorPosX(windowWidth - textWidth - 10); // 10 pixels padding from right
+            ImGui::Text("%s", displayedScene.c_str());
+
+            //ImGui::Text("Current Scene: %s", displayedScene.c_str());
+
             ImGui::EndMainMenuBar();
+            
         }
+        //ImGui::Text("Current Scene: %s", shownFile.c_str());
+        //ImGui::Begin("Current Scene");
+        
+        //ImGui::End();
 
         if (fileWindow) {
 
@@ -1396,32 +1430,34 @@ namespace gam300 {
         else if constexpr (std::is_same_v<componentType, RigidBody>) {
             // rigidBody 
             if (RigidBody* rigidBody = ImguiEcsRef.getComponent<RigidBody>(selectedEntityID)) {
-                //if (rigidBody)
-               // {
-                //BodyType  currRigidBodyType = rigidBody->getRigidBodyType();
 
-                //    const char* bodyTypeNames[] = { "STATIC", "KINEMATIC", "DYNAMIC" };
-                //    int currentTypeIndex = static_cast<int>(currRigidBodyType);
+                if (rigidBody)
+                {
+                    float mass = rigidBody->getMass();
+                    if (ImGui::InputFloat("Mass", &mass)) {
+                        rigidBody->setMass(mass);
+                    }
 
-                //    // Dropdown for BodyType
-                //    if (ImGui::BeginCombo("Rigid Body Type", bodyTypeNames[currentTypeIndex])) {
-                //        for (int i = 0; i < 3; i++) {
-                //            bool isSelected = (currentTypeIndex == i);
-                //            if (ImGui::Selectable(bodyTypeNames[i], isSelected)) {
-                //                currentTypeIndex = i;
-                //                rigidBody->setRigidBodyType(static_cast<BodyType>(i)); //
-                //            }
-                //            if (isSelected)
-                //                ImGui::SetItemDefaultFocus();
-                //        }
-                //        ImGui::EndCombo();
-                //    }
-
-               //}
-
+                    Vector3D vel = rigidBody->getVelocity();
+                    float velocity[3] = { vel.x, vel.y, vel.z };
+                    if (ImGui::DragFloat3("Velocity", velocity, 0.1f)) {
+                        rigidBody->setVelocity(Vector3D(velocity[0], velocity[1], velocity[2]));
+                    }
+                }
 
             }
         }
+        //else if constexpr (std::is_same_v<componentType, Collider>) {
+        //    // rigidBody 
+        //    if (Collider* collider = ImguiEcsRef.getComponent<Collider>(selectedEntityID)) {
+
+        //        if (collider)
+        //        {
+        //           
+        //        }
+
+        //    }
+        //}
 
     }
 

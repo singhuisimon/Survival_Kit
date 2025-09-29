@@ -72,6 +72,15 @@ namespace gam300 {
         std::string serialize(Component* component) override;
         Component* deserialize(EntityID entityId, const std::string& jsonData) override;
     };
+
+    /**
+     * @brief Serializer for Collider components.
+     */
+    //class ColliderSerializer : public IComponentSerializer {
+    //public:
+    //    std::string serialize(Component* component) override;
+    //    Component* deserialize(EntityID entityId, const std::string& jsonData) override;
+    //};
 	/* @brief Serializer for Audio_Component components.
 	* @author Amanda Leow Boon Suan
     */    
