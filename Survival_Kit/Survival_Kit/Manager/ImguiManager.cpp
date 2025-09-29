@@ -345,7 +345,7 @@ namespace gam300 {
                                 // to duplicate entity name
                                 std::string idToDuplicate = allEntities[selectedObjIndex].get_name();
                                 Entity& duplicatedEntity = ImguiEcsRef.createEntity(idToDuplicate);
-                             ;
+                          
 
                                 // get information for original entity 
                                 const Entity& oriSelectedEntity = allEntities[selectedObjIndex];
@@ -360,6 +360,18 @@ namespace gam300 {
                                         ImguiEcsRef.addComponent<Transform3D>(newEntityID, *oldTransform);
                                     }
                                 }
+
+                                if (ImguiEcsRef.hasComponent<RigidBody>(oriSelectedEntity.get_id()))
+                                {
+                                    RigidBody* oldRigidbody = ImguiEcsRef.getComponent<RigidBody>(oriSelectedEntity.get_id());
+                                    if (oldRigidbody)
+                                    {
+
+                                        ImguiEcsRef.addComponent<RigidBody>(newEntityID, *oldRigidbody);
+                                    }
+                                }
+
+                                
                                
 
                                
@@ -1185,7 +1197,7 @@ namespace gam300 {
 
 
         // Left column 
-        ImGui::SetColumnWidth(0, 560.0f);
+        ImGui::SetColumnWidth(0, 200.0f);
         bool openHeader = ImGui::CollapsingHeader(componentName);
 
         ImGui::SetItemAllowOverlap(); // allow overlapping hover for button
