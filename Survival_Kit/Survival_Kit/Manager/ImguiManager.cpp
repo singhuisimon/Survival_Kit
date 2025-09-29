@@ -666,7 +666,7 @@ namespace gam300 {
             std::string displayedScene = shownFile;
             size_t pos = shownFile.find("Assets"); // find "Assets" in the path
             if (pos != std::string::npos) {
-                displayedScene = shownFile.substr(pos); // keep everything from "Assets" onwards
+                displayedScene = shownFile.substr(pos); 
             }
 
             // Get the window width and text width

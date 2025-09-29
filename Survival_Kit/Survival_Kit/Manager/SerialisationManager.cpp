@@ -157,7 +157,7 @@ namespace gam300 {
         std::string massData = SerialisationManager::extractObjectValue(jsonData, "mass");
         if (!massData.empty()) mass = std::stof(massData);
 
-        Vector3D velocity = Vector3D::ONE;
+        Vector3D velocity = Vector3D::ZERO;
         std::string velocityData = SerialisationManager::extractObjectValue(jsonData, "scale");
         if (!velocityData.empty()) {
             std::vector<float> velocityArray = SerialisationManager::parseFloatArray(velocityData);
