@@ -20,7 +20,7 @@ namespace gam300
 		: ComponentSystem<RigidBody>("PhysicsSystem")
 		, PhysicsEcsRef(EM)
 	{
-		// set_priority(101); // optional
+		set_priority(101);
 	}
 
 	bool PhysicsSystem::init(SystemManager & /*sysMgr*/)

@@ -57,6 +57,8 @@
     <ClCompile Include="Manager\PrefabManager.cpp" />
     <ClCompile Include="Manager\ForceManager.cpp" />
     <ClCompile Include="Manager\TorqueManager.cpp" />
+    <ClCompile Include="System\CollisionSystem.cpp" />
+    <ClCompile Include="Component\Collider.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component\Component.h" />
@@ -132,6 +134,8 @@
     <ClInclude Include="IMGUI\ImGuizmo.h" />
     <ClInclude Include="Manager\ForceManager.h" />
     <ClInclude Include="Manager\TorqueManager.h" />
+    <ClInclude Include="System\CollisionSystem.h" />
+    <ClInclude Include="Component\Collider.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Scene\Game.scn" />

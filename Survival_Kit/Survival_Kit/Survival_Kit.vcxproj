@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Component\Collider.cpp" />
     <ClCompile Include="Component\RigidBody.cpp" />
     <ClCompile Include="Component\AudioComponent.cpp" />
     <ClCompile Include="Component\Transform3D.cpp" />
@@ -66,6 +67,7 @@
     <ClCompile Include="Manager\SerialisationManager.cpp" />
     <ClCompile Include="Manager\SystemManager.cpp" />
     <ClCompile Include="Manager\TorqueManager.cpp" />
+    <ClCompile Include="System\CollisionSystem.cpp" />
     <ClCompile Include="System\MovementSystem.cpp" />
     <ClCompile Include="System\PhysicsSystem.cpp" />
     <ClCompile Include="System\AudioSystem.cpp" />
@@ -137,6 +139,8 @@
     <ClInclude Include="Manager\SerialisationBinManager.h" />
     <ClInclude Include="Manager\SerialisationManager.h" />
     <ClInclude Include="Manager\TorqueManager.h" />
+    <ClInclude Include="Component\Collider.h" />
+    <ClInclude Include="System\CollisionSystem.h" />
     <ClInclude Include="System\MovementSystem.h" />
     <ClInclude Include="System\PhysicsSystem.h" />
     <ClInclude Include="System\AudioSystem.h" />
@@ -269,6 +273,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)ScriptCore;$(SolutionDir)External_Libraries\include\FMOD API\core;$(SolutionDir)External_Libraries\include\FMOD API\studio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
