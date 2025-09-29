@@ -109,8 +109,6 @@ namespace gam300 {
         }
     }
 
-
-#if 1 // old code
     void ImguiManager::displayFileList(bool& fileWindow, std::string& shownFile) {
 
         std::string scenePath = getAssetFilePath("Scene");
@@ -221,52 +219,6 @@ namespace gam300 {
         
     }
 
-#endif
-
-#if 0 // new code for display file list
-    void ImguiManager::displayFileList(bool& fileWindow, std::string& shownFile)
-    {
-        std::string scenePath = getAssetFilePath("Scene");
-        std::vector<std::pair<std::string, std::string>> sceneFiles;
-
-        if (std::filesystem::exists(scenePath) && std::filesystem::is_directory(scenePath))
-        {
-            for (const auto& file : std::filesystem::directory_iterator(scenePath)) {
-                if (std::filesystem::is_regular_file(file.path())) {
-                    sceneFiles.push_back(std::make_pair(file.path().filename().string(), file.path().string()));
-                }
-            }
-        }
-        ImGui::SetNextWindowSize(ImVec2(800, 400));
-
-        if (ImGui::Begin("Level Select", &fileWindow, ImGuiWindowFlags_NoDocking))
-        {
-            static std::string pendingScene = "";
-            static bool showConfirmPanel = false;
-
-            for (int i = 0; i < sceneFiles.size(); i++) {
-                std::string fileName = sceneFiles[i].first;
-
-                if (ImGui::Selectable(fileName.c_str())) {
-                    pendingScene = sceneFiles[i].second;
-                    showConfirmPanel = true;
-                    ImGui::OpenPopup("Save Current Scene?");
-                }
-            }
-
-            if (showConfirmPanel)
-            {
-                if (ImGui::BeginPopupModal("Save Current Scene?", NULL, ImGuiWindowFlags_AlwaysAutoResize))
-                {
-                    ImGui::Text("Do you want to save the current scene?");
-                    ImGui::Separator();
-
-
-                }
-            }
-        }
-    }
-#endif
 
     void ImguiManager::displayHierarchyList() {
  
@@ -539,7 +491,7 @@ namespace gam300 {
         }
 
         std::string newPath = getAssetFilePath("Scene/") + saveAsDefaultName;
-        // if click save as 
+       
         if (showSaveAsPanel)
         {
             ImGui::OpenPopup("Save Scene As");
@@ -587,24 +539,22 @@ namespace gam300 {
 
                     if (ImGui::Button("Yes", ImVec2(120, 0)))
                     {
-                        //newPath = getAssetFilePath("Scene/") + saveAsDefaultName;
+                   
                         if (!std::filesystem::path(newPath).has_extension()) {
                             newPath += ".scn";
                         }
 
                         SEM.saveScene(newPath);
                         shownFile = newPath;
-                        LM.writeLog("Scene overwritten: %s", newPath.c_str());
 
                         showSaveAsPanel = false;
-                        ImGui::CloseCurrentPopup(); // close confirm
                         ImGui::CloseCurrentPopup(); // close Save As
                     }
 
                     ImGui::SameLine();
                     if (ImGui::Button("No", ImVec2(120, 0)))
                     {
-                        ImGui::CloseCurrentPopup(); // only close confirm, keep Save As open
+                        ImGui::CloseCurrentPopup(); 
                     }
 
                     ImGui::EndPopup();
