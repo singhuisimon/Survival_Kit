@@ -94,7 +94,7 @@ namespace gam300 {
             if (camType == CameraType::ORBITING)
             {
                 // KENNY TESTING
-                std::cout << "Camera is orbiting with offsets: " << xoffset << ", " << yoffset << std::endl;
+                //std::cout << "Camera is orbiting with offsets: " << xoffset << ", " << yoffset << std::endl;
 
                 // Calculate spherical coordinates for orbiting movement
                 const float r = glm::sqrt(pos.x * pos.x +

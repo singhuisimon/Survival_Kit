@@ -101,6 +101,11 @@ namespace gam300 {
 
     // Update input states, should be called once per frame
     void InputManager::update() {
+        // Reset scroll values at the START of the frame (not the end)
+        // This ensures scroll values from previous frame are cleared before new ones arrive
+        m_scroll_x_offset = 0.0;
+        m_scroll_y_offset = 0.0;
+
         // Store previous states for transitions
         m_prev_key_states = m_key_states;
         m_prev_mouse_button_states = m_mouse_button_states;
@@ -108,8 +113,13 @@ namespace gam300 {
         // Store previous mouse position
         m_prev_mouse_x = m_mouse_x;
         m_prev_mouse_y = m_mouse_y;
-        // KENNY TESTING: Update mouse cursor
+
+        // Update mouse cursor position
         glfwGetCursorPos(m_window, &m_mouse_x, &m_mouse_y);
+
+        // Make sure glfwPollEvents() is called BEFORE processing state transitions
+        // This ensures all callbacks (including scroll) are processed before we transition states
+        glfwPollEvents();
 
         // Update key states from JUST_PRESSED to PRESSED and JUST_RELEASED to RELEASED
         for (auto& key_state : m_key_states) {
@@ -131,9 +141,8 @@ namespace gam300 {
             }
         }
 
-        // Reset scroll values since they're only valid for one frame
-        m_scroll_x_offset = 0.0;
-        m_scroll_y_offset = 0.0;
+        // REMOVED: Don't reset scroll values here anymore!
+        // The old code was: m_scroll_x_offset = 0.0; m_scroll_y_offset = 0.0;
     }
 
     // Check if a key is currently pressed

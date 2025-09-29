@@ -65,6 +65,23 @@ namespace gam300 {
     };
 
     /**
+     * @brief Serializer for RigidBody components.
+     */
+    class RigidBodySerializer : public IComponentSerializer {
+    public:
+        std::string serialize(Component* component) override;
+        Component* deserialize(EntityID entityId, const std::string& jsonData) override;
+    };
+	/* @brief Serializer for Audio_Component components.
+	* @author Amanda Leow Boon Suan
+*/    
+    class AudioComponentSerializer : public IComponentSerializer {
+    public:
+        std::string serialize(Component* component) override;
+		Component* deserialize(EntityID entityId, const std::string& jsonData) override;
+    };
+
+    /**
      * @brief Manager for serializing and deserializing game entities.
      * @details Handles loading entities from scene files and saving them back.
      */
@@ -130,6 +147,13 @@ namespace gam300 {
          */
         void registerComponentSerializer(const std::string& componentName, std::shared_ptr<IComponentSerializer> serializer);
 
+        /**
+         * @brief Get a component serializer by name.
+         * @param componentName The name of the component type.
+         * @return Shared pointer to the serializer, or nullptr if not found.
+         */
+        std::shared_ptr<IComponentSerializer> getComponentSerializer(const std::string& componentName);
+
         // Helper methods for parsing
         bool parseJsonFile(const std::string& filename, std::string& jsonContent);
         bool parseComponents(EntityID entityId, const std::string& componentData);
@@ -140,6 +164,7 @@ namespace gam300 {
         static std::vector<std::string> splitJsonArray(const std::string& jsonArray);
         static std::vector<float> parseFloatArray(const std::string& arrayJson);
         static std::string extractObjectValue(const std::string& json, const std::string& fieldName);
+		static std::string extractNumberValue(const std::string& json, const std::string& fieldName);
 
         // Indentation helper for pretty JSON output
         std::string getIndent(int level) const;

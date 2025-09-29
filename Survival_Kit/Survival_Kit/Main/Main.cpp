@@ -18,7 +18,7 @@ int main(void) {
     //    printf("ERROR: Failed to start GameManager\n");
     //    return -1;
     //}
-
+	
 
     bool spacePressed = false;
 
@@ -95,13 +95,8 @@ int main(void) {
 
     IMGUIM.startUp(window, io);
 
-    // Editor Temporary Windows
-    //bool test_window = true;
-    bool temporaryMainMenu = true;
-    bool inspectorWindow = true;
-    bool assetsBrowser = true; // to load assets
-    bool fileWindow = true;
-    std::string shownFile{};
+
+
 
     //bool test_done = false;
     // Create a clock for timing
@@ -121,9 +116,24 @@ int main(void) {
     app.AddScript(0, "TestScript");
     //std::cout << "Initial script added" << std::endl;
 
-    while (!GM.getGameOver() && !glfwWindowShouldClose(window)) {
-        // Process events
-        glfwPollEvents();
+    // -------------------------Set up Asset Manager ------------------------------------------
+
+    //this creates the default configuration for the asset manager to know the asset filepath and such
+    gam300::AssetManager::Config cfg = AM.createDefaultConfig();
+
+    AM.setConfig(cfg);
+    AM.startUp();
+
+    AM.scanAndProcess();
+
+    std::cout << "\nFinal database count: " << AM.db().Count() << std::endl;
+
+    AM.shutDown();
+
+    // ---------------------------------------------------------------------------------------
+
+
+       while (!GM.getGameOver() && !glfwWindowShouldClose(window)) {
 
         // Update input system
         IM.update();
@@ -137,7 +147,6 @@ int main(void) {
             app.ReloadScripts();
             app.AddScript(0, "TestScript");  // Re-add script after reload
         }
-
         // Update all systems (including InputSystem)
         EM.updateSystems(GM.getFrameTime() / 1000.0f);
 
@@ -149,83 +158,12 @@ int main(void) {
 
         IMGUIM.startImguiFrame();
 
-        //ImGuiViewport* viewport = ImGui::GetMainViewport();
-        //if (viewport == nullptr) {
-        //    std::cout << "Error: ImGui::GetMainViewport() returned nullptr!" << std::endl;
-        //}
-        //else {
-        //    // Create dock space over the main viewport
-        //    ImGuiID dockspace_id = 0;  // If 0, it will generate a new one
-        //    ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_AutoHideTabBar;
-        //    ImGui::DockSpaceOverViewport(dockspace_id, viewport, dockspace_flags);
+        IMGUIM.displayTopMenu();
 
-        //}
-
-        // Editor Temporary Menu Bar
-#if 1
-        // Editor Temporary Menu Bar
-        if (ImGui::BeginMainMenuBar())
-        {
-            ImGui::Separator();
-            if (ImGui::BeginMenu("File_Test"))
-            {
-                if (ImGui::MenuItem("New"))
-                {
-                    
-                }
-
-                if (ImGui::MenuItem("Open"))
-                {
-                    fileWindow = true;
-                }
-
-                if (ImGui::MenuItem("Save"))
-                {
-                    //To uncomment after Serialisation is fixed
-                    //SEM.saveScene(shownFile);
-                }
-                ImGui::EndMenu();
-                ImGui::Separator();
-            }
-            ImGui::EndMainMenuBar();
-        }
-
-#endif // use back after solving viewport problem
-
-        ImGui::SetNextWindowSize(ImVec2(600, 400));
-        if (ImGui::Begin("Temporary Menu Bar to test save", &temporaryMainMenu, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize))
-        {
-          
-            if (ImGui::MenuItem("New"))
-            {
-
-            }
-
-            if (ImGui::MenuItem("Open"))
-            {
-                fileWindow = true; 
-            }
-
-            if (ImGui::MenuItem("Save"))
-            {
-                //To uncomment after Serialisation is fixed
-                SEM.saveScene(shownFile);
-            }
-                  
-        }
-        
-        ImGui::End();
        
         // Editor Dockspace
-       
         ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport()); //not working for some reason 
-        //ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_AutoHideTabBar);
 
-        if (fileWindow) {
-
-            IMGUIM.displayFileList(fileWindow, shownFile); // for now it open at the start of the engine
-        }
-        
         IMGUIM.renderViewport();
 
         // Editor Temporary Windows
@@ -233,12 +171,7 @@ int main(void) {
        
         IMGUIM.displayHierarchyList();
 
-     
-      /*  ImGui::SetNextWindowSize(ImVec2(600, 400));
-        if (ImGui::Begin("Assets Browser Test", &assetsBrowser, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize))
-        {
-        }
-        ImGui::End();*/
+        IMGUIM.displayAssetsBrowserList();
 
         // Editor Start Render
         ImGui::Render();

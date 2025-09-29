@@ -21,22 +21,42 @@
     <ClCompile Include="Manager\SerialisationBinManager.cpp" />
     <ClCompile Include="Manager\SerialisationManager.cpp" />
     <ClCompile Include="Manager\SystemManager.cpp" />
+    <ClCompile Include="Resource\ResourcePaths.cpp" />
     <ClCompile Include="Utility\AssetPath.cpp" />
     <ClCompile Include="Utility\Clock.cpp" />
     <ClCompile Include="Utility\MathUtils.cpp" />
     <ClCompile Include="Utility\Vector2D.cpp" />
     <ClCompile Include="Utility\Vector3D.cpp" />
+    <ClCompile Include="Manager\ResourceManager.cpp" />
+    <ClCompile Include="Resource\ResourceLoaders.cpp" />
     <ClCompile Include="Component\Transform3D.cpp" />
     <ClCompile Include="Manager\GraphicsManager.cpp" />
     <ClCompile Include="Graphics\GLResources.cpp" />
     <ClCompile Include="Graphics\ShaderProgram.cpp" />
     <ClCompile Include="Graphics\Shape.cpp" />
     <ClCompile Include="System\TransformSystem.cpp" />
+    <ClCompile Include="Component\RigidBody.cpp" />
+    <ClCompile Include="System\PhysicsSystem.cpp" />
     <ClCompile Include="Graphics\Sampler.cpp" />
     <ClCompile Include="Graphics\Texture.cpp" />
     <ClCompile Include="Graphics\Common.cpp" />
     <ClCompile Include="Component\RenderComponent.cpp" />
     <ClCompile Include="System\RenderSystem.cpp" />
+    <ClCompile Include="System\MovementSystem.cpp" />
+    <ClCompile Include="Component\AudioComponent.cpp" />
+    <ClCompile Include="System\AudioSystem.cpp" />
+    <ClCompile Include="Manager\AssetManager.cpp" />
+    <ClCompile Include="Pipeline\AssetDatabase.cpp" />
+    <ClCompile Include="Pipeline\AssetDescriptorGenerator.cpp" />
+    <ClCompile Include="Pipeline\AssetImporter.cpp" />
+    <ClCompile Include="Pipeline\AssetScanner.cpp" />
+    <ClCompile Include="Pipeline\Importers\TextureImporter.cpp" />
+    <ClCompile Include="Pipeline\Importers\MeshImporter.cpp" />
+    <ClCompile Include="Pipeline\Importers\AudioImporter.cpp" />
+    <ClCompile Include="Pipeline\Importers\ShaderImporter.cpp" />
+    <ClCompile Include="Pipeline\Importers\SceneImporter.cpp" />
+    <ClCompile Include="IMGUI\ImGuizmo.cpp" />
+    <ClCompile Include="Manager\PrefabManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component\Component.h" />
@@ -71,6 +91,7 @@
     <ClInclude Include="Utility\ECS_Variables.h" />
     <ClInclude Include="Utility\Vector2D.h" />
     <ClInclude Include="Utility\Vector3D.h" />
+    <ClInclude Include="Manager\ResourceManager.h" />
     <ClInclude Include="Component\Transform3D.h" />
     <ClInclude Include="Manager\GraphicsManager.h" />
     <ClInclude Include="Graphics\Camera.h" />
@@ -84,6 +105,8 @@
     <ClInclude Include="Utility\Constant.h" />
     <ClInclude Include="Component\TransformComponent.h" />
     <ClInclude Include="System\TransformSystem.h" />
+    <ClInclude Include="Component\RigidBody.h" />
+    <ClInclude Include="System\PhysicsSystem.h" />
     <ClInclude Include="Graphics\Texture.h" />
     <ClInclude Include="Graphics\Sampler.h" />
     <ClInclude Include="Graphics\stb_image.h" />
@@ -91,6 +114,25 @@
     <ClInclude Include="Graphics\SharedGraphics.h" />
     <ClInclude Include="Component\RenderComponent.h" />
     <ClInclude Include="System\RenderSystem.h" />
+    <ClInclude Include="System\MovementSystem.h" />
+    <ClInclude Include="Component\AudioComponent.h" />
+    <ClInclude Include="System\AudioSystem.h" />
+    <ClInclude Include="Manager\AssetManager.h" />
+    <ClInclude Include="Pipeline\AssetDatabase.h" />
+    <ClInclude Include="Pipeline\AssetDescriptorGenerator.h" />
+    <ClInclude Include="Pipeline\AssetImporter.h" />
+    <ClInclude Include="Pipeline\AssetScanner.h" />
+    <ClInclude Include="Resource\ResourceData.h" />
+    <ClInclude Include="Resource\ResourceMetadata.h" />
+    <ClInclude Include="Resource\ResourcePaths.h" />
+    <ClInclude Include="Resource\ResourceTypes.h" />
+    <ClInclude Include="Pipeline\Importers\TextureImporter.h" />
+    <ClInclude Include="Pipeline\Importers\MeshImporter.h" />
+    <ClInclude Include="Pipeline\Importers\AudioImporter.h" />
+    <ClInclude Include="Pipeline\Importers\ShaderImporter.h" />
+    <ClInclude Include="Pipeline\Importers\SceneImporter.h" />
+    <ClInclude Include="IMGUI\ImGuizmo.h" />
+    <ClInclude Include="Manager\PrefabManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Scene\Game.scn" />
@@ -99,5 +141,8 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="Survival_Kit.log" />
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="Assets\Audio\sfx_jumping.wav" />
   </ItemGroup>
 </Project>
