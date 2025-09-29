@@ -1,0 +1,29 @@
+{
+  "asset": {
+    "guid": "485910592E4D4009",
+    "id": 5213216018873008137,
+    "sourcePath": "C:/Digipen/Survival_Kit/Survival_Kit/Survival_Kit/Assets/Textures/game_background_4.png",
+    "intermediatePath": "C:\\Digipen\\Survival_Kit\\Cache/Intermediate\\game_background_4.png",
+    "compiledPath": "",
+    "type": 2,
+    "ext": ".png",
+    "contentHash": "",
+    "lastWriteTime": 0,
+    "valid": true
+  },
+  "extras": {
+    "displayName": "game_background_4.png",
+    "category": "Texture",
+    "tags": [],
+    "lastImported": 1759067829,
+    "user": {}
+  }
+  ,"textureSettings": {
+    "usageType": "COLOR",
+    "compression": "BC1",
+    "quality": 0.8,
+    "generateMipmaps": true,
+    "srgb": true,
+    "inputFiles": ["game_background_4.png"]
+  }
+}

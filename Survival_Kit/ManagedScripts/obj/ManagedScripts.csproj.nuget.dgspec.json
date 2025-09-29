@@ -1,31 +1,29 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Admin\\source\\repos\\gam_300\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj": {}
+    "C:\\Users\\huish\\Downloads\\SIT Y3 T1\\SEP5\\Sep Prj\\Survival_Kit\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Admin\\source\\repos\\gam_300\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj": {
+    "C:\\Users\\huish\\Downloads\\SIT Y3 T1\\SEP5\\Sep Prj\\Survival_Kit\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Admin\\source\\repos\\gam_300\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj",
+        "projectUniqueName": "C:\\Users\\huish\\Downloads\\SIT Y3 T1\\SEP5\\Sep Prj\\Survival_Kit\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj",
         "projectName": "ManagedScripts",
-        "projectPath": "C:\\Users\\Admin\\source\\repos\\gam_300\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj",
-        "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Admin\\source\\repos\\gam_300\\Survival_Kit\\ManagedScripts\\obj\\",
+        "projectPath": "C:\\Users\\huish\\Downloads\\SIT Y3 T1\\SEP5\\Sep Prj\\Survival_Kit\\Survival_Kit\\ManagedScripts\\ManagedScripts.csproj",
+        "packagesPath": "C:\\Users\\huish\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\huish\\Downloads\\SIT Y3 T1\\SEP5\\Sep Prj\\Survival_Kit\\Survival_Kit\\ManagedScripts\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\huish\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config"
         ],
         "originalTargetFrameworks": [
           "net8.0-windows"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -43,8 +41,7 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        },
-        "SdkAnalysisLevel": "9.0.300"
+        }
       },
       "frameworks": {
         "net8.0-windows7.0": {
@@ -65,7 +62,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.305/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.414/PortableRuntimeIdentifierGraph.json"
         }
       },
       "runtimes": {

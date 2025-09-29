@@ -117,6 +117,10 @@ namespace gam300 {
 
         static JPH::Vec3 convert(const Vector3D& v) { return JPH::Vec3(v.x, v.y, v.z); }
         static Vector3D convert(const JPH::Vec3& v) { return Vector3D(v.GetX(), v.GetY(), v.GetZ()); }
+
+        JPH::Quat getRotation() const;
+
+        void setRotation(const JPH::Quat& rot, JPH::PhysicsSystem& system);
     };
 
 } // namespace gam300
