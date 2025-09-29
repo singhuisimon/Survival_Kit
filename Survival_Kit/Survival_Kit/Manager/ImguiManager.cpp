@@ -1075,9 +1075,13 @@ namespace gam300 {
                 std::string filename = assetEntry.path().filename().string();
 
                 ImGui::PushID(filename.c_str());
-                if (ImGui::Button(filename.c_str(), ImVec2(thumbnailSize, thumbnailSize)))
+                if (ImGui::Button(filename.c_str(), ImVec2(thumbnailSize, thumbnailSize))) {
+                    
+                    //TODO: Ensure that this only loads for SCENE FILES
                     selectedAssetIndex = i;
-
+                    ImguiEcsRef.clearAllEntities();
+                    SEM.loadScene(assetEntry.path().string());
+                }
 
                 // ------- show toolip detail ---------- 
                 if (ImGui::IsItemHovered())
