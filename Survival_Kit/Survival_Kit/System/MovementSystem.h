@@ -3,9 +3,7 @@
 \file       MovementSystem.h
 \author     (you)
 \date       Oct 03 2025
-\brief      Input-driven movement wired to new RigidBodyComponent.
-            - If mass == 0 (invMass == 0) -> treat as kinematic: move Transform directly.
-            - Else dynamic: convert input into per-frame forces via ForceManager.
+\brief      Input-driven movement that applies forces to RigidBody.
 /******************************************************************************/
 #pragma once
 #ifndef __MOVEMENT_SYSTEM_H__
@@ -30,15 +28,16 @@ namespace gam300
 
         void process_entity(EntityID entity_id) override;
 
-        void handleDynamic(Transform3D* transform, RigidBody* rigidBody);
-        void handleKinematic(Transform3D* transform, RigidBody* rigidBody);
-        Vector3D getMovementInput();
-
     private:
         float m_dt{ 0.0f };
-        // Force magnitude for dynamic bodies when keys are held (N).
-        float m_moveForce{ 20.0f };
-        // Bit mask used to tag input forces on the per-entity ForceManager.
+
+        // Force magnitude (Newtons) applied while a key is held (for dynamic bodies)
+        float m_moveForce{ 40.0f };
+
+        // Direct-move speed for static bodies (units/sec)
+        float m_kinematicSpeed{ 2.0f };
+
+        // Mask to tag per-frame input forces in ForceManager
         static constexpr unsigned INPUT_FORCE_MASK = 1u << 0;
     };
 }

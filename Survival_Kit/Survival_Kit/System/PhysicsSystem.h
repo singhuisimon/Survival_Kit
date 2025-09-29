@@ -3,9 +3,10 @@
 \file       PhysicsSystem.h
 \author     (you)
 \date       Oct 03 2025
-\brief      Physics system that updates RigidBodyComponent each frame.
-           - Finds (Transform3D, RigidBodyComponent) pairs
-           - Calls rb->Integrate(*transform, dt)
+\brief      Physics system that updates RigidBody each frame.
+           - Finds (Transform3D, RigidBody) pairs
+           - Calls integrateForces / integrateVelocity with stored dt
+*/
 /******************************************************************************/
 #pragma once
 #ifndef __PHYSICS_SYSTEM_H__
@@ -30,10 +31,12 @@ namespace gam300
         void update(float dt) override;
         void shutdown() override;
 
-        void process_entity(EntityID entity_id, float dt);
+        // NOTE: matches System base signature (no dt here)
+        void process_entity(EntityID entity_id) override;
 
     private:
         ECSManager &PhysicsEcsRef; // bound to EM in ctor
+        float       m_dt{ 0.0f };    
     };
 } // namespace gam300
 

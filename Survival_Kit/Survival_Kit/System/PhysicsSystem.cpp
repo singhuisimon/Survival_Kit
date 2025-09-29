@@ -16,48 +16,48 @@
 
 namespace gam300
 {
-    PhysicsSystem::PhysicsSystem()
-        : ComponentSystem<RigidBody>("PhysicsSystem")
-        , PhysicsEcsRef(EM)
-    {
-        // set_priority(101); // optional
-    }
+	PhysicsSystem::PhysicsSystem()
+		: ComponentSystem<RigidBody>("PhysicsSystem")
+		, PhysicsEcsRef(EM)
+	{
+		// set_priority(101); // optional
+	}
 
-    bool PhysicsSystem::init(SystemManager & /*sysMgr*/)
-    {
-        LM.writeLog("PhysicsSystem::init() - Physics System Initialized");
-        return true;
-    }
+	bool PhysicsSystem::init(SystemManager & /*sysMgr*/)
+	{
+		LM.writeLog("PhysicsSystem::init() - Physics System Initialized");
+		return true;
+	}
 
-    void PhysicsSystem::update(float dt)
-    {
-        if (dt <= 0.0f) return;
+	void PhysicsSystem::update(float dt)
+	{
+		if (dt <= 0.0f) return;
+		m_dt = dt;
+		for (EntityID entity_id : m_entities)
+		{
+			process_entity(entity_id);
+		}
+	}
 
-        for (EntityID entity_id : m_entities)
-        {
-            process_entity(entity_id, dt);
-        }
-    }
+	void PhysicsSystem::shutdown()
+	{
+		LM.writeLog("PhysicsSystem::shutdown() - Physics System shut down");
+	}
 
-    void PhysicsSystem::shutdown()
-    {
-        LM.writeLog("PhysicsSystem::shutdown() - Physics System shut down");
-    }
+	void PhysicsSystem::process_entity(EntityID entity_id)
+	{
+		// Require both Transform3D and RigidBodyComponent
+		if (!PhysicsEcsRef.hasComponent<Transform3D>(entity_id) ||
+			!PhysicsEcsRef.hasComponent<RigidBody>(entity_id))
+		{
+			return;
+		}
 
-    void PhysicsSystem::process_entity(EntityID entity_id, float dt)
-    {
-        // Require both Transform3D and RigidBodyComponent
-        if (!PhysicsEcsRef.hasComponent<Transform3D>(entity_id) ||
-            !PhysicsEcsRef.hasComponent<RigidBody>(entity_id))
-        {
-            return;
-        }
+		Transform3D *transform = PhysicsEcsRef.getComponent<Transform3D>(entity_id);
+		RigidBody *rigidBody = PhysicsEcsRef.getComponent<RigidBody>(entity_id);
+		if (!transform || !rigidBody) return;
 
-        Transform3D *transform = PhysicsEcsRef.getComponent<Transform3D>(entity_id);
-        RigidBody *rigidBody = PhysicsEcsRef.getComponent<RigidBody>(entity_id);
-        if (!transform || !rigidBody) return;
-
-        // Integrate linear and angular state (position is updated inside)
-        rigidBody->Integrate(*transform, dt);
-    }
+		// Integrate linear and angular state (position is updated inside)
+		rigidBody->Integrate(*transform, m_dt);
+	}
 } // namespace gam300

@@ -3,7 +3,8 @@
 \file       MovementSystem.cpp
 \author     (you)
 \date       Oct 03 2025
-\brief      Rewired to use Transform3D + RigidBodyComponent (ForceManager-based).
+\brief      Applies direct transform edits for static bodies, and real forces
+           for dynamic bodies via RigidBody's ForceManager.
 /******************************************************************************/
 
 #include "../System/MovementSystem.h"
@@ -11,7 +12,11 @@
 #include "../Manager/LogManager.h"
 #include "../Manager/InputManager.h"
 
-// If your key defines live elsewhere, keep using IM.isKeyPressed(GLFW_KEY_*)
+// We create LinearDirectionalForce and use Force::Perm.
+// (Removed/re-added each frame so it only acts while keys are held.)
+#include "../Manager/ForceManager.h"
+
+#include <cmath> // std::sqrt
 
 namespace gam300
 {
@@ -47,60 +52,48 @@ namespace gam300
         auto rigidBody = CM.get_component<RigidBody>(entity_id);
         if (!transform || !rigidBody) return;
 
-        // --- KINEMATIC-style control: treat mass==0 as kinematic (direct transform edits) ---
+        // ---------- STATIC: treat as kinematic-style (direct transform edits) ----------
         if (rigidBody->isStatic())
         {
-            // WASD moves in X/Y plane (match your previous behavior)
-            if (IM.isKeyPressed(GLFW_KEY_A))
+            Vector3D delta(0.0f, 0.0f, 0.0f);
+            if (IM.isKeyPressed(GLFW_KEY_A)) delta.x -= m_kinematicSpeed * m_dt;
+            if (IM.isKeyPressed(GLFW_KEY_D)) delta.x += m_kinematicSpeed * m_dt;
+            if (IM.isKeyPressed(GLFW_KEY_W)) delta.y += m_kinematicSpeed * m_dt; 
+            if (IM.isKeyPressed(GLFW_KEY_S)) delta.y -= m_kinematicSpeed * m_dt;
+
+            if (delta.x != 0.0f || delta.y != 0.0f || delta.z != 0.0f)
             {
-                transform->setPosition(transform->getPosition() + Vector3D(-2.0f, 0.0f, 0.0f) * m_dt);
-            }
-            if (IM.isKeyPressed(GLFW_KEY_D))
-            {
-                transform->setPosition(transform->getPosition() + Vector3D(2.0f, 0.0f, 0.0f) * m_dt);
-            }
-            if (IM.isKeyPressed(GLFW_KEY_W))
-            {
-                transform->setPosition(transform->getPosition() + Vector3D(0.0f, 2.0f, 0.0f) * m_dt);
-            }
-            if (IM.isKeyPressed(GLFW_KEY_S))
-            {
-                transform->setPosition(transform->getPosition() + Vector3D(0.0f, -2.0f, 0.0f) * m_dt);
+                transform->setPosition(transform->getPosition() + delta);
             }
             return;
         }
 
-        // --- DYNAMIC: convert input to forces for this frame ---
-        // Clear any previous frame's input forces (so they only last while keys are held)
+        // ---------- DYNAMIC: convert input to forces this frame ----------
+        // Remove last frame's input forces (so they only act while keys are held)
         rigidBody->getForceManager().RemoveForcesByMask(INPUT_FORCE_MASK);
 
-        // Sum up desired input directions (unit vectors)
+        // Build desired input direction
         Vector3D dir(0.0f, 0.0f, 0.0f);
         if (IM.isKeyPressed(GLFW_KEY_A)) dir.x -= 1.0f;
         if (IM.isKeyPressed(GLFW_KEY_D)) dir.x += 1.0f;
-        if (IM.isKeyPressed(GLFW_KEY_W)) dir.y += 1.0f;  // same as your earlier example (Y up)
+        if (IM.isKeyPressed(GLFW_KEY_W)) dir.y += 1.0f;
         if (IM.isKeyPressed(GLFW_KEY_S)) dir.y -= 1.0f;
 
-        // Normalize if needed
+        // Normalize and push a directional force for this frame
         const float len2 = dir.x * dir.x + dir.y * dir.y + dir.z * dir.z;
         if (len2 > 1e-12f)
         {
             const float invLen = 1.0f / std::sqrt(len2);
             dir.x *= invLen; dir.y *= invLen; dir.z *= invLen;
 
-            // Add a directional force tagged with our INPUT_FORCE_MASK.
-            // We remove/re-add every frame, so duration doesn't matter (Perm is fine).
             rigidBody->getForceManager().AddForce<LinearDirectionalForce>(
                 dir, m_moveForce, INPUT_FORCE_MASK, Force::Perm
             );
-
-            // Ensure physics considers these forces this frame:
-            // PhysicsSystem will call rb->Integrate(*transform, m_dt).
-            // (Integration uses ForceManager inside RigidBodyComponent.)
+            // NOTE: We remove and re-add every frame, so Perm is fine.
+            // PhysicsSystem will integrate and apply this force this same frame.
         }
 
-        // OPTIONAL: quick test impulse or velocity tweak (commented to avoid double-accel)
-        // Vector3D impulse = Vector3D(2.0f, 0.0f, 0.0f) * m_dt * rigidBody->getMass();
-        // rigidBody->setVelocity(rigidBody->getVelocity() + impulse * rigidBody->getInvMass());
+        // If you also want rotational input via torque, you can mirror this pattern
+        // with rigidBody->getTorqueManager(), using your AngularDirectionalTorque.
     }
 }
