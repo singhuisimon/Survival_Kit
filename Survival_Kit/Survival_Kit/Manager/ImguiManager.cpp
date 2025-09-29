@@ -19,6 +19,7 @@
 #include "../Utility/AssetPath.h"
 #include "../Component/Transform3D.h"
 #include "../Component/RigidBody.h"
+#include "../Manager/PrefabManager.h"
 #include "../Component/Collider.h"
 
 #include <iostream>
@@ -38,6 +39,9 @@ namespace gam300 {
     static bool needsRefresh = true;
     static float assetIconSize = 64.0f;
     static int selectedAssetIndex = -1;
+
+    static bool asset_editor = false;
+    static std::filesystem::directory_entry currentAsset;
 
     // Asset Type names for display
     const char* ImguiManager::getAssetTypeName(AssetType type)
@@ -165,9 +169,9 @@ namespace gam300 {
                 }
             }
         }
-
+#if 0
         ImGui::SetNextWindowSize(ImVec2(800, 400));
-
+        
         if (ImGui::Begin("Level Select", &fileWindow, ImGuiWindowFlags_NoDocking)) {
 
             for (int i = 0; i < sceneFiles.size(); i++)
@@ -259,7 +263,71 @@ namespace gam300 {
 
             ImGui::End();
         }
-        
+#endif
+
+#if 1 // new code
+        if (fileWindow)
+        {
+            ImGui::OpenPopup("Level Select");
+            //std::cout << "is open here\n";
+           
+        }
+
+        if (ImGui::BeginPopupModal("Level Select", nullptr, ImGuiWindowFlags_NoDocking))
+        {
+            //std::cout << "is open here\n";
+            ImGui::SetWindowSize(ImVec2(500, 200), ImGuiCond_Once);
+            
+            for (int i = 0; i < sceneFiles.size(); i++)
+            {
+                std::string fileName = sceneFiles[i].first;
+                if (ImGui::Selectable(fileName.c_str())) {
+
+                    ImguiEcsRef.clearAllEntities();
+
+                    //if (sceneFiles[i].second != shownFile) {
+
+                    if (SEM.loadScene(sceneFiles[i].second)) {
+
+                        shownFile = sceneFiles[i].second;
+
+                        LM.writeLog("IMGUI_Manager::displayFileList(): Scene %s loaded successfully.", sceneFiles[i].first.c_str());
+                        //std::cout << sceneFiles[i].second << std::endl;
+                        //std::cout << "Scene " << sceneFiles[i].first << "loaded successfully from displayFileList" << std::endl;
+
+                    }
+                    else {
+
+                        LM.writeLog("IMGUI_Manager::displayFileList(): Scene %s failed to load. Loading default scene.", sceneFiles[i].first.c_str());
+                        //std::cout << "Scene " << sceneFiles[i].first << "failed to load from displayFileList. Loading default scene." << std::endl;
+
+                        SEM.saveScene(getAssetFilePath("Scene/Game.scn"));
+                        if (SEM.loadScene(getAssetFilePath("Scene/Game.scn"))) {
+
+                            LM.writeLog("IMGUI_Manager::displayFileList(): Default scene loaded successfully.");
+                            //std::cout << "Default scene loaded successfully from displayFileList" << std::endl;
+                        }
+                        else {
+
+                            LM.writeLog("IMGUI_Manager::displayFileList(): WARNING: Failed to load default scene.");
+                            //std::cout << "WARNING: Failed to load default scene from displayFileList" << std::endl;
+                        }
+
+                        shownFile = getAssetFilePath("Scene/Game.scn");
+                    }
+                    fileWindow = false; // reset
+                    ImGui::CloseCurrentPopup();
+                    break;
+                }
+            }
+            if (ImGui::Button("Cancel")) {
+                fileWindow = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+#endif 
+       
     }
 
 
@@ -290,6 +358,7 @@ namespace gam300 {
                     // always show the new entity that is create 
                     selectedObjIndex = static_cast<int>(allEntities.size()) - 1;
                 }
+               
               
                 ImGui::EndPopup();
             }
@@ -380,6 +449,45 @@ namespace gam300 {
 
                             } 
                         }
+                        ImGui::Separator();
+                        if (ImGui::BeginMenu("Prefabs"))
+                        {
+                            if (ImGui::MenuItem("Create Prefabs"))
+                            {
+                                showPrefabPanel = true; // to open pop up for the prefabs
+                               
+                            }
+               
+                            ImGui::Separator();
+                            if (ImGui::MenuItem("Replace Prefabs"))
+                            {
+
+                            }
+
+                            ImGui::EndMenu();
+                        }
+                        
+                        ImGui::EndPopup();
+                    }
+
+                    if (showPrefabPanel)
+                    {
+                        ImGui::OpenPopup("Create Prefab Panel");
+                        showPrefabPanel = false;
+                    }
+
+                    if (ImGui::BeginPopupModal("Create Prefab Panel", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+                    {
+                        // Implement code here for create prefab 
+                        ImGui::Text("Pls work!!!!");
+                        std::string prefab_name = "Prefab";
+                        const Entity& selectedEntity = allEntities[selectedObjIndex];
+                        PM.createPrefabFromEntity(selectedEntity.get_id(), prefab_name, true);
+
+                        if (ImGui::Button("Close"))
+                        {
+                            ImGui::CloseCurrentPopup();
+                        }
                         ImGui::EndPopup();
                     }
 
@@ -467,15 +575,7 @@ namespace gam300 {
 
                 if (ImGui::Button("Add Component", buttonSize))
                 {
-                    //ImGui::Text("Component"); // for now only transform3D component
-
-                    //if (!ImguiEcsRef.hasComponent<Transform3D>(selectedEntity.get_id())) {
-                    //    ImguiEcsRef.addComponent<Transform3D>(selectedEntity.get_id());
-                    //}
-                    //if (!ImguiEcsRef.hasComponent<RigidBody>(selectedEntity.get_id()))
-                    //{
-                    //    ImguiEcsRef.addComponent<RigidBody>(selectedEntity.get_id());
-                    //}
+                    ImGui::Text("Component"); // for now only transform3D component
 
                     ImGui::OpenPopup("AddComponentPopup");
                 }
@@ -510,6 +610,11 @@ namespace gam300 {
     }
 #endif
 
+    void ImguiManager::showPrefabsPanel(EntityID selectedEntity)
+    {
+        //if (ImGui::Begin)
+    }
+
     void ImguiManager::displayTopMenu()
     {
         if (ImGui::BeginMainMenuBar())
@@ -534,6 +639,7 @@ namespace gam300 {
                 {
                     //To uncomment after Serialisation is fixed
                     SEM.saveScene(shownFile);
+                    std::cout << shownFile << "\n";
 
                 }
                 if (ImGui::MenuItem("Save as"))
@@ -1113,7 +1219,8 @@ namespace gam300 {
                     }
                     if (extension == ".png" || extension == ".jpeg") //to open the image
                     {
-
+                        asset_editor = true;
+                        currentAsset = assetEntry;
                     }
                 }
 
@@ -1165,6 +1272,10 @@ namespace gam300 {
                 ImGui::PopID();
             }
             ImGui::Columns(1);
+
+            if (asset_editor) {
+                dispalyAssetEditor(currentAsset);
+            }
         }
 
         ImGui::EndChild();
@@ -1175,6 +1286,17 @@ namespace gam300 {
 
 #endif
     
+    void ImguiManager::dispalyAssetEditor(const std::filesystem::directory_entry& assetFilepath)
+    {
+        if (ImGui::Begin("Asset Editor", &asset_editor)) {
+            ImGui::Text("Editing: %s", assetFilepath.path().string().c_str());
+        }
+        ImGui::End();
+
+        if (!asset_editor) {
+            currentAsset = std::filesystem::directory_entry();
+        }
+    }
 
     void ImguiManager::handleViewPortClick(ImVec2 mousePos, ImVec2 viewportSize)
     {
@@ -1271,33 +1393,35 @@ namespace gam300 {
                 }
             }
         }
-        //else if constexpr (std::is_same_v<componentType, RigidBody>) {
-        //    // rigidBody 
-        //    if (RigidBody* rigidBody = ImguiEcsRef.getComponent<RigidBody>(selectedEntityID)) {
-        //        //if (rigidBody)
-        //       // {
-        //        BodyType  currRigidBodyType = rigidBody->getRigidBodyType();
+        else if constexpr (std::is_same_v<componentType, RigidBody>) {
+            // rigidBody 
+            if (RigidBody* rigidBody = ImguiEcsRef.getComponent<RigidBody>(selectedEntityID)) {
+                //if (rigidBody)
+               // {
+                //BodyType  currRigidBodyType = rigidBody->getRigidBodyType();
 
-        //            const char* bodyTypeNames[] = { "STATIC", "KINEMATIC", "DYNAMIC" };
-        //            int currentTypeIndex = static_cast<int>(currRigidBodyType);
+                //    const char* bodyTypeNames[] = { "STATIC", "KINEMATIC", "DYNAMIC" };
+                //    int currentTypeIndex = static_cast<int>(currRigidBodyType);
 
-        //            // Dropdown for BodyType
-        //            if (ImGui::BeginCombo("Rigid Body Type", bodyTypeNames[currentTypeIndex])) {
-        //                for (int i = 0; i < 3; i++) {
-        //                    bool isSelected = (currentTypeIndex == i);
-        //                    if (ImGui::Selectable(bodyTypeNames[i], isSelected)) {
-        //                        currentTypeIndex = i;
-        //                        rigidBody->setRigidBodyType(static_cast<BodyType>(i)); //
-        //                    }
-        //                    if (isSelected)
-        //                        ImGui::SetItemDefaultFocus();
-        //                }
-        //                ImGui::EndCombo();
-        //            }
+                //    // Dropdown for BodyType
+                //    if (ImGui::BeginCombo("Rigid Body Type", bodyTypeNames[currentTypeIndex])) {
+                //        for (int i = 0; i < 3; i++) {
+                //            bool isSelected = (currentTypeIndex == i);
+                //            if (ImGui::Selectable(bodyTypeNames[i], isSelected)) {
+                //                currentTypeIndex = i;
+                //                rigidBody->setRigidBodyType(static_cast<BodyType>(i)); //
+                //            }
+                //            if (isSelected)
+                //                ImGui::SetItemDefaultFocus();
+                //        }
+                //        ImGui::EndCombo();
+                //    }
 
-        //       //}
-        //    }
-        //}
+               //}
+
+
+            }
+        }
 
     }
 

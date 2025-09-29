@@ -122,6 +122,7 @@
     <ClInclude Include="Manager\InputManager.h" />
     <ClInclude Include="Manager\LogManager.h" />
     <ClInclude Include="Manager\Manager.h" />
+    <ClInclude Include="Manager\PrefabManager.h" />
     <ClInclude Include="Manager\ResourceManager.h" />
     <ClInclude Include="Resource\ResourceData.h" />
     <ClInclude Include="Resource\ResourceMetadata.h" />

@@ -5,13 +5,13 @@
       "components": {
         "Transform3D": {
           "position": [
-            -2.77817,
-            3.50413,
+            -1.98,
+            2.008,
             0
           ],
           "prev_position": [
-            -2.76849,
-            3.49929,
+            -1.958,
+            2.008,
             0
           ],
           "rotation": [

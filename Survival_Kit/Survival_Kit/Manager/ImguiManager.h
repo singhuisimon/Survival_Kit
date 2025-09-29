@@ -70,6 +70,7 @@ namespace gam300
 		char saveAsDefaultName[128];
 		bool showSaveAsPanel = false;
 		int selectedAssetIndex = -1;
+		bool showPrefabPanel = false;
 
 		const std::string BASE_ASSETS_PATH = std::filesystem::current_path().string() + "\\Assets\\";
 
@@ -110,11 +111,13 @@ namespace gam300
 
 		void displayTopMenu();
 
+		void showPrefabsPanel(EntityID selectedEntity);
+
 		void finishImguiRender(ImGuiIO& imgui_io);
 
 		void handleViewPortClick(ImVec2 mousePos, ImVec2 viewportSize);
 
-		
+		void dispalyAssetEditor(const std::filesystem::directory_entry& assetFilepath);
 
 		//EntityID pickEntityFromViewport(ImVec2 mouseViewportPos, ImVec2 viewportSize, Camera3D& camera);
 

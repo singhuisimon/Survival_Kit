@@ -126,18 +126,20 @@ namespace gam300 {
 
     //// RigidBodySerializer implementation
     //std::string RigidBodySerializer::serialize(Component* component) {
-    //   
+
     //    RigidBody* rigidBody = static_cast<RigidBody*>(component);
-    //   
-    //    if (!rigidBody) { 
+
+    //    if (!rigidBody) {
     //        return "{}";
     //    }
     //    std::stringstream ss;
-    //    
+
     //    ss << "{\n";
 
     //    //ss << "          \"RigidBody\": {\n";
-    //    ss << "          \"rigidBodyType\": \"" << rigidBody->bodyTypeToString(rigidBody->getRigidBodyType()) << "\"\n";
+    //    //ss << "          \"rigidBodyType\": \"" << rigidBody->bodyTypeToString(rigidBody->getRigidBodyType()) << "\"\n";
+
+    //    //ss << "          \"rigidBodyType\": \"" << rigidBody->isStatic()<< "\"\n";
     //    ss << "        }";
 
     //    return ss.str();
@@ -147,13 +149,15 @@ namespace gam300 {
     //Component* RigidBodySerializer::deserialize(EntityID entityId, const std::string& jsonData) {
 
     //    // Parse the rigid body type 
-    //    BodyType rigidBodyType = BodyType::STATIC;
+    //    //BodyType rigidBodyType = BodyType::STATIC;
 
-    //    std::string bodyTypeStr = SerialisationManager::extractQuotedValue(jsonData, "rigidBodyType");
+    //  /*  std::string bodyTypeStr = SerialisationManager::extractQuotedValue(jsonData, "rigidBodyType");
     //    if (!bodyTypeStr.empty()) {
 
     //        rigidBodyType = RigidBody::stringToBodyType(bodyTypeStr);
-    //    }
+    //    }*/
+
+    //    //int rigidBodyIsStatic = SerialisationManager::extractQuotedValue(jsonData, "rigidBodyType");
     //    RigidBody* rigidBody = EM.addComponent<RigidBody>(entityId, rigidBodyType);
 
     //    return rigidBody;
@@ -161,45 +165,45 @@ namespace gam300 {
     //}
 
 
-	//AudioComponentSerializer implementation
+    //AudioComponentSerializer implementation
     std::string AudioComponentSerializer::serialize(Component* component) {
-		AudioComponent* audio = static_cast<AudioComponent*>(component);
+        AudioComponent* audio = static_cast<AudioComponent*>(component);
         if (!audio) {
-			return "{}";
+            return "{}";
         }
 
         std::stringstream ss;
         ss << "{\n";
         ss << "          \"guid\": " << audio->getGUID() << ",\n";
-		//ss << "          \"audioID\": " << audio->getAudioID() << ",\n"; // Placeholder for audioID
+        //ss << "          \"audioID\": " << audio->getAudioID() << ",\n"; // Placeholder for audioID
         ss << "          \"type\": " << (audio->getType() == AudioType::BGM ? "BGM" : "SFX") << ",\n";
         ss << "          \"volume\": " << audio->getVolume() << ",\n";
         ss << "          \"pitch\": " << audio->getPitch() << ",\n";
         ss << "          \"loop\": " << (audio->isLooping() ? "true" : "false") << ",\n";
         ss << "          \"state\": "
-           << (audio->getPlayState() == PlayState::PLAY ? "PLAY" :
-               audio->getPlayState() == PlayState::PAUSE ? "PAUSE" : "STOP")
-           << "\"\n";
-		ss << "          \"is3D\": " << (audio->is3D() ? "true" : "false") << ",\n";
-		ss << "          \"position\": [\n";
+            << (audio->getPlayState() == PlayState::PLAY ? "PLAY" :
+                audio->getPlayState() == PlayState::PAUSE ? "PAUSE" : "STOP")
+            << "\"\n";
+        ss << "          \"is3D\": " << (audio->is3D() ? "true" : "false") << ",\n";
+        ss << "          \"position\": [\n";
 
-		const Vector3D& pos = audio->getPosition();
-		ss << "            " << pos.x << ",\n";
-		ss << "            " << pos.y << ",\n";
-		ss << "            " << pos.z << "\n";\
+        const Vector3D& pos = audio->getPosition();
+        ss << "            " << pos.x << ",\n";
+        ss << "            " << pos.y << ",\n";
+        ss << "            " << pos.z << "\n"; \
 
-		ss << "          ]\n";
+            ss << "          ]\n";
         ss << "        }";
         return ss.str();
     }
 
-	//AudioComponentDeserializer implementation
+    //AudioComponentDeserializer implementation
     Component* AudioComponentSerializer::deserialize(EntityID entityId, const std::string& jsonData) {
         //GUID
-		std::string guid = SerialisationManager::extractQuotedValue(jsonData, "guid");
+        std::string guid = SerialisationManager::extractQuotedValue(jsonData, "guid");
 
-		/*int64_t audioID = -1;
-		int64_t audioIDData = SerialisationManager::extractObjectValue(jsonData, "audioID");
+        /*int64_t audioID = -1;
+        int64_t audioIDData = SerialisationManager::extractObjectValue(jsonData, "audioID");
         if (!audioIDData.empty()) {
             try {
                 audioID = std::stoll(audioIDData);
@@ -207,25 +211,26 @@ namespace gam300 {
             catch (const std::exception&) {
                 LM.writeLog("AudioComponentSerializer::deserialize() - Fail to parse audioID");
             }
-		}*/
+        }*/
 
-		//Type
-		std::string typeData = SerialisationManager::extractQuotedValue(jsonData, "type");
-		AudioType type = (typeData == "BGM") ? AudioType::BGM : AudioType::SFX;
-    
-		//Volume
+        //Type
+        std::string typeData = SerialisationManager::extractQuotedValue(jsonData, "type");
+        AudioType type = (typeData == "BGM") ? AudioType::BGM : AudioType::SFX;
+
+        //Volume
         float volume = 1.0f;
-		std::string volumeData = SerialisationManager::extractNumberValue(jsonData, "volume");
+        std::string volumeData = SerialisationManager::extractNumberValue(jsonData, "volume");
         if (!volumeData.empty()) {
             try {
                 volume = std::stof(volumeData);
-            } catch (const std::exception&) {
+            }
+            catch (const std::exception&) {
                 LM.writeLog("AudioComponentSerializer::deserialize() - Fail to parse volume");
             }
-		}
+        }
 
         //Pitch
-		float pitch = 1.0f;
+        float pitch = 1.0f;
         std::string pitchData = SerialisationManager::extractNumberValue(jsonData, "pitch");
         if (!pitchData.empty()) {
             try {
@@ -236,50 +241,51 @@ namespace gam300 {
             }
         }
 
-		//Loop
+        //Loop
         bool loop = false;
         std::string loopData = SerialisationManager::extractObjectValue(jsonData, "loop");
         if (!loopData.empty()) {
             loop = (loopData == "true");
-		}
+        }
 
-		//State
+        //State
         PlayState state = PlayState::STOP;
         std::string stateData = SerialisationManager::extractQuotedValue(jsonData, "state");
         if (!stateData.empty()) {
             if (stateData == "PLAY") {
                 state = PlayState::PLAY;
-            } else if (stateData == "PAUSE") {
+            }
+            else if (stateData == "PAUSE") {
                 state = PlayState::PAUSE;
             }
-		}
+        }
 
         //is3D
-	    bool is3D = false;
-		std::string is3DData = SerialisationManager::extractObjectValue(jsonData, "is3D");
+        bool is3D = false;
+        std::string is3DData = SerialisationManager::extractObjectValue(jsonData, "is3D");
         if (!is3DData.empty()) {
             is3D = (is3DData == "true");
-		}
+        }
 
-		//Position
-		Vector3D position = Vector3D::ZERO;
-		std::string positionData = SerialisationManager::extractObjectValue(jsonData, "position");
+        //Position
+        Vector3D position = Vector3D::ZERO;
+        std::string positionData = SerialisationManager::extractObjectValue(jsonData, "position");
         if (!positionData.empty()) {
             std::vector<float> posArray = SerialisationManager::parseFloatArray(positionData);
             if (posArray.size() >= 3) {
                 position = Vector3D(posArray[0], posArray[1], posArray[2]);
             }
-		}
+        }
 
         // Create the Audio_Component
         AudioComponent* audio = EM.addComponent<AudioComponent>(entityId, guid, type, volume, pitch, loop);
-        
-		// Set the play state
+
+        // Set the play state
         if (audio) {
-			audio->setPlayState(state);
+            audio->setPlayState(state);
         }
 
-		return audio;
+        return audio;
     }
 
     // Initialize singleton instance
@@ -320,7 +326,7 @@ namespace gam300 {
         //registerComponentSerializer("RigidBody", std::make_shared<RigidBodySerializer>());
 
         // Register component creators
-        registerComponentCreator("RigidBody", [this](EntityID entityId, const std::string& componentData) {
+ /*       registerComponentCreator("RigidBody", [this](EntityID entityId, const std::string& componentData) {
 
             auto serializer = m_component_serializers["RigidBody"];
             if (serializer)
@@ -328,8 +334,8 @@ namespace gam300 {
                 serializer->deserialize(entityId, componentData);
                 LM.writeLog("RigidBody created for entity %d", entityId);
             }
-            });
-    
+            });*/
+
 
         registerComponentCreator("AudioComponent", [this](EntityID entityId, const std::string& componentData) {
             //Use the serializer to create the component
@@ -339,7 +345,7 @@ namespace gam300 {
                 LM.writeLog("Audio_Component created for entity %d", entityId);
             }
             else {
-				LM.writeLog("Audio_Component serializer not found for entity %d", entityId);
+                LM.writeLog("Audio_Component serializer not found for entity %d", entityId);
             }
             });
 
@@ -374,7 +380,7 @@ namespace gam300 {
         LM.writeLog("SerialisationManager::registerComponentSerializer() - Registered serializer for '%s'", componentName.c_str());
     }
 
-	// Load entities from a scene file
+    // Load entities from a scene file
     bool SerialisationManager::loadScene(const std::string& filename) {
         LM.writeLog("SerialisationManager::loadScene() - Loading scene from '%s'", filename.c_str());
 
@@ -385,7 +391,7 @@ namespace gam300 {
             return false;
         }
 
-     
+
 
         /////////////////////////////////////////////////Amanda Code Version/////////////////////////////////////////////////
         // Parse with RapidJSON instead of string::find
@@ -424,7 +430,7 @@ namespace gam300 {
 
             entityCount++;
         }
-        
+
         //// Read file content
         //std::string fileContent;
         //if (!parseJsonFile(filename, fileContent)) {
@@ -659,15 +665,15 @@ namespace gam300 {
                 }
             }
 
-            // Check for RigidBody component
-            if (auto serializer = m_component_serializers.find("RigidBody");
-                serializer != m_component_serializers.end()) {
-                if (RigidBody* rigidBody = EM.getComponent<RigidBody>(entity.get_id())) {
-                    componentStrings.push_back(getIndent(4) + "\"RigidBody\": " +
-                        serializer->second->serialize(rigidBody));
-                    hasComponents = true;
-                }
-            }
+            //// Check for RigidBody component
+            //if (auto serializer = m_component_serializers.find("RigidBody");
+            //    serializer != m_component_serializers.end()) {
+            //    if (RigidBody* rigidBody = EM.getComponent<RigidBody>(entity.get_id())) {
+            //        componentStrings.push_back(getIndent(4) + "\"RigidBody\": " +
+            //            serializer->second->serialize(rigidBody));
+            //        hasComponents = true;
+            //    }
+            //}
 
             // TODO: Add more component types here as needed
 
@@ -703,7 +709,7 @@ namespace gam300 {
         return true;
     }
 
-	// Get a registered component serializer
+    // Get a registered component serializer
     std::shared_ptr<IComponentSerializer> SerialisationManager::getComponentSerializer(const std::string& componentName) {
         auto it = m_component_serializers.find(componentName);
         if (it != m_component_serializers.end()) {
@@ -712,7 +718,7 @@ namespace gam300 {
         return nullptr;
     }
 
-	// ================================= Helper Methods =================================
+    // ================================= Helper Methods =================================
 
     // Helper method to parse a JSON file
     bool SerialisationManager::parseJsonFile(const std::string& filename, std::string& jsonContent) {
@@ -1023,7 +1029,7 @@ namespace gam300 {
         if (colonPos == std::string::npos) {
             return "";
         }
-        
+
         // Move past colon
         size_t valueStart = json.find_first_not_of(" \t\n\r", colonPos + 1);
         if (valueStart == std::string::npos) {

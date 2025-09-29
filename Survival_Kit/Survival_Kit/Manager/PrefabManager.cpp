@@ -9,6 +9,8 @@
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
+#include "rapidjson/prettywriter.h"
+#include "../Utility/AssetPath.h"
 
 #include <fstream>
 #include <filesystem>
@@ -174,6 +176,82 @@ namespace gam300 {
     // Add minimal implementations for other required methods
     bool PrefabManager::savePrefab(const std::string& prefabName, const std::string& filePath) {
         // Simplified - just log for now
+
+        auto it = m_prefabs.find(prefabName);
+        if (it == m_prefabs.end()) {
+            LM.writeLog("PrefabManager::savePrefab() - Prefab '%s' not found", prefabName.c_str());
+            return false;
+        }
+
+        auto prefabData = it->second;
+
+        // Document
+        rapidjson::Document doc;
+        doc.SetObject();
+        auto& alloc = doc.GetAllocator();
+
+        // "objects" array
+        rapidjson::Value objectsArray(rapidjson::kArrayType);
+
+        rapidjson::Value entityObj(rapidjson::kObjectType);
+        entityObj.AddMember("name", rapidjson::Value(prefabName.c_str(), alloc), alloc);
+
+        // Components object
+        rapidjson::Value componentsObj(rapidjson::kObjectType);
+
+        // Transform3D
+        rapidjson::Value transformObj(rapidjson::kObjectType);
+
+        auto addVectorArray = [&](const std::string& name, const Vector3D& vec) {
+            rapidjson::Value arr(rapidjson::kArrayType);
+            arr.PushBack(vec.x, alloc);
+            arr.PushBack(vec.y, alloc);
+            arr.PushBack(vec.z, alloc);
+            transformObj.AddMember(rapidjson::Value(name.c_str(), alloc), arr, alloc);
+            };
+
+        addVectorArray("position", prefabData->defaultPosition);
+        addVectorArray("prev_position", prefabData->defaultPosition); // if you track prev_position
+        addVectorArray("rotation", prefabData->defaultRotation);
+        addVectorArray("scale", prefabData->defaultScale);
+
+        componentsObj.AddMember("Transform3D", transformObj, alloc);
+
+        // Add other components from prefabData->componentData
+        for (const auto& compPair : prefabData->componentData) {
+            rapidjson::Document compDoc;
+            compDoc.Parse(compPair.second.c_str());
+            if (!compDoc.HasParseError() && compDoc.HasMember(compPair.first.c_str())) {
+                rapidjson::Value compVal;
+                compVal.CopyFrom(compDoc[compPair.first.c_str()], alloc);
+                componentsObj.AddMember(rapidjson::Value(compPair.first.c_str(), alloc), compVal, alloc);
+            }
+        }
+
+        entityObj.AddMember("components", componentsObj, alloc);
+        objectsArray.PushBack(entityObj, alloc);
+
+        doc.AddMember("objects", objectsArray, alloc);
+
+        // Write to file
+        rapidjson::StringBuffer buffer;
+        rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer); // pretty formatting
+        doc.Accept(writer);
+
+        // Save in Assets/Prefabs/
+        std::string prefabDir = gam300::getAssetsPath() + "Prefabs/";
+        std::filesystem::create_directories(prefabDir);
+        std::string outPath = prefabDir + prefabName + ".prefab";
+
+        std::ofstream ofs(outPath);
+        if (!ofs.is_open()) {
+            LM.writeLog("PrefabManager::savePrefab() - Failed to open file %s", outPath.c_str());
+            return false;
+        }
+
+        ofs << buffer.GetString();
+        ofs.close();
+
         LM.writeLog("PrefabManager::savePrefab() - Saving %s", prefabName.c_str());
         return true;
     }
