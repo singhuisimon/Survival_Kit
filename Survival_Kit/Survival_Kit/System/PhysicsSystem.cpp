@@ -31,13 +31,15 @@ namespace gam300
 
 	void PhysicsSystem::update(float dt)
 	{
-		if (dt <= 0.0f) return;
 		m_dt = dt;
+		if (m_dt <= 0.0f) return;
+
 		for (EntityID entity_id : m_entities)
 		{
 			process_entity(entity_id);
 		}
 	}
+
 
 	void PhysicsSystem::shutdown()
 	{
@@ -46,7 +48,7 @@ namespace gam300
 
 	void PhysicsSystem::process_entity(EntityID entity_id)
 	{
-		// Require both Transform3D and RigidBodyComponent
+		// Require both Transform3D and RigidBody
 		if (!PhysicsEcsRef.hasComponent<Transform3D>(entity_id) ||
 			!PhysicsEcsRef.hasComponent<RigidBody>(entity_id))
 		{
@@ -57,7 +59,7 @@ namespace gam300
 		RigidBody *rigidBody = PhysicsEcsRef.getComponent<RigidBody>(entity_id);
 		if (!transform || !rigidBody) return;
 
-		// Integrate linear and angular state (position is updated inside)
 		rigidBody->Integrate(*transform, m_dt);
 	}
+
 } // namespace gam300

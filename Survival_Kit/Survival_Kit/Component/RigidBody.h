@@ -25,7 +25,7 @@ namespace gam300
 	{
 	public:
 		RigidBody(
-			float          mass = 0.0f,
+			float          mass = 1.0f,
 			const Vector3D &velocity = Vector3D(0.0f, 0.0f, 0.0f),
 			const Vector3D &acceleration = Vector3D(0.0f, 0.0f, 0.0f),
 			const Vector3D &inertiaDiag = Vector3D(0.0f, 0.0f, 0.0f),
