@@ -70,6 +70,7 @@ namespace gam300
 		char saveAsDefaultName[128];
 		bool showSaveAsPanel = false;
 		int selectedAssetIndex = -1;
+		bool showPrefabPanel = false;
 
 		const std::string BASE_ASSETS_PATH = std::filesystem::current_path().string() + "\\Assets\\";
 
@@ -109,6 +110,8 @@ namespace gam300
 		void displayAssetsBrowserList();	//asset browser
 
 		void displayTopMenu();
+
+		void showPrefabsPanel(EntityID selectedEntity);
 
 		void finishImguiRender(ImGuiIO& imgui_io);
 

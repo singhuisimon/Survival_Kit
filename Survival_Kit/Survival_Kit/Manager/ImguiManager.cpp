@@ -356,6 +356,7 @@ namespace gam300 {
                     // always show the new entity that is create 
                     selectedObjIndex = static_cast<int>(allEntities.size()) - 1;
                 }
+               
               
                 ImGui::EndPopup();
             }
@@ -445,6 +446,41 @@ namespace gam300 {
                                 selectedObjIndex = static_cast<int>(allEntities.size()) - 1;
 
                             } 
+                        }
+                        ImGui::Separator();
+                        if (ImGui::BeginMenu("Prefabs"))
+                        {
+                            if (ImGui::MenuItem("Create Prefabs"))
+                            {
+                                showPrefabPanel = true; // to open pop up for the prefabs
+                               
+                            }
+               
+                            ImGui::Separator();
+                            if (ImGui::MenuItem("Replace Prefabs"))
+                            {
+
+                            }
+
+                            ImGui::EndMenu();
+                        }
+                        
+                        ImGui::EndPopup();
+                    }
+
+                    if (showPrefabPanel)
+                    {
+                        ImGui::OpenPopup("Create Prefab Panel");
+                        showPrefabPanel = false;
+                    }
+
+                    if (ImGui::BeginPopupModal("Create Prefab Panel", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+                    {
+                        // Implement code here for create prefab 
+                        //ImGui::Text("Pls work!!!!");
+                        if (ImGui::Button("Close"))
+                        {
+                            ImGui::CloseCurrentPopup();
                         }
                         ImGui::EndPopup();
                     }
@@ -568,6 +604,11 @@ namespace gam300 {
         ImGui::End();
     }
 #endif
+
+    void ImguiManager::showPrefabsPanel(EntityID selectedEntity)
+    {
+        //if (ImGui::Begin)
+    }
 
     void ImguiManager::displayTopMenu()
     {

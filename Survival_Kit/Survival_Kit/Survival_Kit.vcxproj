@@ -117,6 +117,7 @@
     <ClInclude Include="Manager\InputManager.h" />
     <ClInclude Include="Manager\LogManager.h" />
     <ClInclude Include="Manager\Manager.h" />
+    <ClInclude Include="Manager\PrefabManager.h" />
     <ClInclude Include="Manager\ResourceManager.h" />
     <ClInclude Include="Resource\ResourceData.h" />
     <ClInclude Include="Resource\ResourceMetadata.h" />
@@ -131,7 +132,6 @@
     <ClInclude Include="Pipeline\Importers\SceneImporter.h" />
     <ClInclude Include="Pipeline\Importers\ShaderImporter.h" />
     <ClInclude Include="Pipeline\Importers\TextureImporter.h" />
-    
     <ClInclude Include="Manager\SerialisationBinManager.h" />
     <ClInclude Include="Manager\SerialisationManager.h" />
     <ClInclude Include="System\MovementSystem.h" />
