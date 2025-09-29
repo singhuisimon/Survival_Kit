@@ -28,6 +28,47 @@ namespace gam300 {
     static bool inspectorWindow = true;
     static bool assetsBrowser = true; // to load assets
 
+    // ----------------- ASSET BROWSER FUNCTIONALITY -----------------
+
+    // Asset Browser States
+    static std::vector<const AssetRecord*> filteredAssets;
+    static std::string searchFilter = "";
+    static AssetType selectedAssetType = AssetType::Unknown;    //filter by asset type
+    static bool needsRefresh = true;
+    static float assetIconSize = 64.0f;
+    static int selectedAssetIndex = -1;
+
+    // Asset Type names for display
+    const char* ImguiManager::getAssetTypeName(AssetType type)
+    {
+        switch (type)
+        {
+        case AssetType::Texture: return "Texture";
+        case AssetType::Audio: return "Audio";
+        case AssetType::Mesh: return "Mesh";
+        case AssetType::Shader: return "Shader";
+        case AssetType::Material: return "Material";
+        case AssetType::Scene: return "Scene";
+        case AssetType::Unknown:
+        default: return "Unknown";
+        }
+    }
+
+    // get Asset icon based on type
+    const char* ImguiManager::getAssetIcon(AssetType type)
+    {
+        switch (type) {
+        case AssetType::Texture: return "[IMG]";
+        case AssetType::Audio: return "[SND]";
+        case AssetType::Mesh: return "[3D]";
+        case AssetType::Shader: return "[SHD]";
+        case AssetType::Material: return "[MAT]";
+        case AssetType::Scene: return "[SCN]";
+        case AssetType::Unknown:
+        default: return "[?]";
+        }
+    }
+
     // Entity index
     int selectedObjIndex = -1;
 
@@ -80,6 +121,7 @@ namespace gam300 {
         // Setup Platform/Renderer backends
         ImGui_ImplGlfw_InitForOpenGL(glfwindow, true);
         ImGui_ImplOpenGL3_Init();
+
 
         return 0;
     }
@@ -613,12 +655,299 @@ namespace gam300 {
 
         ImGui::End();
     }
+
+    // ASSET BROWSER FUNCTIONS TO BE PLACED HERE
+
+    void ImguiManager::refreshAssetList()
+    {
+        filteredAssets.clear();
+
+        //get all assets from the Asset Manager Database
+        auto allAssets = AM.db().AllMutable();
+
+        for (auto* asset : allAssets)
+        {
+            if (!asset || !asset->valid) continue;  //skip invalid
+
+            //apply asset type filter
+            if (selectedAssetType != AssetType::Unknown && asset->type != selectedAssetType) {
+                continue;
+            }
+
+            // apply search filter
+            if (!searchFilter.empty()) {
+                std::string assetName = std::filesystem::path(asset->sourcePath).filename().string();
+                std::string lowerAssetName = assetName;
+                std::string lowerFilter = searchFilter;
+
+                // Convert to lowercase for case-insensitive search
+                std::transform(lowerAssetName.begin(), lowerAssetName.end(), lowerAssetName.begin(), ::tolower);
+                std::transform(lowerFilter.begin(), lowerFilter.end(), lowerFilter.begin(), ::tolower);
+
+                if (lowerAssetName.find(lowerFilter) == std::string::npos) {
+                    continue;
+                }
+            }
+
+            filteredAssets.push_back(asset);
+        }
+
+        //sort assets alphabetically by filename
+        std::sort(filteredAssets.begin(), filteredAssets.end(),
+            [](const AssetRecord* a, const AssetRecord* b) {
+                std::string nameA = std::filesystem::path(a->sourcePath).filename().string();
+                std::string nameB = std::filesystem::path(b->sourcePath).filename().string();
+                return nameA < nameB;
+            });
+
+        needsRefresh = false;
+    }
+
+    void ImguiManager::initializeAssetBrowser() {
+        // Make sure Asset Manager is started up
+        if (!AM.isStarted()) {
+            // Create default configuration
+            auto config = AssetManager::createDefaultConfig();
+            AM.setConfig(config);
+            AM.startUp();
+        }
+
+        // Trigger initial scan
+        AM.scanAndProcess();
+
+        // Set flag to refresh the browser
+        needsRefresh = true;
+
+        LM.writeLog("Asset Browser: Initialized and scanning assets...");
+    }
+
+    void ImguiManager::initializeAssetManager() {
+        initializeAssetBrowser();
+    }
+
+    void ImguiManager::rescanAssets() {
+        AM.scanAndProcess();
+        needsRefresh = true;
+        LM.writeLog("Asset Browser: Manual asset rescan triggered");
+    }
  
     void ImguiManager::displayAssetsBrowserList() {
         
         ImGui::Begin("Asset Browser");
 
-        //Asset broswer code goes here
+        //Asset browser code goes here
+
+        //refresh button and auto-refresh logic
+        if (ImGui::Button("Refresh") || needsRefresh)
+        {
+            refreshAssetList();
+        }
+
+        ImGui::SameLine();
+
+        //Search filter
+        static char searchBuffer[256] = "";
+        if (ImGui::InputText("Search", searchBuffer, sizeof(searchBuffer))) {
+            searchFilter = std::string(searchBuffer);
+            needsRefresh = true;
+        }
+
+        // asset Type filter dropdown
+        ImGui::SameLine();
+        if (ImGui::BeginCombo("Type Filter", getAssetTypeName(selectedAssetType))) {
+            if (ImGui::Selectable("All Types", selectedAssetType == AssetType::Unknown)) {
+                selectedAssetType = AssetType::Unknown;
+                needsRefresh = true;
+            }
+            if (ImGui::Selectable("Textures", selectedAssetType == AssetType::Texture)) {
+                selectedAssetType = AssetType::Texture;
+                needsRefresh = true;
+            }
+            if (ImGui::Selectable("Audio", selectedAssetType == AssetType::Audio)) {
+                selectedAssetType = AssetType::Audio;
+                needsRefresh = true;
+            }
+            if (ImGui::Selectable("Meshes", selectedAssetType == AssetType::Mesh)) {
+                selectedAssetType = AssetType::Mesh;
+                needsRefresh = true;
+            }
+            if (ImGui::Selectable("Shaders", selectedAssetType == AssetType::Shader)) {
+                selectedAssetType = AssetType::Shader;
+                needsRefresh = true;
+            }
+            if (ImGui::Selectable("Materials", selectedAssetType == AssetType::Material)) {
+                selectedAssetType = AssetType::Material;
+                needsRefresh = true;
+            }
+            if (ImGui::Selectable("Scenes", selectedAssetType == AssetType::Scene)) {
+                selectedAssetType = AssetType::Scene;
+                needsRefresh = true;
+            }
+            ImGui::EndCombo();
+        }
+
+        //icon size slider
+        ImGui::SliderFloat("Icon Size", &assetIconSize, 32.0f, 128.0f, "%.0f");
+
+        ImGui::Separator();
+
+        // asset count info
+        ImGui::Text("Assets: %zu", filteredAssets.size());
+
+        // Assets grid view
+        ImGui::BeginChild("AssetGrid", ImVec2(0, 0), true);
+
+        if (filteredAssets.empty()) {
+            // Show message when no assets found
+            ImVec2 windowSize = ImGui::GetWindowSize();
+            ImVec2 textSize = ImGui::CalcTextSize("No assets found");
+            ImGui::SetCursorPos(ImVec2((windowSize.x - textSize.x) * 0.5f, (windowSize.y - textSize.y) * 0.5f));
+            ImGui::TextDisabled("No assets found");
+
+            // Check if Asset Manager needs to scan for assets
+            if (ImGui::Button("Scan for Assets")) {
+                AM.scanAndProcess(); // Trigger asset scanning
+                needsRefresh = true;
+            }
+        }
+        else {
+            // Calculate grid layout
+            float windowWidth = ImGui::GetContentRegionAvail().x;
+            int itemsPerRow = std::max(1, (int)(windowWidth / (assetIconSize + 10.0f)));
+
+            for (size_t i = 0; i < filteredAssets.size(); ++i) {
+                const AssetRecord* asset = filteredAssets[i];
+
+                ImGui::PushID((int)i);
+
+                // Start a group for each asset item
+                ImGui::BeginGroup();
+
+                // Asset icon/thumbnail placeholder
+                ImVec2 iconSize(assetIconSize, assetIconSize);
+                ImVec2 cursorPos = ImGui::GetCursorPos();
+
+                // Draw icon background
+                ImDrawList* drawList = ImGui::GetWindowDrawList();
+                ImVec2 iconMin = ImGui::GetCursorScreenPos();
+                ImVec2 iconMax = ImVec2(iconMin.x + iconSize.x, iconMin.y + iconSize.y);
+
+                // Background color based on asset type
+                ImU32 bgColor = IM_COL32(60, 60, 60, 255);
+                switch (asset->type) {
+                case AssetType::Texture: bgColor = IM_COL32(80, 120, 80, 255); break;
+                case AssetType::Audio: bgColor = IM_COL32(120, 80, 80, 255); break;
+                case AssetType::Mesh: bgColor = IM_COL32(80, 80, 120, 255); break;
+                case AssetType::Shader: bgColor = IM_COL32(120, 120, 80, 255); break;
+                case AssetType::Material: bgColor = IM_COL32(120, 80, 120, 255); break;
+                case AssetType::Scene: bgColor = IM_COL32(80, 120, 120, 255); break;
+                default: break;
+                }
+
+                drawList->AddRectFilled(iconMin, iconMax, bgColor);
+                drawList->AddRect(iconMin, iconMax, IM_COL32(200, 200, 200, 255));
+
+                // Asset type icon text
+                const char* iconText = getAssetIcon(asset->type);
+                ImVec2 iconTextSize = ImGui::CalcTextSize(iconText);
+                ImVec2 iconTextPos = ImVec2(
+                    iconMin.x + (iconSize.x - iconTextSize.x) * 0.5f,
+                    iconMin.y + (iconSize.y - iconTextSize.y) * 0.5f
+                );
+                drawList->AddText(iconTextPos, IM_COL32(255, 255, 255, 255), iconText);
+
+                // Invisible button for interaction
+                ImGui::SetCursorPos(cursorPos);
+                bool isSelected = (selectedAssetIndex == (int)i);
+                if (ImGui::InvisibleButton("asset_button", iconSize)) {
+                    selectedAssetIndex = (int)i;
+
+                    // Optional: Double-click to "open" asset (you can implement asset loading here)
+                    if (ImGui::IsMouseDoubleClicked(0)) {
+                        LM.writeLog("Asset Browser: Double-clicked asset: %s", asset->sourcePath.c_str());
+                        // TODO: Implement asset loading/opening functionality
+                    }
+                }
+
+                // Highlight selected item
+                if (isSelected) {
+                    drawList->AddRect(iconMin, iconMax, IM_COL32(255, 255, 0, 255), 0.0f, 0, 2.0f);
+                }
+
+                // Tooltip with asset information
+                if (ImGui::IsItemHovered()) {
+                    ImGui::BeginTooltip();
+                    ImGui::Text("Name: %s", std::filesystem::path(asset->sourcePath).filename().string().c_str());
+                    ImGui::Text("Type: %s", getAssetTypeName(asset->type));
+                    ImGui::Text("Path: %s", asset->sourcePath.c_str());
+                    if (!asset->intermediatePath.empty()) {
+                        ImGui::Text("Intermediate: %s", asset->intermediatePath.c_str());
+                    }
+                    ImGui::Text("Valid: %s", asset->valid ? "Yes" : "No");
+                    ImGui::EndTooltip();
+                }
+
+                // Asset name below icon
+                std::string filename = std::filesystem::path(asset->sourcePath).filename().string();
+
+                // Truncate long filenames
+                if (filename.length() > 12) {
+                    filename = filename.substr(0, 9) + "...";
+                }
+
+                ImVec2 textSize = ImGui::CalcTextSize(filename.c_str());
+                float textX = (iconSize.x - textSize.x) * 0.5f;
+                if (textX < 0) textX = 0;
+
+                ImGui::SetCursorPosX(ImGui::GetCursorPosX() + textX);
+                ImGui::Text("%s", filename.c_str());
+
+                ImGui::EndGroup();
+
+                // Arrange items in grid
+                if ((i + 1) % itemsPerRow != 0 && i + 1 < filteredAssets.size()) {
+                    ImGui::SameLine();
+                }
+
+                ImGui::PopID();
+            }
+        }
+
+        ImGui::EndChild();
+
+        // Asset details panel at the bottom
+            if (selectedAssetIndex >= 0 && selectedAssetIndex < (int)filteredAssets.size()) {
+                ImGui::Separator();
+                ImGui::Text("Asset Details:");
+
+                const AssetRecord* selectedAsset = filteredAssets[selectedAssetIndex];
+
+                ImGui::Text("ID: %llu", selectedAsset->id);
+                ImGui::Text("Source: %s", selectedAsset->sourcePath.c_str());
+                ImGui::Text("Type: %s", getAssetTypeName(selectedAsset->type));
+                ImGui::Text("Extension: %s", selectedAsset->ext.c_str());
+                if (!selectedAsset->intermediatePath.empty()) {
+                    ImGui::Text("Intermediate: %s", selectedAsset->intermediatePath.c_str());
+                }
+                if (!selectedAsset->contentHash.empty()) {
+                    ImGui::Text("Hash: %s", selectedAsset->contentHash.c_str());
+                }
+                ImGui::Text("Valid: %s", selectedAsset->valid ? "Yes" : "No");
+                //ImGui::Text("Last Modified: %s", std::c_time(&selectedAsset->lastWriteTime));
+
+                if (selectedAsset->lastWriteTime > 0) {
+                    char timeBuffer[64];
+                    ctime_s(timeBuffer, sizeof(timeBuffer), &selectedAsset->lastWriteTime);
+                    // Remove the newline character that ctime_s adds
+                    if (strlen(timeBuffer) > 0 && timeBuffer[strlen(timeBuffer) - 1] == '\n') {
+                        timeBuffer[strlen(timeBuffer) - 1] = '\0';
+                    }
+                    ImGui::Text("Last Modified: %s", timeBuffer);
+                }
+                else {
+                    ImGui::Text("Last Modified: Unknown");
+                }
+            }
 
         ImGui::End();
     }

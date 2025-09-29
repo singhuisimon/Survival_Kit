@@ -25,12 +25,17 @@
 #include <fstream>
 #include <sstream>
 #include <filesystem>
+#include <algorithm>
 //#include <GLFW/glfw3.h>
 
 // Include other necessary headers
 #include "../Component/Transform3D.h"
 #include "../Utility/Vector3D.h"
 #include "../Manager/GraphicsManager.h"
+
+//for Asset showcases
+#include "../Pipeline/AssetDatabase.h"
+#include "AssetManager.h"
 
 
 #define IMGUIM gam300::ImguiManager::getInstance()
@@ -62,9 +67,12 @@ namespace gam300
 
 		bool fileWindow = false;
 		std::string shownFile{};
-		bool showSaveAsPanel = false;
-		char saveAsDefaultName[128] = "NewScene.scn"; // default save as name
-		
+
+		//for Asset Browser functionality
+		void refreshAssetList();
+		const char* getAssetTypeName(AssetType type);
+		const char* getAssetIcon(AssetType type);
+		void initializeAssetBrowser();
 	
 	public:
 
@@ -93,7 +101,7 @@ namespace gam300
 
 		void displayPropertiesList();
 
-		void displayAssetsBrowserList();
+		void displayAssetsBrowserList();	//asset browser
 
 		void displayTopMenu();
 
@@ -119,6 +127,13 @@ namespace gam300
 
 		template<typename componentType>
 		void displayComponentContent(EntityID selectedEntityID);
+
+		//for Asset Browser functionality
+		void initializeAssetManager();
+
+		void rescanAssets();
+
+		
 
 	};
 
