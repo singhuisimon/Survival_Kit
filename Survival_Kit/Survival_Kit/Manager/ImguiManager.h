@@ -67,6 +67,11 @@ namespace gam300
 
 		bool fileWindow = false;
 		std::string shownFile{};
+		char saveAsDefaultName[128];
+		bool showSaveAsPanel = false;
+		int selectedAssetIndex = -1;
+
+		const std::string BASE_ASSETS_PATH = std::filesystem::current_path().string() + "\\Assets\\";
 
 		//for Asset Browser functionality
 		void refreshAssetList();
