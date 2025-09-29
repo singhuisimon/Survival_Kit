@@ -20,6 +20,7 @@
 #include "../Component/Transform3D.h"
 #include "../Component/RigidBody.h"
 #include "../Manager/PrefabManager.h"
+#include "../Component/Collider.h"
 
 #include <iostream>
 
@@ -587,6 +588,13 @@ namespace gam300 {
                     if (ImGui::MenuItem("RigidBody")) {
                         if (!ImguiEcsRef.hasComponent<RigidBody>(selectedEntity.get_id())) {
                             ImguiEcsRef.addComponent<RigidBody>(selectedEntity.get_id());
+                        }
+                    }
+                    if (ImGui::MenuItem("Collider"))
+                    {
+                        if (!ImguiEcsRef.hasComponent<Collider>(selectedEntity.get_id()))
+                        {
+                            ImguiEcsRef.addComponent<Collider>(selectedEntity.get_id());
                         }
                     }
                    

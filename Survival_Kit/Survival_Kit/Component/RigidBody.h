@@ -19,7 +19,7 @@
 
 namespace gam300
 {
-	struct Transform3D; // forward decl
+	class Transform3D; // forward decl
 
 	class RigidBody : public Component
 	{

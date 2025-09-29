@@ -21,6 +21,7 @@
 #include "../Component/AudioComponent.h"
 #include "../Utility/Clock.h"
 #include "../Utility/AssetPath.h"
+#include "../System/CollisionSystem.h"
 #include "../System/MovementSystem.h"
 #include "../System/PhysicsSystem.h"
 #include "../Component/RigidBody.h"
@@ -113,7 +114,9 @@ namespace gam300 {
         logManager.writeLog("GameManager::startUp() - Transform3D component registered successfully");
         // Register RigidBody component with the componentManager
         CM.register_component<RigidBody>();
-        logManager.writeLog("GameManager::startUp() - GraphicsManager started successfully");
+        logManager.writeLog("GameManager::startUp() - RigidBody component started successfully");
+        CM.register_component<Collider>();
+        logManager.writeLog("GameManager::startUp() - Collider component started successfully");
 		CM.register_component<AudioComponent>();
 		logManager.writeLog("GameManager::startUp() - AudioComponent component registered successfully");
 
@@ -123,8 +126,13 @@ namespace gam300 {
 
 
         SM.register_system<PhysicsSystem>();
-        SM.register_system<MovementSystem>();
+        logManager.writeLog("GameManager::startUp() - Physics system registered successfully");
 
+        SM.register_system<MovementSystem>();
+        logManager.writeLog("GameManager::startUp() - Movement system registered successfully");
+
+        SM.register_system<CollisionSystem>();
+        logManager.writeLog("GameManager::startUp() - Collision system registered successfully");
         //// Create a test entity with Transform3D component for demonstration
         //Entity& testEntity = EM.createEntity("TestEntity");
         //Vector3D position(0.0f, 0.0f, 0.0f);
