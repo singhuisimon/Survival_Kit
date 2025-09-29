@@ -61,11 +61,9 @@ namespace gam300 {
         //std::string vertex_font_path = ASM.get_full_path(ASM.SHADER_PATH, "lack_of_oxygen_font.vert");
         //std::string fragment_font_path = ASM.get_full_path(ASM.SHADER_PATH, "lack_of_oxygen_font.frag");
 
-        // Temporary hardcoded filepath for vertex and fragment shaders
-        //std::string vertex_obj_path{ "..\\..\\Assets\\Shaders\\survival_kit_obj.vert" };
-        //std::string fragment_obj_path{ "..\\..\\Assets\\Shaders\\survival_kit_obj.frag" };
-        std::string vertex_obj_path{ "..\\Survival_Kit\\Assets\\Shaders\\survival_kit_obj.vert" };
-        std::string fragment_obj_path{ "..\\Survival_Kit\\Assets\\Shaders\\survival_kit_obj.frag" };
+        // Filepath for vertex and fragment shaders
+        std::string vertex_obj_path{ getAssetFilePath("Shaders/survival_kit_obj.vert") };
+        std::string fragment_obj_path{ getAssetFilePath("Shaders/survival_kit_obj.frag") };
 
         // Pair vertex and fragment shader files
         std::vector<std::pair<std::string, std::string>> shader_files{
