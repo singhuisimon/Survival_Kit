@@ -164,9 +164,9 @@ namespace gam300 {
                 }
             }
         }
-
+#if 0
         ImGui::SetNextWindowSize(ImVec2(800, 400));
-
+        
         if (ImGui::Begin("Level Select", &fileWindow, ImGuiWindowFlags_NoDocking)) {
 
             for (int i = 0; i < sceneFiles.size(); i++)
@@ -258,7 +258,71 @@ namespace gam300 {
 
             ImGui::End();
         }
-        
+#endif
+
+#if 1 // new code
+        if (fileWindow)
+        {
+            ImGui::OpenPopup("Level Select");
+            //std::cout << "is open here\n";
+           
+        }
+
+        if (ImGui::BeginPopupModal("Level Select", nullptr, ImGuiWindowFlags_NoDocking))
+        {
+            //std::cout << "is open here\n";
+            ImGui::SetWindowSize(ImVec2(500, 200), ImGuiCond_Once);
+            
+            for (int i = 0; i < sceneFiles.size(); i++)
+            {
+                std::string fileName = sceneFiles[i].first;
+                if (ImGui::Selectable(fileName.c_str())) {
+
+                    ImguiEcsRef.clearAllEntities();
+
+                    //if (sceneFiles[i].second != shownFile) {
+
+                    if (SEM.loadScene(sceneFiles[i].second)) {
+
+                        shownFile = sceneFiles[i].second;
+
+                        LM.writeLog("IMGUI_Manager::displayFileList(): Scene %s loaded successfully.", sceneFiles[i].first.c_str());
+                        //std::cout << sceneFiles[i].second << std::endl;
+                        //std::cout << "Scene " << sceneFiles[i].first << "loaded successfully from displayFileList" << std::endl;
+
+                    }
+                    else {
+
+                        LM.writeLog("IMGUI_Manager::displayFileList(): Scene %s failed to load. Loading default scene.", sceneFiles[i].first.c_str());
+                        //std::cout << "Scene " << sceneFiles[i].first << "failed to load from displayFileList. Loading default scene." << std::endl;
+
+                        SEM.saveScene(getAssetFilePath("Scene/Game.scn"));
+                        if (SEM.loadScene(getAssetFilePath("Scene/Game.scn"))) {
+
+                            LM.writeLog("IMGUI_Manager::displayFileList(): Default scene loaded successfully.");
+                            //std::cout << "Default scene loaded successfully from displayFileList" << std::endl;
+                        }
+                        else {
+
+                            LM.writeLog("IMGUI_Manager::displayFileList(): WARNING: Failed to load default scene.");
+                            //std::cout << "WARNING: Failed to load default scene from displayFileList" << std::endl;
+                        }
+
+                        shownFile = getAssetFilePath("Scene/Game.scn");
+                    }
+                    fileWindow = false; // reset
+                    ImGui::CloseCurrentPopup();
+                    break;
+                }
+            }
+            if (ImGui::Button("Cancel")) {
+                fileWindow = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+#endif 
+       
     }
 
 
