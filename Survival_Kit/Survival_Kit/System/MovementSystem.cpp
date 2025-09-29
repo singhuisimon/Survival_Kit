@@ -15,6 +15,7 @@
 // We create LinearDirectionalForce and use Force::Perm.
 // With stacking enabled, each frame a key is held adds another permanent force.
 #include "../Manager/ForceManager.h"
+#include "../Manager/TorqueManager.h"
 
 #include <cmath> // std::sqrt
 
@@ -52,13 +53,17 @@ namespace gam300
 		auto rigidBody = CM.get_component<RigidBody>(entity_id);
 		if (!transform || !rigidBody) return;
 
+		// Masks used for linear input forces and rotational input torques
+		constexpr unsigned INPUT_FORCE_MASK = 0x00000001u;
+		constexpr unsigned INPUT_TORQUE_MASK = 0x00000002u;
+
 		// ---------- STATIC: mass==0 -> direct transform edits ----------
 		if (rigidBody->isStatic())
 		{
 			Vector3D delta(0.0f, 0.0f, 0.0f);
 			if (IM.isKeyPressed(GLFW_KEY_A)) delta.x -= m_kinematicSpeed * m_dt;
 			if (IM.isKeyPressed(GLFW_KEY_D)) delta.x += m_kinematicSpeed * m_dt;
-			if (IM.isKeyPressed(GLFW_KEY_W)) delta.y += m_kinematicSpeed * m_dt; // Y-up as before
+			if (IM.isKeyPressed(GLFW_KEY_W)) delta.y += m_kinematicSpeed * m_dt;
 			if (IM.isKeyPressed(GLFW_KEY_S)) delta.y -= m_kinematicSpeed * m_dt;
 
 			if (delta.x != 0.0f || delta.y != 0.0f || delta.z != 0.0f)
@@ -66,8 +71,8 @@ namespace gam300
 			return;
 		}
 
-		// ---------- DYNAMIC: replace any old force with new one ----------
-		// Ensure our mask bit is enabled
+		// ---------- DYNAMIC LINEAR: replace any old force with new one ----------
+		// Ensure our linear input mask is enabled
 		if ((rigidBody->getForceMask() & INPUT_FORCE_MASK) == 0u)
 			rigidBody->setForceMask(rigidBody->getForceMask() | INPUT_FORCE_MASK);
 
@@ -85,17 +90,35 @@ namespace gam300
 			const float invLen = 1.0f / std::sqrt(len2);
 			dir.x *= invLen; dir.y *= invLen; dir.z *= invLen;
 
-			// Clear any previous input forces
+			// Clear any previous input forces and add the new one
 			rigidBody->getForceManager().RemoveForcesByMask(INPUT_FORCE_MASK);
-
-			// Add the new one
 			rigidBody->getForceManager().AddForce<LinearDirectionalForce>(
 				dir, m_moveForce, INPUT_FORCE_MASK, Force::Perm
 			);
 		}
 		else
 		{
+			// No linear input this frame -> remove linear input forces
 			rigidBody->getForceManager().RemoveForcesByMask(INPUT_FORCE_MASK);
+		}
+
+		// ---------- DYNAMIC ROTATIONAL: R key applies torque (1,1,1) ----------
+		// Ensure our torque input mask is enabled
+		if ((rigidBody->getTorqueMask() & INPUT_TORQUE_MASK) == 0u)
+			rigidBody->setTorqueMask(rigidBody->getTorqueMask() | INPUT_TORQUE_MASK);
+
+		if (IM.isKeyPressed(GLFW_KEY_R))
+		{
+			// Replace any previous input torques from this mask
+			rigidBody->getTorqueManager().RemoveTorquesByMask(INPUT_TORQUE_MASK);
+
+			// OPTION A: axis + magnitude form (unit axis, scalar magnitude).
+			// This produces an effective torque vector of (1,1,1).
+			Vector3D axis(1.0f, 1.0f, 1.0f);
+			float mag = 20.f;
+			rigidBody->getTorqueManager().AddTorque<AngularDirectionalTorque>(
+				axis, mag, INPUT_TORQUE_MASK, Torque::Perm
+			);
 		}
 	}
 
