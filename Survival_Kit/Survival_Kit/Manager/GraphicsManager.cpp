@@ -45,7 +45,7 @@ namespace gam300 {
             LM.writeLog("GraphicsManager::startUp(): GLAD initialized successfully.");
         }
 
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         
         //glEnable(GL_DEPTH_TEST);
         //glDepthFunc(GL_LESS); // Default comparison
