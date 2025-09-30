@@ -151,9 +151,11 @@ int main(void) {
         bool currentSpaceState = GetKeyState(VK_SPACE) & 0x8000;
         if (currentSpaceState && !spacePressed)
         {
-            app.ReloadScripts();
-            app.AddScript(0, "TestScript");  // Re-add script after reload
+            //app.ReloadScripts();
+            //std::cout << "your mother flip ";
+            app.CreateMonoBehaviourScript("PlayerController");
         }
+        app.CheckAndReloadScripts(); // Add this line
         // Update all systems (including InputSystem)
         EM.updateSystems(GM.getFrameTime() / 1000.0f);
 
