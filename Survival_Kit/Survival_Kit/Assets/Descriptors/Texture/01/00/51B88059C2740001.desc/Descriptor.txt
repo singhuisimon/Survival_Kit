@@ -15,7 +15,7 @@
     "displayName": "fox_kenny.png",
     "category": "Texture",
     "tags": [],
-    "lastImported": 1759220930,
+    "lastImported": 1759220958,
     "user": {}
   }
   ,"textureSettings": {
