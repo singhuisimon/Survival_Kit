@@ -17,13 +17,24 @@
 #include "SerialisationManager.h"
 #include "PrefabManager.h"
 #include "GraphicsManager.h"
+
+// Include component headers
 #include "../Component/Transform3D.h"
 #include "../Component/AudioComponent.h"
-#include "../Utility/Clock.h"
-#include "../Utility/AssetPath.h"
+#include "../Component/RigidBody.h"
+#include "../Component/Bullet.h"
+#include "../Component/Script.h"
+
+// Include system headers
 #include "../System/MovementSystem.h"
 #include "../System/PhysicsSystem.h"
-#include "../Component/RigidBody.h"
+#include "../System/BulletSystem.h"
+
+// Include Utility headers
+#include "../Utility/Clock.h"
+#include "../Utility/AssetPath.h"
+
+
 
 namespace gam300 {
 
@@ -48,112 +59,91 @@ namespace gam300 {
 
         // Start the LogManager
         LogManager& logManager = LogManager::getInstance();
-        if (logManager.startUp()) {
-            // Failed to start LogManager
+        if (LM.startUp()) {
+            // Failed to start logManager
             return -1;
         }
 
-        logManager.writeLog("GameManager::startUp() - LogManager started successfully");
+        LM.writeLog("GameManager::startUp() - logManager started successfully");
 
         // Start the InputManager
         if (IM.startUp()) {
-            logManager.writeLog("GameManager::startUp() - Failed to start InputManager");
-            logManager.shutDown();
+            LM.writeLog("GameManager::startUp() - Failed to start InputManager");
+            LM.shutDown();
             return -1;
         }
 
-        logManager.writeLog("GameManager::startUp() - InputManager started successfully");
+        LM.writeLog("GameManager::startUp() - InputManager started successfully");
 
         // Start the ECSManager
         if (EM.startUp()) {
-            logManager.writeLog("GameManager::startUp() - Failed to start ECSManager");
+            LM.writeLog("GameManager::startUp() - Failed to start ECSManager");
             IM.shutDown();
-            logManager.shutDown();
+            LM.shutDown();
             return -1;
         }
 
-        logManager.writeLog("GameManager::startUp() - ECSManager started successfully");
+        LM.writeLog("GameManager::startUp() - ECSManager started successfully");
 
         // Start the SerialisationManager
         if (SEM.startUp()) {
-            logManager.writeLog("GameManager::startUp() - Failed to start SerialisationManager");
+            LM.writeLog("GameManager::startUp() - Failed to start SerialisationManager");
             EM.shutDown();
             IM.shutDown();
-            logManager.shutDown();
+            LM.shutDown();
             return -1;
         }
 
-        logManager.writeLog("GameManager::startUp() - SerialisationManager started successfully");
+        LM.writeLog("GameManager::startUp() - SerialisationManager started successfully");
 
         // Start the PrefabManager
         if (PM.startUp()) {
-            logManager.writeLog("GameManager::startUp() - Failed to start PrefabManager");
+            LM.writeLog("GameManager::startUp() - Failed to start PrefabManager");
             EM.shutDown();
             IM.shutDown();
-            logManager.shutDown();
+            LM.shutDown();
             return -1;
         }
 
-        logManager.writeLog("GameManager::startUp() - PrefabManager started successfully");
+        LM.writeLog("GameManager::startUp() - PrefabManager started successfully");
 
         // Start the GraphicsManager
         if (GFXM.startUp()) {
-            logManager.writeLog("GameManager::startUp() - Failed to start GraphicsManager");
+            LM.writeLog("GameManager::startUp() - Failed to start GraphicsManager");
             EM.shutDown();
             IM.shutDown();
             SEM.shutDown();
-            logManager.shutDown();
+            LM.shutDown();
             return -1;
         }
 
-        logManager.writeLog("GameManager::startUp() - GraphicsManager started successfully");
+        LM.writeLog("GameManager::startUp() - GraphicsManager started successfully");
 
-        // Register the Transform3D component with the ComponentManager
+		// Register components
         CM.register_component<Transform3D>();
-        logManager.writeLog("GameManager::startUp() - Transform3D component registered successfully");
-        // Register RigidBody component with the componentManager
+        LM.writeLog("GameManager::startUp() - Transform3D component registered successfully");
+
         CM.register_component<RigidBody>();
-        logManager.writeLog("GameManager::startUp() - GraphicsManager started successfully");
+        LM.writeLog("GameManager::startUp() - RigidBody component started successfully");
+
 		CM.register_component<AudioComponent>();
-		logManager.writeLog("GameManager::startUp() - AudioComponent component registered successfully");
+		LM.writeLog("GameManager::startUp() - AudioComponent component registered successfully");
 
-        // Load the scene
+		CM.register_component<Bullet>();
+		LM.writeLog("GameManager::startUp() - Bullet component registered successfully");
+
+		CM.register_component<Script>();
+		LM.writeLog("GameManager::startUp() - Script component registered successfully");
+
+        // Check the scene path
         const std::string scenePath = getAssetFilePath("Scene/Game.scn");
-        logManager.writeLog("GameManager::startUp() - Attempting to load scene from '%s'", scenePath.c_str());
+        LM.writeLog("GameManager::startUp() - Attempting to load scene from '%s'", scenePath.c_str());
 
 
-        // Register the Movement component with the ComponetManager
+		// Register the Systems with the ECSManager
         SM.register_system<MovementSystem>();
-
         SM.register_system<PhysicsSystem>();
-
-        //// Create a test entity with Transform3D component for demonstration
-        //Entity& testEntity = EM.createEntity("TestEntity");
-        //Vector3D position(0.0f, 0.0f, 0.0f);
-        //Vector3D rotation(0.0f, 45.0f, 0.0f);  // 45 degrees rotation on Y axis
-        //Vector3D scale(1.0f, 1.0f, 1.0f);
-
-        //Transform3D* transform = EM.addComponent<Transform3D>(testEntity.get_id(), position, rotation, scale);
-        //if (transform) {
-        //    logManager.writeLog("GameManager::startUp() - Test entity created with Transform3D component");
-        //}
-
-        // Load the scene - Commented out to load scene using editor instead (Edited - Lily (15/9))
-        //const std::string scenePath = getAssetFilePath("Scene/Game.scn");
-        //if (SEM.loadScene(scenePath)) {
-        //    logManager.writeLog("GameManager::startUp() - Scene loaded successfully from %s", scenePath.c_str());
-        //}
-        //else {
-        //    logManager.writeLog("GameManager::startUp() - Failed to load scene, creating default scene");
-        //    // Save to the same path
-        //    SEM.saveScene(scenePath);
-        //    if (SEM.loadScene(scenePath)) {
-        //        logManager.writeLog("GameManager::startUp() - Default scene loaded successfully");
-        //    }
-        //    else {
-        //        logManager.writeLog("GameManager::startUp() - WARNING: Failed to load default scene");
-        //    }
-        //}
+		SM.register_system<BulletSystem>();
 
         // Initialize step count
         m_step_count = 0;
