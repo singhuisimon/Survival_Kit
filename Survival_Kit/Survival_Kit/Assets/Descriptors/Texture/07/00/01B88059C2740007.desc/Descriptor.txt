@@ -15,7 +15,7 @@
     "displayName": "squirrel_kenny.png",
     "category": "Texture",
     "tags": [],
-    "lastImported": 1759219536,
+    "lastImported": 1759220930,
     "user": {}
   }
   ,"textureSettings": {
