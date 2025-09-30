@@ -24,5 +24,5 @@ Cache/
 *.snapshot
 assetdb.txt
 Descriptor.txt
-Debug-x64
-Release-x64
+*Debug-x64
+*Release-x64
