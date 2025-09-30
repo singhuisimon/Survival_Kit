@@ -1,0 +1,21 @@
+{
+  "asset": {
+    "guid": "8F22C059E23C000F",
+    "id": 10314017588912062479,
+    "sourcePath": "C:/Users/Admin/source/repos/gam_300/Survival_Kit/Survival_Kit/Assets/Scene/Saveexample.scn",
+    "intermediatePath": "C:\\Users\\Admin\\source\\repos\\gam_300\\Cache/Intermediate\\Saveexample.scn",
+    "compiledPath": "",
+    "type": 6,
+    "ext": ".scn",
+    "contentHash": "",
+    "lastWriteTime": 0,
+    "valid": true
+  },
+  "extras": {
+    "displayName": "Saveexample.scn",
+    "category": "Scene",
+    "tags": [],
+    "lastImported": 1759252080,
+    "user": {}
+  }
+}

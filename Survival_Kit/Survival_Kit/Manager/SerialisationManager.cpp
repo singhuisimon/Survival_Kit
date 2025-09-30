@@ -161,45 +161,41 @@ namespace gam300 {
     }
 
 
-	//AudioComponentSerializer implementation
+    //AudioComponentSerializer implementation
     std::string AudioComponentSerializer::serialize(Component* component) {
-		AudioComponent* audio = static_cast<AudioComponent*>(component);
+        AudioComponent* audio = static_cast<AudioComponent*>(component);
         if (!audio) {
-			return "{}";
+            return "{}";
         }
 
         std::stringstream ss;
+        ss << std::fixed << std::setprecision(2);
         ss << "{\n";
-        ss << "          \"guid\": " << audio->getGUID() << ",\n";
-		//ss << "          \"audioID\": " << audio->getAudioID() << ",\n"; // Placeholder for audioID
-        ss << "          \"type\": " << (audio->getType() == AudioType::BGM ? "BGM" : "SFX") << ",\n";
+        ss << "          \"guid\": \"" << audio->getGUID() << "\",\n";
+        //ss << "          \"audioID\": " << audio->getAudioID() << ",\n"; // Placeholder for audioID
+        ss << "          \"type\": \"" << (audio->getType() == AudioType::BGM ? "BGM" : "SFX") << "\",\n";
+        ss << "          \"state\": \""
+            << (audio->getPlayState() == PlayState::PLAY ? "PLAY" :
+                audio->getPlayState() == PlayState::PAUSE ? "PAUSE" : "STOP")
+            << "\",\n";
         ss << "          \"volume\": " << audio->getVolume() << ",\n";
         ss << "          \"pitch\": " << audio->getPitch() << ",\n";
-        ss << "          \"loop\": " << (audio->isLooping() ? "true" : "false") << ",\n";
-        ss << "          \"state\": "
-           << (audio->getPlayState() == PlayState::PLAY ? "PLAY" :
-               audio->getPlayState() == PlayState::PAUSE ? "PAUSE" : "STOP")
-           << "\"\n";
-		ss << "          \"is3D\": " << (audio->is3D() ? "true" : "false") << ",\n";
-		ss << "          \"position\": [\n";
-
-		const Vector3D& pos = audio->getPosition();
-		ss << "            " << pos.x << ",\n";
-		ss << "            " << pos.y << ",\n";
-		ss << "            " << pos.z << "\n";\
-
-		ss << "          ]\n";
+        ss << "          \"loop\": \"" << (audio->isLooping() ? "true" : "false") << "\",\n";
+        ss << "          \"mute\": \"" << (audio->isMute() ? "true" : "false") << "\",\n";
+        ss << "          \"is3D\": \"" << (audio->is3D() ? "true" : "false") << "\",\n";
+        ss << "          \"minDistance\": " << audio->getMinDistance() << ",\n";
+        ss << "          \"maxDistance\": " << audio->getMaxDistance() << "\n";
         ss << "        }";
         return ss.str();
     }
 
-	//AudioComponentDeserializer implementation
+    //AudioComponentDeserializer implementation
     Component* AudioComponentSerializer::deserialize(EntityID entityId, const std::string& jsonData) {
         //GUID
-		std::string guid = SerialisationManager::extractQuotedValue(jsonData, "guid");
+        std::string guid = SerialisationManager::extractQuotedValue(jsonData, "guid");
 
-		/*int64_t audioID = -1;
-		int64_t audioIDData = SerialisationManager::extractObjectValue(jsonData, "audioID");
+        /*int64_t audioID = -1;
+        int64_t audioIDData = SerialisationManager::extractObjectValue(jsonData, "audioID");
         if (!audioIDData.empty()) {
             try {
                 audioID = std::stoll(audioIDData);
@@ -207,25 +203,38 @@ namespace gam300 {
             catch (const std::exception&) {
                 LM.writeLog("AudioComponentSerializer::deserialize() - Fail to parse audioID");
             }
-		}*/
+        }*/
 
-		//Type
-		std::string typeData = SerialisationManager::extractQuotedValue(jsonData, "type");
-		AudioType type = (typeData == "BGM") ? AudioType::BGM : AudioType::SFX;
-    
-		//Volume
+        //Type
+        std::string typeData = SerialisationManager::extractQuotedValue(jsonData, "type");
+        AudioType type = (typeData == "BGM") ? AudioType::BGM : AudioType::SFX;
+
+        //State
+        PlayState state = PlayState::STOP;
+        std::string stateData = SerialisationManager::extractQuotedValue(jsonData, "state");
+        if (!stateData.empty()) {
+            if (stateData == "PLAY") {
+                state = PlayState::PLAY;
+            }
+            else if (stateData == "PAUSE") {
+                state = PlayState::PAUSE;
+            }
+        }
+
+        //Volume
         float volume = 1.0f;
-		std::string volumeData = SerialisationManager::extractNumberValue(jsonData, "volume");
+        std::string volumeData = SerialisationManager::extractNumberValue(jsonData, "volume");
         if (!volumeData.empty()) {
             try {
                 volume = std::stof(volumeData);
-            } catch (const std::exception&) {
+            }
+            catch (const std::exception&) {
                 LM.writeLog("AudioComponentSerializer::deserialize() - Fail to parse volume");
             }
-		}
+        }
 
         //Pitch
-		float pitch = 1.0f;
+        float pitch = 1.0f;
         std::string pitchData = SerialisationManager::extractNumberValue(jsonData, "pitch");
         if (!pitchData.empty()) {
             try {
@@ -236,50 +245,64 @@ namespace gam300 {
             }
         }
 
-		//Loop
+        // Loop
         bool loop = false;
-        std::string loopData = SerialisationManager::extractObjectValue(jsonData, "loop");
+        std::string loopData = SerialisationManager::extractQuotedValue(jsonData, "loop");
         if (!loopData.empty()) {
             loop = (loopData == "true");
-		}
-
-		//State
-        PlayState state = PlayState::STOP;
-        std::string stateData = SerialisationManager::extractQuotedValue(jsonData, "state");
-        if (!stateData.empty()) {
-            if (stateData == "PLAY") {
-                state = PlayState::PLAY;
-            } else if (stateData == "PAUSE") {
-                state = PlayState::PAUSE;
-            }
-		}
-
-        //is3D
-	    bool is3D = false;
-		std::string is3DData = SerialisationManager::extractObjectValue(jsonData, "is3D");
-        if (!is3DData.empty()) {
-            is3D = (is3DData == "true");
-		}
-
-		//Position
-		Vector3D position = Vector3D::ZERO;
-		std::string positionData = SerialisationManager::extractObjectValue(jsonData, "position");
-        if (!positionData.empty()) {
-            std::vector<float> posArray = SerialisationManager::parseFloatArray(positionData);
-            if (posArray.size() >= 3) {
-                position = Vector3D(posArray[0], posArray[1], posArray[2]);
-            }
-		}
-
-        // Create the Audio_Component
-        AudioComponent* audio = EM.addComponent<AudioComponent>(entityId, guid, type, volume, pitch, loop);
-        
-		// Set the play state
-        if (audio) {
-			audio->setPlayState(state);
         }
 
-		return audio;
+        // Mute
+        bool mute = false;
+        std::string muteData = SerialisationManager::extractQuotedValue(jsonData, "mute");
+        if (!muteData.empty()) {
+            mute = (muteData == "true");
+        }
+
+        // is3D
+        bool is3D = true; // default true
+        std::string is3DData = SerialisationManager::extractQuotedValue(jsonData, "is3D");
+        if (!is3DData.empty()) {
+            is3D = (is3DData == "true");
+            //LM.writeLog("AudioComponentSerializer::deserialize() - is3D is %s", is3DData.c_str());
+        }
+
+        //minDistance
+        float minDistance = 1.0f;
+        std::string minDistanceData = SerialisationManager::extractNumberValue(jsonData, "minDistance");
+        if (!minDistanceData.empty()) {
+            try {
+                minDistance = std::stof(minDistanceData);
+            }
+            catch (const std::exception&) {
+                LM.writeLog("AudioComponentSerializer::deserialize() - Fail to parse minDistance");
+            }
+        }
+
+        //maxDistance
+        float maxDistance = 100.0f;
+        std::string maxDistanceData = SerialisationManager::extractNumberValue(jsonData, "maxDistance");
+        if (!maxDistanceData.empty()) {
+            try {
+                maxDistance = std::stof(maxDistanceData);
+            }
+            catch (const std::exception&) {
+                LM.writeLog("AudioComponentSerializer::deserialize() - Fail to parse maxDistance");
+            }
+        }
+        LM.writeLog("AudioComponentSerializer::deserialize() - Parsed AudioComponent data: guid=%s, type=%s, state=%s, volume=%.2f, pitch=%.2f, loop=%s, mute=%s, is3D=%s, minDistance=%.2f, maxDistance=%.2f",
+            guid.c_str(), (type == AudioType::BGM ? "BGM" : "SFX"),
+            (state == PlayState::PLAY ? "PLAY" : state == PlayState::PAUSE ? "PAUSE" : "STOP"),
+            volume, pitch, loop ? "true" : "false", mute ? "true" : "false", is3D ? "true" : "false", minDistance, maxDistance);
+
+        // Create the Audio_Component
+        AudioComponent* audio = EM.addComponent<AudioComponent>(entityId, guid, type, state, volume, pitch, loop, mute, is3D, minDistance, maxDistance);
+
+        // Set the play state
+        if (audio) {
+            audio->setPlayState(state);
+        }
+        return audio;
     }
 
     // Initialize singleton instance

@@ -1,9 +1,9 @@
 /**
  * @file AudioSystem.h
- * @brief RAII Wrappers for GPU resources (OpenGL based).
- * @details Contains the prototype of RAII wrappers for GPU resources like vertex array objects and buffer objects.
- * @author
- * @date
+ * @brief Wrappers for FMOD audio system.
+ * @details Contains the prototype of wrappers for FMOD audio system functionalities.
+ * @author Amanda Leow Boon Suan (100%)
+ * @date 21/9/2025
  * Copyright (C) 2025 DigiPen Institute of Technology.
  * Reproduction or disclosure of this file or its contents without the
  * prior written consent of DigiPen Institute of Technology is prohibited.
@@ -14,10 +14,10 @@
 #include "../Manager/InputManager.h"
 #include "../Manager/ECSManager.h"
 #include "../Manager/LogManager.h"
-
+#include "../Utility/AssetPath.h"
 namespace gam300 {
 
-	AudioSystem::AudioSystem() : ComponentSystem<AudioComponent, Transform3D>("AudioSystem") {
+	AudioSystem::AudioSystem() : ComponentSystem<AudioComponent, Transform3D, RigidBody>("AudioSystem") {
 		set_priority(150); //set priority above graphics but above others
 	}
 
@@ -27,23 +27,40 @@ namespace gam300 {
 
 	bool AudioSystem::init(SystemManager& /*system_manager*/) {
 
-		//Create FMOD systems
-		if (FMOD::Studio::System::create(&m_studiosystem) != FMOD_OK) {
-			//LM write log
+		if (FMOD::System_Create(&m_coresystem) != FMOD_OK) {
+			LM.writeLog("AudioSystem::init() - FMOD::System_Create failed");
 			return false;
 		}
 
-		if (m_studiosystem->initialize(512, FMOD_STUDIO_INIT_NORMAL, FMOD_INIT_NORMAL, nullptr) != FMOD_OK) {
+		if (m_coresystem->init(512, FMOD_INIT_NORMAL, nullptr) != FMOD_OK) {
+			LM.writeLog("AudioSystem::init() - m_coresystem->init failed");
 			return false;
 		}
 
-		if (m_studiosystem->getCoreSystem(&m_coresystem) != FMOD_OK) {
+		if (m_coresystem->getMasterChannelGroup(&m_mastergroup) != FMOD_OK) {
+			LM.writeLog("AudioSystem::init() - m_coresystem->getMasterChannelGroup failed");
 			return false;
 		}
 
-		if(m_coresystem->createChannelGroup("SFXGroup", &m_sfxgroup) != FMOD_OK) {
+		if (m_coresystem->createChannelGroup("SFXGroup", &m_sfxgroup) != FMOD_OK) {
+			LM.writeLog("AudioSystem::init() - m_coresystem->createChannelGroup SFXGroup failed");
 			return false;
 		}
+
+		if (m_coresystem->createChannelGroup("BGMGroup", &m_bgmgroup) != FMOD_OK) {
+			LM.writeLog("AudioSystem::init() - m_coresystem->createChannelGroup BGMGroup failed");
+			return false;
+		}
+
+		m_mastergroup->addGroup(m_sfxgroup);
+		m_mastergroup->addGroup(m_bgmgroup);
+
+		if (m_coresystem->set3DSettings(1.0f, 1.0f, 1.0f) != FMOD_OK) {
+			LM.writeLog("AudioSystem::init() - m_coresystem->set3DSettings failed");
+			return false;
+		}
+
+		//setListenerAttributes(Vector3D(0.0f, 0.0f, 0.0f), Vector3D(0.0f, 0.0f, 1.0f), Vector3D(0.0f, 1.0f, 0.0f), Vector3D(0.0f, 0.0f, 0.0f));
 
 		LM.writeLog("AudioSystem::init() - Audio System Initialized");
 		return true;
@@ -52,37 +69,11 @@ namespace gam300 {
 	void AudioSystem::update(float dt) {
 		(void)dt;
 
-		LM.writeLog("AudioSystem::update() - Updating Audio System");
-
-		//if (IM.isKeyJustReleased(GLFW_KEY_P)) {
-		//	LM.writeLog("AudioSystem::update() - Play sound on Cube release");
-		//	Entity* retrievecube = EM.getEntityByName("Cube");
-		//	if (retrievecube) {
-		//		if(retrievecube->has_component(get_component_type_id<AudioComponent>())) {
-		//			AudioComponent* audio = EM.getComponent<AudioComponent>(retrievecube->get_id());
-		//			if (audio) {
-		//				audio->setPlayState(PlayState::PLAY);
-		//			}
-		//		}
-		//	}
-		//}
-
-		//if (IM.isKeyJustPressed(GLFW_KEY_P)) {
-		//	LM.writeLog("AudioSystem::update() - Play sound on Cube just press");
-		//	Entity* retrievecube = EM.getEntityByName("Cube");
-		//	if (retrievecube) {
-		//		if (retrievecube->has_component(get_component_type_id<AudioComponent>())) {
-		//			AudioComponent* audio = EM.getComponent<AudioComponent>(retrievecube->get_id());
-		//			if (audio) {
-		//				audio->setPlayState(PlayState::PLAY);
-		//			}
-		//		}
-		//	}
-		//}
+		//LM.writeLog("AudioSystem::update() - Updating Audio System");
 
 		if (IM.isKeyPressed(GLFW_KEY_P)) {
 			LM.writeLog("AudioSystem::update() - Play sound on Cube pressed");
-			Entity* retrievecube = EM.getEntityByName("Cube");
+			Entity* retrievecube = EM.getEntityByName("New Entity_1");
 			if (retrievecube) {
 				if (retrievecube->has_component(get_component_type_id<AudioComponent>())) {
 					AudioComponent* audio = EM.getComponent<AudioComponent>(retrievecube->get_id());
@@ -91,46 +82,41 @@ namespace gam300 {
 					}
 				}
 			}
+
+			//playeditor("\\Audio\\laserSmall_001.ogg");
 		}
 
 		//Iterate through all entities with AudioComponent
 		auto entities = EM.getEntitiesWithComponent<AudioComponent>();
 		for (EntityID id : entities) {
-			
+
 			process_entity(id);
-			
-			//AudioComponent* audio = EM.getComponent<AudioComponent>(id);
-			//if (!audio) {
-			//	continue;
-			//}
-
-			//switch (audio->getPlayState()) {
-			//	case PlayState::PLAY:
-			//		playSound(id, audio);
-			//		break;
-			//	case PlayState::PAUSE:
-			//		pauseSound(id, true);
-			//		break;
-			//	case PlayState::STOP:
-			//		stopSound(id);
-			//		break;
-			//}
-
-			//auto channel_it = m_activechannels.find(id);
-			//if(channel_it != m_activechannels.end() && channel_it->second) {
-			//	// Update volume and pitch in case they changed
-			//	channel_it->second->setVolume(audio->getVolume());
-			//	channel_it->second->setPitch(audio->getPitch());
-			//}
 
 		}
 
 		cleanupInactiveChannels();
-		cleanupInactiveEvents();
 		updateVolumes();
 
-		if (m_studiosystem) {
-			m_studiosystem->update();
+		//for testing itself but rememebr to set listener attributes to camera or smth
+		Entity* camera = EM.getEntityByName("Camera");
+		if (camera && camera->has_component(get_component_type_id<Transform3D>())) {
+			Transform3D* camtransform = EM.getComponent<Transform3D>(camera->get_id());
+			if (camtransform) {
+				Vector3D campos = camtransform->getPosition();
+				Vector3D camforward = camtransform->getForward();
+				Vector3D camup = camtransform->getUp();
+
+				Vector3D camvelocity(0.0f, 0.0f, 0.0f);
+				if (camera->has_component(get_component_type_id<RigidBody>())) {
+					RigidBody* camrigid = EM.getComponent<RigidBody>(camera->get_id());
+					if (camrigid) {
+						//camvelocity = camrigid->getVelocity();
+					}
+				}
+
+				// Assuming velocity is zero for simplicity; can be calculated if needed
+				setListenerAttributes(campos, camforward, camup, camvelocity);
+			}
 		}
 
 		if (m_coresystem) {
@@ -141,7 +127,7 @@ namespace gam300 {
 	void AudioSystem::shutdown() {
 
 		// Stop and release all active channels
-		for(auto& pair : m_activechannels) {
+		for (auto& pair : m_activechannels) {
 			if (pair.second) {
 				pair.second->stop();
 			}
@@ -158,25 +144,32 @@ namespace gam300 {
 
 		m_loadedsounds.clear();
 
-		for (auto& pair : m_loadedbanks) {
+		for (auto& pair : m_editorchannel) {
 			if (pair.second) {
-				pair.second->unload();
+				pair.second->stop();
 			}
 		}
 
-		m_loadedbanks.clear();
-		m_eventdes.clear();
-		m_activeevents.clear();
-		m_buses.clear();
+		m_previousguids.clear();
 
-		if (m_studiosystem) {
-			m_studiosystem->unloadAll();
-			m_studiosystem->release();
-			m_studiosystem = nullptr;
+		if (m_sfxgroup) {
+			m_sfxgroup->release();
+			m_sfxgroup = nullptr;
 		}
 
-		m_coresystem = nullptr;
-		m_sfxgroup = nullptr;
+		if (m_bgmgroup) {
+			m_bgmgroup->release();
+			m_bgmgroup = nullptr;
+		}
+
+		if (m_mastergroup) {
+			m_mastergroup = nullptr;
+		}
+
+		if (m_coresystem) {
+			m_coresystem->release();
+			m_coresystem = nullptr;
+		}
 
 		LM.writeLog("AudioSystem::shutdown() - Audio System shut down");
 	}
@@ -189,43 +182,19 @@ namespace gam300 {
 			return;
 		}
 
-		/*auto channel_it = m_activechannels.find(entity_id);
-		FMOD::Channel* channel = (channel_it != m_activechannels.end()) ? channel_it->second : nullptr;
-
-		if (channel) {
-			bool is_playing = false;
-			channel->isPlaying(&is_playing);
-
-			bool is_paused = false;
-			channel->getPaused(&is_paused);
-
-			if (!is_playing && !is_paused) {
-				audio->setPlayState(PlayState::STOP);
-				m_activechannels.erase(channel_it);
-				LM.writeLog("AudioSystem::process_entity() - Sound on entity %u finished playing", entity_id);
-			}
-			else {
-				if (is_paused && audio->getPlayState() != PlayState::PAUSE) {
-					audio->setPlayState(PlayState::PAUSE);
-				} else if (!is_paused && audio->getPlayState() == PlayState::PAUSE) {
-					audio->setPlayState(PlayState::PLAY);
-				}
-			}
-		}*/
-
 		switch (audio->getPlayState()) {
-			case PlayState::PLAY:
-				playSound(entity_id, audio);
-				break;
-			case PlayState::PAUSE:
-				pauseSound(entity_id, true);
-				break;
-			case PlayState::STOP:
-				stopSound(entity_id);
-				break;
+		case PlayState::PLAY:
+			playSound(entity_id, audio);
+			break;
+		case PlayState::PAUSE:
+			pauseSound(entity_id, true);
+			break;
+		case PlayState::STOP:
+			stopSound(entity_id);
+			break;
 		}
 
-		if(audio->is3D() && transform) {
+		if (audio->is3D() && transform) {
 			update3DAttributes(entity_id, audio, transform);
 		}
 	}
@@ -253,16 +222,47 @@ namespace gam300 {
 			return;
 		}
 
+		auto channel_prev = m_previousguids.find(id);
+		if (channel_prev != m_previousguids.end() && channel_prev->second != audio->getGUID()) {
+			// New sound or different sound, stop previous if any
+			stopSound(id);
+		}
+
+		m_previousguids[id] = audio->getGUID();
+
 		//check if it has been played b4 / recorded in the active channels map
 		auto channel_it = m_activechannels.find(id);
-		if(channel_it != m_activechannels.end() && channel_it->second) {
+		if (channel_it != m_activechannels.end() && channel_it->second) {
 			bool is_playing = false;
 			channel_it->second->isPlaying(&is_playing);
-			if (is_playing) {
+			bool is_paused = false;
+			channel_it->second->getPaused(&is_paused);
+			if (is_playing && !is_paused) {
 				// Already playing, do not restart
+
+				//update the channel itself and check if its virtual
+				//i add most while half awake if anything goes wrong find me - amanda
+				isChannelVirtual(id);
+				float volume = 0.0f;
+				float pitch = 0.0f;
+				channel_it->second->getVolume(&volume);
+				channel_it->second->getPitch(&pitch);
+				if (volume != audio->getVolume() ||
+					pitch != audio->getPitch()) {
+					channel_it->second->setVolume(volume);
+					channel_it->second->setPitch(pitch);
+				}
+
+				bool muted = false;
+				channel_it->second->getMute(&muted);
+				if (audio->isMute() != muted) {
+					channel_it->second->setMute(audio->isMute());
+				}
+
 				LM.writeLog("AudioSystem::playSound() - Sound %s on entity %u is already playing", audio->getGUID().c_str(), id);
 				return;
-			} else {
+			}
+			else {
 				// Channel is not playing, remove it from active channels
 				m_activechannels.erase(channel_it);
 			}
@@ -271,18 +271,75 @@ namespace gam300 {
 		FMOD::Channel* channel = nullptr;
 		FMOD::ChannelGroup* group = nullptr;
 
-		if(audio->getType() == AudioType::SFX) {
+		if (audio->getType() == AudioType::SFX) {
 			group = m_sfxgroup;
-		} else if (audio->getType() == AudioType::BGM) {
-			// Handle BGM group if needed
-			playEvent(id, audio->getGUID());
+		}
+		else if (audio->getType() == AudioType::BGM) {
+			group = m_bgmgroup;
 			return;
 		}
 
-		if(m_coresystem->playSound(sound, group, false, &channel) == FMOD_OK) {
+		if (m_coresystem->playSound(sound, group, true, &channel) == FMOD_OK) {
 			if (channel) {
 				channel->setVolume(audio->getVolume());
 				channel->setPitch(audio->getPitch());
+
+				if (audio->is3D()) {
+					channel->setMode(FMOD_3D | FMOD_3D_LINEARROLLOFF);
+
+					Transform3D* transform = EM.getComponent<Transform3D>(id);
+					if (transform) {
+						Vector3D pos = transform->getPosition();
+						FMOD_VECTOR fmod_pos = { pos.x, pos.y, pos.z };
+						FMOD_VECTOR vel = { 0.0f, 0.0f, 0.0f };
+						RigidBody* rigid = EM.getComponent<RigidBody>(id);
+						if (rigid) {
+							//Vector3D velocity = rigid->getVelocity();
+							/*vel.x = velocity.x;
+							vel.y = velocity.y;
+							vel.z = velocity.z;*/
+						}
+
+						LM.writeLog("AudioSystem::playSound() - Entity %u sound position: (%.2f, %.2f, %.2f)",
+							id, pos.x, pos.y, pos.z);
+
+						// Get listener position for distance calculation <for debug>
+						/*Entity* camera = EM.getEntityByName("Camera");
+						if (camera && camera->has_component(get_component_type_id<Transform3D>())) {
+							Transform3D* camtransform = EM.getComponent<Transform3D>(camera->get_id());
+							if (camtransform) {
+								Vector3D campos = camtransform->getPosition();
+								float distance = (pos - campos).magnitude();
+								LM.writeLog("AudioSystem::playSound() - Camera position: (%.2f, %.2f, %.2f), Distance: %.2f",
+									campos.x, campos.y, campos.z, distance);
+							}
+						}*/
+
+						channel->set3DAttributes(&fmod_pos, &vel);
+					}
+					else {
+						FMOD_VECTOR pos = { 0.0f, 0.0f, 0.0f };
+						//FMOD_VECTOR vel = { 0.0f, 0.0f, 0.0f };
+						channel->set3DAttributes(&pos, nullptr);
+					}
+
+					channel->set3DMinMaxDistance(audio->getMinDistance(), audio->getMaxDistance());
+					LM.writeLog("AudioSystem::playSound() - Playing 3D sound on entity %u", id);
+				}
+				else {
+					channel->setMode(FMOD_2D);
+					LM.writeLog("AudioSystem::playSound() - Playing 2D sound on entity %u", id);
+				}
+
+				if (audio->isLooping()) {
+					channel->setLoopCount(-1); // Infinite loop
+				}
+				else {
+					channel->setLoopCount(0);
+				}
+
+				channel->setPaused(false); // Start playing
+
 				m_activechannels[id] = channel;
 				LM.writeLog("AudioSystem::playSound() - Playing sound %s on entity %u", audio->getGUID().c_str(), id);
 			}
@@ -292,7 +349,7 @@ namespace gam300 {
 
 	void AudioSystem::stopSound(EntityID id) {
 		auto it = m_activechannels.find(id);
-		if(it != m_activechannels.end() && it->second) {
+		if (it != m_activechannels.end() && it->second) {
 			it->second->stop();
 			m_activechannels.erase(it);
 			LM.writeLog("AudioSystem::stopSound() - Stopped sound on entity %u", id);
@@ -301,79 +358,10 @@ namespace gam300 {
 
 	void AudioSystem::pauseSound(EntityID id, bool pause) {
 		auto it = m_activechannels.find(id);
-		if(it != m_activechannels.end() && it->second) {
+		if (it != m_activechannels.end() && it->second) {
 			it->second->setPaused(pause);
 			LM.writeLog("AudioSystem::pauseSound() - %s sound on entity %u", pause ? "Paused" : "Resumed", id);
 		}
-	}
-
-	bool AudioSystem::playEvent(EntityID id, const std::string& eventpath) {
-
-		auto it = m_eventdes.find(eventpath);
-		if (it == m_eventdes.end()) {
-			FMOD::Studio::EventDescription* eventdesc = nullptr;
-			if (m_studiosystem->getEvent(eventpath.c_str(), &eventdesc) != FMOD_OK || !eventdesc) {
-				LM.writeLog("AudioSystem::playEvent() - Failed to get event description for %s", eventpath.c_str());
-				return false;
-			}
-			m_eventdes[eventpath] = eventdesc;
-			it = m_eventdes.find(eventpath);
-		}
-
-		FMOD::Studio::EventDescription* eventdesc = it->second;
-		if (!eventdesc) {
-			return false;
-		}
-
-		FMOD::Studio::EventInstance* eventinstance = nullptr;
-		if (eventdesc->createInstance(&eventinstance) != FMOD_OK || !eventinstance) {
-			LM.writeLog("AudioSystem::playEvent() - Failed to create event instance for %s", eventpath.c_str());
-			return false;
-		}
-		eventinstance->start();
-		m_activeevents[id] = eventinstance;
-
-		return true;
-	}
-
-	bool AudioSystem::stopEvent(EntityID id, bool immediate) {
-		auto it = m_activeevents.find(id);
-		if(it != m_activeevents.end() && it->second) {
-			it->second->stop(immediate ? FMOD_STUDIO_STOP_IMMEDIATE : FMOD_STUDIO_STOP_ALLOWFADEOUT);
-			it->second->release();
-			m_activeevents.erase(it);
-			LM.writeLog("AudioSystem::stopEvent() - Stopped event on entity %u", id);
-			return true;
-		}
-		return false;
-	}
-
-	bool AudioSystem::pauseEvent(EntityID id, bool pause) {
-		auto it = m_activeevents.find(id);
-		if(it != m_activeevents.end() && it->second) {
-			it->second->setPaused(pause);
-			LM.writeLog("AudioSystem::pauseEvent() - %s event on entity %u", pause ? "Paused" : "Resumed", id);
-			return true;
-		}
-		return false;
-	}
-
-	bool AudioSystem::loadBankTemp(const std::string& path) {
-		if (!m_studiosystem) {
-			return false;
-		}
-		if (m_loadedbanks.find(path) != m_loadedbanks.end()) {
-			return true; // already loaded
-		}
-
-		FMOD::Studio::Bank* bank = nullptr;
-		if (m_studiosystem->loadBankFile(path.c_str(), FMOD_STUDIO_LOAD_BANK_NORMAL, &bank) != FMOD_OK) {
-			LM.writeLog("AudioSystem::loadBankTemp() - Failed to load bank %s", path.c_str());
-			return false;
-		}
-		m_loadedbanks[path] = bank;
-		LM.writeLog("AudioSystem::loadBankTemp() - Loaded bank %s", path.c_str());
-		return true;
 	}
 
 	bool AudioSystem::loadSoundTemp(const std::string& path, bool loop) {
@@ -386,12 +374,16 @@ namespace gam300 {
 		}
 
 		FMOD_MODE mode = FMOD_DEFAULT;
-		if (loop) {
+
+		//always load as 3D sound for this project
+		mode |= FMOD_3D;
+
+		/*if (loop) {
 			mode |= FMOD_LOOP_NORMAL;
-		}
+		}*/
 
 		FMOD::Sound* sound = nullptr;
-		if (m_coresystem->createSound(path.c_str(), mode, nullptr, &sound) != FMOD_OK) {
+		if (m_coresystem->createSound(getAssetFilePath(path).c_str(), mode, nullptr, &sound) != FMOD_OK) {
 			LM.writeLog("AudioSystem::loadSoundTemp() - Failed to load %s", path.c_str());
 			return false;
 		}
@@ -399,15 +391,6 @@ namespace gam300 {
 		m_loadedsounds[path] = sound;
 		LM.writeLog("AudioSystem::loadSoundTemp() - Loaded %s", path.c_str());
 		return true;
-	}
-
-	void AudioSystem::unloadBank(const std::string& path) {
-		auto it = m_loadedbanks.find(path);
-		if (it != m_loadedbanks.end() && it->second) {
-			it->second->unload();
-			m_loadedbanks.erase(it);
-			LM.writeLog("AudioSystem::unloadBank() - Unloaded bank %s", path.c_str());
-		}
 	}
 
 	void AudioSystem::unloadSound(const std::string& path) {
@@ -442,47 +425,12 @@ namespace gam300 {
 		updateVolumes();
 	}
 
-	void AudioSystem::setBusVolume(const std::string& buspath, float volume) {
-		if (!m_studiosystem) {
-			return;
-		}
-
-		auto it = m_buses.find(buspath);
-		FMOD::Studio::Bus* bus = nullptr;
-		if (it == m_buses.end()) {
-			if (m_studiosystem->getBus(buspath.c_str(), &bus) != FMOD_OK) {
-				LM.writeLog("AudioSystem::setBusVolume() - Failed to get bus %s", buspath.c_str());
-				return;
-			}
-			m_buses[buspath] = bus;
-		} else {
-			bus = it->second;
-		}
-		if (bus) {
-			bus->setVolume(volume);
-			LM.writeLog("AudioSystem::setBusVolume() - Set volume of bus %s to %f", buspath.c_str(), volume);
-		}
-	}
-
 	void AudioSystem::getMasterVolume(float& volume) const {
 		volume = m_mastervolume;
 	}
 
 	void AudioSystem::getSFXGroupVolume(float& volume) const {
 		volume = m_sfxgroupvolume;
-	}
-
-	void AudioSystem::getBusVolume(const std::string& buspath, float& volume) const {
-		if (!m_studiosystem) {
-			volume = 0.0f;
-			return;
-		}
-		auto it = m_buses.find(buspath);
-		if(it != m_buses.end() && it->second) {
-			it->second->getVolume(&volume);
-		} else {
-			volume = 0.0f;
-		}
 	}
 
 	void AudioSystem::cleanupInactiveChannels() {
@@ -496,7 +444,7 @@ namespace gam300 {
 			pair.second->getPaused(&is_paused);
 			pair.second->isPlaying(&is_playing);
 
-			if(!is_playing && !is_paused) {
+			if (!is_playing && !is_paused) {
 				to_remove.push_back(pair.first);
 			}
 
@@ -504,15 +452,20 @@ namespace gam300 {
 			if (audio && audio->getPlayState() != PlayState::STOP) {
 				audio->setPlayState(PlayState::STOP);
 			}
-
-			/*if (pair.second && pair.second->isPlaying(&is_playing) == FMOD_OK) {
-				if (!is_playing) {
-					to_remove.push_back(pair.first);
-				}
-			}*/
 		}
 
-		//set the state back to stopped for those removed
+		std::vector<std::string> editorguids_to_remove;
+		for (const auto& pair : m_editorchannel) {
+			bool is_playing = false;
+			bool is_paused = false;
+
+			pair.second->getPaused(&is_paused);
+			pair.second->isPlaying(&is_playing);
+
+			if (!is_playing && !is_paused) {
+				editorguids_to_remove.push_back(pair.first);
+			}
+		}
 
 
 		for (EntityID id : to_remove) {
@@ -521,38 +474,16 @@ namespace gam300 {
 		}
 	}
 
-	void AudioSystem::cleanupInactiveEvents() {
-		std::vector<EntityID> to_remove;
-		for (const auto& pair : m_activeevents) {
-			FMOD_STUDIO_PLAYBACK_STATE state;
-			if (pair.second && pair.second->getPlaybackState(&state) == FMOD_OK) {
-				if (state == FMOD_STUDIO_PLAYBACK_STOPPED) {
-					pair.second->release();
-					to_remove.push_back(pair.first);
-				}
-			}
-		}
-		for (EntityID id : to_remove) {
-			m_activeevents.erase(id);
-			LM.writeLog("AudioSystem::cleanupInactiveEvents() - Removed inactive event for entity %u", id);
-		}
-	}
-
 	void AudioSystem::updateVolumes() {
 		if (m_sfxgroup) {
 			float final_volume = m_mastervolume * m_sfxgroupvolume;
 			m_sfxgroup->setVolume(final_volume);
 		}
-
-		for (auto& pair : m_buses) {
-			if (pair.second) {
-				pair.second->setVolume(m_mastervolume);
-			}
-		}
 	}
 
 	void AudioSystem::update3DAttributes(EntityID id, AudioComponent* audio, Transform3D* transform) {
 		if (!m_coresystem || !audio || !transform) {
+			LM.writeLog("AudioSystem::update3DAttributes() - Invalid parameters");
 			return;
 		}
 		auto it = m_activechannels.find(id);
@@ -561,6 +492,101 @@ namespace gam300 {
 			FMOD_VECTOR fmod_velocity = { 0.0f, 0.0f, 0.0f }; // Velocity can be calculated if needed
 			it->second->set3DAttributes(&fmod_position, &fmod_velocity);
 		}
+	}
+
+	void AudioSystem::playeditor(const std::string& path) {
+		if (path.empty()) {
+			return;
+		}
+
+		auto it = m_loadedsounds.find(path);
+
+		//If sound not loaded, try to load it
+		if (it == m_loadedsounds.end()) {
+			if (!loadSoundTemp(path, false)) {
+				return;
+			}
+			it = m_loadedsounds.find(path);
+		}
+
+		LM.writeLog("AudioSystem::playSound() - sound is loaded");
+
+		FMOD::Sound* sound = it->second;
+		if (!sound) {
+			return;
+		}
+
+		//check if it has been played b4 / recorded in the active channels map
+		auto channel_it = m_editorchannel.find(path);
+		if (channel_it != m_editorchannel.end() && channel_it->second) {
+			bool is_playing = false;
+			channel_it->second->isPlaying(&is_playing);
+			bool is_paused = false;
+			channel_it->second->getPaused(&is_paused);
+			if (is_playing && !is_paused) {
+				// Already playing, do not restart
+				LM.writeLog("AudioSystem::playSound() - Sound %s is already playing", path);
+				return;
+			}
+			else {
+				// Channel is not playing, remove it from active channels
+				m_editorchannel.erase(channel_it);
+			}
+		}
+
+		FMOD::Channel* channel = nullptr;
+		FMOD::ChannelGroup* group = m_sfxgroup;
+
+		if (m_coresystem->playSound(sound, group, false, &channel) == FMOD_OK) {
+			if (channel) {
+				channel->setVolume(1.0);
+				channel->setPitch(1.0);
+				channel->setMode(FMOD_2D);
+				m_editorchannel[path] = channel;
+				LM.writeLog("AudioSystem::playSound() - Playing sound %s on enditor", path);
+			}
+		}
+	}
+
+	void AudioSystem::stopeditor(const std::string& path) {
+		auto it = m_editorchannel.find(path);
+		if (it != m_editorchannel.end() && it->second) {
+			it->second->stop();
+			m_editorchannel.erase(it);
+			LM.writeLog("AudioSystem::stopSound() - Stopped sound %s on editor", path);
+		}
+	}
+
+	PlayState AudioSystem::editorchannel_status(const std::string& path) {
+		auto it = m_editorchannel.find(path);
+		if (it != m_editorchannel.end() && it->second) {
+			bool is_playing = false;
+			bool is_paused = false;
+			it->second->getPaused(&is_paused);
+			it->second->isPlaying(&is_playing);
+			if (is_playing && !is_paused) {
+				return PlayState::PLAY;
+			}
+			else if (!is_playing && is_paused) {
+				return PlayState::PAUSE;
+			}
+			else {
+				return PlayState::STOP;
+			}
+		}
+	}
+
+	bool AudioSystem::isChannelVirtual(EntityID id) {
+		auto it = m_activechannels.find(id);
+		if (it != m_activechannels.end() && it->second) {
+			bool is_virtual = false;
+			if (it->second->isVirtual(&is_virtual) == FMOD_OK) {
+				LM.getInstance().writeLog("AudioSystem::isChannelVirtual() - Channel for entity %u is %s", id, is_virtual ? "virtual" : "not virtual");
+				return is_virtual;
+			}
+		}
+		LM.getInstance().writeLog("AudioSystem::isChannelVirtual() - No active channel for entity %u", id);
+		return false;
 	}
 
 }
