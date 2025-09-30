@@ -1,0 +1,21 @@
+{
+  "asset": {
+    "guid": "58BD0859ACC1C013",
+    "id": 6394276227179462675,
+    "sourcePath": "C:/Users/kuekw/source/repos/here/Survival_Kit/Survival_Kit/Survival_Kit/Assets/Shaders/survival_kit_obj.vert",
+    "intermediatePath": "C:\\Users\\kuekw\\source\\repos\\here\\Survival_Kit\\Cache/Intermediate\\survival_kit_obj.vert",
+    "compiledPath": "",
+    "type": 1,
+    "ext": ".vert",
+    "contentHash": "",
+    "lastWriteTime": 0,
+    "valid": true
+  },
+  "extras": {
+    "displayName": "survival_kit_obj.vert",
+    "category": "Shader",
+    "tags": [],
+    "lastImported": 1759198048,
+    "user": {}
+  }
+}

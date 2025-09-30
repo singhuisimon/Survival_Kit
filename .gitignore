@@ -3,34 +3,32 @@
 *.db
 *.pdb
 *.exe
+*.dll
 *.ilk
-.vs
-.tmp
-*.tlog
-*.obj
-*.idb
-*.log
 *.exp
 *.iobj
 *.ipdb
-//bin
-Debug
-Release
-*.recipe
+*.obj
+*.idb
 *.log
 *.tlog
+*.recipe
 *.lastbuildState
-Cache/
-*.snapshot
-assetdb.txt
-Descriptor.txt
-**/Debug-x64/   # Debug x64 specific
-**/Release-x64/ # Release x64 specific
-**/tmp_build/   # Temporary build output
-packages/              # NuGet packages folder
-*.nuget.props          # NuGet properties
-*.nuget.targets        # NuGet targets
-project.assets.json    # Project assets
-project.nuget.cache    # NuGet cache
-*.nuget.dgspec.json    # Dependency graph spec
-**/.bin/        # Your custom .bin folder
+.vs/
+.tmp/
+
+**/bin/
+**/obj/
+**/Debug/
+**/Release/
+**/.bin/
+**/Debug-x64/
+**/Release-x64/
+**/tmp_build/
+
+packages/
+*.nuget.props
+*.nuget.targets
+project.assets.json
+project.nuget.cache
+*.nuget.dgspec.json

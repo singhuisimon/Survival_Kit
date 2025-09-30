@@ -1,0 +1,29 @@
+{
+  "asset": {
+    "guid": "50BD0859ACC1C005",
+    "id": 5817815474876039173,
+    "sourcePath": "C:/Users/kuekw/source/repos/here/Survival_Kit/Survival_Kit/Survival_Kit/Assets/Textures/mouse_kenny.png",
+    "intermediatePath": "C:\\Users\\kuekw\\source\\repos\\here\\Survival_Kit\\Cache/Intermediate\\mouse_kenny.png",
+    "compiledPath": "",
+    "type": 2,
+    "ext": ".png",
+    "contentHash": "",
+    "lastWriteTime": 0,
+    "valid": true
+  },
+  "extras": {
+    "displayName": "mouse_kenny.png",
+    "category": "Texture",
+    "tags": [],
+    "lastImported": 1759198047,
+    "user": {}
+  }
+  ,"textureSettings": {
+    "usageType": "COLOR",
+    "compression": "BC1",
+    "quality": 0.8,
+    "generateMipmaps": true,
+    "srgb": true,
+    "inputFiles": ["mouse_kenny.png"]
+  }
+}
