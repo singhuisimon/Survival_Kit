@@ -70,4 +70,29 @@ namespace gam300 {
         }
     }
 
+    JPH::Quat RigidBody::getRotation() const
+    {
+        if (m_body)
+        {
+            return m_body->GetRotation();
+        }
+        else
+        {
+            return JPH::Quat::sIdentity(); // default quaternion 
+        }
+    }
+
+    void RigidBody::setRotation(const JPH::Quat& rot, JPH::PhysicsSystem& system)
+    {
+        if (!m_body)
+        {
+            return;
+        }
+
+        JPH::BodyInterface& bodyInterface = system.GetBodyInterface();
+        bodyInterface.SetRotation(m_bodyID, rot, JPH::EActivation::Activate);
+
+
+    }
+
 } // namespace gam300

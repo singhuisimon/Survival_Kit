@@ -48,6 +48,10 @@ namespace gam300 {
         }
 
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        
+        //glEnable(GL_DEPTH_TEST);
+        //glDepthFunc(GL_LESS); // Default comparison
+        //glClearDepth(1.0f);
         //glViewport(0, 0, IMGUIM.getWindowWidthHeight().x, IMGUIM.getWindowWidthHeight().y);
 
         //// Set framebuffer with color (Background color)
@@ -125,6 +129,14 @@ namespace gam300 {
 
         // Attaching texture object for imgui to framebuffer 
         imgui_fbo->attach_color(GL_COLOR_ATTACHMENT0, imguiTex);
+
+        // Attaching renderbuffer 
+        GLuint rboDepth; 
+        glCreateRenderbuffers(1, &rboDepth);
+        glNamedRenderbufferStorage(rboDepth, GL_DEPTH_COMPONENT24, windowWidth, windowHeight);
+        imgui_fbo->attach_renderbuffer(GL_DEPTH_ATTACHMENT, rboDepth);
+
+        // Unbind fbo and texture
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -253,12 +265,14 @@ namespace gam300 {
 
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS); // Default comparison
+        glClearDepth(1.0f);
+        
 
         // Bind framebuffer object for IMGUI viewport
         glBindFramebuffer(GL_FRAMEBUFFER, imgui_fbo->handle());
 
         // Clear the color and depth buffer
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // temporary comment for the imgui
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 
         // Enable choosing of mesh
         if (IM.isKeyPressed(GLFW_KEY_1)) {

@@ -94,7 +94,7 @@ int main(void) {
 
     IMGUIM.startUp(window, io);
 
-
+    IMGUIM.initializeAssetManager(); // This will properly initialize the Asset Manager for the Asset Browser
 
 
     //bool test_done = false;
@@ -124,6 +124,7 @@ int main(void) {
     // -------------------------Set up Asset Manager ------------------------------------------
 
     //this creates the default configuration for the asset manager to know the asset filepath and such
+    /*
     gam300::AssetManager::Config cfg = AM.createDefaultConfig();
 
     AM.setConfig(cfg);
@@ -134,6 +135,7 @@ int main(void) {
     std::cout << "\nFinal database count: " << AM.db().Count() << std::endl;
 
     AM.shutDown();
+    */
 
     // ---------------------------------------------------------------------------------------
 
@@ -240,6 +242,8 @@ int main(void) {
     IM.shutDown();
     
     IMGUIM.shutDown();
+
+    AM.shutDown(); //shut down Asset Manager
     
     // Terminate GLFW
     glfwTerminate();

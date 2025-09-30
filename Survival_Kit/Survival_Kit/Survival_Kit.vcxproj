@@ -134,7 +134,7 @@
     <ClInclude Include="Pipeline\Importers\SceneImporter.h" />
     <ClInclude Include="Pipeline\Importers\ShaderImporter.h" />
     <ClInclude Include="Pipeline\Importers\TextureImporter.h" />
-    <ClInclude Include="Manager\PrefabManager.h" />
+    
     <ClInclude Include="Manager\SerialisationBinManager.h" />
     <ClInclude Include="Manager\SerialisationManager.h" />
     <ClInclude Include="System\RenderSystem.h" />
