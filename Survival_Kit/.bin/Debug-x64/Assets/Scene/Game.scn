@@ -1,17 +1,17 @@
 {
   "objects": [
     {
-      "name": "New Entity",
+      "name": "Camera",
       "components": {
         "Transform3D": {
           "position": [
-            -1.98,
-            2.008,
+            0,
+            0,
             0
           ],
           "prev_position": [
-            -1.958,
-            2.008,
+            0,
+            0,
             0
           ],
           "rotation": [
@@ -24,6 +24,45 @@
             1,
             1
           ]
+        }
+      }
+    },
+    {
+      "name": "New Entity_1",
+      "components": {
+        "Transform3D": {
+          "position": [
+            0,
+            3.2,
+            0
+          ],
+          "prev_position": [
+            0,
+            3.3,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "AudioComponent": {
+          "guid": "\\Audio\\laserSmall_001.ogg",
+          "type": "SFX",
+          "state": "STOP",
+          "volume": 1.0,
+          "pitch": 1.0,
+          "loop": "false",
+          "mute": "false",
+          "is3D": "true",
+          "minDistance": 1.0,
+          "maxDistance": 10.0
         }
       }
     }

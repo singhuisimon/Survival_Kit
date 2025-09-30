@@ -1,9 +1,9 @@
 /**
  * @file AudioSystem.h
- * @brief RAII Wrappers for GPU resources (OpenGL based).
- * @details Contains the prototype of RAII wrappers for GPU resources like vertex array objects and buffer objects.
- * @author
- * @date
+ * @brief Wrappers for FMOD audio system.
+ * @details Contains the prototype of wrappers for FMOD audio system functionalities.
+ * @author Amanda Leow Boon Suan (100%)
+ * @date 21/9/2025
  * Copyright (C) 2025 DigiPen Institute of Technology.
  * Reproduction or disclosure of this file or its contents without the
  * prior written consent of DigiPen Institute of Technology is prohibited.
@@ -16,17 +16,19 @@
 #include "../System/System.h"
 #include "../Component/AudioComponent.h"
 #include "../Component/Transform3D.h"
+#include "../Component/RigidBody.h"
 
 #include <fmod.hpp>
 #include <fmod_studio.hpp>
 #include <fmod_errors.h>
+#include <fmod_common.h>
 
 #include <unordered_map>
 #include <string>
 
 namespace gam300 {
 
-	class AudioSystem : public ComponentSystem<AudioComponent, Transform3D> {
+	class AudioSystem : public ComponentSystem<AudioComponent, Transform3D, RigidBody> {
 	public:
 		AudioSystem();
 		~AudioSystem();
@@ -41,7 +43,6 @@ namespace gam300 {
 		void playSound(EntityID id, AudioComponent* audio);
 		void stopSound(EntityID id);
 		void pauseSound(EntityID id, bool pause);
-
 
 		void playeditor(const std::string& path);
 		void stopeditor(const std::string& path);
@@ -67,7 +68,9 @@ namespace gam300 {
 		//void getBusVolume(const std::string& buspath, float& volume) const;
 		void getSFXGroupVolume(float& volume) const;
 
-		//bool isChannelVirtual(EntityID id); //not sure if need
+		PlayState editorchannel_status(const std::string& path);
+
+		bool isChannelVirtual(EntityID id); 
 		//bool isEventValid(const std::string& eventpath); //not sure if need
 
 	private:
@@ -77,6 +80,7 @@ namespace gam300 {
 		void updateVolumes();
 
 		void update3DAttributes(EntityID id, AudioComponent* audio, Transform3D* transform);
+		//void update3DAttributes(EntityID id, AudioComponent* audio);
 
 		//void errorCheck(FMOD_RESULT result);
 
