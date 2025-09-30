@@ -15,12 +15,14 @@
 #include "InputManager.h" 
 #include "ECSManager.h"
 #include "SerialisationManager.h"
+#include "PrefabManager.h"
 #include "GraphicsManager.h"
 #include "../Component/Transform3D.h"
 #include "../Component/AudioComponent.h"
 #include "../Utility/Clock.h"
 #include "../Utility/AssetPath.h"
 #include "../System/MovementSystem.h"
+#include "../System/PhysicsSystem.h"
 #include "../Component/RigidBody.h"
 
 namespace gam300 {
@@ -83,7 +85,16 @@ namespace gam300 {
 
         logManager.writeLog("GameManager::startUp() - SerialisationManager started successfully");
 
-        // Start the AudioManager
+        // Start the PrefabManager
+        if (PM.startUp()) {
+            logManager.writeLog("GameManager::startUp() - Failed to start PrefabManager");
+            EM.shutDown();
+            IM.shutDown();
+            logManager.shutDown();
+            return -1;
+        }
+
+        logManager.writeLog("GameManager::startUp() - PrefabManager started successfully");
 
         // Start the GraphicsManager
         if (GFXM.startUp()) {
@@ -113,6 +124,8 @@ namespace gam300 {
 
         // Register the Movement component with the ComponetManager
         SM.register_system<MovementSystem>();
+
+        SM.register_system<PhysicsSystem>();
 
         //// Create a test entity with Transform3D component for demonstration
         //Entity& testEntity = EM.createEntity("TestEntity");
@@ -167,6 +180,8 @@ namespace gam300 {
         setGameOver();
 
         // Shut down managers in reverse order of initialization
+        GFXM.shutDown();
+		PM.shutDown();
         SEM.shutDown();
         EM.shutDown();
         IM.shutDown();

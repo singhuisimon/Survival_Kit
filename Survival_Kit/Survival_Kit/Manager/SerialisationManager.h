@@ -147,6 +147,13 @@ namespace gam300 {
          */
         void registerComponentSerializer(const std::string& componentName, std::shared_ptr<IComponentSerializer> serializer);
 
+        /**
+         * @brief Get a component serializer by name.
+         * @param componentName The name of the component type.
+         * @return Shared pointer to the serializer, or nullptr if not found.
+         */
+        std::shared_ptr<IComponentSerializer> getComponentSerializer(const std::string& componentName);
+
         // Helper methods for parsing
         bool parseJsonFile(const std::string& filename, std::string& jsonContent);
         bool parseComponents(EntityID entityId, const std::string& componentData);

@@ -703,6 +703,17 @@ namespace gam300 {
         return true;
     }
 
+	// Get a registered component serializer
+    std::shared_ptr<IComponentSerializer> SerialisationManager::getComponentSerializer(const std::string& componentName) {
+        auto it = m_component_serializers.find(componentName);
+        if (it != m_component_serializers.end()) {
+            return it->second;
+        }
+        return nullptr;
+    }
+
+	// ================================= Helper Methods =================================
+
     // Helper method to parse a JSON file
     bool SerialisationManager::parseJsonFile(const std::string& filename, std::string& jsonContent) {
         // Open the file

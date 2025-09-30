@@ -27,6 +27,8 @@
 #include "../Manager/ECSManager.h"
 #include "../Manager/ImguiManager.h"
 #include "../Utility/Clock.h"
+#include "../Manager/AssetManager.h" //Asset 
+
 
 // Include IMGUI headers
 #include "../IMGUI/imgui.h"

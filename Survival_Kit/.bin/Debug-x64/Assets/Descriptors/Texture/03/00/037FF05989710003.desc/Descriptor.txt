@@ -1,0 +1,29 @@
+{
+  "asset": {
+    "guid": "037FF05989710003",
+    "id": 252184371504676867,
+    "sourcePath": "C:/Users/huish/Downloads/SIT Y3 T1/SEP5/Sep Prj/Survival_Kit/Survival_Kit/.bin/Debug-x64/Assets/Textures/game_background_2.png",
+    "intermediatePath": "C:\\Users\\huish\\Downloads\\SIT Y3 T1\\SEP5\\Sep Prj\\Survival_Kit\\Cache/Intermediate\\game_background_2.png",
+    "compiledPath": "",
+    "type": 2,
+    "ext": ".png",
+    "contentHash": "",
+    "lastWriteTime": 0,
+    "valid": true
+  },
+  "extras": {
+    "displayName": "game_background_2.png",
+    "category": "Texture",
+    "tags": [],
+    "lastImported": 1759161156,
+    "user": {}
+  }
+  ,"textureSettings": {
+    "usageType": "COLOR",
+    "compression": "BC1",
+    "quality": 0.8,
+    "generateMipmaps": true,
+    "srgb": true,
+    "inputFiles": ["game_background_2.png"]
+  }
+}
