@@ -33,3 +33,4 @@ packages/              # NuGet packages folder
 project.assets.json    # Project assets
 project.nuget.cache    # NuGet cache
 *.nuget.dgspec.json    # Dependency graph spec
+**/.bin/        # Your custom .bin folder
