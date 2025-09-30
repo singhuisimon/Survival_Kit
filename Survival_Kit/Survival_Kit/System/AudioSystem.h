@@ -42,25 +42,29 @@ namespace gam300 {
 		void stopSound(EntityID id);
 		void pauseSound(EntityID id, bool pause);
 
-		bool playEvent(EntityID id, const std::string& eventpath);
-		bool stopEvent(EntityID id, bool immediate = true);
-		bool pauseEvent(EntityID id, bool pause);
+
+		void playeditor(const std::string& path);
+		void stopeditor(const std::string& path);
+
+		//bool playEvent(EntityID id, const std::string& eventpath);
+		//bool stopEvent(EntityID id, bool immediate = true);
+		//bool pauseEvent(EntityID id, bool pause);
 
 		//Temporary loading functions
-		bool loadBankTemp(const std::string& path);
+		//bool loadBankTemp(const std::string& path);
 		bool loadSoundTemp(const std::string& path, bool loop = false);
 
-		void unloadBank(const std::string& path);
+		//void unloadBank(const std::string& path);
 		void unloadSound(const std::string& path);
 
 		void setListenerAttributes(const Vector3D& position, const Vector3D& forward, const Vector3D& up, const Vector3D& velocity);
 
 		void setMasterVolume(float volume);
-		void setBusVolume(const std::string& buspath, float volume);
+		//void setBusVolume(const std::string& buspath, float volume);
 		void setSFXGroupVolume(float volume);
 
 		void getMasterVolume(float& volume) const;
-		void getBusVolume(const std::string& buspath, float& volume) const;
+		//void getBusVolume(const std::string& buspath, float& volume) const;
 		void getSFXGroupVolume(float& volume) const;
 
 		//bool isChannelVirtual(EntityID id); //not sure if need
@@ -68,7 +72,7 @@ namespace gam300 {
 
 	private:
 		void cleanupInactiveChannels();
-		void cleanupInactiveEvents();
+		//void cleanupInactiveEvents();
 
 		void updateVolumes();
 
@@ -77,19 +81,23 @@ namespace gam300 {
 		//void errorCheck(FMOD_RESULT result);
 
 		FMOD::System* m_coresystem = nullptr;
-		FMOD::Studio::System* m_studiosystem = nullptr;
-		FMOD::Studio::Bank* m_masterbank = nullptr;
+		//FMOD::Studio::System* m_studiosystem = nullptr;
+		//FMOD::Studio::Bank* m_masterbank = nullptr;
 
 		//A map from GUID -> FMOD::Sound*
 		std::unordered_map<std::string, FMOD::Sound*> m_loadedsounds;
 		std::unordered_map<EntityID, FMOD::Channel*> m_activechannels;
+		std::unordered_map<EntityID, std::string> m_previousguids;
+		std::unordered_map<std::string, FMOD::Channel*> m_editorchannel;
 
-		std::unordered_map<std::string, FMOD::Studio::Bank*> m_loadedbanks;
-		std::unordered_map<EntityID, FMOD::Studio::EventInstance*> m_activeevents;
-		std::unordered_map<std::string, FMOD::Studio::EventDescription*> m_eventdes;
-		std::unordered_map<std::string, FMOD::Studio::Bus*> m_buses;
+		//std::unordered_map<std::string, FMOD::Studio::Bank*> m_loadedbanks;
+		//std::unordered_map<EntityID, FMOD::Studio::EventInstance*> m_activeevents;
+		//std::unordered_map<std::string, FMOD::Studio::EventDescription*> m_eventdes;
+		//std::unordered_map<std::string, FMOD::Studio::Bus*> m_buses;
 
 		FMOD::ChannelGroup* m_sfxgroup = nullptr;
+		FMOD::ChannelGroup* m_bgmgroup = nullptr;
+		FMOD::ChannelGroup* m_mastergroup = nullptr;
 
 		float m_mastervolume = 1.0f;
 		float m_bgmvolume = 1.0f;

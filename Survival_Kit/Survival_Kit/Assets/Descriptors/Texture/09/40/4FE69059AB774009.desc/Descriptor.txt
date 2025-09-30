@@ -1,0 +1,29 @@
+{
+  "asset": {
+    "guid": "4FE69059AB774009",
+    "id": 5757447888442966025,
+    "sourcePath": "C:/Users/Admin/source/repos/gam_300/Survival_Kit/Survival_Kit/Assets/Textures/squirrel_kenny.png",
+    "intermediatePath": "C:\\Users\\Admin\\source\\repos\\gam_300\\Cache/Intermediate\\squirrel_kenny.png",
+    "compiledPath": "",
+    "type": 2,
+    "ext": ".png",
+    "contentHash": "",
+    "lastWriteTime": 0,
+    "valid": true
+  },
+  "extras": {
+    "displayName": "squirrel_kenny.png",
+    "category": "Texture",
+    "tags": [],
+    "lastImported": 1759197481,
+    "user": {}
+  }
+  ,"textureSettings": {
+    "usageType": "COLOR",
+    "compression": "BC1",
+    "quality": 0.8,
+    "generateMipmaps": true,
+    "srgb": true,
+    "inputFiles": ["squirrel_kenny.png"]
+  }
+}

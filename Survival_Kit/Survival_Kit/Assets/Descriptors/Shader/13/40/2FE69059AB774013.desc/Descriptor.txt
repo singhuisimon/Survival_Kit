@@ -1,0 +1,21 @@
+{
+  "asset": {
+    "guid": "2FE69059AB774013",
+    "id": 3451604879229272083,
+    "sourcePath": "C:/Users/Admin/source/repos/gam_300/Survival_Kit/Survival_Kit/Assets/Shaders/survival_kit_obj.vert",
+    "intermediatePath": "C:\\Users\\Admin\\source\\repos\\gam_300\\Cache/Intermediate\\survival_kit_obj.vert",
+    "compiledPath": "",
+    "type": 1,
+    "ext": ".vert",
+    "contentHash": "",
+    "lastWriteTime": 0,
+    "valid": true
+  },
+  "extras": {
+    "displayName": "survival_kit_obj.vert",
+    "category": "Shader",
+    "tags": [],
+    "lastImported": 1759197481,
+    "user": {}
+  }
+}
