@@ -30,30 +30,30 @@ namespace gam300 {
     private:
 
         // Data members of a light
-        float shininess;                // Shininess of the material
         glm::vec3 material_ambient;     // Intensity for the ambient component
         glm::vec3 material_diffuse;     // Intensity for the diffuse component
         glm::vec3 material_specular;    // Intensity for the specular component
+        float shininess;                 // Shininess of the material
 
     public:
 
         // Default constructor for a default light
-        Material() :    shininess{ 100.0f },         
-                        material_ambient{ 0.9f, 0.5f, 0.3f },
-                        material_diffuse{ 0.9f, 0.5f, 0.3f },
-                        material_specular{ 0.8f, 0.8f, 0.8f }
+        Material() : material_ambient{ 0.9f, 0.5f, 0.3f },
+                     material_diffuse{ 0.9f, 0.5f, 0.3f },
+                     material_specular{ 0.8f, 0.8f, 0.8f },
+                     shininess{ 100.0f }
         {}
 
         // Constructor for a light with custom values
-        Material(   float shininess,
-                    glm::vec3 ambient,
-                    glm::vec3 diffuse,
-                    glm::vec3 specular) :
-
-                    shininess{ shininess },
-                    material_ambient{ ambient },
-                    material_diffuse{ diffuse },
-                    material_specular{ specular }
+        Material(glm::vec3 ambient,
+                 glm::vec3 diffuse,
+                 glm::vec3 specular,
+                 float shininess) :
+                 
+                 material_ambient{ ambient },
+                 material_diffuse{ diffuse },
+                 material_specular{ specular },
+                 shininess{ shininess }
         {}
 
         // Reference to light data

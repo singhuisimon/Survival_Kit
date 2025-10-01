@@ -24,6 +24,7 @@
 #include "../Component/RigidBody.h"
 #include "../Component/Bullet.h"
 #include "../Component/Script.h"
+#include "../Component/MeshComponent.h"
 
 // Include system headers
 #include "../System/MovementSystem.h"
@@ -138,6 +139,9 @@ namespace gam300 {
 
 		CM.register_component<Script>();
 		LM.writeLog("GameManager::startUp() - Script component registered successfully");
+
+        CM.register_component<MeshComponent>();
+        LM.writeLog("GameManager::startUp() - Mesh component registered successfully");
 
         // Check the scene path
         const std::string scenePath = getAssetFilePath("Scene/Game.scn");
