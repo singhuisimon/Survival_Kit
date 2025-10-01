@@ -140,6 +140,8 @@ int main(void) {
     // ---------------------------------------------------------------------------------------
 
 
+    AM.shutDown();
+
        while (!GM.getGameOver() && !glfwWindowShouldClose(window)) {
 
         // Update input system
