@@ -74,6 +74,7 @@
     <ClCompile Include="System\AudioSystem.cpp" />
     <ClCompile Include="System\ScriptSystem.cpp" />
     <ClCompile Include="System\TransformSystem.cpp" />
+    <ClCompile Include="Tracy\TracyClient.cpp" />
     <ClCompile Include="Utility\AssetPath.cpp" />
     <ClCompile Include="Utility\Clock.cpp" />
     <ClCompile Include="Utility\MathUtils.cpp" />
@@ -272,9 +273,9 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;TRACY_ENABLE;TRACY_ON_DEMAND;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)ScriptCore;$(SolutionDir)External_Libraries\include\FMOD API\core;$(SolutionDir)External_Libraries\include\FMOD API\studio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)ScriptCore;$(SolutionDir)External_Libraries\include\FMOD API\core;$(SolutionDir)External_Libraries\include\FMOD API\studio;$(ProjectDir)Tracy;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -285,7 +286,11 @@
     </Link>
     <PostBuildEvent>
       <Command>if not exist "$(OutDir)assets" mkdir "$(OutDir)assets"
-xcopy "$(ProjectDir)assets\*" "$(OutDir)assets\" /E /I /Y /Q</Command>
+xcopy "$(ProjectDir)assets\*" "$(OutDir)assets\" /E /I /Y /Q
+
+if exist "$(SolutionDir)..\tracy-profiler.exe" (
+    copy /Y "$(SolutionDir)..\tracy-profiler.exe" "$(OutDir)"
+)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -296,7 +301,7 @@ xcopy "$(ProjectDir)assets\*" "$(OutDir)assets\" /E /I /Y /Q</Command>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)ScriptCore;$(SolutionDir)External_Libraries\include\FMOD API\core;$(SolutionDir)External_Libraries\include\FMOD API\studio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)ScriptCore;$(SolutionDir)External_Libraries\include\FMOD API\core;$(SolutionDir)External_Libraries\include\FMOD API\studio;$(ProjectDir)Tracy;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
