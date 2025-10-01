@@ -116,10 +116,41 @@ namespace gam300 {
 		const AssetDatabase& db() const { return m_db; }
 		AssetImporterRegistry& importers() { return m_importers; }
 		const Config& config() const { return m_cfg; }
+		AssetDescriptorGenerator& descriptorGenerator() { return m_descGen; }
+		const AssetDescriptorGenerator& descriptorGenerator() const { return m_descGen; }
 
 
 		//--------------Validating Descriptors ----------
 		void validateExistingDescriptors();
+
+		/**
+		 * @brief Get the AssetId for a given source path.
+		 * @param sourcePath Path to the asset file (e.g., "Assets/Textures/rock.png")
+		 * @return AssetId (0 if not found)
+		 */
+		AssetId getAssetId(const std::string& sourcePath) const;
+
+		/**
+		 * @brief Get the AssetId for a given filename (searches all assets).
+		 * @param filename Just the filename (e.g., "rock.png")
+		 * @return AssetId (0 if not found, first match if multiple with same name)
+		 */
+		AssetId getAssetIdByFilename(const std::string& filename) const;
+
+		/**
+		 * @brief Get the AssetRecord for a given AssetId.
+		 * @param id The asset ID
+		 * @return Pointer to AssetRecord (nullptr if not found)
+		 */
+		const AssetRecord* getAssetRecord(AssetId id) const;
+
+		/**
+		 * @brief Check if an asset exists in the database.
+		 * @param sourcePath Path to the asset file
+		 * @return True if asset exists
+		 */
+		bool assetExists(const std::string& sourcePath) const;
+
 	private:
 
 		void handleAddedOrModified(const std::string& src);
