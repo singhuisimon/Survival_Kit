@@ -1148,9 +1148,9 @@ namespace gam300 {
             ImGui::Text("No Folder Exist");
         }
 
-        static std::string selectedFolder = ""; // currently selected folder
+        static std::string selectedFolder = ""; // currently selected folder type e.g. scene, prefab
         static int selectedAssetIndex = -1;
-
+        //std::cout << "selectedFolder: " << selectedFolder << "\n";
         // ---set up 2 column ---
         ImGui::Columns(2, nullptr, true);
 
@@ -1212,13 +1212,17 @@ namespace gam300 {
                             assetsList.push_back(entry);
                     }
                 }
+
+
             }
         }
+
+
 
         // --- display assets grid ---
         if (!assetsList.empty())
         {
-            ImGui::Text(("Assets > " + selectedFolder).c_str());
+            ImGui::Text(("Assets > " + selectedFolder).c_str()); // to show which folder we in
             ImGui::Separator();
 
             float padding = 10.0f;
@@ -1232,13 +1236,14 @@ namespace gam300 {
             {
                 const auto& assetEntry = assetsList[i];
                 std::string filename = assetEntry.path().filename().string();
+                std::string fileNamePath = assetEntry.path().string();
 
                 ImGui::PushID(filename.c_str());
                 if (ImGui::Button(filename.c_str(), ImVec2(thumbnailSize, thumbnailSize))) {
 
-                    //TODO: Ensure that this only loads for SCENE FILES
-                    selectedAssetIndex = i;
 
+                    selectedAssetIndex = i;
+                    shownFile = fileNamePath;
                     // to ge the type of the file e.g. .scn, .wav
                     std::string extension = assetEntry.path().extension().string();
 
@@ -1248,6 +1253,7 @@ namespace gam300 {
                     {
                         ImguiEcsRef.clearAllEntities();
                         SEM.loadScene(assetEntry.path().string());
+                        shownFile = fileNamePath;
 
                     }
                     if (extension == ".png" || extension == ".jpeg") //to open the image
@@ -1432,23 +1438,38 @@ namespace gam300 {
 
                 if (rigidBody)
                 {
+                    ImGui::Separator(); // for editable value
+
+
+
                     float mass = rigidBody->getMass();
                     if (ImGui::InputFloat("Mass", &mass)) {
                         rigidBody->setMass(mass);
                     }
 
+
+                    Vector3D iDiagonal = rigidBody->getInertiaDiagonal();
+                    float inertiaDiagonal[3] = { iDiagonal.x, iDiagonal.y, iDiagonal.z };
+                    if (ImGui::DragFloat3("Inertia Diagonal", inertiaDiagonal, 0.1f)) {
+                        rigidBody->setInertiaDiagonal(Vector3D(inertiaDiagonal[0], inertiaDiagonal[1], inertiaDiagonal[2]));
+                    }
+
+                    static bool applyForces = true;
+                    if (ImGui::Checkbox("Apply Forces", &applyForces)) {
+                        rigidBody->setForceMask(applyForces ? 0xFFFFFFFFu : 0u);
+                    }
+
+                    ImGui::Separator(); // read only value
                     Vector3D vel = rigidBody->getVelocity();
                     float velocity[3] = { vel.x, vel.y, vel.z };
-                    if (ImGui::DragFloat3("Velocity", velocity, 0.1f)) {
-                        rigidBody->setVelocity(Vector3D(velocity[0], velocity[1], velocity[2]));
-                    }
+                    ImGui::InputFloat3("Velocity", velocity, "%.3f", ImGuiInputTextFlags_ReadOnly);
+
 
                     Vector3D accel = rigidBody->getAcceleration();
                     float acceleration[3] = { accel.x, accel.y, accel.z };
-                    if (ImGui::DragFloat3("Acceleration", acceleration, 0.1f))
-                    {
-                        rigidBody->setAcceleration(Vector3D(acceleration[0], acceleration[1], acceleration[2]));
-                    }
+                    ImGui::InputFloat3("Acceleration", acceleration, "%.3f", ImGuiInputTextFlags_ReadOnly);
+
+
                 }
 
             }
@@ -1464,6 +1485,8 @@ namespace gam300 {
 
         //    }
         //}
+
+
 
     }
 
