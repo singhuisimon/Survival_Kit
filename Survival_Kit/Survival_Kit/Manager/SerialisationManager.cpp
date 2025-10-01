@@ -25,6 +25,7 @@
 #include "../Component/Collider.h"
 
 #include "../Component/Script.h"
+#include "../Component/MeshComponent.h"
 #include <fstream>
 #include <sstream>
 #include <functional>
@@ -463,6 +464,60 @@ namespace gam300 {
         return script;
     }
 
+    // ==================== MeshComponent Serializer ====================
+    std::string MeshComponentSerializer::serialize(Component* component) {
+
+        // Prepare mesh component for serializing
+        MeshComponent* mesh_comp = static_cast<MeshComponent*>(component);
+        if (!mesh_comp) {
+            return "{}";
+        }
+
+        // Serializing mesh component data
+        std::stringstream ss;
+        ss << "{\n";
+        ss << "          \"guid\": \"" << mesh_comp->getGUID() << "\",\n";
+        ss << "          \"mesh_handle\": " << mesh_comp->getMeshHandle() << ",\n";
+        ss << "          \"material_handle\": " << mesh_comp->getMaterialHandle() << "\n";
+        ss << "        }";
+        return ss.str();
+    }
+
+    // MeshComponentSerializer implementation
+    Component* MeshComponentSerializer::deserialize(EntityID entityId, const std::string& jsonData) {
+
+        // Retrieve guid
+        std::string guid = SerialisationManager::extractQuotedValue(jsonData, "guid");
+
+        // Parse mesh handle
+        uint16_t mesh_handle = 0;
+        std::string mesh_handle_data = SerialisationManager::extractNumberValue(jsonData, "mesh_handle");
+        if (!mesh_handle_data.empty()) {
+            try {
+                mesh_handle = static_cast<uint16_t>(std::stoi(mesh_handle_data));
+            }
+            catch (const std::exception&) {
+                LM.writeLog("MeshComponentSerializer::deserialize() - Fail to parse mesh handle");
+            }
+        }
+
+        // Parse material handle
+        uint16_t material_handle = 0;
+        std::string material_handle_data = SerialisationManager::extractNumberValue(jsonData, "material_handle");
+        if (!material_handle_data.empty()) {
+            try {
+                material_handle = static_cast<uint16_t>(std::stoi(material_handle_data));
+            }
+            catch (const std::exception&) {
+                LM.writeLog("MeshComponentSerializer::deserialize() - Fail to parse material handle");
+            }
+        }
+
+        // Create and return mesh component
+        MeshComponent* mesh_comp = EM.addComponent<MeshComponent>(entityId, guid, mesh_handle, material_handle);
+        return mesh_comp;
+    }
+
     // Initialize singleton instance
     SerialisationManager::SerialisationManager() {
         setType("SerialisationManager");
@@ -547,6 +602,19 @@ namespace gam300 {
             {
                 serializer->deserialize(entityId, componentData);
                 LM.writeLog("Collider created for entity %d", entityId);
+            }
+            });
+
+        // Mesh Component
+        registerComponentCreator("MeshComponent", [this](EntityID entityId, const std::string& componentData) {
+            //Use the serializer to create the component
+            auto serializer = m_component_serializers["MeshComponent"];
+            if (serializer) {
+                serializer->deserialize(entityId, componentData);
+                LM.writeLog("Mesh_Component created for entity %d", entityId);
+            }
+            else {
+                LM.writeLog("Mesh_Component serializer not found for entity %d", entityId);
             }
             });
 
@@ -892,6 +960,16 @@ namespace gam300 {
                 if (Collider* collider = EM.getComponent<Collider>(entity.get_id())) {
                     componentStrings.push_back(getIndent(4) + "\"Collider\": " +
                         serializer->second->serialize(collider));
+                    hasComponents = true;
+                }
+            }
+
+            // Check for MeshComponent 
+            if (auto serializer = m_component_serializers.find("MeshComponent");
+                serializer != m_component_serializers.end()) {
+                if (MeshComponent* mesh = EM.getComponent<MeshComponent>(entity.get_id())) {
+                    componentStrings.push_back(getIndent(4) + "\"MeshComponent\": " +
+                        serializer->second->serialize(mesh));
                     hasComponents = true;
                 }
             }
