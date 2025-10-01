@@ -123,13 +123,19 @@ namespace gam300 {
 
 	void AssetManager::shutDown() {
 		// Save DB
-		if (!m_cfg.databaseFile.empty())
+		if (!m_cfg.databaseFile.empty()) {
 			m_db.Save(m_cfg.databaseFile);
-
+			LM.writeLog("AssetManager::shutDown() - Saved database with %zu assets", m_db.Count());
+		}
 
 		// Save snapshot to speed up next run
-		if (!m_cfg.snapshotFile.empty())
-			m_scanner.SaveSnapshot(m_cfg.snapshotFile);
+		if (!m_cfg.snapshotFile.empty()) {
+			size_t snapCount = m_scanner.GetSnapshotSize();
+			bool success = m_scanner.SaveSnapshot(m_cfg.snapshotFile);
+			LM.writeLog("AssetManager::shutDown() - Saved snapshot: %zu files, success=%d, path=%s",
+				snapCount, success, m_cfg.snapshotFile.c_str());
+		}
+
 
 
 		LM.writeLog("AssetManager::shutDown() - complete");
@@ -242,10 +248,17 @@ namespace gam300 {
 		// Remove from database
 		if (m_db.RemoveBySource(src)) {
 			LM.writeLog("AssetManager - Removed from DB: %s", src.c_str());
+			// FIX: Save immediately
+			// Persist immediately
+			m_db.Save(m_cfg.databaseFile);
+			m_scanner.SaveSnapshot(m_cfg.snapshotFile);
 		}
 	}
 
 	void AssetManager::scanAndProcess() {
+
+		LM.writeLog("AssetManager::scanAndProcess() - Snapshot has %zu files before scan",
+			m_scanner.GetSnapshotSize());
 		// Iterate changes from the scanner and act on them
 		for (const auto& c : m_scanner.Scan()) {
 			switch (c.kind) {
@@ -256,6 +269,8 @@ namespace gam300 {
 				handleRemoved(c.sourcePath); break;
 			}
 		}
+		LM.writeLog("AssetManager::scanAndProcess() - Snapshot has %zu files after scan",
+			m_scanner.GetSnapshotSize());
 
 		////NEW to check for missing descriptors of unchanged files 
 		//if (m_cfg.writeDescriptors) {
@@ -304,12 +319,12 @@ namespace gam300 {
 		}
 	}
 
-	AssetId AssetManager::GetAssetId(const std::string& sourcePath) const {
+	AssetId AssetManager::getAssetId(const std::string& sourcePath) const {
 		const AssetRecord* rec = m_db.FindBySource(sourcePath);
 		return rec ? rec->id : 0;
 	}
 
-	AssetId AssetManager::GetAssetIdByFilename(const std::string& filename) const {
+	AssetId AssetManager::getAssetIdByFilename(const std::string& filename) const {
 		// Search through all assets for matching filename
 		auto allRecords = const_cast<AssetDatabase&>(m_db).AllMutable();
 
@@ -325,12 +340,13 @@ namespace gam300 {
 		return 0; // Not found
 	}
 
-	const AssetRecord* AssetManager::GetAssetRecord(AssetId id) const {
+	const AssetRecord* AssetManager::getAssetRecord(AssetId id) const {
 		return m_db.Find(id);
 	}
 
-	bool AssetManager::AssetExists(const std::string& sourcePath) const {
+	bool AssetManager:: assetExists(const std::string& sourcePath) const {
 		return m_db.FindBySource(sourcePath) != nullptr;
 	}
+
 
 } //end of namespace gam300
