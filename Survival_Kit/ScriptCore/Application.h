@@ -72,6 +72,9 @@ namespace Core
         static void ListExistingScripts();
         static void ShowScriptCreationHelp();
 
+        void UpdateScriptForEntity(int entityId);  // NEW method
+
+
 
     private:
         static std::array<TransformComponent, ENTITY_COUNT> nativeData;
@@ -80,6 +83,8 @@ namespace Core
         bool(*addScriptFunc)(int, const char*) = nullptr;
         void(*executeUpdateFunc)() = nullptr;
         void(*reloadScriptsFunc)() = nullptr;  // Add this
+        void(*executeUpdateForEntityFunc)(int) = nullptr;  // NEW function pointer
+
         void startScriptEngine();
         void stopScriptEngine();
         std::string buildTpaList(const std::string& directory);

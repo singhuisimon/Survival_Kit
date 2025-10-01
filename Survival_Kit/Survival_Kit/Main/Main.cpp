@@ -18,8 +18,11 @@ int main(void) {
     //    printf("ERROR: Failed to start GameManager\n");
     //    return -1;
     //}
+
+    ZoneScopedN("MainStartup");
 	
     bool spacePressed = false;
+    bool tracyKeyWasDown = false;
 
     // Get reference to LogManager (already started by GameManager)
     LM.writeLog("Main: GameManager initialized successfully");
@@ -105,6 +108,8 @@ int main(void) {
 
     IMGUIM.initializeAssetManager(); // This will properly initialize the Asset Manager for the Asset Browser
 
+    TRACY.setTracyPath("tracy-profiler.exe");
+    TRACY.startUp();
 
     //bool test_done = false;
     // Create a clock for timing
@@ -119,9 +124,9 @@ int main(void) {
 
     //Core::Application app;
     //app.Run();
-    Core::Application app;
-    app.InitializeScripting();
-    app.AddScript(0, "TestScript");
+    //Core::Application app;
+    //app.InitializeScripting();
+    //app.AddScript(0, "TestScript");
 
     int frame_count = 0;
     double fps_timer = 0.0;
@@ -133,6 +138,8 @@ int main(void) {
 
        while (!GM.getGameOver() && !glfwWindowShouldClose(window)) {
 
+        ZoneScopedN("MainLoop");
+
         // Update input system
         IM.update();
 
@@ -142,12 +149,10 @@ int main(void) {
         bool currentSpaceState = GetKeyState(VK_SPACE) & 0x8000;
         if (currentSpaceState && !spacePressed)
         {
-            /*app.ReloadScripts();
-            app.AddScript(0, "TestScript");*/
-
-            app.CreateMonoBehaviourScript("PlayerController");
+            //app.ReloadScripts();
+            //std::cout << "your mother flip ";
+            //app.CreateMonoBehaviourScript("PlayerController");
         }
-        app.CheckAndReloadScripts(); // Add this line
         // Update all systems (including InputSystem)
         EM.updateSystems(GM.getFrameTime() / 1000.0f);
 
@@ -222,19 +227,30 @@ int main(void) {
             LM.writeLog("GameManager::run() - Frame running behind: %lld us", -sleep_time);
         }
 
-        app.UpdateScripts();
-        app.CheckAndReloadScripts();
+       /* app.UpdateScripts();
+        app.CheckAndReloadScripts();*/
 
+        bool tracyKeyDown = (GetKeyState('T') & 0x8000) != 0;
+        if ((tracyKeyDown && !tracyKeyWasDown) && !TRACY.isRunning()) {
+            TRACY.launchTracy();
+            LM.writeLog("Tracyprofiler launch requested");
+        }
+        tracyKeyWasDown = tracyKeyDown;
+        TRACY.update();
+
+        FrameMark; //always keep this as the last.
     }
 
 
-    app.ShutdownScripting();
+    //app.ShutdownScripting();
     // Cleanup
     LM.writeLog("Cleaning up resources");
 
     // Shut down InputManager
     IM.shutDown();
     
+    TRACY.shutDown();
+
     IMGUIM.shutDown();
 
     AM.shutDown(); //shut down Asset Manager
