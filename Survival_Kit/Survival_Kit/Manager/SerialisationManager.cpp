@@ -216,7 +216,7 @@ namespace gam300 {
         }
 
         unsigned forceMask = 0xFFFFFFFFu;
-        std::string applyForcesData = SerialisationManager::extractNumberValue(jsonData, "applyForces");
+        std::string applyForcesData = SerialisationManager::extractNumberValue(jsonData, "forceMask");
         if (!applyForcesData.empty()) {
             forceMask = (applyForcesData == "true") ? 0xFFFFFFFFu : 0u;
         }
