@@ -36,3 +36,8 @@ project.nuget.cache
 Cache/
 *.snapshot
 assetdb.txt
+
+.bin/
+bin/
+obj/
+tmp_build/
