@@ -32,6 +32,7 @@
 
 namespace gam300 {
 
+    // ==================== Transform3D Serializer ====================
     // Transform3DSerializer implementation
     std::string Transform3DSerializer::serialize(Component* component) {
         Transform3D* transform = static_cast<Transform3D*>(component);
@@ -128,6 +129,7 @@ namespace gam300 {
         return transform;
     }
 
+    // ==================== RigidBody Serializer ====================
     // RigidBodySerializer implementation
     std::string RigidBodySerializer::serialize(Component* component) {
 
@@ -233,6 +235,7 @@ namespace gam300 {
 
     }
 
+    // ==================== Collider Serializer ====================
     std::string ColliderSerializer::serialize(Component* component)
     {
         Collider* collider = static_cast<Collider*>(component);
@@ -278,7 +281,7 @@ namespace gam300 {
         return collider;
     }
 
-
+    // ==================== Audio Serializer ====================
     //AudioComponentSerializer implementation
     std::string AudioComponentSerializer::serialize(Component* component) {
         AudioComponent* audio = static_cast<AudioComponent*>(component);
@@ -477,26 +480,8 @@ namespace gam300 {
         if (Manager::startUp())
             return -1;
 
-        // Register component serializers
+        // ==============Register Transform3D component serializers ===========================
         registerComponentSerializer("Transform3D", std::make_shared<Transform3DSerializer>());
-
-
-        registerComponentSerializer("AudioComponent", std::make_shared<AudioComponentSerializer>());
-
-        registerComponentSerializer("Script", std::make_shared<ScriptSerializer>());
-
-
-        // Register Script component creator
-        registerComponentCreator("Script", [this](EntityID entityId, const std::string& componentData) {
-            auto serializer = m_component_serializers["Script"];
-            if (serializer) {
-                serializer->deserialize(entityId, componentData);
-                LM.writeLog("Script component created for entity %d", entityId);
-            }
-            else {
-                LM.writeLog("Script serializer not found for entity %d", entityId);
-            }
-            });
         // Register component creators
         registerComponentCreator("Transform3D", [this](EntityID entityId, const std::string& componentData) {
             // Use the serializer to create the component
@@ -507,7 +492,36 @@ namespace gam300 {
             }
             });
 
-        // Register component serializers for RigidBody
+        // ==============Register Audio component serializers ==========================
+        registerComponentSerializer("AudioComponent", std::make_shared<AudioComponentSerializer>());
+        registerComponentCreator("AudioComponent", [this](EntityID entityId, const std::string& componentData) {
+            //Use the serializer to create the component
+            auto serializer = m_component_serializers["AudioComponent"];
+            if (serializer) {
+                serializer->deserialize(entityId, componentData);
+                LM.writeLog("Audio_Component created for entity %d", entityId);
+            }
+            else {
+                LM.writeLog("Audio_Component serializer not found for entity %d", entityId);
+            }
+            });
+
+        // ==============Register Script component serializers ====================
+        registerComponentSerializer("Script", std::make_shared<ScriptSerializer>());
+
+        registerComponentCreator("Script", [this](EntityID entityId, const std::string& componentData) {
+            auto serializer = m_component_serializers["Script"];
+            if (serializer) {
+                serializer->deserialize(entityId, componentData);
+                LM.writeLog("Script component created for entity %d", entityId);
+            }
+            else {
+                LM.writeLog("Script serializer not found for entity %d", entityId);
+            }
+            });
+        
+
+        // ==============Register RigidBody component serializers==========================
         registerComponentSerializer("RigidBody", std::make_shared<RigidBodySerializer>());
 
         // Register component creators
@@ -521,6 +535,7 @@ namespace gam300 {
             }
             });
 
+        // ==============Register Collider component serializers==========================
         // Register component serializers for Collider
         registerComponentSerializer("Collider", std::make_shared<ColliderSerializer>());
 
@@ -532,19 +547,6 @@ namespace gam300 {
             {
                 serializer->deserialize(entityId, componentData);
                 LM.writeLog("Collider created for entity %d", entityId);
-            }
-            });
-
-
-        registerComponentCreator("AudioComponent", [this](EntityID entityId, const std::string& componentData) {
-            //Use the serializer to create the component
-            auto serializer = m_component_serializers["AudioComponent"];
-            if (serializer) {
-                serializer->deserialize(entityId, componentData);
-                LM.writeLog("Audio_Component created for entity %d", entityId);
-            }
-            else {
-                LM.writeLog("Audio_Component serializer not found for entity %d", entityId);
             }
             });
 
@@ -844,7 +846,7 @@ namespace gam300 {
             file << getIndent(3) << "\"name\": \"" << entity.get_name() << "\",\n";
             file << getIndent(3) << "\"components\": {\n";
 
-            // Check for Transform3D component
+            // =================== Check for Transform3D component ========================
             if (auto serializer = m_component_serializers.find("Transform3D");
                 serializer != m_component_serializers.end()) {
                 if (Transform3D* transform = EM.getComponent<Transform3D>(entity.get_id())) {
@@ -854,17 +856,17 @@ namespace gam300 {
                 }
             }
 
-            // Check for Audio_Component (FIXED: Now properly added to componentStrings)
+            // ============================= Check for Audio_Component ==============================
             if (auto serializer = m_component_serializers.find("AudioComponent");
                 serializer != m_component_serializers.end()) {
                 if (AudioComponent* audio = EM.getComponent<AudioComponent>(entity.get_id())) {
-                    componentStrings.push_back(getIndent(4) + "\"Audio_Component\": " +
+                    componentStrings.push_back(getIndent(4) + "\"AudioComponent\": " +
                         serializer->second->serialize(audio));
                     hasComponents = true;
                 }
             }
 
-            // Check for Script component
+            // ======================== Check for Script component ============================
             if (auto serializer = m_component_serializers.find("Script");
                 serializer != m_component_serializers.end()) {
                 if (Script* script = EM.getComponent<Script>(entity.get_id())) {
@@ -874,7 +876,7 @@ namespace gam300 {
                 }
             }
 
-            // Check for RigidBody component
+            // ==================== Check for RigidBody component ===========================
             if (auto serializer = m_component_serializers.find("RigidBody");
                 serializer != m_component_serializers.end()) {
                 if (RigidBody* rigidBody = EM.getComponent<RigidBody>(entity.get_id())) {
@@ -884,7 +886,7 @@ namespace gam300 {
                 }
             }
 
-            // Check for Collider component
+            // ===================== Check for Collider component =====================
             if (auto serializer = m_component_serializers.find("Collider");
                 serializer != m_component_serializers.end()) {
                 if (Collider* collider = EM.getComponent<Collider>(entity.get_id())) {
