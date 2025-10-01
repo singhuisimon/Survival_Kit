@@ -123,13 +123,19 @@ namespace gam300 {
 
 	void AssetManager::shutDown() {
 		// Save DB
-		if (!m_cfg.databaseFile.empty())
+		if (!m_cfg.databaseFile.empty()) {
 			m_db.Save(m_cfg.databaseFile);
-
+			LM.writeLog("AssetManager::shutDown() - Saved database with %zu assets", m_db.Count());
+		}
 
 		// Save snapshot to speed up next run
-		if (!m_cfg.snapshotFile.empty())
-			m_scanner.SaveSnapshot(m_cfg.snapshotFile);
+		if (!m_cfg.snapshotFile.empty()) {
+			size_t snapCount = m_scanner.GetSnapshotSize();
+			bool success = m_scanner.SaveSnapshot(m_cfg.snapshotFile);
+			LM.writeLog("AssetManager::shutDown() - Saved snapshot: %zu files, success=%d, path=%s",
+				snapCount, success, m_cfg.snapshotFile.c_str());
+		}
+
 
 
 		LM.writeLog("AssetManager::shutDown() - complete");
@@ -243,10 +249,17 @@ namespace gam300 {
 
 		if (m_db.RemoveBySource(src)) {
 			LM.writeLog("AssetManager - Removed from DB: %s", src.c_str());
+			// FIX: Save immediately
+			// Persist immediately
+			m_db.Save(m_cfg.databaseFile);
+			m_scanner.SaveSnapshot(m_cfg.snapshotFile);
 		}
 	}
 
 	void AssetManager::scanAndProcess() {
+
+		LM.writeLog("AssetManager::scanAndProcess() - Snapshot has %zu files before scan",
+			m_scanner.GetSnapshotSize());
 		// Iterate changes from the scanner and act on them
 		for (const auto& c : m_scanner.Scan()) {
 			switch (c.kind) {
@@ -257,6 +270,8 @@ namespace gam300 {
 				handleRemoved(c.sourcePath); break;
 			}
 		}
+		LM.writeLog("AssetManager::scanAndProcess() - Snapshot has %zu files after scan",
+			m_scanner.GetSnapshotSize());
 
 		////NEW to check for missing descriptors of unchanged files 
 		//if (m_cfg.writeDescriptors) {
