@@ -22,6 +22,8 @@
 #include "../Component/Transform3D.h"
 #include "../Component/RigidBody.h"
 #include "../Component/AudioComponent.h"
+#include "../Component/Collider.h"
+
 #include <fstream>
 #include <sstream>
 #include <functional>
@@ -139,15 +141,6 @@ namespace gam300 {
         //ss << "          \"Mass\": \"" << rigidBody->getMass() << "\"\n";
         ss << "          \"Mass\": " << rigidBody->getMass() << ",\n";
 
-        const Vector3D& inertiaDiag = rigidBody->getInertiaDiagonal();
-        ss << "          \"inertiaDiag\": [\n";
-        ss << "            " << inertiaDiag.x << ",\n";
-        ss << "            " << inertiaDiag.y << ",\n";
-        ss << "            " << inertiaDiag.z << "\n";
-        ss << "          ],\n";
-
-        ss << "          \"forceMask\": " << ((rigidBody->getForceMask() != 0u) ? "true" : "false") << ",\n";
-
         const Vector3D& vel = rigidBody->getVelocity();
         ss << "          \"velocity\": [\n";
         ss << "            " << vel.x << ",\n";
@@ -161,7 +154,31 @@ namespace gam300 {
         ss << "            " << accel.x << ",\n";
         ss << "            " << accel.y << ",\n";
         ss << "            " << accel.z << "\n";
-        ss << "          ]\n";
+        ss << "          ],\n";
+
+
+        const Vector3D& angularVel = rigidBody->getAngularVelocity();
+        ss << "          \"angularVelocity\": [\n";
+        ss << "            " << angularVel.x << ",\n";
+        ss << "            " << angularVel.y << ",\n";
+        ss << "            " << angularVel.z << "\n";
+        ss << "          ],\n";
+
+        const Vector3D& inertiaDiag = rigidBody->getInertiaDiagonal();
+        ss << "          \"inertiaDiag\": [\n";
+        ss << "            " << inertiaDiag.x << ",\n";
+        ss << "            " << inertiaDiag.y << ",\n";
+        ss << "            " << inertiaDiag.z << "\n";
+        ss << "          ],\n";
+
+
+        ss << "          \"layer\": " << rigidBody->getLayer() << ",\n";
+
+        ss << "          \"forceMask\": " << ((rigidBody->getForceMask() != 0u) ? "true" : "false") << ",\n";
+
+        ss << "          \"torqueMask\": " << ((rigidBody->getTorqueMask() != 0u) ? "true" : "false") << "\n";
+
+
         ss << "        }";
 
 
@@ -176,16 +193,6 @@ namespace gam300 {
         std::string massData = SerialisationManager::extractObjectValue(jsonData, "mass");
         if (!massData.empty()) mass = std::stof(massData);
 
-        Vector3D inertiaDiag = Vector3D::ONE;
-        Vector3D inertiaDiagCom = SerialisationManager::addComponentVec3D(inertiaDiag, jsonData, "inertiaDiag");
-
-
-        unsigned forceMask = 0u;
-        std::string applyForcesData = SerialisationManager::extractNumberValue(jsonData, "applyForces");
-        if (!applyForcesData.empty()) {
-            forceMask = (applyForcesData == "true") ? 0xFFFFFFFFu : 0u;
-        }
-
         Vector3D velocity = Vector3D::ZERO;
         //std::string velString = "velocity";
         //addComponentVec3D()
@@ -195,10 +202,79 @@ namespace gam300 {
         Vector3D acceleration = Vector3D::ZERO;
         Vector3D accelCom = SerialisationManager::addComponentVec3D(acceleration, jsonData, "acceleration");
 
-        RigidBody* rigidBody = EM.addComponent<RigidBody>(entityId, mass, velcom, accelCom, inertiaDiagCom, Vector3D::ZERO, forceMask, 0, 0);
+        Vector3D angularVel = Vector3D::ZERO;
+        Vector3D angularVelcom = SerialisationManager::addComponentVec3D(angularVel, jsonData, "angularVelocity");
+
+        Vector3D inertiaDiag = Vector3D::ONE;
+        Vector3D inertiaDiagCom = SerialisationManager::addComponentVec3D(inertiaDiag, jsonData, "inertiaDiag");
+
+        int layer = 0;
+        std::string layerData = SerialisationManager::extractNumberValue(jsonData, "layer");
+        if (!layerData.empty()) {
+            layer = std::stoi(layerData);
+        }
+
+        unsigned forceMask = 0xFFFFFFFFu;
+        std::string applyForcesData = SerialisationManager::extractNumberValue(jsonData, "applyForces");
+        if (!applyForcesData.empty()) {
+            forceMask = (applyForcesData == "true") ? 0xFFFFFFFFu : 0u;
+        }
+
+        unsigned torqueMask = 0xFFFFFFFFu;
+        std::string torqueMaskData = SerialisationManager::extractNumberValue(jsonData, "torqueMask");
+        if (!torqueMaskData.empty()) {
+            torqueMask = (torqueMaskData == "true") ? 0xFFFFFFFFu : 0u;
+        }
+
+        RigidBody* rigidBody = EM.addComponent<RigidBody>(entityId, mass, velcom, accelCom, angularVelcom, inertiaDiagCom, layer, forceMask, torqueMask);
 
         return rigidBody;
 
+    }
+
+    std::string ColliderSerializer::serialize(Component* component)
+    {
+        Collider* collider = static_cast<Collider*>(component);
+        if (!collider)
+        {
+            return "{}";
+        }
+
+        std::stringstream  ss;
+        ss << "{\n";
+        const Vector3D& aabbHalfExtents = collider->getAABBHalfExtents();
+        ss << "          \"AABBHalfExtents\": [\n";
+        ss << "            " << aabbHalfExtents.x << ",\n";
+        ss << "            " << aabbHalfExtents.y << ",\n";
+        ss << "            " << aabbHalfExtents.z << "\n";
+        ss << "          ],\n";
+
+        const Vector3D& aabbOffset = collider->getAABBOffset();
+        ss << "          \"Offset\": [\n";
+        ss << "            " << aabbOffset.x << ",\n";
+        ss << "            " << aabbOffset.y << ",\n";
+        ss << "            " << aabbOffset.z << "\n";
+        ss << "          ]\n";
+
+        ss << "        }";
+        return ss.str();
+
+    }
+
+    Component* ColliderSerializer::deserialize(EntityID entityId, const std::string& jsonData)
+    {
+        Vector3D aabbHalfExtents = { 0.5f,0.5f,0.5f };
+        Vector3D aabbHEcom = SerialisationManager::addComponentVec3D(aabbHalfExtents, jsonData, "aabbHalfExtents");
+
+        Vector3D offset = { 0.0f,0.0f,0.0f };
+        Vector3D offsetCom = SerialisationManager::addComponentVec3D(offset, jsonData, "aabbOffset");
+
+        Collider::AABBData aabbData;
+        aabbData.halfExtents = aabbHEcom;
+        aabbData.offset = offsetCom;
+        Collider* collider = EM.addComponent<Collider>(entityId, aabbData);
+
+        return collider;
     }
 
 
@@ -391,6 +467,20 @@ namespace gam300 {
             {
                 serializer->deserialize(entityId, componentData);
                 LM.writeLog("RigidBody created for entity %d", entityId);
+            }
+            });
+
+        // Register component serializers for Collider
+        registerComponentSerializer("Collider", std::make_shared<ColliderSerializer>());
+
+        // Register component creators
+        registerComponentCreator("Collider", [this](EntityID entityId, const std::string& componentData) {
+
+            auto serializer = m_component_serializers["Collider"];
+            if (serializer)
+            {
+                serializer->deserialize(entityId, componentData);
+                LM.writeLog("Collider created for entity %d", entityId);
             }
             });
 
@@ -729,6 +819,16 @@ namespace gam300 {
                 if (RigidBody* rigidBody = EM.getComponent<RigidBody>(entity.get_id())) {
                     componentStrings.push_back(getIndent(4) + "\"RigidBody\": " +
                         serializer->second->serialize(rigidBody));
+                    hasComponents = true;
+                }
+            }
+
+            // Check for Collider component
+            if (auto serializer = m_component_serializers.find("Collider");
+                serializer != m_component_serializers.end()) {
+                if (Collider* collider = EM.getComponent<Collider>(entity.get_id())) {
+                    componentStrings.push_back(getIndent(4) + "\"Collider\": " +
+                        serializer->second->serialize(collider));
                     hasComponents = true;
                 }
             }

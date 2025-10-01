@@ -445,10 +445,15 @@ namespace gam300 {
                                     }
                                 }
 
+                                if (ImguiEcsRef.hasComponent<Collider>(oriSelectedEntity.get_id()))
+                                {
+                                    Collider* oldRigidbody = ImguiEcsRef.getComponent<Collider>(oriSelectedEntity.get_id());
+                                    if (oldRigidbody)
+                                    {
 
-
-
-
+                                        ImguiEcsRef.addComponent<Collider>(newEntityID, *oldRigidbody);
+                                    }
+                                }
                                 selectedObjIndex = static_cast<int>(allEntities.size()) - 1;
 
                             }
@@ -585,7 +590,7 @@ namespace gam300 {
 
                 if (ImGui::Button("Add Component", buttonSize))
                 {
-                    ImGui::Text("Component"); // for now only transform3D component
+                    //ImGui::Text("Component"); // for now only transform3D component
 
                     ImGui::OpenPopup("AddComponentPopup");
                 }
@@ -1459,7 +1464,19 @@ namespace gam300 {
                         rigidBody->setForceMask(applyForces ? 0xFFFFFFFFu : 0u);
                     }
 
+                    static bool forceMask = true;
+                    if (ImGui::Checkbox("Forces Mask", &forceMask)) {
+                        rigidBody->setForceMask(forceMask ? 0xFFFFFFFFu : 0u);
+                    }
+                    static bool torqueMask = true;
+                    if (ImGui::Checkbox("Torque Mask", &torqueMask)) {
+                        rigidBody->setForceMask(torqueMask ? 0xFFFFFFFFu : 0u);
+                    }
+
+                    //TODO: implement layer once the layer is done
+
                     ImGui::Separator(); // read only value
+                    ImGui::Text("Display Value:");
                     Vector3D vel = rigidBody->getVelocity();
                     float velocity[3] = { vel.x, vel.y, vel.z };
                     ImGui::InputFloat3("Velocity", velocity, "%.3f", ImGuiInputTextFlags_ReadOnly);
@@ -1469,22 +1486,37 @@ namespace gam300 {
                     float acceleration[3] = { accel.x, accel.y, accel.z };
                     ImGui::InputFloat3("Acceleration", acceleration, "%.3f", ImGuiInputTextFlags_ReadOnly);
 
+                    Vector3D angVel = rigidBody->getAngularVelocity();
+                    float angVelocity[3] = { angVel.x, angVel.y, angVel.z };
+                    ImGui::InputFloat3("Angular Velocity", angVelocity, "%.3f", ImGuiInputTextFlags_ReadOnly);
 
                 }
 
             }
         }
-        //else if constexpr (std::is_same_v<componentType, Collider>) {
-        //    // rigidBody 
-        //    if (Collider* collider = ImguiEcsRef.getComponent<Collider>(selectedEntityID)) {
+        else if constexpr (std::is_same_v<componentType, Collider>) {
+            // rigidBody 
+            if (Collider* collider = ImguiEcsRef.getComponent<Collider>(selectedEntityID)) {
 
-        //        if (collider)
-        //        {
-        //           
-        //        }
+                if (collider)
+                {
+                    ImGui::Separator();
 
-        //    }
-        //}
+                    Vector3D aabbHE = collider->getAABBHalfExtents();
+                    float aabbHalfExtent[3] = { aabbHE.x, aabbHE.y, aabbHE.z };
+                    if (ImGui::DragFloat3("AABB Half Extent", aabbHalfExtent, 0.1f)) {
+                        collider->setAABBHalfExtents(Vector3D(aabbHalfExtent[0], aabbHalfExtent[1], aabbHalfExtent[2]));
+                    }
+
+                    Vector3D aabbOffset = collider->getAABBOffset();
+                    float aabbOffsetData[3] = { aabbOffset.x, aabbOffset.y, aabbOffset.z };
+                    if (ImGui::DragFloat3("AABB Offset", aabbOffsetData, 0.1f)) {
+                        collider->setAABBHalfExtents(Vector3D(aabbOffsetData[0], aabbOffsetData[1], aabbOffsetData[2]));
+                    }
+                }
+
+            }
+        }
 
 
 
