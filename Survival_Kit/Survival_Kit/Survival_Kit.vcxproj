@@ -52,6 +52,7 @@
     <ClCompile Include="Manager\LogManager.cpp" />
     <ClCompile Include="Manager\Manager.cpp" />
     <ClCompile Include="Manager\ResourceManager.cpp" />
+    <ClCompile Include="Manager\TracyManager.cpp" />
     <ClCompile Include="Pipeline\DescriptorEditor.cpp" />
     <ClCompile Include="Pipeline\Importers\AudioImporter.cpp" />
     <ClCompile Include="Pipeline\Importers\MeshImporter.cpp" />
@@ -128,6 +129,7 @@
     <ClInclude Include="Manager\LogManager.h" />
     <ClInclude Include="Manager\Manager.h" />
     <ClInclude Include="Manager\ResourceManager.h" />
+    <ClInclude Include="Manager\TracyManager.h" />
     <ClInclude Include="Pipeline\DescriptorEditor.h" />
     <ClInclude Include="Resource\ResourceData.h" />
     <ClInclude Include="Resource\ResourceMetadata.h" />

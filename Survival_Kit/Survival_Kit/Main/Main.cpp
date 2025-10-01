@@ -22,6 +22,7 @@ int main(void) {
     ZoneScopedN("MainStartup");
 	
     bool spacePressed = false;
+    bool tracyKeyWasDown = false;
 
     // Get reference to LogManager (already started by GameManager)
     LM.writeLog("Main: GameManager initialized successfully");
@@ -98,6 +99,8 @@ int main(void) {
 
     IMGUIM.initializeAssetManager(); // This will properly initialize the Asset Manager for the Asset Browser
 
+    TRACY.setTracyPath("tracy-profiler.exe");
+    TRACY.startUp();
 
     //bool test_done = false;
     // Create a clock for timing
@@ -235,6 +238,15 @@ int main(void) {
 
        /* app.UpdateScripts();
         app.CheckAndReloadScripts();*/
+
+        bool tracyKeyDown = (GetKeyState('T') & 0x8000) != 0;
+        if ((tracyKeyDown && !tracyKeyWasDown) && !TRACY.isRunning()) {
+            TRACY.launchTracy();
+            LM.writeLog("Tracyprofiler launch requested");
+        }
+        tracyKeyWasDown = tracyKeyDown;
+        TRACY.update();
+
         FrameMark; //always keep this as the last.
     }
 
@@ -246,6 +258,8 @@ int main(void) {
     // Shut down InputManager
     IM.shutDown();
     
+    TRACY.shutDown();
+
     IMGUIM.shutDown();
 
     AM.shutDown(); //shut down Asset Manager

@@ -26,7 +26,7 @@
 #include "../Utility/Clock.h"
 #include "../Manager/ImguiManager.h"
 #include "../Manager/AssetManager.h" //Asset 
-
+#include "../Manager/TracyManager.h"
 
 // Include IMGUI headers
 #include "../IMGUI/imgui.h"
