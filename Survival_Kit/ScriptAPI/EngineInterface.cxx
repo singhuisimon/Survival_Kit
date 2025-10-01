@@ -189,6 +189,35 @@ namespace ScriptAPI
         }
     }
 
+    void EngineInterface::ExecuteUpdateForEntity(int entityId)
+    {
+        SAFE_NATIVE_CALL_BEGIN
+
+            // Validate entity ID
+            if (entityId < 0 || entityId >= scripts->Count)
+            {
+                System::Console::WriteLine("ExecuteUpdateForEntity: Invalid entity ID {0}", entityId);
+                return;
+            }
+
+        // Get the script list for this specific entity
+        ScriptList^ entityScriptList = scripts[entityId];
+
+        // Check if the entity has any scripts
+        if (entityScriptList->Count == 0)
+        {
+            return;  // No scripts to update for this entity
+        }
+
+        // Update all scripts attached to this entity
+        for each (Script ^ script in entityScriptList)
+        {
+            script->Update();
+        }
+
+        SAFE_NATIVE_CALL_END
+    }
+
 
 
 }

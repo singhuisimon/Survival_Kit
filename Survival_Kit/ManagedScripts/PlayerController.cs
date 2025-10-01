@@ -9,6 +9,7 @@ public class PlayerController : Script
 
     public override void Update()
     {
+        
         // Called every frame
         // Add your update logic here
     }

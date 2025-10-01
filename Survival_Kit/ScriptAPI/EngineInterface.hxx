@@ -12,6 +12,10 @@ namespace ScriptAPI
         static void Reload();
         static bool AddScriptViaName(int entityId, System::String^ scriptName);
         static void ExecuteUpdate();
+        // NEW METHOD - Updates only specific entity's scripts
+
+        static void ExecuteUpdateForEntity(int entityId);
+
     private:
         using ScriptList = System::Collections::Generic::List<Script^>;
         static System::Runtime::Loader::AssemblyLoadContext^ loadContext;

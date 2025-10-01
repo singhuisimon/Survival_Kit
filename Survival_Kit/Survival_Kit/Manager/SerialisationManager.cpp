@@ -22,6 +22,7 @@
 #include "../Component/Transform3D.h"
 #include "../Component/RigidBody.h"
 #include "../Component/AudioComponent.h"
+#include "../Component/Script.h"
 #include <fstream>
 #include <sstream>
 #include <functional>
@@ -329,6 +330,43 @@ namespace gam300 {
         return audio;
     }
 
+    // ==================== Script Serializer ====================
+
+    std::string ScriptSerializer::serialize(Component* component) {
+        Script* script = static_cast<Script*>(component);
+        if (!script) {
+            return "{}";
+        }
+
+        std::stringstream ss;
+        ss << "{\n";
+        ss << "          \"script_name\": \"" << script->getScriptName() << "\",\n";
+        ss << "          \"is_active\": \"" << (script->isActive() ? "true" : "false") << "\"\n";
+        ss << "        }";
+
+        return ss.str();
+    }
+
+    Component* ScriptSerializer::deserialize(EntityID entityId, const std::string& jsonData) {
+        // Extract script_name
+        std::string script_name = SerialisationManager::extractQuotedValue(jsonData, "script_name");
+
+        // Extract is_active
+        bool is_active = true; // default true
+        std::string is_active_data = SerialisationManager::extractQuotedValue(jsonData, "is_active");
+        if (!is_active_data.empty()) {
+            is_active = (is_active_data == "true");
+        }
+
+        LM.writeLog("ScriptSerializer::deserialize() - Parsed Script data: script_name=%s, is_active=%s",
+            script_name.c_str(), is_active ? "true" : "false");
+
+        // Create the Script component
+        Script* script = EM.addComponent<Script>(entityId, script_name, is_active);
+
+        return script;
+    }
+
     // Initialize singleton instance
     SerialisationManager::SerialisationManager() {
         setType("SerialisationManager");
@@ -352,7 +390,20 @@ namespace gam300 {
 
         registerComponentSerializer("AudioComponent", std::make_shared<AudioComponentSerializer>());
 
+        registerComponentSerializer("Script", std::make_shared<ScriptSerializer>());
 
+
+        // Register Script component creator
+        registerComponentCreator("Script", [this](EntityID entityId, const std::string& componentData) {
+            auto serializer = m_component_serializers["Script"];
+            if (serializer) {
+                serializer->deserialize(entityId, componentData);
+                LM.writeLog("Script component created for entity %d", entityId);
+            }
+            else {
+                LM.writeLog("Script serializer not found for entity %d", entityId);
+            }
+            });
         // Register component creators
         registerComponentCreator("Transform3D", [this](EntityID entityId, const std::string& componentData) {
             // Use the serializer to create the component
@@ -702,6 +753,16 @@ namespace gam300 {
                 if (AudioComponent* audio = EM.getComponent<AudioComponent>(entity.get_id())) {
                     componentStrings.push_back(getIndent(4) + "\"Audio_Component\": " +
                         serializer->second->serialize(audio));
+                    hasComponents = true;
+                }
+            }
+
+            // Check for Script component
+            if (auto serializer = m_component_serializers.find("Script");
+                serializer != m_component_serializers.end()) {
+                if (Script* script = EM.getComponent<Script>(entity.get_id())) {
+                    componentStrings.push_back(getIndent(4) + "\"Script\": " +
+                        serializer->second->serialize(script));
                     hasComponents = true;
                 }
             }

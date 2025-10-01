@@ -119,9 +119,9 @@ int main(void) {
 
     //Core::Application app;
     //app.Run();
-    Core::Application app;
-    app.InitializeScripting();
-    app.AddScript(0, "TestScript");
+    //Core::Application app;
+    //app.InitializeScripting();
+    //app.AddScript(0, "TestScript");
 
     int frame_count = 0;
     double fps_timer = 0.0;
@@ -142,12 +142,10 @@ int main(void) {
         bool currentSpaceState = GetKeyState(VK_SPACE) & 0x8000;
         if (currentSpaceState && !spacePressed)
         {
-            /*app.ReloadScripts();
-            app.AddScript(0, "TestScript");*/
-
-            app.CreateMonoBehaviourScript("PlayerController");
+            //app.ReloadScripts();
+            //std::cout << "your mother flip ";
+            //app.CreateMonoBehaviourScript("PlayerController");
         }
-        app.CheckAndReloadScripts(); // Add this line
         // Update all systems (including InputSystem)
         EM.updateSystems(GM.getFrameTime() / 1000.0f);
 
@@ -222,13 +220,13 @@ int main(void) {
             LM.writeLog("GameManager::run() - Frame running behind: %lld us", -sleep_time);
         }
 
-        app.UpdateScripts();
-        app.CheckAndReloadScripts();
+       /* app.UpdateScripts();
+        app.CheckAndReloadScripts();*/
 
     }
 
 
-    app.ShutdownScripting();
+    //app.ShutdownScripting();
     // Cleanup
     LM.writeLog("Cleaning up resources");
 

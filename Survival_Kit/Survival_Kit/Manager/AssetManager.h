@@ -127,28 +127,28 @@ namespace gam300 {
 		 * @param sourcePath Path to the asset file (e.g., "Assets/Textures/rock.png")
 		 * @return AssetId (0 if not found)
 		 */
-		AssetId GetAssetId(const std::string& sourcePath) const;
+		AssetId getAssetId(const std::string& sourcePath) const;
 
 		/**
 		 * @brief Get the AssetId for a given filename (searches all assets).
 		 * @param filename Just the filename (e.g., "rock.png")
 		 * @return AssetId (0 if not found, first match if multiple with same name)
 		 */
-		AssetId GetAssetIdByFilename(const std::string& filename) const;
+		AssetId getAssetIdByFilename(const std::string& filename) const;
 
 		/**
 		 * @brief Get the AssetRecord for a given AssetId.
 		 * @param id The asset ID
 		 * @return Pointer to AssetRecord (nullptr if not found)
 		 */
-		const AssetRecord* GetAssetRecord(AssetId id) const;
+		const AssetRecord* getAssetRecord(AssetId id) const;
 
 		/**
 		 * @brief Check if an asset exists in the database.
 		 * @param sourcePath Path to the asset file
 		 * @return True if asset exists
 		 */
-		bool AssetExists(const std::string& sourcePath) const;
+		bool assetExists(const std::string& sourcePath) const;
 
 	private:
 
