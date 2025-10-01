@@ -127,7 +127,7 @@ namespace gam300 {
 
     // RigidBodySerializer implementation
     std::string RigidBodySerializer::serialize(Component* component) {
-       
+
         RigidBody* rigidBody = static_cast<RigidBody*>(component);
 
         if (!rigidBody) {
@@ -138,6 +138,15 @@ namespace gam300 {
         ss << "{\n";
         //ss << "          \"Mass\": \"" << rigidBody->getMass() << "\"\n";
         ss << "          \"Mass\": " << rigidBody->getMass() << ",\n";
+
+        const Vector3D& inertiaDiag = rigidBody->getInertiaDiagonal();
+        ss << "          \"inertiaDiag\": [\n";
+        ss << "            " << inertiaDiag.x << ",\n";
+        ss << "            " << inertiaDiag.y << ",\n";
+        ss << "            " << inertiaDiag.z << "\n";
+        ss << "          ],\n";
+
+        ss << "          \"forceMask\": " << ((rigidBody->getForceMask() != 0u) ? "true" : "false") << ",\n";
 
         const Vector3D& vel = rigidBody->getVelocity();
         ss << "          \"velocity\": [\n";
@@ -167,6 +176,16 @@ namespace gam300 {
         std::string massData = SerialisationManager::extractObjectValue(jsonData, "mass");
         if (!massData.empty()) mass = std::stof(massData);
 
+        Vector3D inertiaDiag = Vector3D::ONE;
+        Vector3D inertiaDiagCom = SerialisationManager::addComponentVec3D(inertiaDiag, jsonData, "inertiaDiag");
+
+
+        unsigned forceMask = 0u;
+        std::string applyForcesData = SerialisationManager::extractNumberValue(jsonData, "applyForces");
+        if (!applyForcesData.empty()) {
+            forceMask = (applyForcesData == "true") ? 0xFFFFFFFFu : 0u;
+        }
+
         Vector3D velocity = Vector3D::ZERO;
         //std::string velString = "velocity";
         //addComponentVec3D()
@@ -176,9 +195,7 @@ namespace gam300 {
         Vector3D acceleration = Vector3D::ZERO;
         Vector3D accelCom = SerialisationManager::addComponentVec3D(acceleration, jsonData, "acceleration");
 
-
-
-        RigidBody* rigidBody = EM.addComponent<RigidBody>(entityId, mass, velcom, accelCom);
+        RigidBody* rigidBody = EM.addComponent<RigidBody>(entityId, mass, velcom, accelCom, inertiaDiagCom, Vector3D::ZERO, forceMask, 0, 0);
 
         return rigidBody;
 
@@ -376,7 +393,7 @@ namespace gam300 {
                 LM.writeLog("RigidBody created for entity %d", entityId);
             }
             });
-    
+
 
         registerComponentCreator("AudioComponent", [this](EntityID entityId, const std::string& componentData) {
             //Use the serializer to create the component
@@ -386,7 +403,7 @@ namespace gam300 {
                 LM.writeLog("Audio_Component created for entity %d", entityId);
             }
             else {
-				LM.writeLog("Audio_Component serializer not found for entity %d", entityId);
+                LM.writeLog("Audio_Component serializer not found for entity %d", entityId);
             }
             });
 
@@ -421,7 +438,7 @@ namespace gam300 {
         LM.writeLog("SerialisationManager::registerComponentSerializer() - Registered serializer for '%s'", componentName.c_str());
     }
 
-	// Load entities from a scene file
+    // Load entities from a scene file
     bool SerialisationManager::loadScene(const std::string& filename) {
         LM.writeLog("SerialisationManager::loadScene() - Loading scene from '%s'", filename.c_str());
 
@@ -432,7 +449,7 @@ namespace gam300 {
             return false;
         }
 
-     
+
 
         /////////////////////////////////////////////////Amanda Code Version/////////////////////////////////////////////////
         // Parse with RapidJSON instead of string::find
@@ -471,7 +488,7 @@ namespace gam300 {
 
             entityCount++;
         }
-        
+
         //// Read file content
         //std::string fileContent;
         //if (!parseJsonFile(filename, fileContent)) {
@@ -750,7 +767,7 @@ namespace gam300 {
         return true;
     }
 
-	// Get a registered component serializer
+    // Get a registered component serializer
     std::shared_ptr<IComponentSerializer> SerialisationManager::getComponentSerializer(const std::string& componentName) {
         auto it = m_component_serializers.find(componentName);
         if (it != m_component_serializers.end()) {
@@ -759,7 +776,7 @@ namespace gam300 {
         return nullptr;
     }
 
-	// ================================= Helper Methods =================================
+    // ================================= Helper Methods =================================
 
     // Helper method to parse a JSON file
     bool SerialisationManager::parseJsonFile(const std::string& filename, std::string& jsonContent) {
@@ -821,6 +838,7 @@ namespace gam300 {
 
         return true;
     }
+
 
     // Helper function to extract a section from JSON
     std::string SerialisationManager::extractSection(const std::string& json, const std::string& sectionName) {
@@ -1070,7 +1088,7 @@ namespace gam300 {
         if (colonPos == std::string::npos) {
             return "";
         }
-        
+
         // Move past colon
         size_t valueStart = json.find_first_not_of(" \t\n\r", colonPos + 1);
         if (valueStart == std::string::npos) {
