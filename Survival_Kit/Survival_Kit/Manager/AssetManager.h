@@ -21,7 +21,7 @@
 #include "../Utility/AssetPath.h"
 
 
-//define acronnym for easier access 
+//define acronym for easier access 
 #define AM gam300::AssetManager::getInstance()
 
 namespace gam300 {
@@ -118,7 +118,6 @@ namespace gam300 {
 		const Config& config() const { return m_cfg; }
 		AssetDescriptorGenerator& descriptorGenerator() { return m_descGen; }
 		const AssetDescriptorGenerator& descriptorGenerator() const { return m_descGen; }
-
 
 		//--------------Validating Descriptors ----------
 		void validateExistingDescriptors();

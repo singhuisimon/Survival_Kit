@@ -59,6 +59,10 @@
     <ClCompile Include="Component\Bullet.cpp" />
     <ClCompile Include="Manager\DescriptorFileManager.cpp" />
     <ClCompile Include="System\BulletSystem.cpp" />
+    <ClCompile Include="Component\Collider.cpp" />
+    <ClCompile Include="Manager\ForceManager.cpp" />
+    <ClCompile Include="Manager\TorqueManager.cpp" />
+    <ClCompile Include="System\CollisionSystem.cpp" />
     <ClCompile Include="Pipeline\DescriptorEditor.cpp" />
     <ClCompile Include="System\ScriptSystem.cpp" />
     <ClCompile Include="Tracy\TracyClient.cpp" />
@@ -140,6 +144,11 @@
     <ClInclude Include="Component\Bullet.h" />
     <ClInclude Include="Manager\DescriptorFileManager.h" />
     <ClInclude Include="System\BulletSystem.h" />
+    <ClInclude Include="Manager\PrefabManager.h" />
+    <ClInclude Include="Component\Collider.h" />
+    <ClInclude Include="Manager\ForceManager.h" />
+    <ClInclude Include="Manager\TorqueManager.h" />
+    <ClInclude Include="System\CollisionSystem.h" />
     <ClInclude Include="Pipeline\DescriptorEditor.h" />
     <ClInclude Include="System\ScriptSystem.h" />
     <ClInclude Include="Manager\TracyManager.h" />

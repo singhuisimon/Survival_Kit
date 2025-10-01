@@ -29,12 +29,12 @@ namespace gam300 {
 
 		// Logging header
 		LM.writeLog("AssetManager::startUp() - begin");
-		
+
 		//find base root
 		auto AutoDetectRepoRoot = []() -> fs::path {
 			fs::path p = fs::current_path();
 			while (!p.empty()) {
-				if (fs::exists(p / ".git") 
+				if (fs::exists(p / ".git")
 					//||
 					//fs::exists(p / "Survival_Kit")
 					) {
@@ -246,7 +246,6 @@ namespace gam300 {
 		}
 
 		// Remove from database
-
 		if (m_db.RemoveBySource(src)) {
 			LM.writeLog("AssetManager - Removed from DB: %s", src.c_str());
 			// FIX: Save immediately

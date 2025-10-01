@@ -72,13 +72,22 @@ namespace gam300 {
         std::string serialize(Component* component) override;
         Component* deserialize(EntityID entityId, const std::string& jsonData) override;
     };
-	/* @brief Serializer for Audio_Component components.
-	* @author Amanda Leow Boon Suan
-*/    
+
+    /**
+     * @brief Serializer for Collider components.
+     */
+     //class ColliderSerializer : public IComponentSerializer {
+     //public:
+     //    std::string serialize(Component* component) override;
+     //    Component* deserialize(EntityID entityId, const std::string& jsonData) override;
+     //};
+     /* @brief Serializer for Audio_Component components.
+     * @author Amanda Leow Boon Suan
+     */
     class AudioComponentSerializer : public IComponentSerializer {
     public:
         std::string serialize(Component* component) override;
-		Component* deserialize(EntityID entityId, const std::string& jsonData) override;
+        Component* deserialize(EntityID entityId, const std::string& jsonData) override;
     };
 
     /**
@@ -175,10 +184,13 @@ namespace gam300 {
         static std::vector<std::string> splitJsonArray(const std::string& jsonArray);
         static std::vector<float> parseFloatArray(const std::string& arrayJson);
         static std::string extractObjectValue(const std::string& json, const std::string& fieldName);
-		static std::string extractNumberValue(const std::string& json, const std::string& fieldName);
+        static std::string extractNumberValue(const std::string& json, const std::string& fieldName);
 
         // Indentation helper for pretty JSON output
         std::string getIndent(int level) const;
+
+        // Helper methods for extractObject
+        static Vector3D addComponentVec3D(Vector3D val, const std::string& jsonData, const std::string valName);
     };
 
 } // end of namespace gam300

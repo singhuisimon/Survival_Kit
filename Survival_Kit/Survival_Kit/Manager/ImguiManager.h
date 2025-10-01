@@ -12,7 +12,7 @@
 #ifndef SK_IMGUI_MANAGER_H
 #define SK_IMGUI_MANAGER_H
 
-// Include header file
+ // Include header file
 #include "Manager.h"
 
 // Include Imgui Header file
@@ -70,6 +70,7 @@ namespace gam300
 		char saveAsDefaultName[128];
 		bool showSaveAsPanel = false;
 		int selectedAssetIndex = -1;
+		bool showPrefabPanel = false;
 
 		const std::string BASE_ASSETS_PATH = std::filesystem::current_path().string() + "\\Assets\\";
 
@@ -78,7 +79,7 @@ namespace gam300
 		const char* getAssetTypeName(AssetType type);
 		const char* getAssetIcon(AssetType type);
 		void initializeAssetBrowser();
-	
+
 	public:
 
 		ImguiManager(ECSManager& ecsManager, GraphicsManager& GFM);
@@ -110,11 +111,14 @@ namespace gam300
 
 		void displayTopMenu();
 
+		void showPrefabsPanel(EntityID selectedEntity);
+
 		void finishImguiRender(ImGuiIO& imgui_io);
 
 		void handleViewPortClick(ImVec2 mousePos, ImVec2 viewportSize);
 
-		
+		void displayAssetEditor(const std::filesystem::directory_entry& assetFilepath);
+		void displayPrefabEditor(const std::filesystem::directory_entry& prefabFilepath);
 
 		//EntityID pickEntityFromViewport(ImVec2 mouseViewportPos, ImVec2 viewportSize, Camera3D& camera);
 
@@ -122,7 +126,7 @@ namespace gam300
 
 		// to get the window size from main.cpp
 		Vector2D getWindowSize(GLFWwindow& window);
-		
+
 		// to retuen the width and height for imguiTex and imguiFbo
 		Vector2D getWindowWidthHeight() { return Vector2D(width, height); }
 
@@ -138,7 +142,7 @@ namespace gam300
 
 		void rescanAssets();
 
-		
+
 
 	};
 

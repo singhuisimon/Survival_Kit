@@ -90,6 +90,15 @@ int main(void) {
     IM.setWindow(window);
     LM.writeLog("InputManager initialized successfully");
 
+    gam300::AssetManager::Config cfg = AM.createDefaultConfig();
+
+    AM.setConfig(cfg);
+    AM.startUp();
+
+    AM.scanAndProcess();
+
+    std::cout << "\nFinal database count: " << AM.db().Count() << std::endl;
+
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -125,24 +134,6 @@ int main(void) {
     char window_title[256];
 
     //std::cout << "Initial script added" << std::endl;
-
-    // -------------------------Set up Asset Manager ------------------------------------------
-
-    //this creates the default configuration for the asset manager to know the asset filepath and such
-    /*
-    gam300::AssetManager::Config cfg = AM.createDefaultConfig();
-
-    AM.setConfig(cfg);
-    AM.startUp();
-
-    AM.scanAndProcess();
-
-    std::cout << "\nFinal database count: " << AM.db().Count() << std::endl;
-
-    AM.shutDown();
-    */
-
-    // ---------------------------------------------------------------------------------------
 
 
        while (!GM.getGameOver() && !glfwWindowShouldClose(window)) {

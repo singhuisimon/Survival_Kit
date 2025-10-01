@@ -36,3 +36,23 @@ project.nuget.cache
 Cache/
 *.snapshot
 assetdb.txt
+
+ScriptAPI.dll
+ManagedScripts.dll
+
+# Asset descriptor files
+**/Descriptors/**/*.txt
+**/Descriptors/**/*.descriptor
+**/Assets/**/Descriptors/**
+
+# imgui configuration
+imgui.ini
+
+
+# But ALLOW third-party DLLs (double negative - don't ignore these)
+!**/fmod*.dll
+!**/FMOD/**/*.dll
+!**/External/**/*.dll
+!**/ThirdParty/**/*.dll
+!**/Lib/**/*.dll
+!**/Libraries/**/*.dll
