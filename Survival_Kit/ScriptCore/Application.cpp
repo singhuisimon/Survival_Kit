@@ -287,6 +287,9 @@ namespace Core
         initFunc = GetFunctionPtr<void(*)(void)>("ScriptAPI", "ScriptAPI.EngineInterface", "Init");
         addScriptFunc = GetFunctionPtr<bool(*)(int, const char*)>("ScriptAPI", "ScriptAPI.EngineInterface", "AddScriptViaName");
         executeUpdateFunc = GetFunctionPtr<void(*)(void)>("ScriptAPI", "ScriptAPI.EngineInterface", "ExecuteUpdate");
+
+        // NEW: Get the new function pointer
+        executeUpdateForEntityFunc = GetFunctionPtr<void(*)(int)>("ScriptAPI", "ScriptAPI.EngineInterface", "ExecuteUpdateForEntity");
         reloadScriptsFunc = GetFunctionPtr<void(*)(void)>("ScriptAPI", "ScriptAPI.EngineInterface", "Reload");
 
         std::cout << "Initializing script system..." << std::endl;
@@ -325,6 +328,8 @@ namespace Core
         addScriptFunc = nullptr;
         executeUpdateFunc = nullptr;
         reloadScriptsFunc = nullptr;
+        executeUpdateForEntityFunc = nullptr;  // NEW: Reset this too
+
     }
 
     void Application::ReloadScripts()
@@ -656,5 +661,13 @@ namespace Core
         return MonoBehaviour::OpenScriptInEditor(scriptName);
     }
 
+
+    void Application::UpdateScriptForEntity(int entityId)
+    {
+        if (executeUpdateForEntityFunc)
+        {
+            executeUpdateForEntityFunc(entityId);
+        }
+    }
 
 }

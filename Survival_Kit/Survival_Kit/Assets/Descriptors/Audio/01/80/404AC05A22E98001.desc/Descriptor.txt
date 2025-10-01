@@ -1,0 +1,21 @@
+{
+  "asset": {
+    "guid": "404AC05A22E98001",
+    "id": 4632726660069294081,
+    "sourcePath": "C:/Users/kuekw/source/repos/here/Survival_Kit/Survival_Kit/Survival_Kit/Assets/Audio/laserSmall_001.ogg",
+    "intermediatePath": "C:\\Users\\kuekw\\source\\repos\\here\\Survival_Kit\\Cache/Intermediate\\laserSmall_001.ogg",
+    "compiledPath": "",
+    "type": 3,
+    "ext": ".ogg",
+    "contentHash": "",
+    "lastWriteTime": 0,
+    "valid": true
+  },
+  "extras": {
+    "displayName": "laserSmall_001.ogg",
+    "category": "Audio",
+    "tags": [],
+    "lastImported": 1759329516,
+    "user": {}
+  }
+}

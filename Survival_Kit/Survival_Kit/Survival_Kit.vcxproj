@@ -71,6 +71,7 @@
     <ClCompile Include="System\MovementSystem.cpp" />
     <ClCompile Include="System\PhysicsSystem.cpp" />
     <ClCompile Include="System\AudioSystem.cpp" />
+    <ClCompile Include="System\ScriptSystem.cpp" />
     <ClCompile Include="System\TransformSystem.cpp" />
     <ClCompile Include="Utility\AssetPath.cpp" />
     <ClCompile Include="Utility\Clock.cpp" />
@@ -144,6 +145,7 @@
     <ClInclude Include="System\MovementSystem.h" />
     <ClInclude Include="System\PhysicsSystem.h" />
     <ClInclude Include="System\AudioSystem.h" />
+    <ClInclude Include="System\ScriptSystem.h" />
     <ClInclude Include="System\System.h" />
     <ClInclude Include="System\TransformSystem.h" />
     <ClInclude Include="Utility\AssetPath.h" />

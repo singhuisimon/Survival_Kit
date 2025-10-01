@@ -59,6 +59,7 @@
     <ClCompile Include="Component\Bullet.cpp" />
     <ClCompile Include="Manager\DescriptorFileManager.cpp" />
     <ClCompile Include="System\BulletSystem.cpp" />
+    <ClCompile Include="System\ScriptSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component\Component.h" />
@@ -136,6 +137,7 @@
     <ClInclude Include="Component\Bullet.h" />
     <ClInclude Include="Manager\DescriptorFileManager.h" />
     <ClInclude Include="System\BulletSystem.h" />
+    <ClInclude Include="System\ScriptSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Scene\Game.scn" />
