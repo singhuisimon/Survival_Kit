@@ -18,6 +18,7 @@
 #include <unordered_map>
 #include <array>
 #include <vector>
+#include "../Tracy/tracy/Tracy.hpp"
 
  // Two-letter acronym for easier access to manager.
 #define IM gam300::InputManager::getInstance()

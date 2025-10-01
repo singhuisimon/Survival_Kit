@@ -1,0 +1,21 @@
+{
+  "asset": {
+    "guid": "289E185A16DD800D",
+    "id": 2926803583047139341,
+    "sourcePath": "C:/Users/Admin/source/repos/gam_300/Survival_Kit/Survival_Kit/Assets/Scene/GameB.scn",
+    "intermediatePath": "C:\\Users\\Admin\\source\\repos\\gam_300\\Cache/Intermediate\\GameB.scn",
+    "compiledPath": "",
+    "type": 6,
+    "ext": ".scn",
+    "contentHash": "",
+    "lastWriteTime": 0,
+    "valid": true
+  },
+  "extras": {
+    "displayName": "GameB.scn",
+    "category": "Scene",
+    "tags": [],
+    "lastImported": 1759311655,
+    "user": {}
+  }
+}

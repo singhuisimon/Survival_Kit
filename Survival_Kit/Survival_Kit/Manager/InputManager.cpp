@@ -101,6 +101,9 @@ namespace gam300 {
 
     // Update input states, should be called once per frame
     void InputManager::update() {
+
+        ZoneScopedN("InputManager::update");
+
         // Reset scroll values at the START of the frame (not the end)
         // This ensures scroll values from previous frame are cleared before new ones arrive
         m_scroll_x_offset = 0.0;

@@ -1,0 +1,29 @@
+{
+  "asset": {
+    "guid": "C89E185A16DD8003",
+    "id": 14456018629115609091,
+    "sourcePath": "C:/Users/Admin/source/repos/gam_300/Survival_Kit/Survival_Kit/Assets/Textures/fox_kenny.png",
+    "intermediatePath": "C:\\Users\\Admin\\source\\repos\\gam_300\\Cache/Intermediate\\fox_kenny.png",
+    "compiledPath": "",
+    "type": 2,
+    "ext": ".png",
+    "contentHash": "",
+    "lastWriteTime": 0,
+    "valid": true
+  },
+  "extras": {
+    "displayName": "fox_kenny.png",
+    "category": "Texture",
+    "tags": [],
+    "lastImported": 1759311655,
+    "user": {}
+  }
+  ,"textureSettings": {
+    "usageType": "COLOR",
+    "compression": "BC1",
+    "quality": 0.8,
+    "generateMipmaps": true,
+    "srgb": true,
+    "inputFiles": ["fox_kenny.png"]
+  }
+}

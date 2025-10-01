@@ -59,6 +59,7 @@
     <ClCompile Include="Component\Bullet.cpp" />
     <ClCompile Include="Manager\DescriptorFileManager.cpp" />
     <ClCompile Include="System\BulletSystem.cpp" />
+    <ClCompile Include="Tracy\TracyClient.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component\Component.h" />

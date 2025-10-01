@@ -18,6 +18,8 @@ int main(void) {
     //    printf("ERROR: Failed to start GameManager\n");
     //    return -1;
     //}
+
+    ZoneScopedN("MainStartup"); // Profile startup phase
 	
     bool spacePressed = false;
 
@@ -142,6 +144,9 @@ int main(void) {
 
        while (!GM.getGameOver() && !glfwWindowShouldClose(window)) {
 
+        //Profile each iteration of the main loop
+        ZoneScopedN("MainLoop");
+
         // Update input system
         IM.update();
 
@@ -232,6 +237,8 @@ int main(void) {
 
         app.UpdateScripts();
         app.CheckAndReloadScripts();
+
+        FrameMark;
 
     }
 

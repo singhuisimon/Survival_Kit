@@ -20,6 +20,7 @@
 #include "../Entity/Entity.h"
 #include "../Manager/ComponentManager.h"
 #include "../System/System.h"
+#include "../Tracy/tracy/Tracy.hpp"
 
  // Two-letter acronym for easier access to manager.
 #define EM gam300::ECSManager::getInstance()

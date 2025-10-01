@@ -34,7 +34,8 @@
 #include "../Utility/Clock.h"
 #include "../Utility/AssetPath.h"
 
-
+// Include Tracy
+#include "../Tracy/tracy/Tracy.hpp"
 
 namespace gam300 {
 
@@ -183,25 +184,36 @@ namespace gam300 {
 
     // Update the game state for the current frame
     void GameManager::update(float dt) {
-        // Increment step count
-        m_step_count++;
 
-        // Log every 100 steps
-        if (m_step_count % 100 == 0) {
-            LM.writeLog("GameManager::update() - Step count: %d", m_step_count);
+        {
+            ZoneScopedN("GameManager::update");
+
+            // Increment step count
+            m_step_count++;
+
+            // Log every 100 steps
+            if (m_step_count % 100 == 0) {
+                LM.writeLog("GameManager::update() - Step count: %d", m_step_count);
+            }
+
+            // Check for escape key to quit
+            if (IM.isKeyJustPressed(GLFW_KEY_ESCAPE)) {
+                setGameOver(true);
+                LM.writeLog("GameManager::update() - Escape key pressed, setting game over");
+            }
+            {
+                ZoneScopedN("ECS Update");
+
+                // Update all ECS systems
+                EM.updateSystems(dt);
+            }
+            {
+                ZoneScopedN("SerializedEntities");
+
+                // Example: Work with serialized entities using new lookup functionality
+                workWithSerializedEntities(dt);
+            }
         }
-
-        // Check for escape key to quit
-        if (IM.isKeyJustPressed(GLFW_KEY_ESCAPE)) {
-            setGameOver(true);
-            LM.writeLog("GameManager::update() - Escape key pressed, setting game over");
-        }
-
-        // Update all ECS systems
-        EM.updateSystems(dt);
-
-        // Example: Work with serialized entities using new lookup functionality
-        workWithSerializedEntities(dt);
     }
 
     // Set game over status

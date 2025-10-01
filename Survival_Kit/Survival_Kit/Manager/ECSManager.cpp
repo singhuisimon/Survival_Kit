@@ -255,6 +255,9 @@ namespace gam300 {
 
     // Update all systems
     void ECSManager::updateSystems(float dt) {
+
+        ZoneScopedN("ECSManager::updateSystem");
+
         SM.update_systems(dt);
     }
 
