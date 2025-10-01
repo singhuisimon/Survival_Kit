@@ -36,9 +36,3 @@ project.nuget.cache
 Cache/
 *.snapshot
 assetdb.txt
-
-imgui.ini
-Descriptor.txt
-# Asset descriptor files (from your Descriptors folders)
-**/Descriptors/**/*.txt
-**/Descriptors/**/*.descriptor
