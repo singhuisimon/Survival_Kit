@@ -77,6 +77,9 @@ namespace gam300 {
     // Entity index
     int selectedObjIndex = -1;
 
+    //Prefab counter index
+    static int counter = 0;
+
     ImguiManager::ImguiManager() : ImguiEcsRef(EM), ImguiGraphicRef(GFXM) {}
 
     ImguiManager::ImguiManager(ECSManager& ECS, GraphicsManager& GFM) : ImguiEcsRef(ECS), ImguiGraphicRef(GFM) {
@@ -330,6 +333,7 @@ namespace gam300 {
 
     }
 
+    static std::string prefab_name;
 
     void ImguiManager::displayHierarchyList() {
 
@@ -470,30 +474,31 @@ namespace gam300 {
                         ImGui::EndPopup();
                     }
 
-                    if (showPrefabPanel)
-                    {
-                        ImGui::OpenPopup("Create Prefab Panel");
-                        showPrefabPanel = false;
-                    }
-
-                    if (ImGui::BeginPopupModal("Create Prefab Panel", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
-                    {
-                        // Implement code here for create prefab 
-                        ImGui::Text("Pls work!!!!");
-                        std::string prefab_name = "Prefab";
-                        const Entity& selectedEntity = allEntities[selectedObjIndex];
-                        PM.createPrefabFromEntity(selectedEntity.get_id(), prefab_name, true);
-
-                        if (ImGui::Button("Close"))
-                        {
-                            ImGui::CloseCurrentPopup();
-                        }
-                        ImGui::EndPopup();
-                    }
-
-
                     //++currObjIndex;
                 }
+
+                if (showPrefabPanel && selectedObjIndex >= 0 && selectedObjIndex < static_cast<int>(allEntities.size()))
+                {
+                    const Entity& prefabSelectedEntity = allEntities[selectedObjIndex];
+                    prefab_name = prefabSelectedEntity.get_name() + "_prefab";
+                    if (PM.createPrefabFromEntity(prefabSelectedEntity.get_id(), prefab_name, true)) {
+                        ImGui::OpenPopup("Create Prefab Panel");
+                    }
+
+                    showPrefabPanel = false;
+
+                }
+
+                if (ImGui::BeginPopupModal("Create Prefab Panel", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+                {
+                    ImGui::Text("%s has been created.", prefab_name.c_str());
+
+                    if (ImGui::Button("Close"))
+                        ImGui::CloseCurrentPopup();
+
+                    ImGui::EndPopup();
+                }
+
             }
 
         }
