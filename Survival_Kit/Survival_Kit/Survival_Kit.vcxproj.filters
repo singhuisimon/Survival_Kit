@@ -60,6 +60,7 @@
     <ClCompile Include="Manager\DescriptorFileManager.cpp" />
     <ClCompile Include="System\BulletSystem.cpp" />
     <ClCompile Include="Tracy\TracyClient.cpp" />
+    <ClCompile Include="Manager\TracyManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component\Component.h" />
@@ -137,6 +138,7 @@
     <ClInclude Include="Component\Bullet.h" />
     <ClInclude Include="Manager\DescriptorFileManager.h" />
     <ClInclude Include="System\BulletSystem.h" />
+    <ClInclude Include="Manager\TracyManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Scene\Game.scn" />

@@ -158,5 +158,25 @@ namespace gam300 {
         return (descriptorDir / filename).generic_string();
     }
 
+    std::string getTracyFilePath(const std::string& exeName) {
+
+        fs::path repoRoot = getRepositoryRoot();
+
+        // 1. Check directly in repo root
+        fs::path tracyExe = repoRoot / exeName;
+        if (fs::exists(tracyExe)) {
+            return tracyExe.string();
+        }
+
+        // 2. Check in Tools/ under repo root
+        fs::path tracyTools = repoRoot / exeName;
+        if (fs::exists(tracyTools)) {
+            return tracyTools.string();
+        }
+
+        // 3. Fallback: return just the exe name (system PATH or local dir must resolve it)
+        return exeName;
+    }
+
 
 } // end of namespace gam300

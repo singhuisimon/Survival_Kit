@@ -65,5 +65,7 @@ namespace gam300 {
         const std::string& guid,
         const std::string& filename = "Descriptor.txt");
 
+    std::string getTracyFilePath(const std::string& exeName);
+
 } // end of namespace gam300
 #endif // __ASSET_PATH_H__
