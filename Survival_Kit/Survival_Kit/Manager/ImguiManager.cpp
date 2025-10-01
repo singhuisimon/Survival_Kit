@@ -868,15 +868,9 @@ namespace gam300 {
     void ImguiManager::initializeAssetBrowser() {
         // Make sure Asset Manager is started up
         if (!AM.isStarted()) {
-            // Create default configuration
-            auto config = AssetManager::createDefaultConfig();
-            AM.setConfig(config);
-            AM.startUp();
+            LM.writeLog("ERROR: Asset Manager not initialized before IMGUI!");
+            return;
         }
-
-        // Trigger initial scan
-        AM.scanAndProcess();
-
         // Set flag to refresh the browser
         needsRefresh = true;
 

@@ -29,12 +29,12 @@ namespace gam300 {
 
 		// Logging header
 		LM.writeLog("AssetManager::startUp() - begin");
-		
+
 		//find base root
 		auto AutoDetectRepoRoot = []() -> fs::path {
 			fs::path p = fs::current_path();
 			while (!p.empty()) {
-				if (fs::exists(p / ".git") 
+				if (fs::exists(p / ".git")
 					//||
 					//fs::exists(p / "Survival_Kit")
 					) {
@@ -191,6 +191,55 @@ namespace gam300 {
 	}
 
 	void AssetManager::handleRemoved(const std::string& src) {
+		// Find the record before removing it
+		const AssetRecord* rec = m_db.FindBySource(src);
+
+		if (rec && m_cfg.writeDescriptors) {
+			// Get the descriptor path
+			std::string descriptorPath = m_descGen.DefaultDescPathForRecord(*rec);
+
+			// Delete the descriptor file
+			if (fs::exists(descriptorPath)) {
+				fs::remove(descriptorPath);
+				LM.writeLog("AssetManager - Deleted descriptor file: %s", descriptorPath.c_str());
+			}
+
+			//// Delete the GUID.desc folder if it's now empty
+			//fs::path descriptorFolder = fs::path(descriptorPath).parent_path();
+			//if (fs::exists(descriptorFolder) && fs::is_empty(descriptorFolder)) {
+			//	fs::remove(descriptorFolder);
+			//	LM.writeLog("AssetManager - Deleted empty descriptor folder: %s",
+			//		descriptorFolder.string().c_str());
+			//}
+
+			// Clean up empty parent folders (GUID.desc folder, then subdirs)
+			fs::path currentFolder = fs::path(descriptorPath).parent_path();
+
+			// Walk up the directory tree, removing empty folders
+			// Stop at the Descriptors root or when we hit a non-empty folder
+			fs::path descriptorsRoot = fs::absolute(m_cfg.descriptorRoot);
+
+			while (currentFolder.has_parent_path()) {
+
+				// Stop if we've reached the descriptors root
+				if (fs::equivalent(currentFolder, descriptorsRoot)) {
+					break;
+				}
+
+				if (fs::exists(currentFolder) && fs::is_empty(currentFolder)) {
+					fs::remove(currentFolder);
+					LM.writeLog("AssetManager - Deleted empty folder: %s",
+						currentFolder.string().c_str());
+					currentFolder = currentFolder.parent_path();
+				}
+				else {
+					// Folder not empty or doesn't exist, stop climbing
+					break;
+				}
+			}
+		}
+
+		// Remove from database
 		if (m_db.RemoveBySource(src)) {
 			LM.writeLog("AssetManager - Removed from DB: %s", src.c_str());
 		}
@@ -253,6 +302,35 @@ namespace gam300 {
 				m_descGen.GenerateFor(*rec, &extras);
 			}
 		}
+	}
+
+	AssetId AssetManager::GetAssetId(const std::string& sourcePath) const {
+		const AssetRecord* rec = m_db.FindBySource(sourcePath);
+		return rec ? rec->id : 0;
+	}
+
+	AssetId AssetManager::GetAssetIdByFilename(const std::string& filename) const {
+		// Search through all assets for matching filename
+		auto allRecords = const_cast<AssetDatabase&>(m_db).AllMutable();
+
+		for (const auto* rec : allRecords) {
+			if (!rec) continue;
+
+			// Extract filename from sourcePath
+			fs::path p(rec->sourcePath);
+			if (p.filename().string() == filename) {
+				return rec->id;
+			}
+		}
+		return 0; // Not found
+	}
+
+	const AssetRecord* AssetManager::GetAssetRecord(AssetId id) const {
+		return m_db.Find(id);
+	}
+
+	bool AssetManager::AssetExists(const std::string& sourcePath) const {
+		return m_db.FindBySource(sourcePath) != nullptr;
 	}
 
 } //end of namespace gam300
