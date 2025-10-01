@@ -188,7 +188,7 @@ int main(void) {
 
         IMGUIM.finishImguiRender(io);
 
-        GFXM.update();
+        //GFXM.update();
         
         // Swap buffers
         glfwSwapBuffers(window);

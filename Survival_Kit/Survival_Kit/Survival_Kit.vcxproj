@@ -27,6 +27,7 @@
     <ClCompile Include="Glad\glad.c" />
     <ClCompile Include="Graphics\Common.cpp" />
     <ClCompile Include="Graphics\GLResources.cpp" />
+    <ClCompile Include="Graphics\Renderer.cpp" />
     <ClCompile Include="Graphics\Sampler.cpp" />
     <ClCompile Include="Graphics\ShaderProgram.cpp" />
     <ClCompile Include="Graphics\Shape.cpp" />
@@ -89,11 +90,13 @@
     <ClInclude Include="Glad\glad.h" />
     <ClInclude Include="Graphics\Camera.h" />
     <ClInclude Include="Graphics\Common.h" />
+    <ClInclude Include="Graphics\DrawItem.h" />
     <ClInclude Include="Graphics\Framebuffer.h" />
     <ClInclude Include="Graphics\GLResources.h" />
     <ClInclude Include="Graphics\Light.h" />
     <ClInclude Include="Graphics\Material.h" />
     <ClInclude Include="Graphics\MeshData.h" />
+    <ClInclude Include="Graphics\Renderer.h" />
     <ClInclude Include="Graphics\Sampler.h" />
     <ClInclude Include="Graphics\ShaderProgram.h" />
     <ClInclude Include="Graphics\Shape.h" />
@@ -134,7 +137,6 @@
     <ClInclude Include="Pipeline\Importers\SceneImporter.h" />
     <ClInclude Include="Pipeline\Importers\ShaderImporter.h" />
     <ClInclude Include="Pipeline\Importers\TextureImporter.h" />
-    
     <ClInclude Include="Manager\SerialisationBinManager.h" />
     <ClInclude Include="Manager\SerialisationManager.h" />
     <ClInclude Include="System\RenderSystem.h" />

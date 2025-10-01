@@ -10,8 +10,8 @@
  */
 #pragma once
 
-#ifndef __TRANSFORM_SYSTEM_H__
-#define __TRANSFORM_SYSTEM_H__
+#ifndef __MOVEMENT_SYSTEM_H__
+#define __MOVEMENT_SYSTEM_H__
 
 #include "../System/System.h"
 #include "../Component/Transform3D.h"

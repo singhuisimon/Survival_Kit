@@ -6,11 +6,7 @@
 #include "../Component/Transform3D.h"
 #include "../Component/RenderComponent.h"
 #include "../Utility/Constant.h"
-#include "../Graphics/ShaderProgram.h"
-#include "../Graphics/Camera.h"
-#include "../Graphics/Light.h"
-#include "../Graphics/Shape.h"
-#include "../Graphics/Framebuffer.h"
+#include "../Graphics/Renderer.h"
 
 namespace gam300 {
 
@@ -18,7 +14,7 @@ namespace gam300 {
 
 	public:
         /**
-        * @brief Constructor for TransformSystem.
+        * @brief Constructor for RenderSystem.
         */
         RenderSystem();
 
@@ -46,17 +42,11 @@ namespace gam300 {
          */
         void process_entity(EntityID entity_id) override;
 
-        void configurePipelineState();
-
-        void draw();
-
     private:
+        Camera3D              m_camera;
+        Light                 m_light;
 
-        std::unordered_map<std::string, MeshGL>  m_tmp_mesh_storage;
-        std::vector<ShaderProgram>               m_shader_storage;
-
-        Camera3D                                 t_camera3d;
-        Light                                    t_light;
+        std::vector<DrawItem> m_draw_list; 
 	};
 
 }

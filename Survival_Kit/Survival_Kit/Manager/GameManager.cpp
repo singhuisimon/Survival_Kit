@@ -23,6 +23,7 @@
 #include "../Utility/AssetPath.h"
 #include "../System/MovementSystem.h"
 #include "../System/PhysicsSystem.h"
+#include "../System/RenderSystem.h"
 #include "../Component/RigidBody.h"
 
 namespace gam300 {
@@ -116,11 +117,14 @@ namespace gam300 {
         logManager.writeLog("GameManager::startUp() - GraphicsManager started successfully");
 		CM.register_component<AudioComponent>();
 		logManager.writeLog("GameManager::startUp() - AudioComponent component registered successfully");
+        CM.register_component<RenderComponent>();
+        logManager.writeLog("GameManager::startUp() - RenderComponent component registered successfully");
 
         // Load the scene
         const std::string scenePath = getAssetFilePath("Scene/Game.scn");
         logManager.writeLog("GameManager::startUp() - Attempting to load scene from '%s'", scenePath.c_str());
 
+        SM.register_system<RenderSystem>();
 
         // Register the Movement component with the ComponetManager
         SM.register_system<MovementSystem>();

@@ -19,6 +19,7 @@
 #include "../Utility/AssetPath.h"
 #include "../Component/Transform3D.h"
 #include "../Component/RigidBody.h"
+#include "../Component/RenderComponent.h"
 
 #include <iostream>
 
@@ -281,8 +282,8 @@ namespace gam300 {
                 {
                     Entity& createNewEntity = ImguiEcsRef.createEntity("New Entity");
 
-                    // always add default transform3D
-                    if (!ImguiEcsRef.hasComponent<Transform3D>(createNewEntity.get_id())) {
+                    if (!ImguiEcsRef.hasAllComponents<RenderComponent, Transform3D>(createNewEntity.get_id())) {
+                        ImguiEcsRef.addComponent<RenderComponent>(createNewEntity.get_id());
                         ImguiEcsRef.addComponent<Transform3D>(createNewEntity.get_id());
                     }
 

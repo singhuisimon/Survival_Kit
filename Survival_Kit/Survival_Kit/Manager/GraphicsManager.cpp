@@ -47,8 +47,9 @@ namespace gam300 {
             LM.writeLog("GraphicsManager::startUp(): GLAD initialized successfully.");
         }
 
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-        
+        m_renderer.setup();
+
+#if 0
         //glEnable(GL_DEPTH_TEST);
         //glDepthFunc(GL_LESS); // Default comparison
         //glClearDepth(1.0f);
@@ -151,17 +152,7 @@ namespace gam300 {
         meshStorage.push_back(std::move(cubeGL));
         meshStorage.push_back(std::move(planeGL));
         meshStorage.push_back(std::move(sphereGL));
-
-        TextureDesc td{};
-        auto tex = Texture::load_from_file("..//Survival_Kit//Assets//text.png", td);
-
-        if (!tex.has_value()) {
-            // do something throw run time error
-        }
-
-        // do something with the texture
-        tex->handle();
-        
+#endif
         // Log startup
         LM.writeLog("GraphicsManager::startUp() - Graphics Manager started successfully");
         return 0;
@@ -182,6 +173,7 @@ namespace gam300 {
         Manager::shutDown();
     }
 
+#if 0
     // Update input states, should be called once per frame
     void GraphicsManager::update() {
 
@@ -313,6 +305,8 @@ namespace gam300 {
         // Unbind framebuffer object
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
+
+#endif
 
     bool GraphicsManager::loadShaderPrograms(std::vector<std::pair<std::string, std::string>> shaders) {
         for (auto const& file : shaders) { 
