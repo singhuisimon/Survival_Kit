@@ -41,7 +41,9 @@ namespace gam300 {
     static int selectedAssetIndex = -1;
 
     static bool asset_editor = false;
+    static bool prefab_editor = false;
     static std::filesystem::directory_entry currentAsset;
+    static std::filesystem::directory_entry selectedPrefab;
 
     // Asset Type names for display
     const char* ImguiManager::getAssetTypeName(AssetType type)
@@ -334,6 +336,7 @@ namespace gam300 {
     }
 
     static std::string prefab_name;
+    static int prefab_index = -1;
 
     void ImguiManager::displayHierarchyList() {
 
@@ -458,6 +461,7 @@ namespace gam300 {
                         {
                             if (ImGui::MenuItem("Create Prefabs"))
                             {
+                                prefab_index = i;
                                 showPrefabPanel = true; // to open pop up for the prefabs
 
                             }
@@ -477,10 +481,10 @@ namespace gam300 {
                     //++currObjIndex;
                 }
 
-                if (showPrefabPanel && selectedObjIndex >= 0 && selectedObjIndex < static_cast<int>(allEntities.size()))
+                if (showPrefabPanel && prefab_index >= 0 && prefab_index < static_cast<int>(allEntities.size()))
                 {
-                    const Entity& prefabSelectedEntity = allEntities[selectedObjIndex];
-                    prefab_name = prefabSelectedEntity.get_name() + "_prefab";
+                    const Entity& prefabSelectedEntity = allEntities[prefab_index];
+                    prefab_name = prefabSelectedEntity.get_name();
                     if (PM.createPrefabFromEntity(prefabSelectedEntity.get_id(), prefab_name, true)) {
                         ImGui::OpenPopup("Create Prefab Panel");
                     }
@@ -1255,6 +1259,11 @@ namespace gam300 {
                         asset_editor = true;
                         currentAsset = assetEntry;
                     }
+                    if (extension == ".prefab") //to open the image
+                    {
+                        prefab_editor = true;
+                        selectedPrefab = assetEntry;
+                    }
                 }
 
                 // ------- show toolip detail ---------- 
@@ -1307,7 +1316,11 @@ namespace gam300 {
             ImGui::Columns(1);
 
             if (asset_editor) {
-                dispalyAssetEditor(currentAsset);
+                displayAssetEditor(currentAsset);
+            }
+
+            if (prefab_editor) {
+                displayPrefabEditor(selectedPrefab);
             }
         }
 
@@ -1319,7 +1332,7 @@ namespace gam300 {
 
 #endif
 
-    void ImguiManager::dispalyAssetEditor(const std::filesystem::directory_entry& assetFilepath)
+    void ImguiManager::displayAssetEditor(const std::filesystem::directory_entry& assetFilepath)
     {
         if (ImGui::Begin("Asset Editor", &asset_editor)) {
             ImGui::Text("Editing: %s", assetFilepath.path().string().c_str());
@@ -1328,6 +1341,18 @@ namespace gam300 {
 
         if (!asset_editor) {
             currentAsset = std::filesystem::directory_entry();
+        }
+    }
+
+    void ImguiManager::displayPrefabEditor(const std::filesystem::directory_entry& prefabFilepath)
+    {
+        if (ImGui::Begin("Prefab Editor", &prefab_editor)) {
+            ImGui::Text("Editing: %s", prefabFilepath.path().string().c_str());
+        }
+        ImGui::End();
+
+        if (!prefab_editor) {
+            selectedPrefab = std::filesystem::directory_entry();
         }
     }
 
