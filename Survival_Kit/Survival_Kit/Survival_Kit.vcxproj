@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Component\Bullet.cpp" />
+    <ClCompile Include="Component\Collider.cpp" />
     <ClCompile Include="Component\RigidBody.cpp" />
     <ClCompile Include="Component\AudioComponent.cpp" />
     <ClCompile Include="Component\Script.cpp" />
@@ -45,6 +46,7 @@
     <ClCompile Include="Manager\ComponentManager.cpp" />
     <ClCompile Include="Manager\DescriptorFileManager.cpp" />
     <ClCompile Include="Manager\ECSManager.cpp" />
+    <ClCompile Include="Manager\ForceManager.cpp" />
     <ClCompile Include="Manager\GameManager.cpp" />
     <ClCompile Include="Manager\GraphicsManager.cpp" />
     <ClCompile Include="Manager\ImguiManager.cpp" />
@@ -52,6 +54,7 @@
     <ClCompile Include="Manager\LogManager.cpp" />
     <ClCompile Include="Manager\Manager.cpp" />
     <ClCompile Include="Manager\ResourceManager.cpp" />
+    <ClCompile Include="Manager\TorqueManager.cpp" />
     <ClCompile Include="Pipeline\Importers\AudioImporter.cpp" />
     <ClCompile Include="Pipeline\Importers\MeshImporter.cpp" />
     <ClCompile Include="Pipeline\Importers\SceneImporter.cpp" />
@@ -68,6 +71,7 @@
     <ClCompile Include="Manager\SerialisationManager.cpp" />
     <ClCompile Include="Manager\SystemManager.cpp" />
     <ClCompile Include="System\BulletSystem.cpp" />
+    <ClCompile Include="System\CollisionSystem.cpp" />
     <ClCompile Include="System\MovementSystem.cpp" />
     <ClCompile Include="System\PhysicsSystem.cpp" />
     <ClCompile Include="System\AudioSystem.cpp" />
@@ -81,6 +85,7 @@
   <ItemGroup>
     <ClInclude Include="Component\AudioComponent.h" />
     <ClInclude Include="Component\Bullet.h" />
+    <ClInclude Include="Component\Collider.h" />
     <ClInclude Include="Component\Component.h" />
     <ClInclude Include="Component\ComponentPool.h" />
     <ClInclude Include="Component\ComponentView.h" />
@@ -118,13 +123,16 @@
     <ClInclude Include="Manager\ComponentManager.h" />
     <ClInclude Include="Manager\DescriptorFileManager.h" />
     <ClInclude Include="Manager\ECSManager.h" />
+    <ClInclude Include="Manager\ForceManager.h" />
     <ClInclude Include="Manager\GameManager.h" />
     <ClInclude Include="Manager\GraphicsManager.h" />
     <ClInclude Include="Manager\ImguiManager.h" />
     <ClInclude Include="Manager\InputManager.h" />
     <ClInclude Include="Manager\LogManager.h" />
     <ClInclude Include="Manager\Manager.h" />
+    <ClInclude Include="Manager\PrefabManager.h" />
     <ClInclude Include="Manager\ResourceManager.h" />
+    <ClInclude Include="Manager\TorqueManager.h" />
     <ClInclude Include="Resource\ResourceData.h" />
     <ClInclude Include="Resource\ResourceMetadata.h" />
     <ClInclude Include="Resource\ResourcePaths.h" />
@@ -141,6 +149,7 @@
     <ClInclude Include="Manager\SerialisationBinManager.h" />
     <ClInclude Include="Manager\SerialisationManager.h" />
     <ClInclude Include="System\BulletSystem.h" />
+    <ClInclude Include="System\CollisionSystem.h" />
     <ClInclude Include="System\MovementSystem.h" />
     <ClInclude Include="System\PhysicsSystem.h" />
     <ClInclude Include="System\AudioSystem.h" />

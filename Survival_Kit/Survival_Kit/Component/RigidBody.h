@@ -1,128 +1,107 @@
-/**
- * @file ...
- * @brief ...
- * @details ...
- * @author
- * @date
- * Copyright (C) 2025 DigiPen Institute of Technology.
- * Reproduction or disclosure of this file or its contents without the
- * prior written consent of DigiPen Institute of Technology is prohibited.
- */
+/******************************************************************************/
+/*!
+\file       RigidBody.h
+\author     (you)
+\date       Oct 03 2025
+\brief      Rigid body component with linear + angular forces (mask-based).
+			Inherits Component. Provides full getters/setters. Linear motion
+			writes position in Integrate(); angular state is updated here,
+			but rotation write-back is left to the caller/system.
+/******************************************************************************/
 #pragma once
-#ifndef __RIGIDBODY_H__
-#define __RIGIDBODY_H__
+#ifndef RigidBody_H
+#define RigidBody_H
 
 #include "../Component/Component.h"
-#include "../Component/Transform3D.h"
 #include "../Utility/Vector3D.h"
+#include "../Manager/ForceManager.h"
+#include "../Manager/TorqueManager.h"
 
-#include "Jolt/Jolt.h"
-#include "Jolt/RegisterTypes.h"
-#include "Jolt/Core/Factory.h"
-#include "Jolt/Core/TempAllocator.h"
-#include "Jolt/Core/JobSystemThreadPool.h"
-#include "Jolt/Physics/PhysicsSettings.h"
-#include "Jolt/Physics/PhysicsSystem.h"
-#include "Jolt/Physics/Body/BodyID.h"
+namespace gam300
+{
+	class Transform3D; // forward decl
 
-namespace gam300 {
+	class RigidBody : public Component
+	{
+	public:
+		RigidBody(
+			float          mass = 1.0f,
+			const Vector3D& velocity = Vector3D(0.0f, 0.0f, 0.0f),
+			const Vector3D& acceleration = Vector3D(0.0f, 0.0f, 0.0f),
+			const Vector3D& inertiaDiag = Vector3D(0.0f, 0.0f, 0.0f),
+			const Vector3D& angularVelocity = Vector3D(0.0f, 0.0f, 0.0f),
+			unsigned        forceMask = 0xFFFFFFFFu,
+			unsigned        torqueMask = 0xFFFFFFFFu,
+			int             layer = 0
+		);
 
-    enum class BodyType
-    {
-        STATIC, 
-        KINEMATIC,
-        DYNAMIC
+		// ---- Component interface ----
+		void init(EntityID entity_id) override;
+		void update(float dt) override;
 
-    };
+		// ---- Integration entry point (call from your physics pass) ----
+		void Integrate(Transform3D& tr, float dt);
 
-    class RigidBody : public Component {
-    private:
+		// ---- Getters / Setters (linear) ----
+		float          getMass() const { return m_mass; }
+		float          getInvMass() const { return m_invMass; }
+		const Vector3D& getVelocity() const { return m_velocity; }
+		const Vector3D& getAcceleration() const { return m_acceleration; }
+		unsigned       getForceMask() const { return m_forceMask; }
+		int            getLayer() const { return m_layer; }
+		ForceManager& getForceManager() { return m_forceMgr; }
+		const ForceManager& getForceManager() const { return m_forceMgr; }
 
-        JPH::BodyID m_bodyID;           // Jolt body ID
-        JPH::Body* m_body = nullptr;    // Direct reference
-        BodyType m_bodyType;
-        bool m_gravity;
+		void setMass(float m);
+		void setVelocity(const Vector3D& v) { m_velocity = v; }
+		void setAcceleration(const Vector3D& a) { m_acceleration = a; }
+		void setForceMask(unsigned mask) { m_forceMask = mask; }
+		void setLayer(int layer) { m_layer = layer; }
 
-    public:
-        
-        RigidBody();
-        RigidBody(JPH::BodyID bodyID, JPH::Body* body,
-            BodyType bodyType = BodyType::STATIC,
-            const bool& gravity = true);
+		// ---- Getters / Setters (angular) ----
+		const Vector3D& getInertiaDiagonal() const { return m_inertiaDiag; }
+		const Vector3D& getInvInertiaDiagonal() const { return m_invInertiaDiag; }
+		const Vector3D& getAngularVelocity() const { return m_angularVelocity; }
+		const Vector3D& getAngularAcceleration() const { return m_angularAcceleration; }
+		unsigned        getTorqueMask() const { return m_torqueMask; }
+		TorqueManager& getTorqueManager() { return m_torqueMgr; }
+		const TorqueManager& getTorqueManager() const { return m_torqueMgr; }
 
-        RigidBody(BodyType bodyType)
-            : m_bodyID(JPH::BodyID()), m_body(nullptr),
-              m_bodyType(bodyType), m_gravity(true)
-        {}
+		void setInertiaDiagonal(const Vector3D& I);
+		void setAngularVelocity(const Vector3D& w) { m_angularVelocity = w; }
+		void setAngularAcceleration(const Vector3D& a) { m_angularAcceleration = a; }
+		void setTorqueMask(unsigned mask) { m_torqueMask = mask; }
 
+		// convenience
+		bool isStatic() const { return m_invMass <= 0.0f; }
+		Vector3D GetAngularDelta(float dt) const
+		{
+			return Vector3D(m_angularVelocity.x * dt,
+				m_angularVelocity.y * dt,
+				m_angularVelocity.z * dt);
+		}
 
-            // Explicit move semantics
-        RigidBody(RigidBody&&) = default;
-        RigidBody& operator=(RigidBody&&) = default;
+	private:
+		static inline float inv_or_zero(float x) { return (x > 0.0f) ? (1.0f / x) : 0.0f; }
 
-        // Optional copy semantics (if ECS requires)
-        RigidBody(const RigidBody&) = default;
-        RigidBody& operator=(const RigidBody&) = default;
+		// linear
+		float    m_mass;
+		float    m_invMass;
+		Vector3D m_velocity;
+		Vector3D m_acceleration;
+		unsigned m_forceMask;
+		int      m_layer;
+		ForceManager m_forceMgr;
 
-        void init(EntityID entity_id) override;
-
-        void update(float dt) override;
-
-        const bool& getGravity() const { return m_gravity; }
-        void setType(BodyType type) { m_bodyType = type; }
-        void setGravity(bool gravity) { m_gravity = gravity; }
-
-        const float& getMass() const { return m_body ? 1.0f / m_body->GetMotionProperties()->GetInverseMass() : 0.0f; }
-        const float& getInverseMass() const { return m_body ? m_body->GetMotionProperties()->GetInverseMass() : 0.0f; }
-        Vector3D getLinearVelocity() const { return m_body ? convert(m_body->GetLinearVelocity()) : Vector3D(); }
-        Vector3D getAngularVelocity() const { return m_body ? convert(m_body->GetAngularVelocity()) : Vector3D(); }
-        const float& getLinearDamp() const { return m_body ? m_body->GetMotionProperties()->GetLinearDamping() : 0.0f; ; }
-        const float& getAngularDamp() const { return m_body ? m_body->GetMotionProperties()->GetAngularDamping() : 0.0f; ; }
-       
-        void setLinearVelocity(const Vector3D& linearVelocity) { if (m_body) m_body->SetLinearVelocity(convert(linearVelocity)); }
-        void setAngularVelocity(const Vector3D& angularVelocity) { if (m_body) m_body->SetAngularVelocity(convert(angularVelocity)); }
-        void setLinearDamp(float linearDamp) { if (m_body) m_body->GetMotionProperties()->SetLinearDamping(linearDamp); }
-        void setAngularDamp(float angularDamp) { if (m_body) m_body->GetMotionProperties()->SetAngularDamping(angularDamp); }
-
-        void applyForce(const Vector3D& force);
-        void applyTorque(const Vector3D& torque);
-        void applyImpulse(const Vector3D& impulse);
-
-        // add to check bodyType 
-        bool isStatic() const { return m_bodyType == BodyType::STATIC; }
-        bool isKinematic() const { return m_bodyType == BodyType::KINEMATIC; }
-        bool isDynamic() const { return m_bodyType == BodyType::DYNAMIC; }
-
-        // to get the type of the Rigid Body - STATIC, KINEMATIC, DYNAMIC
-        const BodyType getRigidBodyType() { return m_bodyType; }
-
-        // to return the enum type to string for serialization
-        static BodyType stringToBodyType(const std::string& str);
-
-        // convert back from string to enum for serialization
-        static std::string bodyTypeToString(BodyType type);
-
-        // set the rigid body type (use in imgui)
-        void setRigidBodyType(BodyType type) { m_bodyType = type; }
-
-        Vector3D getPosition() const {
-            return m_body ? convert(m_body->GetPosition()) : Vector3D();
-        }
-
-        void setPosition(const Vector3D& pos, JPH::PhysicsSystem& system)
-        {
-            JPH::BodyInterface& body_interface = system.GetBodyInterface();
-            body_interface.SetPosition(m_bodyID, convert(pos), JPH::EActivation::Activate);
-        }
-
-        static JPH::Vec3 convert(const Vector3D& v) { return JPH::Vec3(v.x, v.y, v.z); }
-        static Vector3D convert(const JPH::Vec3& v) { return Vector3D(v.GetX(), v.GetY(), v.GetZ()); }
-
-        JPH::Quat getRotation() const;
-
-        void setRotation(const JPH::Quat& rot, JPH::PhysicsSystem& system);
-    };
+		// angular
+		Vector3D m_inertiaDiag;
+		Vector3D m_invInertiaDiag;
+		Vector3D m_angularVelocity;
+		Vector3D m_angularAcceleration;
+		unsigned m_torqueMask;
+		TorqueManager m_torqueMgr;
+	};
 
 } // namespace gam300
 
-#endif // __RIGIDBODY_H__
+#endif // RigidBody_H

@@ -25,6 +25,7 @@
 #include <fstream>
 #include <sstream>
 #include <functional>
+#include <iomanip>
 
 namespace gam300 {
 
@@ -128,17 +129,32 @@ namespace gam300 {
     std::string RigidBodySerializer::serialize(Component* component) {
        
         RigidBody* rigidBody = static_cast<RigidBody*>(component);
-       
-        if (!rigidBody) { 
+
+        if (!rigidBody) {
             return "{}";
         }
         std::stringstream ss;
-        
-        ss << "{\n";
 
-        //ss << "          \"RigidBody\": {\n";
-        ss << "          \"rigidBodyType\": \"" << rigidBody->bodyTypeToString(rigidBody->getRigidBodyType()) << "\"\n";
+        ss << "{\n";
+        //ss << "          \"Mass\": \"" << rigidBody->getMass() << "\"\n";
+        ss << "          \"Mass\": " << rigidBody->getMass() << ",\n";
+
+        const Vector3D& vel = rigidBody->getVelocity();
+        ss << "          \"velocity\": [\n";
+        ss << "            " << vel.x << ",\n";
+        ss << "            " << vel.y << ",\n";
+        ss << "            " << vel.z << "\n";
+        ss << "          ],\n";
+        //ss << "        }";
+
+        const Vector3D& accel = rigidBody->getAcceleration();
+        ss << "          \"acceleration\": [\n";
+        ss << "            " << accel.x << ",\n";
+        ss << "            " << accel.y << ",\n";
+        ss << "            " << accel.z << "\n";
+        ss << "          ]\n";
         ss << "        }";
+
 
         return ss.str();
     }
@@ -147,14 +163,22 @@ namespace gam300 {
     Component* RigidBodySerializer::deserialize(EntityID entityId, const std::string& jsonData) {
 
         // Parse the rigid body type 
-        BodyType rigidBodyType = BodyType::STATIC;
+        float mass = 1.0f;
+        std::string massData = SerialisationManager::extractObjectValue(jsonData, "mass");
+        if (!massData.empty()) mass = std::stof(massData);
 
-        std::string bodyTypeStr = SerialisationManager::extractQuotedValue(jsonData, "rigidBodyType");
-        if (!bodyTypeStr.empty()) {
+        Vector3D velocity = Vector3D::ZERO;
+        //std::string velString = "velocity";
+        //addComponentVec3D()
+        Vector3D velcom = SerialisationManager::addComponentVec3D(velocity, jsonData, "velocity");
 
-            rigidBodyType = RigidBody::stringToBodyType(bodyTypeStr);
-        }
-        RigidBody* rigidBody = EM.addComponent<RigidBody>(entityId, rigidBodyType);
+
+        Vector3D acceleration = Vector3D::ZERO;
+        Vector3D accelCom = SerialisationManager::addComponentVec3D(acceleration, jsonData, "acceleration");
+
+
+
+        RigidBody* rigidBody = EM.addComponent<RigidBody>(entityId, mass, velcom, accelCom);
 
         return rigidBody;
 
@@ -1058,6 +1082,21 @@ namespace gam300 {
 
         return json.substr(valueStart, valueEnd - valueStart);
     }
+    Vector3D SerialisationManager::addComponentVec3D(Vector3D val, const std::string& jsonData, const std::string valName)
+    {
+        std::string valData = SerialisationManager::extractObjectValue(jsonData, valName);
+        if (!valData.empty())
+        {
+            std::vector<float> valArray = SerialisationManager::parseFloatArray(valData);
+            if (valArray.size() >= 3)
+            {
+                val = Vector3D(valArray[0], valArray[1], valArray[2]);
+            }
 
+        }
+
+        return val;
+
+    }
 
 } // end of namespace gam300

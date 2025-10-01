@@ -29,6 +29,7 @@
 #include "../System/MovementSystem.h"
 #include "../System/PhysicsSystem.h"
 #include "../System/BulletSystem.h"
+#include "../System/CollisionSystem.h"
 
 // Include Utility headers
 #include "../Utility/Clock.h"
@@ -126,6 +127,9 @@ namespace gam300 {
         CM.register_component<RigidBody>();
         LM.writeLog("GameManager::startUp() - RigidBody component started successfully");
 
+        CM.register_component<Collider>();
+        LM.writeLog("GameManager::startUp() - Collider component started successfully");
+
 		CM.register_component<AudioComponent>();
 		LM.writeLog("GameManager::startUp() - AudioComponent component registered successfully");
 
@@ -143,6 +147,7 @@ namespace gam300 {
 		// Register the Systems with the ECSManager
         SM.register_system<MovementSystem>();
         SM.register_system<PhysicsSystem>();
+        SM.register_system<CollisionSystem>();
 		SM.register_system<BulletSystem>();
 
         // Initialize step count

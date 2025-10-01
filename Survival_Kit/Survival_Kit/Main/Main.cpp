@@ -151,8 +151,9 @@ int main(void) {
         bool currentSpaceState = GetKeyState(VK_SPACE) & 0x8000;
         if (currentSpaceState && !spacePressed)
         {
-            //app.ReloadScripts();
-            //std::cout << "your mother flip ";
+            /*app.ReloadScripts();
+            app.AddScript(0, "TestScript");*/
+
             app.CreateMonoBehaviourScript("PlayerController");
         }
         app.CheckAndReloadScripts(); // Add this line

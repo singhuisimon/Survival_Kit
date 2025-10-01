@@ -1,0 +1,21 @@
+{
+  "asset": {
+    "guid": "BBEBB85A148C800D",
+    "id": 13541119401650847757,
+    "sourcePath": "C:/Users/User/Documents/GitHub/gam_300/Survival_Kit/Survival_Kit/Assets/Scene/GameB.scn",
+    "intermediatePath": "C:\\Users\\User\\Documents\\GitHub\\gam_300\\Cache/Intermediate\\GameB.scn",
+    "compiledPath": "",
+    "type": 6,
+    "ext": ".scn",
+    "contentHash": "",
+    "lastWriteTime": 0,
+    "valid": true
+  },
+  "extras": {
+    "displayName": "GameB.scn",
+    "category": "Scene",
+    "tags": [],
+    "lastImported": 1759303638,
+    "user": {}
+  }
+}

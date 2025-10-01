@@ -1,0 +1,21 @@
+{
+  "asset": {
+    "guid": "8BEBB85A148C8011",
+    "id": 10082354887830306833,
+    "sourcePath": "C:/Users/User/Documents/GitHub/gam_300/Survival_Kit/Survival_Kit/Assets/Shaders/survival_kit_obj.frag",
+    "intermediatePath": "C:\\Users\\User\\Documents\\GitHub\\gam_300\\Cache/Intermediate\\survival_kit_obj.frag",
+    "compiledPath": "",
+    "type": 1,
+    "ext": ".frag",
+    "contentHash": "",
+    "lastWriteTime": 0,
+    "valid": true
+  },
+  "extras": {
+    "displayName": "survival_kit_obj.frag",
+    "category": "Shader",
+    "tags": [],
+    "lastImported": 1759303638,
+    "user": {}
+  }
+}

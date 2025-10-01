@@ -1,66 +1,45 @@
-/**
- * @file MovementSystem.h
- * @brief .
- * @details .
- * @author
- * @date
- * Copyright (C) 2025 DigiPen Institute of Technology.
- * Reproduction or disclosure of this file or its contents without the
- * prior written consent of DigiPen Institute of Technology is prohibited.
- */
+/******************************************************************************/
+/*!
+\file       MovementSystem.h
+\author     (you)
+\date       Oct 03 2025
+\brief      Input-driven movement that applies forces to RigidBody.
+/******************************************************************************/
 #pragma once
-
-#ifndef __TRANSFORM_SYSTEM_H__
-#define __TRANSFORM_SYSTEM_H__
+#ifndef __MOVEMENT_SYSTEM_H__
+#define __MOVEMENT_SYSTEM_H__
 
 #include "../System/System.h"
 #include "../Component/Transform3D.h"
 #include "../Component/RigidBody.h"
 
-namespace gam300 {
+namespace gam300
+{
+    class SystemManager;
 
-    class MovementSystem : public ComponentSystem<Transform3D, RigidBody>{
-
+    class MovementSystem : public ComponentSystem<Transform3D, RigidBody>
+    {
     public:
-        /**
-         * @brief Constructor for...
-         */
         MovementSystem();
 
-        /**
-         * @brief Initialize the system.
-         * @param system_manager Reference to the system manager.
-         * @return True if initialization was successful, false otherwise.
-         */
         bool init(SystemManager& system_manager) override;
-
-        /**
-         * @brief Update the system, processing all relevant entities.
-         * @param dt Delta time since the last update.
-         */
         void update(float dt) override;
-
-        /**
-         * @brief Clean up the system when shutting down.
-         */
         void shutdown() override;
 
-        /**
-         * @brief Process a specific entity with an InputComponent.
-         * @param entity_id The ID of the entity to process.
-         */
         void process_entity(EntityID entity_id) override;
 
-        void handleDynamic(Transform3D* transform, RigidBody* rigidBody);
-        void handleKinematic(Transform3D* transform, RigidBody* rigidBody);
-        Vector3D getMovementInput();
-
     private:
-        float m_dt = 0; 
+        float m_dt{ 0.0f };
+
+        // Force magnitude (Newtons) applied while a key is held (for dynamic bodies)
+        float m_moveForce{ 40.0f };
+
+        // Direct-move speed for static bodies (units/sec)
+        float m_kinematicSpeed{ 2.0f };
+
+        // Mask to tag per-frame input forces in ForceManager
+        static constexpr unsigned INPUT_FORCE_MASK = 1u << 0;
     };
-
-
 }
 
-
-#endif // !__TRANSFORM_SYSTEM_H__
+#endif // __MOVEMENT_SYSTEM_H__
