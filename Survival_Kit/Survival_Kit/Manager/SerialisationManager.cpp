@@ -962,6 +962,9 @@ namespace gam300 {
                 if (Collider* collider = EM.getComponent<Collider>(entity.get_id())) {
                     componentStrings.push_back(getIndent(4) + "\"Collider\": " +
                         serializer->second->serialize(collider));
+                    hasComponents = true;
+                }
+            }
 
             // ===================== Check for Mesh component =====================
             if (auto serializer = m_component_serializers.find("MeshComponent");
@@ -972,6 +975,7 @@ namespace gam300 {
                     hasComponents = true;
                 }
             }
+           
 
             // Write all components with proper comma separation
             for (size_t j = 0; j < componentStrings.size(); ++j) {
