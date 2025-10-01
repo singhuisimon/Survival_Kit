@@ -1,9 +1,9 @@
 {
   "asset": {
-    "guid": "3091685A2771000F",
-    "id": 3499693121861648399,
+    "guid": "2F36885A35A7000D",
+    "id": 3402056489553559565,
     "sourcePath": "C:/Survival_Kit/Survival_Kit/Survival_Kit/Assets/Scene/Saveexample.scn",
-    "intermediatePath": "C:\\Survival_Kit\\Cache/Intermediate\\Saveexample.scn",
+    "intermediatePath": "C:\\Survival_Kit\\Survival_Kit/Survival_Kit/Assets/Cache/Intermediate\\Saveexample.scn",
     "compiledPath": "",
     "type": 6,
     "ext": ".scn",
@@ -15,7 +15,7 @@
     "displayName": "Saveexample.scn",
     "category": "Scene",
     "tags": [],
-    "lastImported": 1759323006,
+    "lastImported": 1759337500,
     "user": {}
   }
 }

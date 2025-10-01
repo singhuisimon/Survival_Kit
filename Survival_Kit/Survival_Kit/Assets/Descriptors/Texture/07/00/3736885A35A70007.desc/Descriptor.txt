@@ -1,9 +1,9 @@
 {
   "asset": {
-    "guid": "8091685A27710009",
-    "id": 9264300644895883273,
+    "guid": "3736885A35A70007",
+    "id": 3978517241856983047,
     "sourcePath": "C:/Survival_Kit/Survival_Kit/Survival_Kit/Assets/Textures/squirrel_kenny.png",
-    "intermediatePath": "C:\\Survival_Kit\\Cache/Intermediate\\squirrel_kenny.png",
+    "intermediatePath": "C:\\Survival_Kit\\Survival_Kit/Survival_Kit/Assets/Cache/Intermediate\\squirrel_kenny.png",
     "compiledPath": "",
     "type": 2,
     "ext": ".png",
@@ -15,7 +15,7 @@
     "displayName": "squirrel_kenny.png",
     "category": "Texture",
     "tags": [],
-    "lastImported": 1759323006,
+    "lastImported": 1759337500,
     "user": {}
   }
   ,"textureSettings": {

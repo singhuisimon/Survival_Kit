@@ -1,9 +1,9 @@
 {
   "asset": {
-    "guid": "F891685A27710007",
-    "id": 17911211929447235591,
+    "guid": "1736885A35A70005",
+    "id": 1672674232643289093,
     "sourcePath": "C:/Survival_Kit/Survival_Kit/Survival_Kit/Assets/Textures/rabbit_kenny.png",
-    "intermediatePath": "C:\\Survival_Kit\\Cache/Intermediate\\rabbit_kenny.png",
+    "intermediatePath": "C:\\Survival_Kit\\Survival_Kit/Survival_Kit/Assets/Cache/Intermediate\\rabbit_kenny.png",
     "compiledPath": "",
     "type": 2,
     "ext": ".png",
@@ -15,7 +15,7 @@
     "displayName": "rabbit_kenny.png",
     "category": "Texture",
     "tags": [],
-    "lastImported": 1759323006,
+    "lastImported": 1759337500,
     "user": {}
   }
   ,"textureSettings": {

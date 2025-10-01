@@ -1,9 +1,9 @@
 {
   "asset": {
-    "guid": "1091685A27710001",
-    "id": 1193850112647954433,
+    "guid": "FF36885A35A70001",
+    "id": 18390036049442570241,
     "sourcePath": "C:/Survival_Kit/Survival_Kit/Survival_Kit/Assets/Audio/laserSmall_001.ogg",
-    "intermediatePath": "C:\\Survival_Kit\\Cache/Intermediate\\laserSmall_001.ogg",
+    "intermediatePath": "C:\\Survival_Kit\\Survival_Kit/Survival_Kit/Assets/Cache/Intermediate\\laserSmall_001.ogg",
     "compiledPath": "",
     "type": 3,
     "ext": ".ogg",
@@ -15,7 +15,7 @@
     "displayName": "laserSmall_001.ogg",
     "category": "Audio",
     "tags": [],
-    "lastImported": 1759323006,
+    "lastImported": 1759337500,
     "user": {}
   }
 }

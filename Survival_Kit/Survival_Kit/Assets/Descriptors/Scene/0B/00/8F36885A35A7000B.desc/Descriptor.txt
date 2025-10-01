@@ -1,9 +1,9 @@
 {
   "asset": {
-    "guid": "2891685A2771000D",
-    "id": 2923232369558224909,
+    "guid": "8F36885A35A7000B",
+    "id": 10319585517194641419,
     "sourcePath": "C:/Survival_Kit/Survival_Kit/Survival_Kit/Assets/Scene/GameB.scn",
-    "intermediatePath": "C:\\Survival_Kit\\Cache/Intermediate\\GameB.scn",
+    "intermediatePath": "C:\\Survival_Kit\\Survival_Kit/Survival_Kit/Assets/Cache/Intermediate\\GameB.scn",
     "compiledPath": "",
     "type": 6,
     "ext": ".scn",
@@ -15,7 +15,7 @@
     "displayName": "GameB.scn",
     "category": "Scene",
     "tags": [],
-    "lastImported": 1759323006,
+    "lastImported": 1759337500,
     "user": {}
   }
 }

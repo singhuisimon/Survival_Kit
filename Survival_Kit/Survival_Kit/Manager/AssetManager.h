@@ -52,9 +52,13 @@ namespace gam300 {
 			bool followSymlinks = false; //!< Recurse through symlinks
 
 			//temporary for now
-			std::string intermediateDirectory = "Cache/Intermediate"; //!< Where import output goes
-			std::string databaseFile = "Cache/assetdb.txt"; //!< Asset DB persistence
-			std::string snapshotFile = "Cache/scan.snapshot"; //!< Scanner warm start
+			//std::string intermediateDirectory = "Cache/Intermediate"; //!< Where import output goes
+			//std::string databaseFile = "Cache/assetdb.txt"; //!< Asset DB persistence
+			//std::string snapshotFile = "Cache/scan.snapshot"; //!< Scanner warm start
+
+			std::string intermediateDirectory = "Survival_Kit/Survival_Kit/Assets/Cache/Intermediate"; //!< Where import output goes
+			std::string databaseFile = "Survival_Kit/Survival_Kit/Assets/Cache/assetdb.txt"; //!< Asset DB persistence
+			std::string snapshotFile = "Survival_Kit/Survival_Kit/Assets/Cache/scan.snapshot"; //!< Scanner warm start
 
 
 			bool writeDescriptors = true; //!< Emit .desc files
