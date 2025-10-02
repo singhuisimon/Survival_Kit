@@ -32,6 +32,8 @@
 #include "../Graphics/Shape.h"
 #include "../Graphics/Material.h"
 #include "../Graphics/Framebuffer.h" 
+#include "../Graphics/Texture.h"
+
 
 // For IMGUI operations
 #include "ImguiManager.h"
@@ -69,6 +71,7 @@ namespace gam300 {
         std::vector<ShaderProgram> shadersStorage;
         std::vector<MeshGL>        meshStorage;
         std::vector<MeshData>      m_meshDataStorage;
+        std::vector<std::optional<Texture>>       m_textureStorage;
 
         // Storage for materials
         std::map<uint16_t, Material> m_material_storage;
@@ -84,7 +87,10 @@ namespace gam300 {
         std::optional<FrameBuffer> imgui_fbo; 
 
         // Mesh selection
-        int selected_mesh{ 0 };
+        int selected_texture{ 0 };
+
+        // Texture flag
+        bool textureMode = false;
 
     public:
         /**
@@ -120,6 +126,9 @@ namespace gam300 {
 
         // Get meshdata storage
         const std::vector<MeshData>& getMeshDataStorage() { return m_meshDataStorage; }
+
+        // Get texture storage
+        const std::vector<std::optional<Texture>>& getTextureStorage() { return m_textureStorage; }
         
         size_t getMeshCount() const { return meshStorage.size(); }
 

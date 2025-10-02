@@ -19,10 +19,16 @@ struct Light
 in vec3 Position;       // In view space
 in vec3 Normal;         // In view space
 in vec3 Color;         
+in vec2 TexCoord;
 
 uniform Light light;
 uniform Material material;
 uniform mat4 V;         // View transform matrix
+
+// For handling textures
+uniform bool isTexture;
+layout(binding=0) uniform sampler2D Texture2D;
+//uniform sampler2D Texture2D;
 
 layout(location=0) out vec4 FragColor;
 
@@ -70,7 +76,16 @@ vec3 BlinnPhong(vec3 position, vec3 normal, Light light, Material material, mat4
 void main() 
 {
 
-    FragColor = vec4(BlinnPhong(Position, Normal, light, material, V), 1.0);
+    vec4 shadeColor = vec4(BlinnPhong(Position, Normal, light, material, V), 1.0); 
+
+    if(isTexture){
+        //vec4 texColor = texture(Texture2D, TexCoord);
+        //FragColor = mix(shadeColor, texColor, 0.7f);
+        FragColor = texture(Texture2D, TexCoord);;
+    } else {
+        FragColor = shadeColor;
+    }
+
 
 //    vec3 n = normalize(Normal);
 //    FragColor = vec4(n * 0.5 + 0.5, 1.0);
