@@ -1,0 +1,21 @@
+{
+  "asset": {
+    "guid": "DFEBF85A66C9C00B",
+    "id": 16135263157140176907,
+    "sourcePath": "C:/Survival_Kit/Survival_Kit/Survival_Kit/Assets/Meshes/E007_adware_popup_v001.fbx",
+    "intermediatePath": "C:\\Survival_Kit\\Survival_Kit/Survival_Kit/Assets/Cache/Intermediate\\E007_adware_popup_v001.fbx",
+    "compiledPath": "",
+    "type": 4,
+    "ext": ".fbx",
+    "contentHash": "",
+    "lastWriteTime": 0,
+    "valid": true
+  },
+  "extras": {
+    "displayName": "E007_adware_popup_v001.fbx",
+    "category": "Mesh",
+    "tags": [],
+    "lastImported": 1759387815,
+    "user": {}
+  }
+}
