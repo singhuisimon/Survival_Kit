@@ -17,6 +17,7 @@
 
 #include "../Manager/PrefabManager.h"
 #include "../Manager/AssetManager.h"
+#include "../Manager/TracyManager.h"
 
 #include "../Utility/AssetPath.h"
 
@@ -24,6 +25,7 @@
 #include "../Component/RigidBody.h"
 #include "../Component/Collider.h"
 #include "../Component/AudioComponent.h"
+#include "../Component/MeshComponent.h"
 
 #include <iostream>
 
@@ -374,6 +376,15 @@ namespace gam300 {
                                         ImguiEcsRef.addComponent<AudioComponent>(newEntityID, *oldAudio);
                                     }
                                 }
+                                if (ImguiEcsRef.hasComponent<MeshComponent>(oriSelectedEntity.get_id()))
+                                {
+                                    MeshComponent* oldMesh = ImguiEcsRef.getComponent<MeshComponent>(oriSelectedEntity.get_id());
+                                    if (oldMesh)
+                                    {
+
+                                        ImguiEcsRef.addComponent<MeshComponent>(newEntityID, *oldMesh);
+                                    }
+                                }
                                 selectedObjIndex = static_cast<int>(allEntities.size()) - 1;
 
                             }
@@ -544,6 +555,13 @@ namespace gam300 {
                         if (!ImguiEcsRef.hasComponent<AudioComponent>(selectedEntity.get_id()))
                         {
                             ImguiEcsRef.addComponent<AudioComponent>(selectedEntity.get_id());
+                        }
+                    }
+                    if (ImGui::MenuItem("Mesh"))
+                    {
+                        if (!ImguiEcsRef.hasComponent<MeshComponent>(selectedEntity.get_id()))
+                        {
+                            ImguiEcsRef.addComponent<MeshComponent>(selectedEntity.get_id());
                         }
                     }
 
@@ -944,7 +962,12 @@ namespace gam300 {
             float thumbnailSize = 64.0f;
             float cellSize = thumbnailSize + padding;
             float panelWidth = ImGui::GetContentRegionAvail().x;
-            int itemsPerRow = std::max(1, (int)(panelWidth / cellSize));
+            int itemsPerRow = (int)(panelWidth / cellSize);
+            if (itemsPerRow < 1)
+            {
+                itemsPerRow = 1;
+
+            }
 
             ImGui::Columns(itemsPerRow, nullptr, false);
             for (size_t i = 0; i < assetsList.size(); ++i)
@@ -1265,9 +1288,43 @@ namespace gam300 {
 
             }
         }
+        else if constexpr (std::is_same_v<componentType, MeshComponent>) {
+            // rigidBody 
+            if (MeshComponent* mesh = ImguiEcsRef.getComponent<MeshComponent>(selectedEntityID)) {
+
+                if (mesh)
+                {
+                    ImGui::Separator();
+
+
+                }
+
+            }
+        }
 
 
 
+    }
+
+    void ImguiManager::displayPerformanceProfile()
+    {
+        ImGui::SetNextWindowSize(ImVec2(200, 100));
+
+        if (ImGui::Begin("Performance Profile", &hierachyWindow, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize))
+        {
+            if (ImGui::Button("Launch Tracy Window"))
+            {
+                if (!TRACY.isRunning())
+                {
+                    TRACY.launchTracy();
+
+                }
+            }
+
+            TRACY.update();
+        }
+
+        ImGui::End();
     }
 
 }// end of namespace gam300

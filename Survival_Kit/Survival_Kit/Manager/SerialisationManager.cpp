@@ -537,7 +537,7 @@ namespace gam300 {
 
         // ==============Register Transform3D component serializers ===========================
         registerComponentSerializer("Transform3D", std::make_shared<Transform3DSerializer>());
-        // Register component creators
+         // Register component creators
         registerComponentCreator("Transform3D", [this](EntityID entityId, const std::string& componentData) {
             // Use the serializer to create the component
             auto serializer = m_component_serializers["Transform3D"];
@@ -546,7 +546,7 @@ namespace gam300 {
                 LM.writeLog("Transform3D created for entity %d", entityId);
             }
             });
-
+            
         // ==============Register Audio component serializers ==========================
         registerComponentSerializer("AudioComponent", std::make_shared<AudioComponentSerializer>());
         registerComponentCreator("AudioComponent", [this](EntityID entityId, const std::string& componentData) {
@@ -604,7 +604,9 @@ namespace gam300 {
                 LM.writeLog("Collider created for entity %d", entityId);
             }
             });
-
+        
+        // ==============Register Mesh component serializers==========================
+        registerComponentSerializer("MeshComponent", std::make_shared<MeshComponentSerializer>());
         // Mesh Component
         registerComponentCreator("MeshComponent", [this](EntityID entityId, const std::string& componentData) {
             //Use the serializer to create the component
@@ -964,7 +966,9 @@ namespace gam300 {
                 }
             }
 
-            // Check for MeshComponent 
+     
+
+            // ===================== Check for Mesh component =====================
             if (auto serializer = m_component_serializers.find("MeshComponent");
                 serializer != m_component_serializers.end()) {
                 if (MeshComponent* mesh = EM.getComponent<MeshComponent>(entity.get_id())) {
@@ -973,8 +977,7 @@ namespace gam300 {
                     hasComponents = true;
                 }
             }
-
-            // TODO: Add more component types here as needed
+           
 
             // Write all components with proper comma separation
             for (size_t j = 0; j < componentStrings.size(); ++j) {

@@ -118,7 +118,9 @@ namespace gam300
 		void handleViewPortClick(ImVec2 mousePos, ImVec2 viewportSize);
 
 		void displayAssetEditor(const std::filesystem::directory_entry& assetFilepath);
+
 		void displayPrefabEditor(const std::filesystem::directory_entry& prefabFilepath);
+
 
 		//EntityID pickEntityFromViewport(ImVec2 mouseViewportPos, ImVec2 viewportSize, Camera3D& camera);
 
@@ -129,6 +131,8 @@ namespace gam300
 
 		// to retuen the width and height for imguiTex and imguiFbo
 		Vector2D getWindowWidthHeight() { return Vector2D(width, height); }
+
+		void displayPerformanceProfile();
 
 		// template to add the remove component menu right beside collapsing menu
 		template<typename componentType>
