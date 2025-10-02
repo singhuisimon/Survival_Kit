@@ -36,7 +36,8 @@
 #include "../Utility/Clock.h"
 #include "../Utility/AssetPath.h"
 
-
+// Include Tracy headers
+#include "../Tracy/tracy/Tracy.hpp"
 
 namespace gam300 {
 
@@ -192,6 +193,9 @@ namespace gam300 {
 
     // Update the game state for the current frame
     void GameManager::update(float dt) {
+
+        ZoneScoped;
+
         // Increment step count
         m_step_count++;
 

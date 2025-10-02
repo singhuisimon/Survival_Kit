@@ -15,6 +15,8 @@
 #include "../Manager/ECSManager.h"
 #include "../Manager/LogManager.h"
 #include "../Utility/AssetPath.h"
+#include "../Tracy/tracy/Tracy.hpp"
+
 namespace gam300 {
 
 	AudioSystem::AudioSystem() : ComponentSystem<AudioComponent, Transform3D, RigidBody>("AudioSystem") {
