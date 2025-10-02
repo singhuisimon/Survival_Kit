@@ -17,6 +17,7 @@
 
 #include "../Manager/PrefabManager.h"
 #include "../Manager/AssetManager.h"
+#include "../Manager/TracyManager.h"
 
 #include "../Utility/AssetPath.h"
 
@@ -961,7 +962,12 @@ namespace gam300 {
             float thumbnailSize = 64.0f;
             float cellSize = thumbnailSize + padding;
             float panelWidth = ImGui::GetContentRegionAvail().x;
-            int itemsPerRow = std::max(1, (int)(panelWidth / cellSize));
+            int itemsPerRow = (int)(panelWidth / cellSize);
+            if (itemsPerRow < 1)
+            {
+                itemsPerRow = 1;
+
+            }
 
             ImGui::Columns(itemsPerRow, nullptr, false);
             for (size_t i = 0; i < assetsList.size(); ++i)
@@ -1290,14 +1296,35 @@ namespace gam300 {
                 {
                     ImGui::Separator();
 
-                   
+
                 }
 
             }
+        }
+
+
+
+    }
+
+    void ImguiManager::displayPerformanceProfile()
+    {
+        ImGui::SetNextWindowSize(ImVec2(200, 100));
+
+        if (ImGui::Begin("Performance Profile", &hierachyWindow, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize))
+        {
+            if (ImGui::Button("Launch Tracy Window"))
+            {
+                if (!TRACY.isRunning())
+                {
+                    TRACY.launchTracy();
+
+                }
             }
 
+            TRACY.update();
+        }
 
-
+        ImGui::End();
     }
 
 }// end of namespace gam300

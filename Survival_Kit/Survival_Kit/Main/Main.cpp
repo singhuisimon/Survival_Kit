@@ -136,7 +136,7 @@ int main(void) {
     //std::cout << "Initial script added" << std::endl;
 
 
-       while (!GM.getGameOver() && !glfwWindowShouldClose(window)) {
+    while (!GM.getGameOver() && !glfwWindowShouldClose(window)) {
 
         ZoneScopedN("MainLoop");
 
@@ -166,7 +166,7 @@ int main(void) {
 
         IMGUIM.displayTopMenu();
 
-       
+
         // Editor Dockspace
         ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport()); //not working for some reason 
 
@@ -174,10 +174,12 @@ int main(void) {
 
         // Editor Temporary Windows
         IMGUIM.displayPropertiesList();
-       
+
         IMGUIM.displayHierarchyList();
 
         IMGUIM.displayAssetsBrowserList();
+
+        IMGUIM.displayPerformanceProfile();
 
         // Editor Start Render
         ImGui::Render();
@@ -226,17 +228,6 @@ int main(void) {
             // If we're behind, log that we're not keeping up
             LM.writeLog("GameManager::run() - Frame running behind: %lld us", -sleep_time);
         }
-
-       /* app.UpdateScripts();
-        app.CheckAndReloadScripts();*/
-
-        bool tracyKeyDown = (GetKeyState('T') & 0x8000) != 0;
-        if ((tracyKeyDown && !tracyKeyWasDown) && !TRACY.isRunning()) {
-            TRACY.launchTracy();
-            LM.writeLog("Tracyprofiler launch requested");
-        }
-        tracyKeyWasDown = tracyKeyDown;
-        TRACY.update();
 
         FrameMark; //always keep this as the last.
     }
