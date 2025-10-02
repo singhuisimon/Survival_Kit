@@ -857,9 +857,9 @@ namespace gam300 {
 
         // --- load folders ---//
         std::vector<std::string> assetsFoldersName;
-        if (std::filesystem::exists(BASE_ASSETS_PATH) && std::filesystem::is_directory(BASE_ASSETS_PATH))
+        if (std::filesystem::exists(getAssetsPath()) && std::filesystem::is_directory(getAssetsPath()))
         {
-            for (const auto& entry : std::filesystem::directory_iterator(BASE_ASSETS_PATH))
+            for (const auto& entry : std::filesystem::directory_iterator(getAssetsPath()))
             {
                 if (entry.is_directory())
                     assetsFoldersName.push_back(entry.path().filename().string());
@@ -905,7 +905,7 @@ namespace gam300 {
             if (!searchStr.empty())
             {
                 // Search across all folders
-                for (const auto& folderEntry : std::filesystem::directory_iterator(BASE_ASSETS_PATH))
+                for (const auto& folderEntry : std::filesystem::directory_iterator(getAssetsPath()))
                 {
                     if (!folderEntry.is_directory()) continue;
 
@@ -925,7 +925,7 @@ namespace gam300 {
             else
             {
                 // normal view: only selected folder
-                std::string currentFolder = BASE_ASSETS_PATH + selectedFolder + "\\";
+                std::filesystem::path currentFolder = std::filesystem::path(getAssetsPath()) / selectedFolder;
                 if (std::filesystem::exists(currentFolder) && std::filesystem::is_directory(currentFolder))
                 {
                     for (const auto& entry : std::filesystem::directory_iterator(currentFolder))
@@ -988,13 +988,13 @@ namespace gam300 {
                     {
                         //asset_editor = true;
                         //currentAsset = assetEntry;
-                        m_showDescriptorPanel = true;
+                        //m_showDescriptorPanel = true;
                     }
                     if (extension == ".prefab") //to open the image
                     {
                         prefab_editor = true;
                         selectedPrefab = assetEntry;
-                        m_showDescriptorPanel = true;
+                        //m_showDescriptorPanel = true;
                     }
                 }
 
@@ -1069,120 +1069,120 @@ namespace gam300 {
 
         if (!m_showDescriptorPanel) return;
 
-        ImGui::Begin("Descriptor Editor", &m_showDescriptorPanel);
+        if (ImGui::Begin("Descriptor Editor", &m_showDescriptorPanel)) {
+            // Display read-only asset info
+            ImGui::SeparatorText("Asset Information");
+            ImGui::Text("Asset ID: %llu", m_currentDescriptor.assetId);
+            ImGui::Text("GUID: %s", m_currentDescriptor.guid.c_str());
+            ImGui::Text("Source: %s", m_currentDescriptor.sourcePath.c_str());
+            ImGui::Text("Type: %s", getAssetTypeName(m_currentDescriptor.assetType));
 
-        // Display read-only asset info
-        ImGui::SeparatorText("Asset Information");
-        ImGui::Text("Asset ID: %llu", m_currentDescriptor.assetId);
-        ImGui::Text("GUID: %s", m_currentDescriptor.guid.c_str());
-        ImGui::Text("Source: %s", m_currentDescriptor.sourcePath.c_str());
-        ImGui::Text("Type: %s", getAssetTypeName(m_currentDescriptor.assetType));
-
-        ImGui::Spacing();
-        ImGui::SeparatorText("Editable Properties");
-
-        // Display Name (editable)
-        char displayNameBuf[256];
-        strncpy_s(displayNameBuf, sizeof(displayNameBuf),
-            m_currentDescriptor.displayName.c_str(), _TRUNCATE);
-        if (ImGui::InputText("Display Name", displayNameBuf, sizeof(displayNameBuf))) {
-            m_descriptorEditor->UpdateProperty(
-                m_currentDescriptor.assetId,
-                "displayName",
-                std::string(displayNameBuf)
-            );
-            m_currentDescriptor.displayName = displayNameBuf;
-        }
-
-        // Category (editable)
-        char categoryBuf[128];
-        strncpy_s(categoryBuf, sizeof(categoryBuf),
-            m_currentDescriptor.category.c_str(), _TRUNCATE);
-        if (ImGui::InputText("Category", categoryBuf, sizeof(categoryBuf))) {
-            m_descriptorEditor->UpdateProperty(
-                m_currentDescriptor.assetId,
-                "category",
-                std::string(categoryBuf)
-            );
-            m_currentDescriptor.category = categoryBuf;
-        }
-
-        // Texture-specific settings (only for textures)
-        if (m_currentDescriptor.assetType == AssetType::Texture) {
             ImGui::Spacing();
-            ImGui::SeparatorText("Texture Settings");
+            ImGui::SeparatorText("Editable Properties");
 
-            // Usage Type dropdown
-            std::vector<std::string> usageTypes = m_descriptorEditor->GetPropertyOptions("textureSettings.usageType");
-            if (ImGui::BeginCombo("Usage Type", m_currentDescriptor.textureSettings.usageType.c_str())) {
-                for (const auto& type : usageTypes) {
-                    bool isSelected = (m_currentDescriptor.textureSettings.usageType == type);
-                    if (ImGui::Selectable(type.c_str(), isSelected)) {
-                        m_descriptorEditor->UpdateProperty(
-                            m_currentDescriptor.assetId,
-                            "textureSettings.usageType",
-                            type
-                        );
-                        m_currentDescriptor.textureSettings.usageType = type;
+            // Display Name (editable)
+            char displayNameBuf[256];
+            strncpy_s(displayNameBuf, sizeof(displayNameBuf),
+                m_currentDescriptor.displayName.c_str(), _TRUNCATE);
+            if (ImGui::InputText("Display Name", displayNameBuf, sizeof(displayNameBuf))) {
+                m_descriptorEditor->UpdateProperty(
+                    m_currentDescriptor.assetId,
+                    "displayName",
+                    std::string(displayNameBuf)
+                );
+                m_currentDescriptor.displayName = displayNameBuf;
+            }
+
+            // Category (editable)
+            char categoryBuf[128];
+            strncpy_s(categoryBuf, sizeof(categoryBuf),
+                m_currentDescriptor.category.c_str(), _TRUNCATE);
+            if (ImGui::InputText("Category", categoryBuf, sizeof(categoryBuf))) {
+                m_descriptorEditor->UpdateProperty(
+                    m_currentDescriptor.assetId,
+                    "category",
+                    std::string(categoryBuf)
+                );
+                m_currentDescriptor.category = categoryBuf;
+            }
+
+            // Texture-specific settings (only for textures)
+            if (m_currentDescriptor.assetType == AssetType::Texture) {
+                ImGui::Spacing();
+                ImGui::SeparatorText("Texture Settings");
+
+                // Usage Type dropdown
+                std::vector<std::string> usageTypes = m_descriptorEditor->GetPropertyOptions("textureSettings.usageType");
+                if (ImGui::BeginCombo("Usage Type", m_currentDescriptor.textureSettings.usageType.c_str())) {
+                    for (const auto& type : usageTypes) {
+                        bool isSelected = (m_currentDescriptor.textureSettings.usageType == type);
+                        if (ImGui::Selectable(type.c_str(), isSelected)) {
+                            m_descriptorEditor->UpdateProperty(
+                                m_currentDescriptor.assetId,
+                                "textureSettings.usageType",
+                                type
+                            );
+                            m_currentDescriptor.textureSettings.usageType = type;
+                        }
                     }
+                    ImGui::EndCombo();
                 }
-                ImGui::EndCombo();
-            }
 
-            // Compression dropdown
-            std::vector<std::string> compressionTypes = m_descriptorEditor->GetPropertyOptions("textureSettings.compression");
-            if (ImGui::BeginCombo("Compression", m_currentDescriptor.textureSettings.compression.c_str())) {
-                for (const auto& comp : compressionTypes) {
-                    bool isSelected = (m_currentDescriptor.textureSettings.compression == comp);
-                    if (ImGui::Selectable(comp.c_str(), isSelected)) {
-                        m_descriptorEditor->UpdateProperty(
-                            m_currentDescriptor.assetId,
-                            "textureSettings.compression",
-                            comp
-                        );
-                        m_currentDescriptor.textureSettings.compression = comp;
+                // Compression dropdown
+                std::vector<std::string> compressionTypes = m_descriptorEditor->GetPropertyOptions("textureSettings.compression");
+                if (ImGui::BeginCombo("Compression", m_currentDescriptor.textureSettings.compression.c_str())) {
+                    for (const auto& comp : compressionTypes) {
+                        bool isSelected = (m_currentDescriptor.textureSettings.compression == comp);
+                        if (ImGui::Selectable(comp.c_str(), isSelected)) {
+                            m_descriptorEditor->UpdateProperty(
+                                m_currentDescriptor.assetId,
+                                "textureSettings.compression",
+                                comp
+                            );
+                            m_currentDescriptor.textureSettings.compression = comp;
+                        }
                     }
+                    ImGui::EndCombo();
                 }
-                ImGui::EndCombo();
+
+                // Quality slider
+                float quality = m_currentDescriptor.textureSettings.quality;
+                if (ImGui::SliderFloat("Quality", &quality, 0.0f, 1.0f)) {
+                    m_descriptorEditor->UpdateProperty(
+                        m_currentDescriptor.assetId,
+                        "textureSettings.quality",
+                        std::to_string(quality)
+                    );
+                    m_currentDescriptor.textureSettings.quality = quality;
+                }
+
+                // Generate Mipmaps checkbox
+                bool genMips = m_currentDescriptor.textureSettings.generateMipmaps;
+                if (ImGui::Checkbox("Generate Mipmaps", &genMips)) {
+                    m_descriptorEditor->UpdateProperty(
+                        m_currentDescriptor.assetId,
+                        "textureSettings.generateMipmaps",
+                        genMips ? "true" : "false"
+                    );
+                    m_currentDescriptor.textureSettings.generateMipmaps = genMips;
+                }
+
+                // sRGB checkbox
+                bool srgb = m_currentDescriptor.textureSettings.srgb;
+                if (ImGui::Checkbox("sRGB", &srgb)) {
+                    m_descriptorEditor->UpdateProperty(
+                        m_currentDescriptor.assetId,
+                        "textureSettings.srgb",
+                        srgb ? "true" : "false"
+                    );
+                    m_currentDescriptor.textureSettings.srgb = srgb;
+                }
             }
 
-            // Quality slider
-            float quality = m_currentDescriptor.textureSettings.quality;
-            if (ImGui::SliderFloat("Quality", &quality, 0.0f, 1.0f)) {
-                m_descriptorEditor->UpdateProperty(
-                    m_currentDescriptor.assetId,
-                    "textureSettings.quality",
-                    std::to_string(quality)
-                );
-                m_currentDescriptor.textureSettings.quality = quality;
+            // Dirty state indicator
+            if (m_currentDescriptor.isDirty) {
+                ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Modified");
             }
-
-            // Generate Mipmaps checkbox
-            bool genMips = m_currentDescriptor.textureSettings.generateMipmaps;
-            if (ImGui::Checkbox("Generate Mipmaps", &genMips)) {
-                m_descriptorEditor->UpdateProperty(
-                    m_currentDescriptor.assetId,
-                    "textureSettings.generateMipmaps",
-                    genMips ? "true" : "false"
-                );
-                m_currentDescriptor.textureSettings.generateMipmaps = genMips;
-            }
-
-            // sRGB checkbox
-            bool srgb = m_currentDescriptor.textureSettings.srgb;
-            if (ImGui::Checkbox("sRGB", &srgb)) {
-                m_descriptorEditor->UpdateProperty(
-                    m_currentDescriptor.assetId,
-                    "textureSettings.srgb",
-                    srgb ? "true" : "false"
-                );
-                m_currentDescriptor.textureSettings.srgb = srgb;
-            }
-        }
-
-        // Dirty state indicator
-        if (m_currentDescriptor.isDirty) {
-            ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Modified");
         }
 
         ImGui::End();
