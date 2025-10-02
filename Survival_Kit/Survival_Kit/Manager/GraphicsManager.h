@@ -121,6 +121,13 @@ namespace gam300 {
         // Get meshdata storage
         const std::vector<MeshData>& getMeshDataStorage() { return m_meshDataStorage; }
         
+        size_t getMeshCount() const { return meshStorage.size(); }
+
+
+        std::string getMeshName(uint16_t handle) const;
+        Material* getMaterial(uint16_t handle);
+
+        std::string getMeshGUID(uint16_t handle) const;
     };
 
 } // end of namespace gam300
