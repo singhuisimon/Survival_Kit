@@ -112,6 +112,16 @@ namespace gam300 {
     };
 
     /**
+    * @brief Serializer for MeshComponent components.
+    * @author Chua Wen Bin Kennys
+    */
+    class BulletSerializer : public IComponentSerializer {
+    public:
+        std::string serialize(Component* component) override;
+        Component* deserialize(EntityID entityId, const std::string& jsonData) override;
+    };
+
+    /**
      * @brief Manager for serializing and deserializing game entities.
      * @details Handles loading entities from scene files and saving them back.
      */

@@ -23,6 +23,7 @@
 #include "../Component/RigidBody.h"
 #include "../Component/AudioComponent.h"
 #include "../Component/Collider.h"
+#include "../Component/Bullet.h"
 
 #include "../Component/Script.h"
 #include "../Component/MeshComponent.h"
@@ -518,6 +519,70 @@ namespace gam300 {
         return mesh_comp;
     }
 
+    // ==================== Bullet Serializer ====================
+    std::string BulletSerializer::serialize(Component* component)
+    {
+        Bullet* bullet = static_cast<Bullet*>(component);
+        if (!bullet)
+        {
+            return "{}";
+        }
+
+        std::stringstream ss;
+        ss << std::fixed << std::setprecision(3);
+        ss << "{\n";
+
+        // Serialize direction
+        const Vector3D& direction = bullet->getDirection();
+        ss << "          \"direction\": [\n";
+        ss << "            " << direction.x << ",\n";
+        ss << "            " << direction.y << ",\n";
+        ss << "            " << direction.z << "\n";
+        ss << "          ],\n";
+
+        // Serialize speed
+        ss << "          \"speed\": " << bullet->getSpeed() << ",\n";
+
+        // Serialize active state
+        ss << "          \"isActive\": " << (bullet->isActive() ? "true" : "false") << "\n";
+
+        ss << "        }";
+        return ss.str();
+    }
+
+    Component* BulletSerializer::deserialize(EntityID entityId, const std::string& jsonData)
+    {
+        // Extract direction with default value
+        Vector3D direction = { 0.0f, 0.0f, 1.0f };  // Default forward direction
+        Vector3D directionCom = SerialisationManager::addComponentVec3D(direction, jsonData, "direction");
+
+        // Extract speed with default value
+        float speed = 10.0f;  // Default speed
+        std::string speedData = SerialisationManager::extractNumberValue(jsonData, "speed");
+        if (!speedData.empty()) {
+            speed = std::stof(speedData);
+        }
+
+        // Extract active state with default value
+        bool isActive = true;  // Default to active
+        std::string activeData = SerialisationManager::extractNumberValue(jsonData, "isActive");
+        if (!activeData.empty()) {
+            isActive = (activeData == "true");
+        }
+
+        // Create the Bullet component with extracted values
+        // Note: Adjust constructor parameters based on your Bullet class constructor
+        Bullet* bullet = EM.addComponent<Bullet>(entityId, directionCom, speed);
+
+        if (bullet && !isActive) {
+            bullet->deactivate();
+        }
+
+        return bullet;
+    }
+
+	// ==================== END Component Serialisation Implementation ====================
+
     // Initialize singleton instance
     SerialisationManager::SerialisationManager() {
         setType("SerialisationManager");
@@ -620,8 +685,18 @@ namespace gam300 {
             }
             });
 
-        // Log startup
-        LM.writeLog("SerialisationManager::startUp() - Serialisation Manager started successfully");
+		// ==============Register Bullet component serializers==========================
+        registerComponentCreator("Bullet", [this](EntityID entityId, const std::string& componentData) {
+            auto serializer = m_component_serializers["Bullet"];
+            if (serializer) {
+                serializer->deserialize(entityId, componentData);
+                LM.writeLog("Bullet component created for entity %d", entityId);
+            }
+            else {
+                LM.writeLog("Bullet serializer not found for entity %d", entityId);
+            }
+            });
+
 
         return 0;
     }
@@ -966,8 +1041,6 @@ namespace gam300 {
                 }
             }
 
-     
-
             // ===================== Check for Mesh component =====================
             if (auto serializer = m_component_serializers.find("MeshComponent");
                 serializer != m_component_serializers.end()) {
@@ -978,6 +1051,15 @@ namespace gam300 {
                 }
             }
            
+            // ===================== Check for Bullet component =====================
+            if (auto serializer = m_component_serializers.find("Bullet");
+                serializer != m_component_serializers.end()) {
+                if (Bullet* bullet = EM.getComponent<Bullet>(entity.get_id())) {
+                    componentStrings.push_back(getIndent(4) + "\"Bullet\": " +
+                        serializer->second->serialize(bullet));
+                    hasComponents = true;
+                }
+            }
 
             // Write all components with proper comma separation
             for (size_t j = 0; j < componentStrings.size(); ++j) {
