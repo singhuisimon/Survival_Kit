@@ -1331,27 +1331,27 @@ namespace gam300 {
             if (MeshComponent* mesh = ImguiEcsRef.getComponent<MeshComponent>(selectedEntityID)) {
 
                 ImGui::Separator();
+                //ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.6f, 0.6f, 0.6f, 1.0f));
                 ImGui::Text("GUID: %s", mesh->getGUID().c_str());
                 ImGui::Separator();
 
                 // =============== Mesh Dropdown =======================
-                // 
-                ImGui::Text("meshHandle: %i", mesh->getMaterialHandle());
                  
                 uint16_t currMesh = mesh->getMeshHandle();
-                std::string nameMash = GFXM.getMeshName(currMesh);
+                std::string meshName = ImguiGraphicRef.getMeshName(currMesh);
   
-                if (ImGui::BeginCombo("Mesh Shape Type", nameMash.c_str())) {
+                if (ImGui::BeginCombo("Mesh Shape Type", meshName.c_str())) {
 
                     size_t meshCount = ImguiGraphicRef.getMeshCount();
+
                     for (uint16_t i = 0; i < meshCount; i++)
                     {
                         std::string name = ImguiGraphicRef.getMeshName(i);
-                        bool selected = (mesh->getMeshHandle() == i);
+                        bool selected = (currMesh == i);
 
                         if (ImGui::Selectable(name.c_str(), selected)) {
-                            mesh->setMeshHandle(i);  // update component
-                            mesh->setGUID(name);
+                            mesh->setMeshHandle(i);
+                            mesh->setGUID(ImguiGraphicRef.getMeshGUID(i));
                         }
 
                         if (selected) {
@@ -1360,7 +1360,55 @@ namespace gam300 {
                     }
                     ImGui::EndCombo();
                 }
-                
+
+                ImGui::Spacing();
+
+                // =============== Meterial Dropdown =======================
+                uint16_t currMaterial = mesh->getMaterialHandle();
+                //ImGui::Text("Debug - Current Material Handle: %d", currMaterial);
+                std::string materialName;
+                if (currMaterial == 0) {
+                    materialName = "None";
+                }
+                else {
+                    materialName = "Material " + std::to_string(currMaterial);
+                }
+                if (ImGui::BeginCombo("Material", materialName.c_str())) {
+                    bool noneSelected = (currMaterial == 0);
+                    if (ImGui::Selectable("None", noneSelected)) 
+                    {
+                        mesh->setMaterialHandle(0);
+                        
+                    }
+                    if (noneSelected) {
+                        ImGui::SetItemDefaultFocus();
+                    }
+                    ImGui::Separator();
+
+                    // ================ Show materials ==========================
+                    const auto& materials = ImguiGraphicRef.getMaterialStorage();
+                    if (materials.empty()) 
+                    {
+                        ImGui::TextDisabled("(No materials loaded)");
+                    }
+                    else 
+                    {
+                        for (const auto& [handle, material] : materials) 
+                        {
+                            std::string matName = "Material " + std::to_string(handle);
+                            bool selected = (currMaterial == handle);
+                            if (ImGui::Selectable(matName.c_str(), selected)) {
+                                mesh->setMaterialHandle(handle);
+                               
+                            }
+                            if (selected) {
+                                ImGui::SetItemDefaultFocus();
+                            }
+                        }
+                    }
+                    ImGui::EndCombo();
+
+                }
 
             }
         }

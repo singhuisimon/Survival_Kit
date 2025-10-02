@@ -395,6 +395,29 @@ namespace gam300 {
         }
         return nullptr;
     }
+
+    std::string GraphicsManager::getMeshGUID(uint16_t handle) const
+    {
+        if (handle == 0)
+        {
+            return "builtin:cube";
+        }
+        else if (handle == 1)
+        {
+            return "builtin:plane";
+        }
+        else if (handle == 2)
+        {
+            return "builtin:sphere";
+        }
+        else if (handle < meshStorage.size()) {
+            
+            return "custom:mesh_" + std::to_string(handle);
+        }
+        else {
+            return "";  // Invalid
+        }
+    }
  
 
 } // end of namespace gam300
