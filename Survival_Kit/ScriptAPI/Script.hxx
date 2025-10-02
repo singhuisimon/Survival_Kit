@@ -1,6 +1,5 @@
 #pragma once
 #include "TransformComponent.hxx"
-
 namespace ScriptAPI
 {
     public ref class Script abstract
