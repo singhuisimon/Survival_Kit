@@ -17,6 +17,7 @@
 #include "../Component/Transform3D.h"
 #include "../Graphics/Texture.h"
 
+#include "../Component/MeshComponent.h"
 
 namespace gam300 {
 
@@ -87,13 +88,20 @@ namespace gam300 {
         }
 
         // Set camera as orbiting
-        main_camera = Camera3D(ORBITING, glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.f, 0.f, 0.0f), 45.0f, 0.5f, 100.0f);
+        main_camera = Camera3D(ORBITING, glm::vec3(0.0f, 5.0f, 10.0f), glm::vec3(0.f, 0.f, 0.0f), 45.0f, 0.5f, 100.0f);
+
 
         // Set light
         main_light = Light(glm::vec3(0.0f, 5.0f, 0.0f),
             glm::vec3(0.4f, 0.4f, 0.4f),
             glm::vec3(1.0f, 1.0f, 1.0f),
             glm::vec3(1.0f, 1.0f, 1.0f));
+
+        // Temporarily load materials manually here
+        Material mat1 = Material(glm::vec3(0.3f, 0.5f, 0.9f), glm::vec3(0.3f, 0.5f, 0.9f), glm::vec3(0.8f, 0.8f, 0.8f), 100.0f);
+        Material mat2 = Material(glm::vec3(0.9f, 0.5f, 0.3f), glm::vec3(0.9f, 0.5f, 0.3f), glm::vec3(0.8f, 0.8f, 0.8f), 100.0f);
+        m_material_storage.emplace(m_material_storage.size(), mat1);
+        m_material_storage.emplace(m_material_storage.size(), mat2);
 
         //// File path for assets
         //std::string mesh_path = ASM.get_full_path(ASM.MODEL_PATH, DEFAULT_MODEL_MSH_FILE);
@@ -144,6 +152,11 @@ namespace gam300 {
         MeshData cubeData = Shape::make_cube();
         MeshData planeData = Shape::make_plane();
         MeshData sphereData = Shape::make_sphere();
+
+        // Save mesh data for collision calculation
+        m_meshDataStorage.emplace_back(cubeData);
+        m_meshDataStorage.emplace_back(planeData);
+        m_meshDataStorage.emplace_back(sphereData);
 
         MeshGL   cubeGL = Shape::upload_mesh_data(cubeData);
         MeshGL   planeGL = Shape::upload_mesh_data(planeData);
@@ -266,28 +279,53 @@ namespace gam300 {
         // Clear the color and depth buffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 
-        // Enable choosing of mesh
-        if (IM.isKeyPressed(GLFW_KEY_1)) {
-            selected_mesh = 0;
-        }
-        if (IM.isKeyPressed(GLFW_KEY_2)) {
-            selected_mesh = 1;
-        }
-        if (IM.isKeyPressed(GLFW_KEY_3)) {
-            selected_mesh = 2;
-        }
+        //// Enable choosing of mesh
+        //if (IM.isKeyPressed(GLFW_KEY_1)) {
+        //    selected_mesh = 0;
+        //}
+        //if (IM.isKeyPressed(GLFW_KEY_2)) {
+        //    selected_mesh = 1;
+        //}
+        //if (IM.isKeyPressed(GLFW_KEY_3)) {
+        //    selected_mesh = 2;
+        //}
 
-        const MeshGL& mesh = meshStorage[selected_mesh];
+        // Default mesh and material handle
+        uint16_t mesh_handle = 0;
+        uint16_t material_handle = 0;
 
         // KENNY TESTING: ACCESSING ENTITIES AND UPDATING THEIR TRANSFORMS PER FRAME     
         const auto transform_entities_IDs = EM.getEntitiesWithComponent<Transform3D>();
-        for (const auto transform_ID : transform_entities_IDs) {
+        for (const auto entity_id : transform_entities_IDs) {
 
             // Get entity's transform component using ID
-            if (EM.hasComponent<Transform3D>(transform_ID)) { // Extra check just in case 
-                Transform3D* transform = EM.getComponent<Transform3D>(transform_ID);
+            if (EM.hasComponent<Transform3D>(entity_id)) { // Extra check just in case 
+                Transform3D* transform = EM.getComponent<Transform3D>(entity_id);
                 shadersStorage[0].setUniform("M", transform->getTransformationMatrix()); // Model transform
             }
+
+            // Access entity's mesh and material handle from Mesh component
+            if (EM.hasComponent<MeshComponent>(entity_id)) {
+                MeshComponent* mesh_comp = EM.getComponent<MeshComponent>(entity_id);
+
+                // Update handles only if it exists
+                if (mesh_comp->getMeshHandle() < meshStorage.size()) {
+                    mesh_handle = mesh_comp->getMeshHandle();
+                }
+                if (mesh_comp->getMaterialHandle() < m_material_storage.size()) {
+                    material_handle = mesh_comp->getMaterialHandle();
+                }
+            }
+
+            // Set uniforms for material data
+            Material& material = m_material_storage[material_handle];
+            shadersStorage[0].setUniform("material.Ka", material.getMaterialAmbient());  // Ambient
+            shadersStorage[0].setUniform("material.Kd", material.getMaterialDiffuse());  // Diffuse
+            shadersStorage[0].setUniform("material.Ks", material.getMaterialSpecular());  // Specular
+            shadersStorage[0].setUniform("material.shininess", material.getMaterialShininess());  // Shininess
+
+            // Retrieve mesh from mesh storage
+            MeshGL& mesh = meshStorage[mesh_handle];
 
             // Bind selected mesh
             mesh.vao.bind();

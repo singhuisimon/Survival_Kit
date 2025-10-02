@@ -1,7 +1,7 @@
 {
   "objects": [
     {
-      "name": "New Entity",
+      "name": "Camera",
       "components": {
         "Transform3D": {
           "position": [
@@ -20,10 +20,63 @@
             0
           ],
           "scale": [
+            5,
+            5,
+            5
+          ]
+        },
+        "MeshComponent": {
+          "guid": "plane",
+          "mesh_handle": 1,
+          "material_handle": 0
+        }
+      }
+    },
+    {
+      "name": "New Entity_1",
+      "components": {
+        "Transform3D": {
+          "position": [
+            0,
+            3.2,
+            0
+          ],
+          "prev_position": [
+            0,
+            3.3,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
             1,
             1,
             1
           ]
+        },
+        "MeshComponent": {
+          "guid": "cube",
+          "mesh_handle": 0,
+          "material_handle": 1
+        },
+        "AudioComponent": {
+          "guid": "\\Audio\\laserSmall_001.ogg",
+          "type": "SFX",
+          "state": "STOP",
+          "volume": 1.0,
+          "pitch": 1.0,
+          "loop": "false",
+          "mute": "false",
+          "is3D": "true",
+          "minDistance": 1.0,
+          "maxDistance": 10.0
+        },
+        "Script": {
+          "script_name": "TestScript",
+          "is_active": true
         }
       }
     }

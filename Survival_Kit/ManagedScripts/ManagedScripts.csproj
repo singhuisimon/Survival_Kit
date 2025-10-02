@@ -20,6 +20,7 @@
     <ItemGroup>
     <Reference Include="ScriptAPI">
 		<HintPath>..\.bin\Debug-x64\ScriptAPI.dll</HintPath>
+		<HintPath>..\.bin\Release-x64\ScriptAPI.dll</HintPath>
 
 	</Reference>
   </ItemGroup>

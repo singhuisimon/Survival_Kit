@@ -52,7 +52,7 @@ namespace Core
         addScript(0, "TestScript");
         std::cout << "Test script added" << std::endl;
 
-         
+
         while (true)
         {
             if (GetKeyState(VK_ESCAPE) & 0x8000)
@@ -68,7 +68,7 @@ namespace Core
             executeUpdate();
         }
         stopScriptEngine();
-    }
+    }// not using
     void Application::HelloWorld()
     {
         std::cout << "Hello Native World!" << std::endl;
@@ -86,10 +86,38 @@ namespace Core
     {
         const char* PROJ_PATH =
             "..\\..\\ManagedScripts\\ManagedScripts.csproj";
+
+        // Get current executable directory
+        std::string execPath(MAX_PATH, '\0');
+        GetModuleFileNameA(nullptr, execPath.data(), MAX_PATH);
+        PathRemoveFileSpecA(execPath.data());
+        execPath.resize(std::strlen(execPath.data()));
+
+        std::cout << "Executable path: " << execPath << std::endl;
+
+
+        // Look for dotnet one level up (shared between Debug/Release)
+        std::string sharedDotnetPath = execPath + "\\..\\dotnet\\dotnet.exe";
+        std::wstring dotnetExePath;
+
+        if (std::filesystem::exists(sharedDotnetPath))
+        {
+            dotnetExePath = std::filesystem::absolute(sharedDotnetPath).wstring();
+            std::cout << "Using shared bundled .NET at: " << sharedDotnetPath << std::endl;
+        }
+        else
+        {
+            dotnetExePath = L"C:\\Program Files\\dotnet\\dotnet.exe";
+            std::cout << "Using system .NET" << std::endl;
+        }
+
         std::wstring buildCmd = L" build \"" +
             std::filesystem::absolute(PROJ_PATH).wstring() +
             L"\" -c Debug --no-self-contained " +
             L"-o \"./tmp_build/\" -r \"win-x64\"";
+
+
+
         STARTUPINFOW startInfo;
         PROCESS_INFORMATION pi;
         ZeroMemory(&startInfo, sizeof(startInfo));
@@ -245,21 +273,30 @@ namespace Core
     void Application::InitializeScripting()
     {
         std::cout << "Starting script engine..." << std::endl;
-        startScriptEngine();
 
-        std::cout << "Compiling script assembly..." << std::endl;
+        // Initialize MonoBehaviour templates
+        if (!InitializeTemplates())
+        {
+            std::cout << "Warning: Failed to initialize MonoBehaviour templates" << std::endl;
+        }
+
+        startScriptEngine();
         compileScriptAssembly();
 
         std::cout << "Getting function pointers..." << std::endl;
         initFunc = GetFunctionPtr<void(*)(void)>("ScriptAPI", "ScriptAPI.EngineInterface", "Init");
         addScriptFunc = GetFunctionPtr<bool(*)(int, const char*)>("ScriptAPI", "ScriptAPI.EngineInterface", "AddScriptViaName");
         executeUpdateFunc = GetFunctionPtr<void(*)(void)>("ScriptAPI", "ScriptAPI.EngineInterface", "ExecuteUpdate");
+
+        // NEW: Get the new function pointer
+        executeUpdateForEntityFunc = GetFunctionPtr<void(*)(int)>("ScriptAPI", "ScriptAPI.EngineInterface", "ExecuteUpdateForEntity");
         reloadScriptsFunc = GetFunctionPtr<void(*)(void)>("ScriptAPI", "ScriptAPI.EngineInterface", "Reload");
 
         std::cout << "Initializing script system..." << std::endl;
         initFunc();
 
         std::cout << "Script system initialized successfully!" << std::endl;
+
         // Initialize file watching
         updateFileTimestamps();
         lastCheck = std::chrono::steady_clock::now();
@@ -291,6 +328,8 @@ namespace Core
         addScriptFunc = nullptr;
         executeUpdateFunc = nullptr;
         reloadScriptsFunc = nullptr;
+        executeUpdateForEntityFunc = nullptr;  // NEW: Reset this too
+
     }
 
     void Application::ReloadScripts()
@@ -304,64 +343,45 @@ namespace Core
         }
     }
 
-
     void Application::CheckAndReloadScripts()
     {
-        // Option 1: Use the atomic flag from file watcher thread
-        if (scriptsNeedReload.exchange(false))
-        {
-            std::cout << "Auto-reloading scripts due to file changes..." << std::endl;
-            try
-            {
-                // Add a small delay to ensure file write is complete
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
-                compileScriptAssembly();
-                if (reloadScriptsFunc)
-                {
-                    reloadScriptsFunc();
-                }
-
-                // Re-add your scripts here
-                AddScript(0, "TestScript");
-
-                std::cout << "Auto-reload completed!" << std::endl;
-            }
-            catch (const std::exception& e)
-            {
-                std::cout << "Auto-reload failed: " << e.what() << std::endl;
-            }
-        }
-
-        // Option 2: Alternative polling approach (comment out if using file watcher thread)
-        /*
+        // Use polling - check every 2 seconds
         auto now = std::chrono::steady_clock::now();
-        if (std::chrono::duration_cast<std::chrono::milliseconds>(now - lastCheck).count() > 500)
+        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastCheck).count();
+
+        if (elapsed > 2000)  // Check every 2 seconds
         {
             if (checkForScriptChanges())
             {
-                std::cout << "Auto-reloading scripts due to file changes..." << std::endl;
+                std::cout << "\n=== AUTO-RELOAD TRIGGERED ===" << std::endl;
+                std::cout << "Script changes detected, recompiling..." << std::endl;
+
                 try
                 {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                    // Wait for IDE to finish writing
+                    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+
                     compileScriptAssembly();
+
                     if (reloadScriptsFunc)
                     {
                         reloadScriptsFunc();
                     }
+
+                    // Re-add scripts
                     AddScript(0, "TestScript");
-                    std::cout << "Auto-reload completed!" << std::endl;
+
+                    std::cout << "=== AUTO-RELOAD COMPLETED ===\n" << std::endl;
                 }
                 catch (const std::exception& e)
                 {
                     std::cout << "Auto-reload failed: " << e.what() << std::endl;
                 }
             }
+
             lastCheck = now;
         }
-        */
     }
-
 
     void Application::startFileWatcher()
     {
@@ -404,31 +424,37 @@ namespace Core
 
         while (!shouldStopWatching)
         {
+            //std::cout << "File watcher loop iteration..." << std::endl; // Add this debug line
+
+            // In the file watcher, also watch for FILE_NOTIFY_CHANGE_FILE_NAME
             if (ReadDirectoryChangesW(
                 hDir,
                 buffer,
                 sizeof(buffer),
-                TRUE, // Watch subdirectories
-                FILE_NOTIFY_CHANGE_LAST_WRITE | FILE_NOTIFY_CHANGE_CREATION,
+                TRUE,
+                FILE_NOTIFY_CHANGE_LAST_WRITE | FILE_NOTIFY_CHANGE_CREATION | FILE_NOTIFY_CHANGE_FILE_NAME, // Add FILE_NAME
                 &bytesReturned,
                 &overlapped,
                 nullptr))
             {
                 DWORD waitResult = WaitForSingleObject(overlapped.hEvent, 1000);
+                //std::cout << "Wait result: " << waitResult << std::endl; // Add this debug line
 
                 if (waitResult == WAIT_OBJECT_0)
                 {
+                    std::cout << "File change detected!" << std::endl; // Add this debug line
+
                     FILE_NOTIFY_INFORMATION* info = reinterpret_cast<FILE_NOTIFY_INFORMATION*>(buffer);
 
                     do
                     {
                         std::wstring filename(info->FileName, info->FileNameLength / sizeof(wchar_t));
+                        std::wcout << L"File changed: " << filename << std::endl; // Enhanced debug
 
-                        // Check if it's a C# file
                         if (filename.length() > 3 &&
                             filename.substr(filename.length() - 3) == L".cs")
                         {
-                            std::wcout << L"Detected change in: " << filename << std::endl;
+                            std::wcout << L"C# file change detected: " << filename << std::endl;
                             scriptsNeedReload = true;
                             break;
                         }
@@ -441,6 +467,10 @@ namespace Core
 
                     } while (true);
                 }
+            }
+            else
+            {
+                std::cout << "ReadDirectoryChangesW failed: " << GetLastError() << std::endl; // Add error logging
             }
 
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -509,4 +539,135 @@ namespace Core
             std::cout << "Error updating file timestamps: " << e.what() << std::endl;
         }
     }
+
+    // Script Creation Methods
+    bool Application::CreateMonoBehaviourScript(const std::string& scriptName)
+    {
+        std::cout << "Creating MonoBehaviour script via Application..." << std::endl;
+
+        bool success = MonoBehaviour::CreateScript(scriptName);
+
+        if (success)
+        {
+            std::cout << "MonoBehaviour script created, triggering recompilation..." << std::endl;
+
+            try
+            {
+                compileScriptAssembly();
+                std::cout << "Recompilation completed successfully." << std::endl;
+            }
+            catch (const std::exception& e)
+            {
+                std::cout << "Warning: Recompilation failed: " << e.what() << std::endl;
+            }
+        }
+
+        return success;
+    }
+
+    bool Application::CreateScriptableObjectScript(const std::string& scriptName)
+    {
+        // TODO: Implement ScriptableObject creation
+        std::cout << "ScriptableObject creation not yet implemented" << std::endl;
+        return false;
+    }
+
+    bool Application::CreateScriptFromTemplate(const std::string& scriptName, const std::string& templateType)
+    {
+        if (templateType == "MonoBehaviour")
+        {
+            return CreateMonoBehaviourScript(scriptName);
+        }
+        else if (templateType == "ScriptableObject")
+        {
+            return CreateScriptableObjectScript(scriptName);
+        }
+        else
+        {
+            std::cout << "Unknown template type: " << templateType << std::endl;
+            return false;
+        }
+    }
+
+    std::string Application::GetTemplatesDirectory()
+    {
+        return MonoBehaviour::GetTemplatesDirectory();
+    }
+
+    bool Application::InitializeTemplates()
+    {
+        return MonoBehaviour::InitializeTemplates();
+    }
+
+    std::vector<std::string> Application::GetAvailableTemplateTypes()
+    {
+        return { "MonoBehaviour" }; // Will add ScriptableObject later
+    }
+
+    // Validation and utility methods
+    bool Application::ValidateScriptName(const std::string& scriptName)
+    {
+        return MonoBehaviour::ValidateScriptName(scriptName);
+    }
+
+    std::string Application::GetManagedScriptsDirectory()
+    {
+        return MonoBehaviour::GetScriptsDirectory();
+    }
+
+    bool Application::DoesScriptExist(const std::string& scriptName)
+    {
+        return MonoBehaviour::DoesScriptExist(scriptName);
+    }
+
+    std::vector<std::string> Application::GetExistingScriptFiles()
+    {
+        return MonoBehaviour::GetExistingScripts();
+    }
+
+    void Application::ListExistingScripts()
+    {
+        std::cout << "\n=== Existing Scripts ===" << std::endl;
+        auto scripts = MonoBehaviour::GetExistingScripts();
+
+        if (scripts.empty())
+        {
+            std::cout << "No scripts found in " << MonoBehaviour::GetScriptsDirectory() << std::endl;
+        }
+        else
+        {
+            for (const auto& script : scripts)
+            {
+                std::cout << "  - " << script << ".cs" << std::endl;
+            }
+            std::cout << "Total: " << scripts.size() << " scripts" << std::endl;
+        }
+        std::cout << "========================\n" << std::endl;
+    }
+
+    void Application::ShowScriptCreationHelp()
+    {
+        std::cout << "\n=== Script Creation Help ===" << std::endl;
+        std::cout << "Available script types:" << std::endl;
+        std::cout << "  1. MonoBehaviour - Components that attach to game objects" << std::endl;
+        std::cout << "  2. ScriptableObject - Data containers (coming soon)" << std::endl;
+        std::cout << "\nTemplate location: " << MonoBehaviour::GetTemplatesDirectory() << std::endl;
+        std::cout << "Scripts location: " << MonoBehaviour::GetScriptsDirectory() << std::endl;
+        std::cout << "============================\n" << std::endl;
+    }
+
+    bool Application::OpenScriptInEditor(const std::string& scriptName)
+    {
+        return MonoBehaviour::OpenScriptInEditor(scriptName);
+    }
+
+
+    void Application::UpdateScriptForEntity(int entityId)
+    {
+        if (executeUpdateForEntityFunc)
+        {
+            executeUpdateForEntityFunc(entityId);
+        }
+    }
+
 }

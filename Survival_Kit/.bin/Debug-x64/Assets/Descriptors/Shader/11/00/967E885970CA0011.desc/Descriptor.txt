@@ -3,7 +3,7 @@
     "guid": "967E885970CA0011",
     "id": 10844254870480486417,
     "sourcePath": "C:/Users/Admin/source/repos/Survival_Kit/Survival_Kit/Survival_Kit/Assets/Shaders/survival_kit_obj.frag",
-    "intermediatePath": "C:\\Users\\Admin\\Source\\Repos\\Survival_Kit\\Cache/Intermediate\\survival_kit_obj.frag",
+    "intermediatePath": "C:\\Users\\Admin\\source\\repos\\Survival_Kit\\Cache/Intermediate\\survival_kit_obj.frag",
     "compiledPath": "",
     "type": 1,
     "ext": ".frag",
@@ -15,7 +15,7 @@
     "displayName": "survival_kit_obj.frag",
     "category": "Shader",
     "tags": [],
-    "lastImported": 1759135912,
+    "lastImported": 1759220958,
     "user": {}
   }
 }

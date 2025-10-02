@@ -20,8 +20,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Component\RenderComponent.cpp" />
+    <ClCompile Include="Component\Bullet.cpp" />
+    <ClCompile Include="Component\Collider.cpp" />
+    <ClCompile Include="Component\MeshComponent.cpp" />
     <ClCompile Include="Component\RigidBody.cpp" />
     <ClCompile Include="Component\AudioComponent.cpp" />
+    <ClCompile Include="Component\Script.cpp" />
     <ClCompile Include="Component\Transform3D.cpp" />
     <ClCompile Include="Entity\Entity.cpp" />
     <ClCompile Include="Glad\glad.c" />
@@ -43,7 +47,9 @@
     <ClCompile Include="Main\Main.cpp" />
     <ClCompile Include="Manager\AssetManager.cpp" />
     <ClCompile Include="Manager\ComponentManager.cpp" />
+    <ClCompile Include="Manager\DescriptorFileManager.cpp" />
     <ClCompile Include="Manager\ECSManager.cpp" />
+    <ClCompile Include="Manager\ForceManager.cpp" />
     <ClCompile Include="Manager\GameManager.cpp" />
     <ClCompile Include="Manager\GraphicsManager.cpp" />
     <ClCompile Include="Manager\ImguiManager.cpp" />
@@ -51,6 +57,9 @@
     <ClCompile Include="Manager\LogManager.cpp" />
     <ClCompile Include="Manager\Manager.cpp" />
     <ClCompile Include="Manager\ResourceManager.cpp" />
+    <ClCompile Include="Manager\TracyManager.cpp" />
+    <ClCompile Include="Manager\TorqueManager.cpp" />
+    <ClCompile Include="Pipeline\DescriptorEditor.cpp" />
     <ClCompile Include="Pipeline\Importers\AudioImporter.cpp" />
     <ClCompile Include="Pipeline\Importers\MeshImporter.cpp" />
     <ClCompile Include="Pipeline\Importers\SceneImporter.cpp" />
@@ -67,10 +76,14 @@
     <ClCompile Include="Manager\SerialisationManager.cpp" />
     <ClCompile Include="Manager\SystemManager.cpp" />
     <ClCompile Include="System\RenderSystem.cpp" />
+    <ClCompile Include="System\BulletSystem.cpp" />
+    <ClCompile Include="System\CollisionSystem.cpp" />
     <ClCompile Include="System\MovementSystem.cpp" />
     <ClCompile Include="System\PhysicsSystem.cpp" />
     <ClCompile Include="System\AudioSystem.cpp" />
+    <ClCompile Include="System\ScriptSystem.cpp" />
     <ClCompile Include="System\TransformSystem.cpp" />
+    <ClCompile Include="Tracy\TracyClient.cpp" />
     <ClCompile Include="Utility\AssetPath.cpp" />
     <ClCompile Include="Utility\Clock.cpp" />
     <ClCompile Include="Utility\MathUtils.cpp" />
@@ -79,11 +92,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component\AudioComponent.h" />
+    <ClInclude Include="Component\Bullet.h" />
+    <ClInclude Include="Component\Collider.h" />
     <ClInclude Include="Component\Component.h" />
     <ClInclude Include="Component\ComponentPool.h" />
     <ClInclude Include="Component\ComponentView.h" />
     <ClInclude Include="Component\RenderComponent.h" />
+    <ClInclude Include="Component\MeshComponent.h" />
     <ClInclude Include="Component\RigidBody.h" />
+    <ClInclude Include="Component\Script.h" />
     <ClInclude Include="Component\Transform3D.h" />
     <ClInclude Include="Component\TransformComponent.h" />
     <ClInclude Include="Entity\Entity.h" />
@@ -116,14 +133,20 @@
     <ClInclude Include="Main\Main.h" />
     <ClInclude Include="Manager\AssetManager.h" />
     <ClInclude Include="Manager\ComponentManager.h" />
+    <ClInclude Include="Manager\DescriptorFileManager.h" />
     <ClInclude Include="Manager\ECSManager.h" />
+    <ClInclude Include="Manager\ForceManager.h" />
     <ClInclude Include="Manager\GameManager.h" />
     <ClInclude Include="Manager\GraphicsManager.h" />
     <ClInclude Include="Manager\ImguiManager.h" />
     <ClInclude Include="Manager\InputManager.h" />
     <ClInclude Include="Manager\LogManager.h" />
     <ClInclude Include="Manager\Manager.h" />
+    <ClInclude Include="Manager\PrefabManager.h" />
     <ClInclude Include="Manager\ResourceManager.h" />
+    <ClInclude Include="Manager\TracyManager.h" />
+    <ClInclude Include="Manager\TorqueManager.h" />
+    <ClInclude Include="Pipeline\DescriptorEditor.h" />
     <ClInclude Include="Resource\ResourceData.h" />
     <ClInclude Include="Resource\ResourceMetadata.h" />
     <ClInclude Include="Resource\ResourcePaths.h" />
@@ -140,9 +163,12 @@
     <ClInclude Include="Manager\SerialisationBinManager.h" />
     <ClInclude Include="Manager\SerialisationManager.h" />
     <ClInclude Include="System\RenderSystem.h" />
+    <ClInclude Include="System\BulletSystem.h" />
+    <ClInclude Include="System\CollisionSystem.h" />
     <ClInclude Include="System\MovementSystem.h" />
     <ClInclude Include="System\PhysicsSystem.h" />
     <ClInclude Include="System\AudioSystem.h" />
+    <ClInclude Include="System\ScriptSystem.h" />
     <ClInclude Include="System\System.h" />
     <ClInclude Include="System\TransformSystem.h" />
     <ClInclude Include="Utility\AssetPath.h" />
@@ -267,9 +293,9 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;TRACY_ENABLE;TRACY_ON_DEMAND;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)ScriptCore;$(SolutionDir)External_Libraries\include\FMOD API\core;$(SolutionDir)External_Libraries\include\FMOD API\studio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)ScriptCore;$(SolutionDir)External_Libraries\include\FMOD API\core;$(SolutionDir)External_Libraries\include\FMOD API\studio;$(ProjectDir)Tracy;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -280,7 +306,11 @@
     </Link>
     <PostBuildEvent>
       <Command>if not exist "$(OutDir)assets" mkdir "$(OutDir)assets"
-xcopy "$(ProjectDir)assets\*" "$(OutDir)assets\" /E /I /Y /Q</Command>
+xcopy "$(ProjectDir)assets\*" "$(OutDir)assets\" /E /I /Y /Q
+
+if exist "$(SolutionDir)..\tracy-profiler.exe" (
+    copy /Y "$(SolutionDir)..\tracy-profiler.exe" "$(OutDir)"
+)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -291,8 +321,8 @@ xcopy "$(ProjectDir)assets\*" "$(OutDir)assets\" /E /I /Y /Q</Command>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)ScriptCore;$(SolutionDir)External_Libraries\include\FMOD API\core;$(SolutionDir)External_Libraries\include\FMOD API\studio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)ScriptCore;$(SolutionDir)External_Libraries\include\FMOD API\core;$(SolutionDir)External_Libraries\include\FMOD API\studio;$(ProjectDir)Tracy;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

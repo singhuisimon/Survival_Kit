@@ -18,6 +18,8 @@
 #include "../External_Libraries/include/dotnet/coreclrhost.h"    // coreclr_*
 
 #include "ImportExport.h"
+#include "MonoBehaviour.h"
+
 
 namespace Core
 {
@@ -47,16 +49,47 @@ namespace Core
 
         static void HelloWorld();
 
+        //file creation
+        static bool CreateMonoBehaviourScript(const std::string& scriptName);
+        static bool CreateScriptableObjectScript(const std::string& scriptName);
+        static bool CreateScriptFromTemplate(const std::string& scriptName, const std::string& templateType);
+        // File opening
+        static bool OpenScriptInEditor(const std::string& scriptName);
+
+        // Template management
+        static std::string GetTemplatesDirectory();
+        static bool InitializeTemplates();
+        static std::vector<std::string> GetAvailableTemplateTypes();
+
+
+        // Validation and utility methods
+        static bool ValidateScriptName(const std::string& scriptName);
+        static std::string GetManagedScriptsDirectory();
+        static bool DoesScriptExist(const std::string& scriptName);
+        static std::vector<std::string> GetExistingScriptFiles();
+
+        // Utility methods
+        static void ListExistingScripts();
+        static void ShowScriptCreationHelp();
+
+        void UpdateScriptForEntity(int entityId);  // NEW method
+
+
+
     private:
         static std::array<TransformComponent, ENTITY_COUNT> nativeData;
-        void compileScriptAssembly();
+        static void compileScriptAssembly();
         void(*initFunc)() = nullptr;
         bool(*addScriptFunc)(int, const char*) = nullptr;
         void(*executeUpdateFunc)() = nullptr;
         void(*reloadScriptsFunc)() = nullptr;  // Add this
+        void(*executeUpdateForEntityFunc)(int) = nullptr;  // NEW function pointer
+
         void startScriptEngine();
         void stopScriptEngine();
         std::string buildTpaList(const std::string& directory);
+
+
 
         // File watching members
         std::thread fileWatcherThread;
@@ -122,6 +155,6 @@ namespace Core
         }
     };
 
-  
+
 
 }

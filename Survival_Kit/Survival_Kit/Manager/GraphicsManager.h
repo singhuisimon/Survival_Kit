@@ -63,6 +63,10 @@ namespace gam300 {
         // Storage for shader programs (Will port to asset manager eventually)
         std::vector<ShaderProgram> shadersStorage;
         std::vector<MeshGL>        meshStorage;
+        std::vector<MeshData>      m_meshDataStorage;
+
+        // Storage for materials
+        std::map<uint16_t, Material> m_material_storage;
         
         // Main camera
         Camera3D main_camera;
@@ -109,6 +113,12 @@ namespace gam300 {
 
         Renderer& getRenderer() { return m_renderer; }
 
+        // Get materials storage
+        const std::map<uint16_t, Material>& getMaterialStorage() { return m_material_storage; }
+
+        // Get meshdata storage
+        const std::vector<MeshData>& getMeshDataStorage() { return m_meshDataStorage; }
+        
     };
 
 } // end of namespace gam300

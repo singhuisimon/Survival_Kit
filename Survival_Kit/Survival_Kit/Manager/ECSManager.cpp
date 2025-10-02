@@ -14,6 +14,8 @@
 #include <algorithm>
 
 #include "../System/AudioSystem.h"
+#include "../System/ScriptSystem.h"
+
 
 namespace gam300 {
 
@@ -61,6 +63,18 @@ namespace gam300 {
             LM.writeLog("ECSManager::startUp() - AudioSystem registered successfully");
         }
         
+
+        //scripts
+        // Register ScriptSystem
+        auto scriptSystem = EM.registerSystem<ScriptSystem>();
+        if (!scriptSystem) {
+            LM.writeLog("ECSManager::startUp() - Failed to register ScriptSystem");
+        }
+        else {
+            LM.writeLog("ECSManager::startUp() - ScriptSystem registered successfully");
+        }
+
+
         LM.writeLog("ECSManager::startUp() - ECS Manager started successfully");
 
         return 0;

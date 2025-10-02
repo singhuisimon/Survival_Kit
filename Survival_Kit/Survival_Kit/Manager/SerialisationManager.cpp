@@ -22,12 +22,18 @@
 #include "../Component/Transform3D.h"
 #include "../Component/RigidBody.h"
 #include "../Component/AudioComponent.h"
+#include "../Component/Collider.h"
+
+#include "../Component/Script.h"
+#include "../Component/MeshComponent.h"
 #include <fstream>
 #include <sstream>
 #include <functional>
+#include <iomanip>
 
 namespace gam300 {
 
+    // ==================== Transform3D Serializer ====================
     // Transform3DSerializer implementation
     std::string Transform3DSerializer::serialize(Component* component) {
         Transform3D* transform = static_cast<Transform3D*>(component);
@@ -124,21 +130,61 @@ namespace gam300 {
         return transform;
     }
 
+    // ==================== RigidBody Serializer ====================
     // RigidBodySerializer implementation
     std::string RigidBodySerializer::serialize(Component* component) {
-       
+
         RigidBody* rigidBody = static_cast<RigidBody*>(component);
-       
-        if (!rigidBody) { 
+
+        if (!rigidBody) {
             return "{}";
         }
         std::stringstream ss;
-        
-        ss << "{\n";
 
-        //ss << "          \"RigidBody\": {\n";
-        ss << "          \"rigidBodyType\": \"" << rigidBody->bodyTypeToString(rigidBody->getRigidBodyType()) << "\"\n";
+        ss << "{\n";
+        //ss << "          \"Mass\": \"" << rigidBody->getMass() << "\"\n";
+        ss << "          \"Mass\": " << rigidBody->getMass() << ",\n";
+
+        const Vector3D& vel = rigidBody->getVelocity();
+        ss << "          \"velocity\": [\n";
+        ss << "            " << vel.x << ",\n";
+        ss << "            " << vel.y << ",\n";
+        ss << "            " << vel.z << "\n";
+        ss << "          ],\n";
+        //ss << "        }";
+
+        const Vector3D& accel = rigidBody->getAcceleration();
+        ss << "          \"acceleration\": [\n";
+        ss << "            " << accel.x << ",\n";
+        ss << "            " << accel.y << ",\n";
+        ss << "            " << accel.z << "\n";
+        ss << "          ],\n";
+
+
+        const Vector3D& angularVel = rigidBody->getAngularVelocity();
+        ss << "          \"angularVelocity\": [\n";
+        ss << "            " << angularVel.x << ",\n";
+        ss << "            " << angularVel.y << ",\n";
+        ss << "            " << angularVel.z << "\n";
+        ss << "          ],\n";
+
+        const Vector3D& inertiaDiag = rigidBody->getInertiaDiagonal();
+        ss << "          \"inertiaDiag\": [\n";
+        ss << "            " << inertiaDiag.x << ",\n";
+        ss << "            " << inertiaDiag.y << ",\n";
+        ss << "            " << inertiaDiag.z << "\n";
+        ss << "          ],\n";
+
+
+        ss << "          \"layer\": " << rigidBody->getLayer() << ",\n";
+
+        ss << "          \"forceMask\": " << ((rigidBody->getForceMask() != 0u) ? "true" : "false") << ",\n";
+
+        ss << "          \"torqueMask\": " << ((rigidBody->getTorqueMask() != 0u) ? "true" : "false") << "\n";
+
+
         ss << "        }";
+
 
         return ss.str();
     }
@@ -147,59 +193,131 @@ namespace gam300 {
     Component* RigidBodySerializer::deserialize(EntityID entityId, const std::string& jsonData) {
 
         // Parse the rigid body type 
-        BodyType rigidBodyType = BodyType::STATIC;
+        float mass = 1.0f;
+        std::string massData = SerialisationManager::extractObjectValue(jsonData, "mass");
+        if (!massData.empty()) mass = std::stof(massData);
 
-        std::string bodyTypeStr = SerialisationManager::extractQuotedValue(jsonData, "rigidBodyType");
-        if (!bodyTypeStr.empty()) {
+        Vector3D velocity = Vector3D::ZERO;
+        //std::string velString = "velocity";
+        //addComponentVec3D()
+        Vector3D velcom = SerialisationManager::addComponentVec3D(velocity, jsonData, "velocity");
 
-            rigidBodyType = RigidBody::stringToBodyType(bodyTypeStr);
+
+        Vector3D acceleration = Vector3D::ZERO;
+        Vector3D accelCom = SerialisationManager::addComponentVec3D(acceleration, jsonData, "acceleration");
+
+        Vector3D angularVel = Vector3D::ZERO;
+        Vector3D angularVelcom = SerialisationManager::addComponentVec3D(angularVel, jsonData, "angularVelocity");
+
+        Vector3D inertiaDiag = Vector3D::ONE;
+        Vector3D inertiaDiagCom = SerialisationManager::addComponentVec3D(inertiaDiag, jsonData, "inertiaDiag");
+
+        int layer = 0;
+        std::string layerData = SerialisationManager::extractNumberValue(jsonData, "layer");
+        if (!layerData.empty()) {
+            layer = std::stoi(layerData);
         }
-        RigidBody* rigidBody = EM.addComponent<RigidBody>(entityId, rigidBodyType);
+
+        unsigned forceMask = 0xFFFFFFFFu;
+        std::string applyForcesData = SerialisationManager::extractNumberValue(jsonData, "forceMask");
+        if (!applyForcesData.empty()) {
+            forceMask = (applyForcesData == "true") ? 0xFFFFFFFFu : 0u;
+        }
+
+        unsigned torqueMask = 0xFFFFFFFFu;
+        std::string torqueMaskData = SerialisationManager::extractNumberValue(jsonData, "torqueMask");
+        if (!torqueMaskData.empty()) {
+            torqueMask = (torqueMaskData == "true") ? 0xFFFFFFFFu : 0u;
+        }
+
+        RigidBody* rigidBody = EM.addComponent<RigidBody>(entityId, mass, velcom, accelCom, angularVelcom, inertiaDiagCom, layer, forceMask, torqueMask);
 
         return rigidBody;
 
     }
 
+    // ==================== Collider Serializer ====================
+    std::string ColliderSerializer::serialize(Component* component)
+    {
+        Collider* collider = static_cast<Collider*>(component);
+        if (!collider)
+        {
+            return "{}";
+        }
 
-	//AudioComponentSerializer implementation
+        std::stringstream  ss;
+        ss << "{\n";
+        const Vector3D& aabbHalfExtents = collider->getAABBHalfExtents();
+        ss << "          \"AABBHalfExtents\": [\n";
+        ss << "            " << aabbHalfExtents.x << ",\n";
+        ss << "            " << aabbHalfExtents.y << ",\n";
+        ss << "            " << aabbHalfExtents.z << "\n";
+        ss << "          ],\n";
+
+        const Vector3D& aabbOffset = collider->getAABBOffset();
+        ss << "          \"Offset\": [\n";
+        ss << "            " << aabbOffset.x << ",\n";
+        ss << "            " << aabbOffset.y << ",\n";
+        ss << "            " << aabbOffset.z << "\n";
+        ss << "          ]\n";
+
+        ss << "        }";
+        return ss.str();
+
+    }
+
+    Component* ColliderSerializer::deserialize(EntityID entityId, const std::string& jsonData)
+    {
+        Vector3D aabbHalfExtents = { 0.5f,0.5f,0.5f };
+        Vector3D aabbHEcom = SerialisationManager::addComponentVec3D(aabbHalfExtents, jsonData, "aabbHalfExtents");
+
+        Vector3D offset = { 0.0f,0.0f,0.0f };
+        Vector3D offsetCom = SerialisationManager::addComponentVec3D(offset, jsonData, "aabbOffset");
+
+        Collider::AABBData aabbData;
+        aabbData.halfExtents = aabbHEcom;
+        aabbData.offset = offsetCom;
+        Collider* collider = EM.addComponent<Collider>(entityId, aabbData);
+
+        return collider;
+    }
+
+    // ==================== Audio Serializer ====================
+    //AudioComponentSerializer implementation
     std::string AudioComponentSerializer::serialize(Component* component) {
-		AudioComponent* audio = static_cast<AudioComponent*>(component);
+        AudioComponent* audio = static_cast<AudioComponent*>(component);
         if (!audio) {
-			return "{}";
+            return "{}";
         }
 
         std::stringstream ss;
+        ss << std::fixed << std::setprecision(2);
         ss << "{\n";
-        ss << "          \"guid\": " << audio->getGUID() << ",\n";
-		//ss << "          \"audioID\": " << audio->getAudioID() << ",\n"; // Placeholder for audioID
-        ss << "          \"type\": " << (audio->getType() == AudioType::BGM ? "BGM" : "SFX") << ",\n";
+        ss << "          \"guid\": \"" << audio->getGUID() << "\",\n";
+        //ss << "          \"audioID\": " << audio->getAudioID() << ",\n"; // Placeholder for audioID
+        ss << "          \"type\": \"" << (audio->getType() == AudioType::BGM ? "BGM" : "SFX") << "\",\n";
+        ss << "          \"state\": \""
+            << (audio->getPlayState() == PlayState::PLAY ? "PLAY" :
+                audio->getPlayState() == PlayState::PAUSE ? "PAUSE" : "STOP")
+            << "\",\n";
         ss << "          \"volume\": " << audio->getVolume() << ",\n";
         ss << "          \"pitch\": " << audio->getPitch() << ",\n";
-        ss << "          \"loop\": " << (audio->isLooping() ? "true" : "false") << ",\n";
-        ss << "          \"state\": "
-           << (audio->getPlayState() == PlayState::PLAY ? "PLAY" :
-               audio->getPlayState() == PlayState::PAUSE ? "PAUSE" : "STOP")
-           << "\"\n";
-		ss << "          \"is3D\": " << (audio->is3D() ? "true" : "false") << ",\n";
-		ss << "          \"position\": [\n";
-
-		const Vector3D& pos = audio->getPosition();
-		ss << "            " << pos.x << ",\n";
-		ss << "            " << pos.y << ",\n";
-		ss << "            " << pos.z << "\n";\
-
-		ss << "          ]\n";
+        ss << "          \"loop\": \"" << (audio->isLooping() ? "true" : "false") << "\",\n";
+        ss << "          \"mute\": \"" << (audio->isMute() ? "true" : "false") << "\",\n";
+        ss << "          \"is3D\": \"" << (audio->is3D() ? "true" : "false") << "\",\n";
+        ss << "          \"minDistance\": " << audio->getMinDistance() << ",\n";
+        ss << "          \"maxDistance\": " << audio->getMaxDistance() << "\n";
         ss << "        }";
         return ss.str();
     }
 
-	//AudioComponentDeserializer implementation
+    //AudioComponentDeserializer implementation
     Component* AudioComponentSerializer::deserialize(EntityID entityId, const std::string& jsonData) {
         //GUID
-		std::string guid = SerialisationManager::extractQuotedValue(jsonData, "guid");
+        std::string guid = SerialisationManager::extractQuotedValue(jsonData, "guid");
 
-		/*int64_t audioID = -1;
-		int64_t audioIDData = SerialisationManager::extractObjectValue(jsonData, "audioID");
+        /*int64_t audioID = -1;
+        int64_t audioIDData = SerialisationManager::extractObjectValue(jsonData, "audioID");
         if (!audioIDData.empty()) {
             try {
                 audioID = std::stoll(audioIDData);
@@ -207,25 +325,38 @@ namespace gam300 {
             catch (const std::exception&) {
                 LM.writeLog("AudioComponentSerializer::deserialize() - Fail to parse audioID");
             }
-		}*/
+        }*/
 
-		//Type
-		std::string typeData = SerialisationManager::extractQuotedValue(jsonData, "type");
-		AudioType type = (typeData == "BGM") ? AudioType::BGM : AudioType::SFX;
-    
-		//Volume
+        //Type
+        std::string typeData = SerialisationManager::extractQuotedValue(jsonData, "type");
+        AudioType type = (typeData == "BGM") ? AudioType::BGM : AudioType::SFX;
+
+        //State
+        PlayState state = PlayState::STOP;
+        std::string stateData = SerialisationManager::extractQuotedValue(jsonData, "state");
+        if (!stateData.empty()) {
+            if (stateData == "PLAY") {
+                state = PlayState::PLAY;
+            }
+            else if (stateData == "PAUSE") {
+                state = PlayState::PAUSE;
+            }
+        }
+
+        //Volume
         float volume = 1.0f;
-		std::string volumeData = SerialisationManager::extractNumberValue(jsonData, "volume");
+        std::string volumeData = SerialisationManager::extractNumberValue(jsonData, "volume");
         if (!volumeData.empty()) {
             try {
                 volume = std::stof(volumeData);
-            } catch (const std::exception&) {
+            }
+            catch (const std::exception&) {
                 LM.writeLog("AudioComponentSerializer::deserialize() - Fail to parse volume");
             }
-		}
+        }
 
         //Pitch
-		float pitch = 1.0f;
+        float pitch = 1.0f;
         std::string pitchData = SerialisationManager::extractNumberValue(jsonData, "pitch");
         if (!pitchData.empty()) {
             try {
@@ -236,50 +367,155 @@ namespace gam300 {
             }
         }
 
-		//Loop
+        // Loop
         bool loop = false;
-        std::string loopData = SerialisationManager::extractObjectValue(jsonData, "loop");
+        std::string loopData = SerialisationManager::extractQuotedValue(jsonData, "loop");
         if (!loopData.empty()) {
             loop = (loopData == "true");
-		}
-
-		//State
-        PlayState state = PlayState::STOP;
-        std::string stateData = SerialisationManager::extractQuotedValue(jsonData, "state");
-        if (!stateData.empty()) {
-            if (stateData == "PLAY") {
-                state = PlayState::PLAY;
-            } else if (stateData == "PAUSE") {
-                state = PlayState::PAUSE;
-            }
-		}
-
-        //is3D
-	    bool is3D = false;
-		std::string is3DData = SerialisationManager::extractObjectValue(jsonData, "is3D");
-        if (!is3DData.empty()) {
-            is3D = (is3DData == "true");
-		}
-
-		//Position
-		Vector3D position = Vector3D::ZERO;
-		std::string positionData = SerialisationManager::extractObjectValue(jsonData, "position");
-        if (!positionData.empty()) {
-            std::vector<float> posArray = SerialisationManager::parseFloatArray(positionData);
-            if (posArray.size() >= 3) {
-                position = Vector3D(posArray[0], posArray[1], posArray[2]);
-            }
-		}
-
-        // Create the Audio_Component
-        AudioComponent* audio = EM.addComponent<AudioComponent>(entityId, guid, type, volume, pitch, loop);
-        
-		// Set the play state
-        if (audio) {
-			audio->setPlayState(state);
         }
 
-		return audio;
+        // Mute
+        bool mute = false;
+        std::string muteData = SerialisationManager::extractQuotedValue(jsonData, "mute");
+        if (!muteData.empty()) {
+            mute = (muteData == "true");
+        }
+
+        // is3D
+        bool is3D = true; // default true
+        std::string is3DData = SerialisationManager::extractQuotedValue(jsonData, "is3D");
+        if (!is3DData.empty()) {
+            is3D = (is3DData == "true");
+            //LM.writeLog("AudioComponentSerializer::deserialize() - is3D is %s", is3DData.c_str());
+        }
+
+        //minDistance
+        float minDistance = 1.0f;
+        std::string minDistanceData = SerialisationManager::extractNumberValue(jsonData, "minDistance");
+        if (!minDistanceData.empty()) {
+            try {
+                minDistance = std::stof(minDistanceData);
+            }
+            catch (const std::exception&) {
+                LM.writeLog("AudioComponentSerializer::deserialize() - Fail to parse minDistance");
+            }
+        }
+
+        //maxDistance
+        float maxDistance = 100.0f;
+        std::string maxDistanceData = SerialisationManager::extractNumberValue(jsonData, "maxDistance");
+        if (!maxDistanceData.empty()) {
+            try {
+                maxDistance = std::stof(maxDistanceData);
+            }
+            catch (const std::exception&) {
+                LM.writeLog("AudioComponentSerializer::deserialize() - Fail to parse maxDistance");
+            }
+        }
+        LM.writeLog("AudioComponentSerializer::deserialize() - Parsed AudioComponent data: guid=%s, type=%s, state=%s, volume=%.2f, pitch=%.2f, loop=%s, mute=%s, is3D=%s, minDistance=%.2f, maxDistance=%.2f",
+            guid.c_str(), (type == AudioType::BGM ? "BGM" : "SFX"),
+            (state == PlayState::PLAY ? "PLAY" : state == PlayState::PAUSE ? "PAUSE" : "STOP"),
+            volume, pitch, loop ? "true" : "false", mute ? "true" : "false", is3D ? "true" : "false", minDistance, maxDistance);
+
+        // Create the Audio_Component
+        AudioComponent* audio = EM.addComponent<AudioComponent>(entityId, guid, type, state, volume, pitch, loop, mute, is3D, minDistance, maxDistance);
+
+        // Set the play state
+        if (audio) {
+            audio->setPlayState(state);
+        }
+        return audio;
+    }
+
+    // ==================== Script Serializer ====================
+
+    std::string ScriptSerializer::serialize(Component* component) {
+        Script* script = static_cast<Script*>(component);
+        if (!script) {
+            return "{}";
+        }
+
+        std::stringstream ss;
+        ss << "{\n";
+        ss << "          \"script_name\": \"" << script->getScriptName() << "\",\n";
+        ss << "          \"is_active\": \"" << (script->isActive() ? "true" : "false") << "\"\n";
+        ss << "        }";
+
+        return ss.str();
+    }
+
+    Component* ScriptSerializer::deserialize(EntityID entityId, const std::string& jsonData) {
+        // Extract script_name
+        std::string script_name = SerialisationManager::extractQuotedValue(jsonData, "script_name");
+
+        // Extract is_active
+        bool is_active = true; // default true
+        std::string is_active_data = SerialisationManager::extractQuotedValue(jsonData, "is_active");
+        if (!is_active_data.empty()) {
+            is_active = (is_active_data == "true");
+        }
+
+        LM.writeLog("ScriptSerializer::deserialize() - Parsed Script data: script_name=%s, is_active=%s",
+            script_name.c_str(), is_active ? "true" : "false");
+
+        // Create the Script component
+        Script* script = EM.addComponent<Script>(entityId, script_name, is_active);
+
+        return script;
+    }
+
+    // ==================== MeshComponent Serializer ====================
+    std::string MeshComponentSerializer::serialize(Component* component) {
+
+        // Prepare mesh component for serializing
+        MeshComponent* mesh_comp = static_cast<MeshComponent*>(component);
+        if (!mesh_comp) {
+            return "{}";
+        }
+
+        // Serializing mesh component data
+        std::stringstream ss;
+        ss << "{\n";
+        ss << "          \"guid\": \"" << mesh_comp->getGUID() << "\",\n";
+        ss << "          \"mesh_handle\": " << mesh_comp->getMeshHandle() << ",\n";
+        ss << "          \"material_handle\": " << mesh_comp->getMaterialHandle() << "\n";
+        ss << "        }";
+        return ss.str();
+    }
+
+    // MeshComponentSerializer implementation
+    Component* MeshComponentSerializer::deserialize(EntityID entityId, const std::string& jsonData) {
+
+        // Retrieve guid
+        std::string guid = SerialisationManager::extractQuotedValue(jsonData, "guid");
+
+        // Parse mesh handle
+        uint16_t mesh_handle = 0;
+        std::string mesh_handle_data = SerialisationManager::extractNumberValue(jsonData, "mesh_handle");
+        if (!mesh_handle_data.empty()) {
+            try {
+                mesh_handle = static_cast<uint16_t>(std::stoi(mesh_handle_data));
+            }
+            catch (const std::exception&) {
+                LM.writeLog("MeshComponentSerializer::deserialize() - Fail to parse mesh handle");
+            }
+        }
+
+        // Parse material handle
+        uint16_t material_handle = 0;
+        std::string material_handle_data = SerialisationManager::extractNumberValue(jsonData, "material_handle");
+        if (!material_handle_data.empty()) {
+            try {
+                material_handle = static_cast<uint16_t>(std::stoi(material_handle_data));
+            }
+            catch (const std::exception&) {
+                LM.writeLog("MeshComponentSerializer::deserialize() - Fail to parse material handle");
+            }
+        }
+
+        // Create and return mesh component
+        MeshComponent* mesh_comp = EM.addComponent<MeshComponent>(entityId, guid, mesh_handle, material_handle);
+        return mesh_comp;
     }
 
     // Initialize singleton instance
@@ -299,13 +535,8 @@ namespace gam300 {
         if (Manager::startUp())
             return -1;
 
-        // Register component serializers
+        // ==============Register Transform3D component serializers ===========================
         registerComponentSerializer("Transform3D", std::make_shared<Transform3DSerializer>());
-
-
-        registerComponentSerializer("AudioComponent", std::make_shared<AudioComponentSerializer>());
-
-
         // Register component creators
         registerComponentCreator("Transform3D", [this](EntityID entityId, const std::string& componentData) {
             // Use the serializer to create the component
@@ -316,7 +547,36 @@ namespace gam300 {
             }
             });
 
-        // Register component serializers for RigidBody
+        // ==============Register Audio component serializers ==========================
+        registerComponentSerializer("AudioComponent", std::make_shared<AudioComponentSerializer>());
+        registerComponentCreator("AudioComponent", [this](EntityID entityId, const std::string& componentData) {
+            //Use the serializer to create the component
+            auto serializer = m_component_serializers["AudioComponent"];
+            if (serializer) {
+                serializer->deserialize(entityId, componentData);
+                LM.writeLog("Audio_Component created for entity %d", entityId);
+            }
+            else {
+                LM.writeLog("Audio_Component serializer not found for entity %d", entityId);
+            }
+            });
+
+        // ==============Register Script component serializers ====================
+        registerComponentSerializer("Script", std::make_shared<ScriptSerializer>());
+
+        registerComponentCreator("Script", [this](EntityID entityId, const std::string& componentData) {
+            auto serializer = m_component_serializers["Script"];
+            if (serializer) {
+                serializer->deserialize(entityId, componentData);
+                LM.writeLog("Script component created for entity %d", entityId);
+            }
+            else {
+                LM.writeLog("Script serializer not found for entity %d", entityId);
+            }
+            });
+        
+
+        // ==============Register RigidBody component serializers==========================
         registerComponentSerializer("RigidBody", std::make_shared<RigidBodySerializer>());
 
         // Register component creators
@@ -329,17 +589,32 @@ namespace gam300 {
                 LM.writeLog("RigidBody created for entity %d", entityId);
             }
             });
-    
 
-        registerComponentCreator("AudioComponent", [this](EntityID entityId, const std::string& componentData) {
+        // ==============Register Collider component serializers==========================
+        // Register component serializers for Collider
+        registerComponentSerializer("Collider", std::make_shared<ColliderSerializer>());
+
+        // Register component creators
+        registerComponentCreator("Collider", [this](EntityID entityId, const std::string& componentData) {
+
+            auto serializer = m_component_serializers["Collider"];
+            if (serializer)
+            {
+                serializer->deserialize(entityId, componentData);
+                LM.writeLog("Collider created for entity %d", entityId);
+            }
+            });
+
+        // Mesh Component
+        registerComponentCreator("MeshComponent", [this](EntityID entityId, const std::string& componentData) {
             //Use the serializer to create the component
-            auto serializer = m_component_serializers["AudioComponent"];
+            auto serializer = m_component_serializers["MeshComponent"];
             if (serializer) {
                 serializer->deserialize(entityId, componentData);
-                LM.writeLog("Audio_Component created for entity %d", entityId);
+                LM.writeLog("Mesh_Component created for entity %d", entityId);
             }
             else {
-				LM.writeLog("Audio_Component serializer not found for entity %d", entityId);
+                LM.writeLog("Mesh_Component serializer not found for entity %d", entityId);
             }
             });
 
@@ -374,7 +649,7 @@ namespace gam300 {
         LM.writeLog("SerialisationManager::registerComponentSerializer() - Registered serializer for '%s'", componentName.c_str());
     }
 
-	// Load entities from a scene file
+    // Load entities from a scene file
     bool SerialisationManager::loadScene(const std::string& filename) {
         LM.writeLog("SerialisationManager::loadScene() - Loading scene from '%s'", filename.c_str());
 
@@ -385,7 +660,7 @@ namespace gam300 {
             return false;
         }
 
-     
+
 
         /////////////////////////////////////////////////Amanda Code Version/////////////////////////////////////////////////
         // Parse with RapidJSON instead of string::find
@@ -424,7 +699,7 @@ namespace gam300 {
 
             entityCount++;
         }
-        
+
         //// Read file content
         //std::string fileContent;
         //if (!parseJsonFile(filename, fileContent)) {
@@ -639,7 +914,7 @@ namespace gam300 {
             file << getIndent(3) << "\"name\": \"" << entity.get_name() << "\",\n";
             file << getIndent(3) << "\"components\": {\n";
 
-            // Check for Transform3D component
+            // =================== Check for Transform3D component ========================
             if (auto serializer = m_component_serializers.find("Transform3D");
                 serializer != m_component_serializers.end()) {
                 if (Transform3D* transform = EM.getComponent<Transform3D>(entity.get_id())) {
@@ -649,22 +924,52 @@ namespace gam300 {
                 }
             }
 
-            // Check for Audio_Component (FIXED: Now properly added to componentStrings)
+            // ============================= Check for Audio_Component ==============================
             if (auto serializer = m_component_serializers.find("AudioComponent");
                 serializer != m_component_serializers.end()) {
                 if (AudioComponent* audio = EM.getComponent<AudioComponent>(entity.get_id())) {
-                    componentStrings.push_back(getIndent(4) + "\"Audio_Component\": " +
+                    componentStrings.push_back(getIndent(4) + "\"AudioComponent\": " +
                         serializer->second->serialize(audio));
                     hasComponents = true;
                 }
             }
 
-            // Check for RigidBody component
+            // ======================== Check for Script component ============================
+            if (auto serializer = m_component_serializers.find("Script");
+                serializer != m_component_serializers.end()) {
+                if (Script* script = EM.getComponent<Script>(entity.get_id())) {
+                    componentStrings.push_back(getIndent(4) + "\"Script\": " +
+                        serializer->second->serialize(script));
+                    hasComponents = true;
+                }
+            }
+
+            // ==================== Check for RigidBody component ===========================
             if (auto serializer = m_component_serializers.find("RigidBody");
                 serializer != m_component_serializers.end()) {
                 if (RigidBody* rigidBody = EM.getComponent<RigidBody>(entity.get_id())) {
                     componentStrings.push_back(getIndent(4) + "\"RigidBody\": " +
                         serializer->second->serialize(rigidBody));
+                    hasComponents = true;
+                }
+            }
+
+            // ===================== Check for Collider component =====================
+            if (auto serializer = m_component_serializers.find("Collider");
+                serializer != m_component_serializers.end()) {
+                if (Collider* collider = EM.getComponent<Collider>(entity.get_id())) {
+                    componentStrings.push_back(getIndent(4) + "\"Collider\": " +
+                        serializer->second->serialize(collider));
+                    hasComponents = true;
+                }
+            }
+
+            // Check for MeshComponent 
+            if (auto serializer = m_component_serializers.find("MeshComponent");
+                serializer != m_component_serializers.end()) {
+                if (MeshComponent* mesh = EM.getComponent<MeshComponent>(entity.get_id())) {
+                    componentStrings.push_back(getIndent(4) + "\"MeshComponent\": " +
+                        serializer->second->serialize(mesh));
                     hasComponents = true;
                 }
             }
@@ -703,7 +1008,7 @@ namespace gam300 {
         return true;
     }
 
-	// Get a registered component serializer
+    // Get a registered component serializer
     std::shared_ptr<IComponentSerializer> SerialisationManager::getComponentSerializer(const std::string& componentName) {
         auto it = m_component_serializers.find(componentName);
         if (it != m_component_serializers.end()) {
@@ -712,7 +1017,7 @@ namespace gam300 {
         return nullptr;
     }
 
-	// ================================= Helper Methods =================================
+    // ================================= Helper Methods =================================
 
     // Helper method to parse a JSON file
     bool SerialisationManager::parseJsonFile(const std::string& filename, std::string& jsonContent) {
@@ -774,6 +1079,7 @@ namespace gam300 {
 
         return true;
     }
+
 
     // Helper function to extract a section from JSON
     std::string SerialisationManager::extractSection(const std::string& json, const std::string& sectionName) {
@@ -1023,7 +1329,7 @@ namespace gam300 {
         if (colonPos == std::string::npos) {
             return "";
         }
-        
+
         // Move past colon
         size_t valueStart = json.find_first_not_of(" \t\n\r", colonPos + 1);
         if (valueStart == std::string::npos) {
@@ -1035,6 +1341,21 @@ namespace gam300 {
 
         return json.substr(valueStart, valueEnd - valueStart);
     }
+    Vector3D SerialisationManager::addComponentVec3D(Vector3D val, const std::string& jsonData, const std::string valName)
+    {
+        std::string valData = SerialisationManager::extractObjectValue(jsonData, valName);
+        if (!valData.empty())
+        {
+            std::vector<float> valArray = SerialisationManager::parseFloatArray(valData);
+            if (valArray.size() >= 3)
+            {
+                val = Vector3D(valArray[0], valArray[1], valArray[2]);
+            }
 
+        }
+
+        return val;
+
+    }
 
 } // end of namespace gam300
