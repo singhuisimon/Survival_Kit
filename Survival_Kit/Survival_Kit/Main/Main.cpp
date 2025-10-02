@@ -179,6 +179,8 @@ int main(void) {
 
         IMGUIM.displayAssetsBrowserList();
 
+        IMGUIM.displayAssetEditor();
+
         // Editor Start Render
         ImGui::Render();
 

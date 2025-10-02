@@ -35,6 +35,7 @@
 
 //for Asset showcases
 #include "../Pipeline/AssetDatabase.h"
+#include "../Pipeline/DescriptorEditor.h"
 #include "AssetManager.h"
 
 
@@ -80,6 +81,11 @@ namespace gam300
 		const char* getAssetIcon(AssetType type);
 		void initializeAssetBrowser();
 
+		// Add descriptor editor
+		DescriptorEditor* m_descriptorEditor;
+		EditableDescriptor m_currentDescriptor;
+		bool m_showDescriptorPanel = false;
+
 	public:
 
 		ImguiManager(ECSManager& ecsManager, GraphicsManager& GFM);
@@ -117,7 +123,7 @@ namespace gam300
 
 		void handleViewPortClick(ImVec2 mousePos, ImVec2 viewportSize);
 
-		void displayAssetEditor(const std::filesystem::directory_entry& assetFilepath);
+		void displayAssetEditor();
 		void displayPrefabEditor(const std::filesystem::directory_entry& prefabFilepath);
 
 		//EntityID pickEntityFromViewport(ImVec2 mouseViewportPos, ImVec2 viewportSize, Camera3D& camera);
