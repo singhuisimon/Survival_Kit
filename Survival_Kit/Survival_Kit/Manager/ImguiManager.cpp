@@ -24,6 +24,7 @@
 #include "../Component/RigidBody.h"
 #include "../Component/Collider.h"
 #include "../Component/AudioComponent.h"
+#include "../Component/MeshComponent.h"
 
 #include <iostream>
 
@@ -374,6 +375,15 @@ namespace gam300 {
                                         ImguiEcsRef.addComponent<AudioComponent>(newEntityID, *oldAudio);
                                     }
                                 }
+                                if (ImguiEcsRef.hasComponent<MeshComponent>(oriSelectedEntity.get_id()))
+                                {
+                                    MeshComponent* oldMesh = ImguiEcsRef.getComponent<MeshComponent>(oriSelectedEntity.get_id());
+                                    if (oldMesh)
+                                    {
+
+                                        ImguiEcsRef.addComponent<MeshComponent>(newEntityID, *oldMesh);
+                                    }
+                                }
                                 selectedObjIndex = static_cast<int>(allEntities.size()) - 1;
 
                             }
@@ -544,6 +554,13 @@ namespace gam300 {
                         if (!ImguiEcsRef.hasComponent<AudioComponent>(selectedEntity.get_id()))
                         {
                             ImguiEcsRef.addComponent<AudioComponent>(selectedEntity.get_id());
+                        }
+                    }
+                    if (ImGui::MenuItem("Mesh"))
+                    {
+                        if (!ImguiEcsRef.hasComponent<MeshComponent>(selectedEntity.get_id()))
+                        {
+                            ImguiEcsRef.addComponent<MeshComponent>(selectedEntity.get_id());
                         }
                     }
 
@@ -1265,6 +1282,19 @@ namespace gam300 {
 
             }
         }
+        else if constexpr (std::is_same_v<componentType, MeshComponent>) {
+            // rigidBody 
+            if (MeshComponent* mesh = ImguiEcsRef.getComponent<MeshComponent>(selectedEntityID)) {
+
+                if (mesh)
+                {
+                    ImGui::Separator();
+
+                   
+                }
+
+            }
+            }
 
 
 

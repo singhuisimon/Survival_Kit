@@ -966,6 +966,8 @@ namespace gam300 {
                 }
             }
 
+     
+
             // ===================== Check for Mesh component =====================
             if (auto serializer = m_component_serializers.find("MeshComponent");
                 serializer != m_component_serializers.end()) {
