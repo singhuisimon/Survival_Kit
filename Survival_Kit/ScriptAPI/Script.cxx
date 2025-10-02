@@ -1,6 +1,8 @@
 #include "Script.hxx"
 #include "../ScriptCore/Application.h"
 
+
+
 namespace ScriptAPI
 {
     TransformComponent Script::GetTransformComponent()
