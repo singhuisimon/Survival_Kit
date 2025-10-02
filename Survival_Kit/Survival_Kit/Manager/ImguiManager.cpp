@@ -1245,7 +1245,7 @@ namespace gam300 {
             }
         }
         else if constexpr (std::is_same_v<componentType, AudioComponent>) {
-            // rigidBody 
+            // audio
             if (AudioComponent* audio = ImguiEcsRef.getComponent<AudioComponent>(selectedEntityID)) {
 
                 if (audio)
@@ -1261,6 +1261,97 @@ namespace gam300 {
                     if (ImGui::RadioButton("SFX", currentType == 1)) {
                         audio->setType(AudioType::SFX);
                     }
+
+                    ImGui::Separator();
+                    ImGui::Text("Play State:");
+                    PlayState playState = audio->getPlayState();
+                    if (ImGui::RadioButton("Play", playState == PlayState::PLAY)) {
+                        audio->setPlayState(PlayState::PLAY);
+                    }
+                    if (ImGui::RadioButton("Pause", playState == PlayState::PAUSE)) {
+                        audio->setPlayState(PlayState::PAUSE);
+                    }
+                    if (ImGui::RadioButton("Stop", playState == PlayState::STOP)) {
+                        audio->setPlayState(PlayState::STOP);
+                    }
+
+                    ImGui::Separator();
+                    ImGui::Text("Volume:");
+                    float volume = audio->getVolume();
+                    if (ImGui::DragFloat("Volume", &volume, 0.001f, 0.f, 1.f)) {
+                        audio->setVolume(volume);
+                    }
+
+                    ImGui::Separator();
+                    ImGui::Text("Pitch:");
+                    float pitch = audio->getPitch();
+                    if (ImGui::DragFloat("Pitch", &pitch, 0.001f, 0.f, 1.f)) {
+                        audio->setPitch(pitch);
+                    }
+
+                    ImGui::Separator();
+                    ImGui::Text("Looping:");
+                    bool looping = audio->isLooping();
+                    if (ImGui::Checkbox("Looping", &looping)) {
+                        audio->setLooping(looping);
+                    }
+
+                    ImGui::Separator();
+                    ImGui::Text("Mute:");
+                    bool mute = audio->isMute();
+                    if (ImGui::Checkbox("Mute", &mute)) {
+                        audio->setMute(mute);
+                    }
+
+                    ImGui::Separator();
+                    ImGui::Text("3D:");
+                    bool is_3d = audio->is3D();
+                    if (ImGui::Checkbox("3D", &is_3d)) {
+                        audio->setIs3D(is_3d);
+                    }
+
+                    ImGui::Separator();
+
+                    std::string advice = "Max Distance needs to be higher than Min Distance to have attenuation";
+                    ImGui::TextDisabled("(i)");
+                    if (ImGui::IsItemHovered())
+                    {
+                        ImGui::BeginTooltip();
+                        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+                        ImGui::TextUnformatted(advice.c_str());
+                        ImGui::PopTextWrapPos();
+                        ImGui::EndTooltip();
+                    }
+
+                    // Disable only if not 3D
+                    ImGui::BeginDisabled(!is_3d);
+
+                    ImGui::Text("Min Distance:");
+                    float min_distance = audio->getMinDistance();
+                    if (ImGui::DragFloat("##MinDistance", &min_distance, 0.1f, 0.f)) {
+                        if (is_3d) {
+                            audio->setMinDistance(min_distance);
+                        }
+                        else {
+                            audio->setMinDistance(1.f);
+                        }
+                    }
+
+                    ImGui::Separator();
+
+                    ImGui::Text("Max Distance:");
+                    float max_distance = audio->getMaxDistance();
+                    if (ImGui::DragFloat("##MaxDistance", &max_distance, 0.1f, 0.f)) {
+                        if (is_3d) {
+                            audio->setMaxDistance(max_distance);
+                        }
+                        else {
+                            audio->setMaxDistance(10.f);
+                        }
+                    }
+
+                    ImGui::EndDisabled();
+
                 }
 
             }
