@@ -1423,15 +1423,15 @@ namespace gam300 {
                         rigidBody->setInertiaDiagonal(Vector3D(inertiaDiagonal[0], inertiaDiagonal[1], inertiaDiagonal[2]));
                     }
 
-                    static bool forceMask = true;
-                    if (ImGui::Checkbox("ForceMask", &forceMask)) {
-                        rigidBody->setForceMask(forceMask ? 0xFFFFFFFFu : 0u);
-                    }
+                    //static bool forceMask = true;
+                    //if (ImGui::Checkbox("ForceMask", &forceMask)) {
+                    //    rigidBody->setForceMask(forceMask ? 0xFFFFFFFFu : 0u);
+                    //}
 
-                    static bool torqueMask = true;
-                    if (ImGui::Checkbox("Torque Mask", &torqueMask)) {
-                        rigidBody->setTorqueMask(torqueMask ? 0xFFFFFFFFu : 0u);
-                    }
+                    //static bool torqueMask = true;
+                    //if (ImGui::Checkbox("Torque Mask", &torqueMask)) {
+                    //    rigidBody->setTorqueMask(torqueMask ? 0xFFFFFFFFu : 0u);
+                    //}
 
                     //TODO: implement layer once the layer is done
 

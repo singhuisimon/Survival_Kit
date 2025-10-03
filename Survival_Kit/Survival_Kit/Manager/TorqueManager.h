@@ -140,6 +140,8 @@ namespace gam300
         unsigned    FindMaskByName(const std::string &name) const;
         std::vector<std::pair<unsigned, std::string>> ListMaskNames() const;
         Vector3D    CalculateTorqueByMaskName(const std::string &name) const;
+        const std::vector<std::unique_ptr<Torque>> &GetTorques() const;
+
     };
 }
 

@@ -132,7 +132,7 @@ namespace gam300
 
 		// velocity source for drag, etc.
 		void    SetCurrentVelocity(const Vector3D &velocity);
-		const   Vector3D &GetCurrentVelocity() const;
+		Vector3D const &GetCurrentVelocity() const;
 
 		// Registers/overwrites the display name for a mask
 		void        RegisterMaskName(unsigned mask, const std::string &name);
@@ -147,6 +147,7 @@ namespace gam300
 
 		// Convenience: compute using a registered mask name (0 => no-op)
 		Vector3D    CalculateForceByMaskName(const std::string &name) const;
+		std::vector<std::unique_ptr<Force>> const &GetForces() const;
 	};
 }
 

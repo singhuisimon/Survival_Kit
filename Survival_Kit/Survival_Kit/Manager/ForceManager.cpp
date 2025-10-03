@@ -277,4 +277,10 @@ namespace gam300
         if (mask == 0u) return Vector3D(0.0f, 0.0f, 0.0f);
         return CalculateForceByMask(mask);
     }
+
+    std::vector<std::unique_ptr<Force>> const &ForceManager::GetForces() const {
+        return forces;
+    }
+
+
 } // namespace gam300
