@@ -1,30 +1,23 @@
-/**
- * @file TransformSystem.h
- * @brief RAII Wrappers for GPU resources (OpenGL based).
- * @details Contains the prototype of RAII wrappers for GPU resources like vertex array objects and buffer objects.
- * @author
- * @date
- * Copyright (C) 2025 DigiPen Institute of Technology.
- * Reproduction or disclosure of this file or its contents without the
- * prior written consent of DigiPen Institute of Technology is prohibited.
- */
 #pragma once
 
-#ifndef __TRANSFORM_SYSTEM_H__
-#define __TRANSFORM_SYSTEM_H__
+#include <unordered_map>
 
 #include "../System/System.h"
 #include "../Component/Transform3D.h"
+#include "../Component/MeshComponent.h"
+#include "../Component/RenderComponent.h"
+#include "../Utility/Constant.h"
+#include "../Graphics/Renderer.h"
 
-namespace gam300{
+namespace gam300 {
 
-	class TransformSystem : public ComponentSystem<Transform3D> {
-      
+	class RenderSystem : public ComponentSystem<Transform3D, MeshComponent> {
+
 	public:
         /**
-         * @brief Constructor for TransformSystem.
-         */
-        TransformSystem();
+        * @brief Constructor for RenderSystem.
+        */
+        RenderSystem();
 
         /**
          * @brief Initialize the system.
@@ -51,16 +44,10 @@ namespace gam300{
         void process_entity(EntityID entity_id) override;
 
     private:
+        Camera3D              m_camera;
+        Light                 m_light;
 
-        /**
-         * @brief Propagate transformations from parent to children.
-         * @param root is the root transformation to propagate from.
-         */
-        void propagate(EntityID root);
+        std::vector<DrawItem> m_draw_list; 
 	};
 
-
 }
-
-
-#endif // !__TRANSFORM_SYSTEM_H__

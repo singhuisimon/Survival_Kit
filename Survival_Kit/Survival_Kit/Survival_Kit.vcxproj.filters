@@ -40,6 +40,8 @@
     <ClCompile Include="Graphics\Sampler.cpp" />
     <ClCompile Include="Graphics\Texture.cpp" />
     <ClCompile Include="Graphics\Common.cpp" />
+    <ClCompile Include="Component\RenderComponent.cpp" />
+    <ClCompile Include="System\RenderSystem.cpp" />
     <ClCompile Include="System\MovementSystem.cpp" />
     <ClCompile Include="Component\AudioComponent.cpp" />
     <ClCompile Include="System\AudioSystem.cpp" />
@@ -55,6 +57,7 @@
     <ClCompile Include="Pipeline\Importers\SceneImporter.cpp" />
     <ClCompile Include="IMGUI\ImGuizmo.cpp" />
     <ClCompile Include="Manager\PrefabManager.cpp" />
+    <ClCompile Include="Graphics\Renderer.cpp" />
     <ClCompile Include="Component\Script.cpp" />
     <ClCompile Include="Component\Bullet.cpp" />
     <ClCompile Include="Manager\DescriptorFileManager.cpp" />
@@ -73,6 +76,7 @@
     <ClCompile Include="Compiler\MeshCompiler.cpp" />
     <ClCompile Include="Compiler\AudioCompiler.cpp" />
     <ClCompile Include="Compiler\ShadowCompiler.cpp" />
+    <ClCompile Include="Component\TextureComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component\Component.h" />
@@ -128,6 +132,8 @@
     <ClInclude Include="Graphics\stb_image.h" />
     <ClInclude Include="Graphics\Common.h" />
     <ClInclude Include="Graphics\SharedGraphics.h" />
+    <ClInclude Include="Component\RenderComponent.h" />
+    <ClInclude Include="System\RenderSystem.h" />
     <ClInclude Include="System\MovementSystem.h" />
     <ClInclude Include="Component\AudioComponent.h" />
     <ClInclude Include="System\AudioSystem.h" />
@@ -146,6 +152,8 @@
     <ClInclude Include="Pipeline\Importers\ShaderImporter.h" />
     <ClInclude Include="Pipeline\Importers\SceneImporter.h" />
     <ClInclude Include="IMGUI\ImGuizmo.h" />
+    <ClInclude Include="Graphics\Renderer.h" />
+    <ClInclude Include="Graphics\DrawItem.h" />
     <ClInclude Include="Component\Script.h" />
     <ClInclude Include="Component\Bullet.h" />
     <ClInclude Include="Manager\DescriptorFileManager.h" />
@@ -159,6 +167,9 @@
     <ClInclude Include="System\ScriptSystem.h" />
     <ClInclude Include="Manager\TracyManager.h" />
     <ClInclude Include="Component\MeshComponent.h" />
+    <ClInclude Include="Component\TextureComponent.h" />
+    <ClInclude Include="Graphics\RenderPass.h" />
+    <ClInclude Include="Graphics\Renderbuffer.h" />
     <ClInclude Include="Compiler\ResourceCompiler.h" />
     <ClInclude Include="Compiler\TextureCompiler.h" />
     <ClInclude Include="Compiler\MeshCompiler.h" />

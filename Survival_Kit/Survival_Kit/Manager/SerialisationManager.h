@@ -112,6 +112,16 @@ namespace gam300 {
     };
 
     /**
+    * @brief Serializer for TextureComponent components.
+    * @author Tan Jun Rui
+    */
+    class TextureComponentSerializer : public IComponentSerializer {
+    public:
+        std::string serialize(Component* component) override;
+        Component*  deserialize(EntityID entityId, const std::string& jsonData) override;
+    };
+
+    /**
     * @brief Serializer for MeshComponent components.
     * @author Chua Wen Bin Kennys
     */

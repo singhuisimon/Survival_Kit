@@ -27,6 +27,7 @@
 
 #include "../Component/Script.h"
 #include "../Component/MeshComponent.h"
+#include "../Component/TextureComponent.h"
 #include <fstream>
 #include <sstream>
 #include <functional>
@@ -519,6 +520,44 @@ namespace gam300 {
         return mesh_comp;
     }
 
+    // ==================== TextureComponent Serializer ====================
+    std::string TextureComponentSerializer::serialize(Component* component ) {
+        
+        // Prepare texture component for serializing 
+        TextureComponent* tex_comp = static_cast<TextureComponent*>(component);
+        if (!tex_comp) {
+            return "{}";
+        }
+
+        // Serializing texture component data
+        std::stringstream ss;
+        ss << "{\n";
+        ss << "          \"guid\": \"" << tex_comp->getGUID() << "\",\n";
+        ss << "          \"texture_handle\": " << tex_comp->getTextureHandle() << ",\n";
+        ss << "        }";
+        return ss.str();
+    }
+
+    // TextureComponentSerializer implementation
+    Component* TextureComponentSerializer::deserialize(EntityID entityId, const std::string& jsonData) {
+
+        std::string guid = SerialisationManager::extractQuotedValue(jsonData, "guid");
+
+        uint16_t texture_handle = 0;
+        std::string texture_handle_data = SerialisationManager::extractNumberValue(jsonData, "texture_handle");
+        if (!texture_handle_data.empty()) {
+            try {
+                texture_handle = static_cast<uint16_t>(std::stoi(texture_handle_data));
+            }
+            catch (const std::exception&) {
+                LM.writeLog("TextureComponentSerializer::deserialize() - Fail to parse texture handle");
+            }
+        }
+
+        TextureComponent* tex_comp = EM.addComponent<TextureComponent>(entityId, guid, texture_handle);
+        return tex_comp;
+    }
+
     // ==================== Bullet Serializer ====================
     std::string BulletSerializer::serialize(Component* component)
     {
@@ -685,7 +724,23 @@ namespace gam300 {
             }
             });
 
-		// ==============Register Bullet component serializers==========================
+        // ==============Register TextureComponent component serializers==========================
+        registerComponentSerializer("TextureComponent", std::make_shared<TextureComponentSerializer>());
+
+        registerComponentCreator("TextureComponent", [this](EntityID entityId, const std::string& componentData) {
+            auto serializer = m_component_serializers["TextureComponent"];
+            if (serializer) {
+                serializer->deserialize(entityId, componentData);
+                LM.writeLog("TextureComponent created for entity %d", entityId);
+            }
+            else {
+                LM.writeLog("Texture Component serializer not found for entity &d", entityId);
+            }
+            });
+
+        // ==============Register Bullet component serializers==========================
+        registerComponentSerializer("Bullet", std::make_shared<BulletSerializer>());
+
         registerComponentCreator("Bullet", [this](EntityID entityId, const std::string& componentData) {
             auto serializer = m_component_serializers["Bullet"];
             if (serializer) {
@@ -697,7 +752,8 @@ namespace gam300 {
             }
             });
 
-
+        // Log startup
+        LM.writeLog("SerialisationManager::startUp() - Serialisation Manager started successfully");
         return 0;
     }
 
@@ -1050,6 +1106,17 @@ namespace gam300 {
                     hasComponents = true;
                 }
             }
+
+            // ===================== Check for Texture component =====================
+            if (auto serializer = m_component_serializers.find("TextureComponent");
+                serializer != m_component_serializers.end()) {
+                if (TextureComponent* tex = EM.getComponent<TextureComponent>(entity.get_id())) {
+                    componentStrings.push_back(getIndent(4) + "\"TextureComponent\": " + serializer->second->serialize(tex));
+                    hasComponents = true;
+                }
+
+
+            }
            
             // ===================== Check for Bullet component =====================
             if (auto serializer = m_component_serializers.find("Bullet");
@@ -1060,6 +1127,9 @@ namespace gam300 {
                     hasComponents = true;
                 }
             }
+
+
+            // TODO: Add more component types here as needed
 
             // Write all components with proper comma separation
             for (size_t j = 0; j < componentStrings.size(); ++j) {

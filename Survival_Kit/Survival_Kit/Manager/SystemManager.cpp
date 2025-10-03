@@ -10,6 +10,7 @@
  */
 
 #include "../System/System.h"
+#include "../Tracy/tracy/Tracy.hpp"
 
 namespace gam300 {
 
@@ -56,9 +57,16 @@ namespace gam300 {
 
     // Update all systems
     void SystemManager::update_systems(float dt) {
+
+        ZoneScopedN("SystemManager::update_systems");
+
         // Only update active systems
         for (auto& system : m_systems) {
             if (system->is_active()) {
+
+                ZoneScoped;// N("Currently updating active systems");
+                TracyMessage(system->get_name().c_str(), system->get_name().length());
+
                 system->update(dt);
             }
         }

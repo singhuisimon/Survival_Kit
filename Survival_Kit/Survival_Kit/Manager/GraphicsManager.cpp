@@ -15,6 +15,8 @@
 #include <glm-0.9.9.8/glm/gtc/quaternion.hpp>
 #include <glm-0.9.9.8/glm/gtx/quaternion.hpp>
 #include "../Component/Transform3D.h"
+#include "../Graphics/Texture.h"
+
 #include "../Component/MeshComponent.h"
 
 namespace gam300 {
@@ -45,6 +47,14 @@ namespace gam300 {
         else {
             LM.writeLog("GraphicsManager::startUp(): GLAD initialized successfully.");
         }
+
+        m_renderer.setup();
+
+#if 0
+        TracyGpuContext; //creates the GPU timeline in Tracy
+
+        glGenQueries(GPU_QUERY_COUNT, gpuStartQueries);
+        glGenQueries(GPU_QUERY_COUNT, gpuEndQueries);
 
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         
@@ -170,6 +180,7 @@ namespace gam300 {
         meshStorage.push_back(std::move(planeGL));
         meshStorage.push_back(std::move(sphereGL));
 
+#endif
 
         // Log startup
         LM.writeLog("GraphicsManager::startUp() - Graphics Manager started successfully");
@@ -181,12 +192,6 @@ namespace gam300 {
         // Log shutdown
         LM.writeLog("GraphicsManager::shutDown() - Shutting down Graphics Manager");
 
-        // Reset/Clear anything if needed
-
-        //// Clear stored states
-        //m_key_states.clear();
-        //m_prev_key_states.clear();
-
         // Call parent's shutDown()
         Manager::shutDown();
     }
@@ -194,16 +199,14 @@ namespace gam300 {
     // Update input states, should be called once per frame
     void GraphicsManager::update() {
 
-        // update loop 
-        /*
-        to include:
-        -
-        -
-        -
-        -
-        -
-        */
+#if 0
+        ZoneScopedN("GraphicsManager::update");  //CPU zone
+        TracyGpuZone("FrameRender");             // GPU Zone (entire frame)
 
+        int q = currentQueryIndex;
+
+        // Start GPU timer
+        glQueryCounter(gpuStartQueries[q], GL_TIMESTAMP);
         // Temporary input for cursor to move camera
         if (IM.isKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
 
@@ -229,8 +232,6 @@ namespace gam300 {
                 main_camera.cameraOnScroll(IM.getScrollY(), &shadersStorage[0]);
             }
         }
-
-
 
         // KEYBOARD: Camera control with arrow keys
         float keyboardSensitivity = 8.0f; // Adjust this value for keyboard speed
@@ -260,20 +261,23 @@ namespace gam300 {
             main_camera.cameraOnCursor(keyDeltaX, keyDeltaY, &shadersStorage[0]);
         }
 
-        // Set up shader program
-        shadersStorage[0].programUse();
+        {
+            TracyGpuZone("Camera + Light Setup");
 
-        // Temporary transformations for camera
-        //shadersStorage[0].setUniform("M", transform.getTransformationMatrix()); // Model transform
-        shadersStorage[0].setUniform("V", main_camera.getLookAt()); // View transform
-        shadersStorage[0].setUniform("P", main_camera.getPerspective()); // Perspective transform
+            // Set up shader program
+            shadersStorage[0].programUse();
 
-        // Set uniform to shader after update light values
-        shadersStorage[0].setUniform("light.position", main_light.getLightPos());       // Position
-        shadersStorage[0].setUniform("light.La", main_light.getLightAmbient());         // Ambient
-        shadersStorage[0].setUniform("light.Ld", main_light.getLightDiffuse());         // Diffuse
-        shadersStorage[0].setUniform("light.Ls", main_light.getLightSpecular());        // Specular
+            // Temporary transformations for camera
+            //shadersStorage[0].setUniform("M", transform.getTransformationMatrix()); // Model transform
+            shadersStorage[0].setUniform("V", main_camera.getLookAt()); // View transform
+            shadersStorage[0].setUniform("P", main_camera.getPerspective()); // Perspective transform
 
+            // Set uniform to shader after update light values
+            shadersStorage[0].setUniform("light.position", main_light.getLightPos());       // Position
+            shadersStorage[0].setUniform("light.La", main_light.getLightAmbient());         // Ambient
+            shadersStorage[0].setUniform("light.Ld", main_light.getLightDiffuse());         // Diffuse
+            shadersStorage[0].setUniform("light.Ls", main_light.getLightSpecular());        // Specular
+        }
         //Temporary input for light cursor
         if (IM.isKeyPressed(GLFW_KEY_L)) {
             //std::cout << IM.getMouseDeltaX() << std::endl;
@@ -282,16 +286,23 @@ namespace gam300 {
             }
         }
 
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LESS); // Default comparison
-        glClearDepth(1.0f);
-        
+        {
+            TracyGpuZone("Frame Setup");
+            glEnable(GL_DEPTH_TEST);
+            glDepthFunc(GL_LESS); // Default comparison
+            glClearDepth(1.0f);
 
-        // Bind framebuffer object for IMGUI viewport
-        glBindFramebuffer(GL_FRAMEBUFFER, imgui_fbo->handle());
+            // Bind framebuffer object for IMGUI viewport
+            glBindFramebuffer(GL_FRAMEBUFFER, imgui_fbo->handle());
 
-        // Clear the color and depth buffer
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
+        }
+
+        {
+
+            TracyGpuZone("Clear Buffers");
+            // Clear the color and depth buffer
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        }
 
         // Enable choosing of mesh
         if (IM.isKeyPressed(GLFW_KEY_1)) {
@@ -342,6 +353,8 @@ namespace gam300 {
         const auto transform_entities_IDs = EM.getEntitiesWithComponent<Transform3D>();
         for (const auto entity_id : transform_entities_IDs) {
 
+            TracyGpuZone("Draw Entity");
+
             // Get entity's transform component using ID
             if (EM.hasComponent<Transform3D>(entity_id)) { // Extra check just in case 
                 Transform3D* transform = EM.getComponent<Transform3D>(entity_id);
@@ -386,6 +399,29 @@ namespace gam300 {
 
         // Unbind framebuffer object
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        // End GPU timer
+        glQueryCounter(gpuEndQueries[q], GL_TIMESTAMP);
+
+        TracyGpuCollect; // <-- flush GPU timeline to Tracy
+
+        // == Custom GPU frame time plot ==
+        int prev = (q + 1) % GPU_QUERY_COUNT;
+        GLint available = 0;
+        glGetQueryObjectiv(gpuEndQueries[prev], GL_QUERY_RESULT_AVAILABLE, &available);
+        if (available) {
+            GLuint64 startTime = 0, endTime = 0;
+            glGetQueryObjectui64v(gpuStartQueries[prev], GL_QUERY_RESULT, &startTime);
+            glGetQueryObjectui64v(gpuEndQueries[prev], GL_QUERY_RESULT, &endTime);
+
+            double gpuTimeMs = (endTime - startTime) / 1e6; // ns ? ms
+            TracyPlot("GPU Frame Time (ms)", (float)gpuTimeMs);
+        }
+
+        // Move to next slot
+        currentQueryIndex = (currentQueryIndex + 1) % GPU_QUERY_COUNT;
+#endif
+
     }
 
     bool GraphicsManager::loadShaderPrograms(std::vector<std::pair<std::string, std::string>> shaders) {

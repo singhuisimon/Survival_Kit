@@ -26,10 +26,7 @@
 
 // To support graphical operations
 #include "../Utility/Constant.h"
-#include "../Graphics/ShaderProgram.h"
-#include "../Graphics/Camera.h"
-#include "../Graphics/Light.h"
-#include "../Graphics/Shape.h"
+#include "../Graphics/Renderer.h"
 #include "../Graphics/Material.h"
 #include "../Graphics/Framebuffer.h" 
 #include "../Graphics/Texture.h"
@@ -37,6 +34,10 @@
 
 // For IMGUI operations
 #include "ImguiManager.h"
+
+// For Tracy operations
+#include "../Tracy/tracy/Tracy.hpp"
+#include "../Tracy/tracy/TracyOpenGL.hpp"
 
 // KENNY TESTING: For testing cursor input
 #include "InputManager.h"
@@ -95,6 +96,13 @@ namespace gam300 {
         // Render type
         bool isPBR = false;
 
+        // Query Handles
+        GLuint gpuStartQueries[GPU_QUERY_COUNT]{};
+        GLuint gpuEndQueries[GPU_QUERY_COUNT]{};
+        int currentQueryIndex = 0;
+
+        Renderer m_renderer;
+
     public:
         /**
          * @brief Get the singleton instance of the GraphicsManager.
@@ -121,19 +129,21 @@ namespace gam300 {
         // To load all shader program at start up (the pair of 2 strings are the vertex and fragment shaders' filepath)
         bool loadShaderPrograms(std::vector<std::pair<std::string, std::string>> shaders);
 
-        GLuint getImguiTex() { return imguiTex; }
-        //GLuint getImguiFbo() { return imguiFbo; }
+        GLuint getImguiTex() const { return m_renderer.get_imgui_texture(); }
+
+        Renderer& getRenderer() { return m_renderer; }
 
         // Get materials storage
-        const std::map<uint16_t, Material>& getMaterialStorage() { return m_material_storage; }
+        const std::vector<Material>& getMaterialStorage() { return m_renderer.getMaterialStorage(); }
 
         // Get meshdata storage
-        const std::vector<MeshData>& getMeshDataStorage() { return m_meshDataStorage; }
+        const std::vector<MeshData>& getMeshDataStorage() { return m_renderer.getMeshDataStorage(); }
 
         // Get texture storage
-        const std::vector<std::optional<Texture>>& getTextureStorage() { return m_textureStorage; }
+        //const std::vector<std::optional<Texture>>& getTextureStorage() { return m_textureStorage; }
+        const std::vector<Texture>& getTextureStorage() { return m_renderer.getTextureStorage(); }
         
-        size_t getMeshCount() const { return meshStorage.size(); }
+        const size_t getMeshCount() const { return m_renderer.mesh_count(); }
 
 
         std::string getMeshName(uint16_t handle) const;

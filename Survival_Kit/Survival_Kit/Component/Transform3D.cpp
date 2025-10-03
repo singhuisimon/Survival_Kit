@@ -21,7 +21,8 @@ namespace gam300 {
 
     // Constructor
     Transform3D::Transform3D(const Vector3D& position, const Vector3D& rotation, const Vector3D& scale)
-        : m_position(position), m_prev_position(position), m_rotation(rotation), m_scale(scale) {
+        : m_position(position), m_prev_position(position), m_rotation(rotation), m_scale(scale), m_parent(INVALID_ENTITY_ID), m_dirtyflag(true)
+    {
         // Initialize with provided values
     }
 
@@ -47,6 +48,7 @@ namespace gam300 {
     void Transform3D::setPosition(const Vector3D& position) {
         m_prev_position = m_position;
         m_position = position;
+        m_dirtyflag = true;
     }
 
     // Translate by offset
@@ -91,25 +93,7 @@ namespace gam300 {
     }
 
     glm::mat4 Transform3D::getTransformationMatrix() const {
-
-        glm::vec3 trl = static_cast<glm::vec3>(m_position);
-        glm::vec3 rot = static_cast<glm::vec3>(m_rotation);
-        glm::vec3 scl = static_cast<glm::vec3>(m_scale);
-
-        glm::mat4 trl_mat = glm::translate(glm::mat4(1.0f), trl);
-        glm::mat4 scl_mat = glm::scale(glm::mat4(1.0f), scl);
-
-        auto quat_x = glm::angleAxis(glm::radians(rot.x), glm::vec3(1.0f, 0.0f, 0.0f));
-        auto quat_y = glm::angleAxis(glm::radians(rot.y), glm::vec3(0.0f, 1.0f, 0.0f));
-        auto quat_z = glm::angleAxis(glm::radians(rot.z), glm::vec3(0.0f, 0.0f, 1.0f));
-
-        auto quat_final = quat_z * quat_y * quat_x;
-
-        glm::mat4 rot_mat = glm::toMat4(quat_final);
-
-        glm::mat4 trans_mat = trl_mat * rot_mat * scl_mat;
-
-        return trans_mat;
+        return m_worldxform_mat;
     }
 
     // Get forward direction vector
@@ -140,6 +124,76 @@ namespace gam300 {
     Vector3D Transform3D::getUp() const {
         // Up is perpendicular to both forward and right
         return Vector3D::cross(getRight(), getForward()).normalize();
+    }
+
+    void Transform3D::setParent(EntityID parent) {
+        m_parent = parent;
+    }
+
+    const EntityID Transform3D::getParent() const {
+        return m_parent;
+    }
+
+    const std::vector<EntityID>& Transform3D::getChildren() const {
+        return m_children;
+    }
+
+    void Transform3D::addChild(EntityID c) {
+        m_children.push_back(c);
+    }
+
+    size_t Transform3D::findChild(EntityID c) const {
+        for (size_t i = 0; i < m_children.size(); ++i) {
+            if (m_children[i] == c)
+                return i;
+        }
+
+        return -1;
+    }
+
+    void Transform3D::removeChild(EntityID c) {
+
+        size_t child_idx = findChild(c);
+
+        if (child_idx != -1) {
+            m_children.erase(m_children.begin() + child_idx);
+        }
+
+    }
+
+    void Transform3D::markDirty(bool dirty) {
+        m_dirtyflag = dirty;
+    }
+
+    bool Transform3D::isDirty() const {
+        return m_dirtyflag;
+    }
+
+    void Transform3D::setTransformationMatrix(glm::mat4& mat) {
+        m_worldxform_mat = mat;
+    }
+
+    glm::mat4 Transform3D::computeLocalTransformationMatrix() const {
+
+        glm::vec3 trl = static_cast<glm::vec3>(m_position);
+        glm::vec3 rot = static_cast<glm::vec3>(m_rotation);
+        glm::vec3 scl = static_cast<glm::vec3>(m_scale);
+
+        glm::mat4 trl_mat = glm::translate(glm::mat4(1.0f), trl);
+        glm::mat4 scl_mat = glm::scale(glm::mat4(1.0f), scl);
+
+        auto quat_x = glm::angleAxis(glm::radians(rot.x), glm::vec3(1.0f, 0.0f, 0.0f));
+        auto quat_y = glm::angleAxis(glm::radians(rot.y), glm::vec3(0.0f, 1.0f, 0.0f));
+        auto quat_z = glm::angleAxis(glm::radians(rot.z), glm::vec3(0.0f, 0.0f, 1.0f));
+
+        auto quat_final = quat_z * quat_y * quat_x;
+
+        glm::mat4 rot_mat = glm::toMat4(quat_final);
+
+        glm::mat4 trans_mat = trl_mat * rot_mat * scl_mat;
+
+        return trans_mat;
+
     }
 
 } // namespace gam300

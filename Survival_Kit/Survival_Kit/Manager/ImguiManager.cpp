@@ -24,6 +24,7 @@
 
 #include "../Component/Transform3D.h"
 #include "../Component/RigidBody.h"
+#include "../Component/RenderComponent.h"
 #include "../Component/Collider.h"
 #include "../Component/AudioComponent.h"
 #include "../Component/MeshComponent.h"
@@ -50,6 +51,8 @@ namespace gam300 {
     static bool prefab_editor = false;
     //static std::filesystem::directory_entry currentAsset;
     static std::filesystem::directory_entry selectedPrefab;
+
+    static int tex_index = -1;
 
     // Asset Type names for display
     const char* ImguiManager::getAssetTypeName(AssetType type)
@@ -88,9 +91,10 @@ namespace gam300 {
     //Prefab counter index
     static int counter = 0;
 
-    ImguiManager::ImguiManager() : ImguiEcsRef(EM), ImguiGraphicRef(GFXM) {}
+    ImguiManager::ImguiManager() : ImguiEcsRef(EM), ImguiGraphicRef(GFXM), m_descriptorEditor(nullptr) {}
 
-    ImguiManager::ImguiManager(ECSManager& ECS, GraphicsManager& GFM) : ImguiEcsRef(ECS), ImguiGraphicRef(GFM) {
+    ImguiManager::ImguiManager(ECSManager& ECS, GraphicsManager& GFM) : ImguiEcsRef(ECS), ImguiGraphicRef(GFM), m_descriptorEditor(nullptr) {
+        saveAsDefaultName[0] = '\0';
         setType("IMGUI_Manager");
     }
 
@@ -172,7 +176,7 @@ namespace gam300 {
         }
     }
 
-    void ImguiManager::displayFileList(bool& fileWindow, std::string& shownFile) {
+    void ImguiManager::displayFileList() {
 
         // ================ When Open File ===========================
         // scenePath: /Survival_Kit/Assets/Scene
@@ -286,8 +290,8 @@ namespace gam300 {
                 {
                     Entity& createNewEntity = ImguiEcsRef.createEntity("New Entity");
 
-                    // always add default transform3D
-                    if (!ImguiEcsRef.hasComponent<Transform3D>(createNewEntity.get_id())) {
+                    if (!ImguiEcsRef.hasAllComponents<MeshComponent, Transform3D>(createNewEntity.get_id())) {
+                        ImguiEcsRef.addComponent<MeshComponent>(createNewEntity.get_id());
                         ImguiEcsRef.addComponent<Transform3D>(createNewEntity.get_id());
                     }
 
@@ -603,10 +607,10 @@ namespace gam300 {
     }
 #endif
 
-    void ImguiManager::showPrefabsPanel(EntityID selectedEntity)
-    {
-        //if (ImGui::Begin)
-    }
+    //void ImguiManager::showPrefabsPanel(EntityID selectedEntity)
+    //{
+    //    //if (ImGui::Begin)
+    //}
 
     void ImguiManager::displayTopMenu()
     {
@@ -675,7 +679,7 @@ namespace gam300 {
         // ========================== Open top menu =============================  
         if (fileWindow) {
 
-            IMGUIM.displayFileList(fileWindow, shownFile); 
+            IMGUIM.displayFileList(); 
         }
 
         // newPath: /Survival_Kit/Assets/Scene/
@@ -774,7 +778,7 @@ namespace gam300 {
         //Vector2D dimension{ 0,0 };
 
         glfwGetWindowSize(&window, &width, &height);
-        return Vector2D(width, height);
+        return Vector2D(static_cast<float>(width), static_cast<float>(height));
         //std::cout << width << ", " << "height\n";
     }
 
@@ -801,7 +805,7 @@ namespace gam300 {
                 viewportSize,
                 ImVec2(0, 1), ImVec2(1, 0));
 
-            handleViewPortClick(imagePos, viewportSize);
+            handleViewPortClick(imagePos);
         }
 
         //ImVec2 mousePos, viewportSize;
@@ -914,7 +918,7 @@ namespace gam300 {
         }
 
         static std::string selectedFolder = ""; // currently selected folder type e.g. scene, prefab
-        static int selectedAssetIndex = -1;
+        //static int selectedAssetIndex = -1;
         //std::cout << "selectedFolder: " << selectedFolder << "\n";
         // ---set up 2 column ---
         ImGui::Columns(2, nullptr, true);
@@ -1008,6 +1012,7 @@ namespace gam300 {
 
             }
 
+            int texture_count = -1;
             ImGui::Columns(itemsPerRow, nullptr, false);
             for (size_t i = 0; i < assetsList.size(); ++i)
             {
@@ -1015,10 +1020,14 @@ namespace gam300 {
                 std::string filename = assetEntry.path().filename().string();
                 std::string fileNamePath = assetEntry.path().string();
 
+                if (assetEntry.path().extension().string() == ".png" || assetEntry.path().extension().string() == ".jpeg") //to open the image
+                {
+                    ++texture_count;
+                }
                 ImGui::PushID(filename.c_str());
                 if (ImGui::Button(filename.c_str(), ImVec2(thumbnailSize, thumbnailSize))) {
 
-                    selectedAssetIndex = (int)i;
+                    selectedAssetIndex = static_cast<int>(i);
                     if (m_descriptorEditor->LoadDescriptor(AM.getAssetIdByFilename(filename), m_currentDescriptor)) {
                         m_showDescriptorPanel = true;
                         LM.writeLog("Loaded descriptor for asset: %s", filename.c_str());
@@ -1027,7 +1036,7 @@ namespace gam300 {
                         LM.writeLog("Failed to load descriptor for asset ID: %llu", AM.getAssetIdByFilename(filename));
                     }
                    
-                    selectedAssetIndex = i;
+                    selectedAssetIndex = static_cast<int>(i);
                     shownFile = fileNamePath;
                     // to ge the type of the file e.g. .scn, .wav
                     std::string extension = assetEntry.path().extension().string();
@@ -1043,9 +1052,11 @@ namespace gam300 {
                     }
                     if (extension == ".png" || extension == ".jpeg") //to open the image
                     {
-                        //asset_editor = true;
-                        //currentAsset = assetEntry;
-                        //m_showDescriptorPanel = true;
+                        tex_index = texture_count; 
+                        
+                    }
+                    else {
+                        tex_index = -1;
                     }
                     if (extension == ".prefab") //to open the image
                     {
@@ -1127,6 +1138,44 @@ namespace gam300 {
         if (!m_showDescriptorPanel) return;
 
         if (ImGui::Begin("Descriptor Editor", &m_showDescriptorPanel)) {
+
+            ImGui::Columns(2, nullptr, true);
+            auto& texture_store = GFXM.getTextureStorage();
+
+            if (tex_index != -1) {
+                // Get texture size
+                float tex_w = static_cast<float>(texture_store[tex_index].width());
+                float tex_h = static_cast<float>(texture_store[tex_index].height());
+
+                // Get window size
+                float win_w = static_cast<float>(getWindowWidthHeight().x);
+                float win_h = static_cast<float>(getWindowWidthHeight().y) / 2.0f;
+
+                // Compute texture aspect ratio
+                float aspect = tex_w / tex_h;
+
+                // Compute viewport size preserving aspect ratio
+                ImVec2 viewportSize;
+                if (win_w / win_h > aspect) {
+                    viewportSize.x = win_h * aspect;
+                    viewportSize.y = win_h;
+                }
+                else {
+                    viewportSize.x = win_w;
+                    viewportSize.y = win_w / aspect;
+                }
+
+                // Draw the image
+                ImGui::Image(
+                    (ImTextureID)(intptr_t)((GLuint)texture_store[tex_index].handle()),
+                    viewportSize,
+                    ImVec2(0, 1), ImVec2(1, 0)
+                );
+
+            }
+
+            ImGui::NextColumn();
+            
             // Display read-only asset info
             ImGui::SeparatorText("Asset Information");
             ImGui::Text("Asset ID: %llu", m_currentDescriptor.assetId);
@@ -1240,6 +1289,8 @@ namespace gam300 {
             if (m_currentDescriptor.isDirty) {
                 ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Modified");
             }
+
+            ImGui::Columns(1);
         }
 
         ImGui::End();
@@ -1257,7 +1308,7 @@ namespace gam300 {
         }
     }
 
-    void ImguiManager::handleViewPortClick(ImVec2 mousePos, ImVec2 viewportSize)
+    void ImguiManager::handleViewPortClick(ImVec2 mousePos)
     {
         // Check the mouse hover position for reference
         if (ImGui::IsItemHovered())
@@ -1269,7 +1320,7 @@ namespace gam300 {
             mouseInViewportPos.y = mouseScreen.y - mousePos.y;
 
             ImGui::Text("Mouse local: (%.1f, %.1f)", mouseInViewportPos.x, mouseInViewportPos.y);
-            float aspectRatio = viewportSize.x / viewportSize.y;
+            
 
         }
     }
@@ -1607,13 +1658,12 @@ namespace gam300 {
                     }
                     else 
                     {
-                        for (const auto& [handle, material] : materials) 
-                        {
+                        for (uint16_t handle = 0; handle < materials.size(); ++handle) {
                             std::string matName = "Material " + std::to_string(handle);
                             bool selected = (currMaterial == handle);
                             if (ImGui::Selectable(matName.c_str(), selected)) {
                                 mesh->setMaterialHandle(handle);
-                               
+
                             }
                             if (selected) {
                                 ImGui::SetItemDefaultFocus();
@@ -1644,9 +1694,160 @@ namespace gam300 {
             }
 
             TRACY.update();
+            ImGui::Separator();
+
+            // Use FPS calculated in Main.cpp for consistency
+            float currentFPS = (lastReceivedFPS > 0.0f) ? lastReceivedFPS : ImGui::GetIO().Framerate;
+            float currentFrameTime = 1000.0f / currentFPS; //converting to milliseconds
+
+            //history statistics
+            fpsHistory[fpsHistoryOffset] = currentFPS;
+            frameTimeHistory[fpsHistoryOffset] = currentFrameTime;
+            fpsHistoryOffset = (fpsHistoryOffset + 1) % FPS_HISTORY_SIZE;
+
+            //update min/max statistics
+            minFPS = (currentFPS < minFPS) ? currentFPS : minFPS;
+            maxFPS = (currentFPS > maxFPS) ? currentFPS : maxFPS;
+            minFrameTime = (currentFrameTime < minFrameTime) ? currentFrameTime : minFrameTime;
+            maxFrameTime = (currentFrameTime > maxFrameTime) ? currentFrameTime : maxFrameTime;
+
+            //calculate average
+            float avgFPS = 0.0f;
+            float avgFrameTime = 0.0f;
+            for (int i = 0; i < FPS_HISTORY_SIZE; i++)
+            {
+                avgFPS += fpsHistory[i];
+                avgFrameTime += frameTimeHistory[i];
+            }
+            avgFPS /= (float)FPS_HISTORY_SIZE;
+            avgFrameTime /= (float)FPS_HISTORY_SIZE;
+
+            //showcase statistics
+            ImGui::Text("Frame Statistics");
+            ImGui::Spacing();
+
+            //create a table to display statistics better
+            if (ImGui::BeginTable("StatsTable", 3, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg))
+            {
+                ImGui::TableSetupColumn("Metric", ImGuiTableColumnFlags_WidthFixed, 120.0f);
+                ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_WidthStretch);
+                ImGui::TableSetupColumn("Unit", ImGuiTableColumnFlags_WidthFixed, 40.0f);
+                ImGui::TableHeadersRow();
+
+                // Average FPS
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                ImGui::Text("Average FPS:");
+                ImGui::TableNextColumn();
+                ImGui::Text("%.1f", avgFPS);
+                ImGui::TableNextColumn();
+                ImGui::Text("fps");
+
+                // Average Frame Time
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                ImGui::Text("Avg Frame Time:");
+                ImGui::TableNextColumn();
+                ImGui::Text("%.2f", avgFrameTime);
+                ImGui::TableNextColumn();
+                ImGui::Text("ms");
+
+                // Min Frame Time
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                ImGui::Text("Min Frame Time:");
+                ImGui::TableNextColumn();
+                ImGui::Text("%.2f", minFrameTime);
+                ImGui::TableNextColumn();
+                ImGui::Text("ms");
+
+                // Max Frame Time
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                ImGui::Text("Max Frame Time:");
+                ImGui::TableNextColumn();
+                ImGui::Text("%.2f", maxFrameTime);
+                ImGui::TableNextColumn();
+                ImGui::Text("ms");
+
+                ImGui::EndTable();
+            }
+
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            //showcase performance graphs section
+            ImGui::Text("Performance Graphs");
+            ImGui::Spacing();
+
+            float graphWidth = ImGui::GetContentRegionAvail().x;
+
+            //FPS graph
+            char fpsOverlay[64];
+            sprintf_s(fpsOverlay, sizeof(fpsOverlay), "FPS - avg %.1f", avgFPS);
+
+            float fpsMinScale = (avgFPS - 30.0f > 0.0f) ? (avgFPS - 30.0f) : 0.0f;
+            float fpsMaxScale = avgFPS + 30.0f;
+
+            ImGui::PlotLines(
+                "##FPS",
+                fpsHistory,
+                FPS_HISTORY_SIZE,
+                fpsHistoryOffset,
+                fpsOverlay,
+                fpsMinScale,
+                fpsMaxScale,
+                ImVec2(graphWidth, 100.0f),
+                sizeof(float)
+            );
+
+            // frame time graph
+            char frameTimeOverlay[64];
+            sprintf_s(frameTimeOverlay, sizeof(frameTimeOverlay), "Frame Time (ms) - avg %.2f", avgFrameTime);
+
+            //dynamic scaling
+            float ftMinScale = (avgFrameTime - 5.0f > 0.0f) ? (avgFrameTime - 5.0f) : 0.0f;
+            float ftMaxScale = avgFrameTime + 5.0f;
+
+            ImGui::PlotLines(
+                "##FrameTime",
+                frameTimeHistory,
+                FPS_HISTORY_SIZE,
+                fpsHistoryOffset,
+                frameTimeOverlay,
+                ftMinScale,
+                ftMaxScale,
+                ImVec2(graphWidth, 100.0f),
+                sizeof(float)
+            );
+
+            ImGui::Spacing();
+            ImGui::Separator();
+
+            // different coloring to indicate performance status
+            ImGui::Spacing();
+            if (currentFPS >= 60.0f)
+                ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Performance: Excellent");
+            else if (currentFPS >= 30.0f)
+                ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Performance: Good");
+            else
+                ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Performance: Poor");
+
+            ImGui::Spacing();
+
+
+
         }
 
         ImGui::End();
+    }
+
+    void ImguiManager::updateFPS(float fps)
+    {
+        lastReceivedFPS = fps;
+        fpsHistory[fpsHistoryOffset] = fps;
+        fpsHistoryOffset = (fpsHistoryOffset + 1) % FPS_HISTORY_SIZE;
     }
 
 }// end of namespace gam300
