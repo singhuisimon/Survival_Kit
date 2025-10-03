@@ -255,34 +255,38 @@ namespace gam300 {
         if (keyPressed) {
             main_camera.cameraOnCursor(keyDeltaX, keyDeltaY, &shadersStorage[0]);
         }
+        {
+            TracyGpuZone("Camera + Light Setup");
+            // Set up shader program
+            shadersStorage[0].programUse();
 
-        // Set up shader program
-        shadersStorage[0].programUse();
+            // Temporary transformations for camera
+            //shadersStorage[0].setUniform("M", transform.getTransformationMatrix()); // Model transform
+            shadersStorage[0].setUniform("V", main_camera.getLookAt()); // View transform
+            shadersStorage[0].setUniform("P", main_camera.getPerspective()); // Perspective transform
 
-        // Temporary transformations for camera
-        //shadersStorage[0].setUniform("M", transform.getTransformationMatrix()); // Model transform
-        shadersStorage[0].setUniform("V", main_camera.getLookAt()); // View transform
-        shadersStorage[0].setUniform("P", main_camera.getPerspective()); // Perspective transform
-
-        // Set uniform to shader after update light values
-        shadersStorage[0].setUniform("light.position", main_light.getLightPos());  // Position
-        shadersStorage[0].setUniform("light.La", main_light.getLightAmbient());        // Ambient
-        shadersStorage[0].setUniform("light.Ld", main_light.getLightDiffuse());        // Diffuse
-        shadersStorage[0].setUniform("light.Ls", main_light.getLightSpecular());        // Specular
-
+            // Set uniform to shader after update light values
+            shadersStorage[0].setUniform("light.position", main_light.getLightPos());  // Position
+            shadersStorage[0].setUniform("light.La", main_light.getLightAmbient());        // Ambient
+            shadersStorage[0].setUniform("light.Ld", main_light.getLightDiffuse());        // Diffuse
+            shadersStorage[0].setUniform("light.Ls", main_light.getLightSpecular());        // Specular
+        }
         //Temporary input for light cursor
         if (IM.isKeyPressed(GLFW_KEY_L)) {
             //std::cout << IM.getMouseDeltaX() << std::endl;
             main_light.lightOnCursor(IM.getMouseDeltaX(), IM.getMouseDeltaY(), &shadersStorage[0]);
         }
 
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LESS); // Default comparison
-        glClearDepth(1.0f);
-        
+        {
+            TracyGpuZone("Frame Setup");
+            glEnable(GL_DEPTH_TEST);
+            glDepthFunc(GL_LESS); // Default comparison
+            glClearDepth(1.0f);
 
-        // Bind framebuffer object for IMGUI viewport
-        glBindFramebuffer(GL_FRAMEBUFFER, imgui_fbo->handle());
+            // Bind framebuffer object for IMGUI viewport
+            glBindFramebuffer(GL_FRAMEBUFFER, imgui_fbo->handle());
+
+        }
 
         {
 
