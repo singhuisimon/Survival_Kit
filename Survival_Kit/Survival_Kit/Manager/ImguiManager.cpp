@@ -1694,9 +1694,160 @@ namespace gam300 {
             }
 
             TRACY.update();
+            ImGui::Separator();
+
+            // Use FPS calculated in Main.cpp for consistency
+            float currentFPS = (lastReceivedFPS > 0.0f) ? lastReceivedFPS : ImGui::GetIO().Framerate;
+            float currentFrameTime = 1000.0f / currentFPS; //converting to milliseconds
+
+            //history statistics
+            fpsHistory[fpsHistoryOffset] = currentFPS;
+            frameTimeHistory[fpsHistoryOffset] = currentFrameTime;
+            fpsHistoryOffset = (fpsHistoryOffset + 1) % FPS_HISTORY_SIZE;
+
+            //update min/max statistics
+            minFPS = (currentFPS < minFPS) ? currentFPS : minFPS;
+            maxFPS = (currentFPS > maxFPS) ? currentFPS : maxFPS;
+            minFrameTime = (currentFrameTime < minFrameTime) ? currentFrameTime : minFrameTime;
+            maxFrameTime = (currentFrameTime > maxFrameTime) ? currentFrameTime : maxFrameTime;
+
+            //calculate average
+            float avgFPS = 0.0f;
+            float avgFrameTime = 0.0f;
+            for (int i = 0; i < FPS_HISTORY_SIZE; i++)
+            {
+                avgFPS += fpsHistory[i];
+                avgFrameTime += frameTimeHistory[i];
+            }
+            avgFPS /= (float)FPS_HISTORY_SIZE;
+            avgFrameTime /= (float)FPS_HISTORY_SIZE;
+
+            //showcase statistics
+            ImGui::Text("Frame Statistics");
+            ImGui::Spacing();
+
+            //create a table to display statistics better
+            if (ImGui::BeginTable("StatsTable", 3, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg))
+            {
+                ImGui::TableSetupColumn("Metric", ImGuiTableColumnFlags_WidthFixed, 120.0f);
+                ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_WidthStretch);
+                ImGui::TableSetupColumn("Unit", ImGuiTableColumnFlags_WidthFixed, 40.0f);
+                ImGui::TableHeadersRow();
+
+                // Average FPS
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                ImGui::Text("Average FPS:");
+                ImGui::TableNextColumn();
+                ImGui::Text("%.1f", avgFPS);
+                ImGui::TableNextColumn();
+                ImGui::Text("fps");
+
+                // Average Frame Time
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                ImGui::Text("Avg Frame Time:");
+                ImGui::TableNextColumn();
+                ImGui::Text("%.2f", avgFrameTime);
+                ImGui::TableNextColumn();
+                ImGui::Text("ms");
+
+                // Min Frame Time
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                ImGui::Text("Min Frame Time:");
+                ImGui::TableNextColumn();
+                ImGui::Text("%.2f", minFrameTime);
+                ImGui::TableNextColumn();
+                ImGui::Text("ms");
+
+                // Max Frame Time
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                ImGui::Text("Max Frame Time:");
+                ImGui::TableNextColumn();
+                ImGui::Text("%.2f", maxFrameTime);
+                ImGui::TableNextColumn();
+                ImGui::Text("ms");
+
+                ImGui::EndTable();
+            }
+
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            //showcase performance graphs section
+            ImGui::Text("Performance Graphs");
+            ImGui::Spacing();
+
+            float graphWidth = ImGui::GetContentRegionAvail().x;
+
+            //FPS graph
+            char fpsOverlay[64];
+            sprintf_s(fpsOverlay, sizeof(fpsOverlay), "FPS - avg %.1f", avgFPS);
+
+            float fpsMinScale = (avgFPS - 30.0f > 0.0f) ? (avgFPS - 30.0f) : 0.0f;
+            float fpsMaxScale = avgFPS + 30.0f;
+
+            ImGui::PlotLines(
+                "##FPS",
+                fpsHistory,
+                FPS_HISTORY_SIZE,
+                fpsHistoryOffset,
+                fpsOverlay,
+                fpsMinScale,
+                fpsMaxScale,
+                ImVec2(graphWidth, 100.0f),
+                sizeof(float)
+            );
+
+            // frame time graph
+            char frameTimeOverlay[64];
+            sprintf_s(frameTimeOverlay, sizeof(frameTimeOverlay), "Frame Time (ms) - avg %.2f", avgFrameTime);
+
+            //dynamic scaling
+            float ftMinScale = (avgFrameTime - 5.0f > 0.0f) ? (avgFrameTime - 5.0f) : 0.0f;
+            float ftMaxScale = avgFrameTime + 5.0f;
+
+            ImGui::PlotLines(
+                "##FrameTime",
+                frameTimeHistory,
+                FPS_HISTORY_SIZE,
+                fpsHistoryOffset,
+                frameTimeOverlay,
+                ftMinScale,
+                ftMaxScale,
+                ImVec2(graphWidth, 100.0f),
+                sizeof(float)
+            );
+
+            ImGui::Spacing();
+            ImGui::Separator();
+
+            // different coloring to indicate performance status
+            ImGui::Spacing();
+            if (currentFPS >= 60.0f)
+                ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Performance: Excellent");
+            else if (currentFPS >= 30.0f)
+                ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Performance: Good");
+            else
+                ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Performance: Poor");
+
+            ImGui::Spacing();
+
+
+
         }
 
         ImGui::End();
+    }
+
+    void ImguiManager::updateFPS(float fps)
+    {
+        lastReceivedFPS = fps;
+        fpsHistory[fpsHistoryOffset] = fps;
+        fpsHistoryOffset = (fpsHistoryOffset + 1) % FPS_HISTORY_SIZE;
     }
 
 }// end of namespace gam300

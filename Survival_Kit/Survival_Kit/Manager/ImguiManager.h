@@ -84,6 +84,20 @@ namespace gam300
 		EditableDescriptor m_currentDescriptor;
 		bool m_showDescriptorPanel = false;
 
+		// performance profile 
+		float lastReceivedFPS = 0.0f;
+		static const int FPS_HISTORY_SIZE = 90;  //store up to 90 frames
+		float fpsHistory[FPS_HISTORY_SIZE] = {};
+		float frameTimeHistory[FPS_HISTORY_SIZE] = {}; //for frame time
+		int fpsHistoryOffset = 0;
+
+		// statistics tracking
+		float minFPS = FLT_MAX;
+		float maxFPS = 0.0f;
+		float minFrameTime = FLT_MAX;
+		float maxFrameTime = 0.0f;
+
+
 	public:
 
 		ImguiManager(ECSManager& ecsManager, GraphicsManager& GFM);
@@ -149,6 +163,8 @@ namespace gam300
 
 		void rescanAssets();
 
+		// for the performance view part
+		void updateFPS(float fps);
 
 
 	};
