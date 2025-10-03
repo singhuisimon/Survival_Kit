@@ -92,6 +92,9 @@ namespace gam300 {
         // Texture flag
         bool textureMode = false;
 
+        // Render type
+        bool isPBR = false;
+
     public:
         /**
          * @brief Get the singleton instance of the GraphicsManager.

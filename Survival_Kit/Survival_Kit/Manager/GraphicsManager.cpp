@@ -108,9 +108,9 @@ namespace gam300 {
 
         // Set light
         main_light = Light(glm::vec3(0.0f, 5.0f, 0.0f),
-            glm::vec3(0.4f, 0.4f, 0.4f),
-            glm::vec3(1.0f, 1.0f, 1.0f),
-            glm::vec3(1.0f, 1.0f, 1.0f));
+                     glm::vec3(0.4f, 0.4f, 0.4f),
+                     glm::vec3(1.0f, 1.0f, 1.0f),
+                     glm::vec3(1.0f, 1.0f, 1.0f));
 
         // Temporarily load materials manually here
         Material mat1 = Material(glm::vec3(0.3f, 0.5f, 0.9f), glm::vec3(0.3f, 0.5f, 0.9f), glm::vec3(0.8f, 0.8f, 0.8f), 100.0f);
@@ -221,7 +221,15 @@ namespace gam300 {
                         &shadersStorage[0]);
                 }
             }
+
+            // Gather input for scrolling
+            double scrollY_offset = IM.getScrollY();
+            if (scrollY_offset != 0) {
+
+                main_camera.cameraOnScroll(IM.getScrollY(), &shadersStorage[0]);
+            }
         }
+
 
 
         // KEYBOARD: Camera control with arrow keys
@@ -269,7 +277,9 @@ namespace gam300 {
         //Temporary input for light cursor
         if (IM.isKeyPressed(GLFW_KEY_L)) {
             //std::cout << IM.getMouseDeltaX() << std::endl;
-            main_light.lightOnCursor(IM.getMouseDeltaX(), IM.getMouseDeltaY(), &shadersStorage[0]);
+            if (IM.isMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT)) {
+                main_light.lightOnCursor(IM.getMouseDeltaX(), IM.getMouseDeltaY(), &shadersStorage[0]);
+            }
         }
 
         glEnable(GL_DEPTH_TEST);
@@ -308,6 +318,20 @@ namespace gam300 {
         }
         else {
             shadersStorage[0].setUniform("isTexture", false);
+        }
+
+        // Choosing BlinnPhong or PBR
+        if (IM.isKeyPressed(GLFW_KEY_B)) {
+            isPBR = false;
+        }
+        if (IM.isKeyPressed(GLFW_KEY_N)) {
+            isPBR = true;
+        }
+        if (isPBR) {
+            shadersStorage[0].setUniform("isPBR", true);
+        }
+        else {
+            shadersStorage[0].setUniform("isPBR", false);
         }
 
         // Default mesh and material handle
