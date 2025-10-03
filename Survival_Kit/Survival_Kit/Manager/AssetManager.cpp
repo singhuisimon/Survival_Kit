@@ -17,6 +17,18 @@ namespace gam300 {
 		return s_mgr;
 	}
 
+	// Helper function convert AssetType to ResourceType
+	ResourceType assetTypeToResourceType(AssetType assetType) {
+		switch (assetType) {
+		case AssetType::Texture: return ResourceType::TEXTURE;
+		case AssetType::Mesh: return ResourceType::MESH;
+		case AssetType::Audio: return ResourceType::AUDIO;
+		case AssetType::Shader: return ResourceType::SHADER;
+		case AssetType::Material: return ResourceType::MATERIAL;
+		default: return ResourceType::UNKNOWN;
+		}
+	}
+
 	// Configuration
 	void AssetManager::setConfig(const Config& cfg) {
 		m_cfg = cfg;
@@ -284,7 +296,7 @@ namespace gam300 {
 		try {
 			// This is safe - runs in separate thread, won't crash ImGui
 			result = m_compilerRegistry->compile(
-				job.assetType,
+				assetTypeToResourceType(job.assetType),
 				job.intermediatePath,
 				job.properties.get(),
 				*m_resourcePaths,

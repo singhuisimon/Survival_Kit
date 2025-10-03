@@ -21,3 +21,5 @@ namespace gam300 {
     };
 
 } // namespace gam300
+
+#endif // __SHADER_COMPILER_H__
