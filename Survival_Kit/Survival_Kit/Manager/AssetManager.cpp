@@ -1,6 +1,8 @@
 #include "AssetManager.h"
 #include <filesystem>
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include "../Utility/AssetPath.h"
 
 namespace fs = std::filesystem;
@@ -26,6 +28,229 @@ namespace gam300 {
 		case AssetType::Shader: return ResourceType::SHADER;
 		case AssetType::Material: return ResourceType::MATERIAL;
 		default: return ResourceType::UNKNOWN;
+		}
+	}
+
+	// NEW: Helper function to read properties from descriptor file
+	std::unique_ptr<ResourceProperties> readPropertiesFromDescriptor(
+		const std::string& descriptorPath,
+		AssetType assetType)
+	{
+		if (!fs::exists(descriptorPath)) {
+			LM.writeLog("AssetManager - Descriptor file not found: %s", descriptorPath.c_str());
+			return nullptr;
+		}
+
+		std::ifstream file(descriptorPath);
+		if (!file.is_open()) {
+			LM.writeLog("AssetManager - Cannot open descriptor: %s", descriptorPath.c_str());
+			return nullptr;
+		}
+
+		// Read entire file
+		std::stringstream buffer;
+		buffer << file.rdbuf();
+		std::string json = buffer.str();
+		file.close();
+
+		// Helper function to parse JSON values
+		auto parseJsonValue = [&json](const std::string& fieldPath) -> std::string {
+			std::string searchKey = "\"" + fieldPath + "\":";
+			size_t pos = json.find(searchKey);
+			if (pos == std::string::npos) return "";
+
+			pos += searchKey.length();
+			while (pos < json.length() && (json[pos] == ' ' || json[pos] == '\t')) pos++;
+
+			if (pos >= json.length()) return "";
+
+			if (json[pos] == '"') {
+				pos++;
+				size_t end = json.find('"', pos);
+				if (end != std::string::npos) {
+					return json.substr(pos, end - pos);
+				}
+			}
+			return "";
+			};
+
+		auto parseJsonBool = [&json](const std::string& fieldPath) -> bool {
+			std::string searchKey = "\"" + fieldPath + "\":";
+			size_t pos = json.find(searchKey);
+			if (pos == std::string::npos) return false;
+
+			pos += searchKey.length();
+			while (pos < json.length() && (json[pos] == ' ' || json[pos] == '\t')) pos++;
+
+			return (json.substr(pos, 4) == "true");
+			};
+
+		auto parseJsonFloat = [&json](const std::string& fieldPath) -> float {
+			std::string searchKey = "\"" + fieldPath + "\":";
+			size_t pos = json.find(searchKey);
+			if (pos == std::string::npos) return 0.0f;
+
+			pos += searchKey.length();
+			while (pos < json.length() && (json[pos] == ' ' || json[pos] == '\t')) pos++;
+
+			size_t end = pos;
+			while (end < json.length() && (json[end] == '.' || json[end] == '-' ||
+				(json[end] >= '0' && json[end] <= '9'))) {
+				end++;
+			}
+
+			if (end > pos) {
+				try {
+					return std::stof(json.substr(pos, end - pos));
+				}
+				catch (...) {
+					return 0.0f;
+				}
+			}
+			return 0.0f;
+			};
+
+		auto parseJsonInt = [&json](const std::string& fieldPath) -> int {
+			std::string searchKey = "\"" + fieldPath + "\":";
+			size_t pos = json.find(searchKey);
+			if (pos == std::string::npos) return 0;
+
+			pos += searchKey.length();
+			while (pos < json.length() && (json[pos] == ' ' || json[pos] == '\t')) pos++;
+
+			size_t end = pos;
+			while (end < json.length() && (json[end] == '-' || (json[end] >= '0' && json[end] <= '9'))) {
+				end++;
+			}
+
+			if (end > pos) {
+				try {
+					return std::stoi(json.substr(pos, end - pos));
+				}
+				catch (...) {
+					return 0;
+				}
+			}
+			return 0;
+			};
+
+		// Create properties based on asset type and populate from descriptor
+		switch (assetType) {
+		case AssetType::Texture: {
+			auto props = std::make_unique<TextureProperties>();
+
+			// Read texture settings from descriptor
+			std::string compression = parseJsonValue("compression");
+			if (!compression.empty()) {
+				props->compressionFormat = compression;
+			}
+
+			// Parse quality (stored as float 0-1 in descriptor, but compressionQuality is int 0-100)
+			float qualityFloat = parseJsonFloat("quality");
+			if (qualityFloat > 0.0f) {
+				props->compressionQuality = static_cast<int>(qualityFloat * 100.0f);
+			}
+
+			props->generateMipmaps = parseJsonBool("generateMipmaps");
+			props->srgb = parseJsonBool("srgb");
+
+			// These might not be in all descriptors, keep defaults if not found
+			int width = parseJsonInt("maxWidth");
+			if (width > 0) {
+				props->maxWidth = width;
+			}
+
+			int height = parseJsonInt("maxHeight");
+			if (height > 0) {
+				props->maxHeight = height;
+			}
+
+			LM.writeLog("AssetManager - Loaded texture properties: compression=%s, quality=%d, mipmaps=%d, srgb=%d",
+				props->compressionFormat.c_str(),
+				props->compressionQuality,
+				props->generateMipmaps,
+				props->srgb);
+
+			return props;
+		}
+
+		case AssetType::Mesh: {
+			auto props = std::make_unique<MeshProperties>();
+
+			// Read mesh-specific properties from descriptor if available
+			float scale = parseJsonFloat("scaleFactor");
+			if (scale > 0.0f) {
+				props->scaleFactor = scale;
+			}
+
+			// These might be stored in descriptor
+			props->optimizeVertices = parseJsonBool("optimizeVertices");
+			props->generateNormals = parseJsonBool("generateNormals");
+			props->generateTangents = parseJsonBool("generateTangents");
+
+			LM.writeLog("AssetManager - Loaded mesh properties: scale=%.2f, optimize=%d, normals=%d, tangents=%d",
+				props->scaleFactor,
+				props->optimizeVertices,
+				props->generateNormals,
+				props->generateTangents);
+
+			return props;
+		}
+
+		case AssetType::Audio: {
+			auto props = std::make_unique<AudioProperties>();
+
+			// Read audio-specific properties from descriptor if available
+			int sampleRate = parseJsonInt("sampleRate");
+			if (sampleRate > 0) {
+				props->sampleRate = sampleRate;
+			}
+
+			int channels = parseJsonInt("channels");
+			if (channels > 0) {
+				props->channels = channels;
+			}
+
+			std::string compressionFormat = parseJsonValue("compressionFormat");
+			if (!compressionFormat.empty()) {
+				props->compressionFormat = compressionFormat;
+			}
+
+			LM.writeLog("AssetManager - Loaded audio properties: sampleRate=%d, channels=%d, format=%s",
+				props->sampleRate,
+				props->channels,
+				props->compressionFormat.c_str());
+
+			return props;
+		}
+
+		case AssetType::Shader: {
+			auto props = std::make_unique<ShaderProperties>();
+
+			// Read shader-specific properties from descriptor if available
+			std::string vertPath = parseJsonValue("vertexShaderPath");
+			if (!vertPath.empty()) {
+				props->vertexShaderPath = vertPath;
+			}
+
+			std::string fragPath = parseJsonValue("fragmentShaderPath");
+			if (!fragPath.empty()) {
+				props->fragmentShaderPath = fragPath;
+			}
+
+			props->enableDebugInfo = parseJsonBool("enableDebugInfo");
+
+			LM.writeLog("AssetManager - Loaded shader properties: vert=%s, frag=%s, debug=%d",
+				props->vertexShaderPath.c_str(),
+				props->fragmentShaderPath.c_str(),
+				props->enableDebugInfo);
+
+			return props;
+		}
+
+		default:
+			LM.writeLog("AssetManager - Unknown asset type, cannot create properties");
+			return nullptr;
 		}
 	}
 
@@ -72,72 +297,58 @@ namespace gam300 {
 		auto Resolve = [&](const std::string& in) -> std::string {
 			if (in.empty()) return in;
 			fs::path p(in);
-			return p.is_absolute() ? p.string() : (base / p).string();
+			return p.is_absolute() ? p.string() : (base / p).lexically_normal().string();
 			};
 
-		// Ensure some sensible defaults
-		if (m_cfg.sourceRoots.empty())
-			m_cfg.sourceRoots = { "Assets" };
+		// Resolve paths
+		for (auto& r : m_cfg.sourceRoots)
+			r = Resolve(r);
 
-		// Normalize all paths
-		for (auto& r : m_cfg.sourceRoots) r = Resolve(r);
 		m_cfg.intermediateDirectory = Resolve(m_cfg.intermediateDirectory);
 		m_cfg.databaseFile = Resolve(m_cfg.databaseFile);
 		m_cfg.snapshotFile = Resolve(m_cfg.snapshotFile);
+
 		if (!m_cfg.descriptorSidecar && !m_cfg.descriptorRoot.empty())
 			m_cfg.descriptorRoot = Resolve(m_cfg.descriptorRoot);
 
-		// Configure scanner
+		// Ensure intermediate directory exists
+		fs::create_directories(m_cfg.intermediateDirectory);
+
+		// Configure scanner (FIXED: Use lowercase method names)
 		m_scanner.setRoots(m_cfg.sourceRoots);
 		m_scanner.setExtensions(m_cfg.scanExtensions);
 		m_scanner.setIgnoreSubstrings(m_cfg.ignoreSubstrings);
 		m_scanner.setIncludeHidden(m_cfg.includeHidden);
 		m_scanner.setFollowSymlinks(m_cfg.followSymlinks);
 
-		// Directories and persistence
-		fs::create_directories(m_cfg.intermediateDirectory);
-
-		// Load previous DB if available
-		if (!m_cfg.databaseFile.empty()) {
-			if (m_db.Load(m_cfg.databaseFile))
-				LM.writeLog("AssetManager - DB loaded: %s", m_cfg.databaseFile.c_str());
-		}
-
-		// Load scanner snapshot for faster first diff
-		if (!m_cfg.snapshotFile.empty()) {
+		if (!m_cfg.snapshotFile.empty())
 			m_scanner.LoadSnapshot(m_cfg.snapshotFile);
-		}
 
-		// Register built-in importers
 		RegisterDefaultImporters(m_importers);
 
-		// Descriptor writer setup
+		if (!m_cfg.databaseFile.empty())
+			m_db.Load(m_cfg.databaseFile);
+
 		m_descGen.SetSidecar(m_cfg.descriptorSidecar);
-		if (!m_cfg.descriptorSidecar && !m_cfg.descriptorRoot.empty())
-			m_descGen.SetOutputRoot(m_cfg.descriptorRoot);
+		m_descGen.SetOutputRoot(m_cfg.descriptorRoot);
+		m_descGen.SetPretty(true);
 
 		// NEW: Initialize compiler system
 		initializeCompilers();
 
-		LM.writeLog("AssetManager::startUp() - ready");
+		LM.writeLog("AssetManager::startUp() - complete");
 		return 0;
 	}
 
 	void AssetManager::shutDown() {
-		LM.writeLog("AssetManager::shutDown() - Starting shutdown");
-
-		// NEW: Shut down compilers FIRST
+		// NEW: Shutdown compilers before other systems
 		shutdownCompilers();
 
-		// Save DB
-		if (!m_cfg.databaseFile.empty()) {
+		if (!m_cfg.databaseFile.empty())
 			m_db.Save(m_cfg.databaseFile);
-			LM.writeLog("AssetManager::shutDown() - Saved database with %zu assets", m_db.Count());
-		}
 
-		// Save snapshot to speed up next run
 		if (!m_cfg.snapshotFile.empty()) {
-			size_t snapCount = m_scanner.GetSnapshotSize();
+			const size_t snapCount = m_scanner.GetSnapshotSize();
 			bool success = m_scanner.SaveSnapshot(m_cfg.snapshotFile);
 			LM.writeLog("AssetManager::shutDown() - Saved snapshot: %zu files, success=%d, path=%s",
 				snapCount, success, m_cfg.snapshotFile.c_str());
@@ -187,22 +398,32 @@ namespace gam300 {
 		job.guid.m_Instance = xresource::instance_guid::GenerateGUIDCopy();
 		job.guid.m_Type = xresource::type_guid::GenerateGUIDCopy(typeName(rec->type));
 
-		// Create properties based on asset type
-		switch (rec->type) {
-		case AssetType::Texture:
-			job.properties = std::make_unique<TextureProperties>();
-			break;
-		case AssetType::Mesh:
-			job.properties = std::make_unique<MeshProperties>();
-			break;
-		case AssetType::Audio:
-			job.properties = std::make_unique<AudioProperties>();
-			break;
-		case AssetType::Shader:
-			job.properties = std::make_unique<ShaderProperties>();
-			break;
-		default:
-			return; // Unknown type
+		// FIXED: Read properties from descriptor file instead of creating empty ones
+		std::string descriptorPath = m_descGen.DefaultDescPathForRecord(*rec);
+		job.properties = readPropertiesFromDescriptor(descriptorPath, rec->type);
+
+		// If we couldn't read properties from descriptor, create defaults as fallback
+		if (!job.properties) {
+			LM.writeLog("AssetManager - Failed to read properties from descriptor, using defaults for: %s",
+				rec->sourcePath.c_str());
+
+			switch (rec->type) {
+			case AssetType::Texture:
+				job.properties = std::make_unique<TextureProperties>();
+				break;
+			case AssetType::Mesh:
+				job.properties = std::make_unique<MeshProperties>();
+				break;
+			case AssetType::Audio:
+				job.properties = std::make_unique<AudioProperties>();
+				break;
+			case AssetType::Shader:
+				job.properties = std::make_unique<ShaderProperties>();
+				break;
+			default:
+				LM.writeLog("AssetManager - Unknown asset type, cannot queue compilation");
+				return; // Unknown type
+			}
 		}
 
 		// Queue the job
