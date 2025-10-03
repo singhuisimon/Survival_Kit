@@ -8,14 +8,17 @@
 layout(location=0) in vec3 VertexPosition;
 layout(location=1) in vec3 VertexNormal;
 layout(location=2) in vec3 VertexColor;
-
-out vec3 Position;
-out vec3 Normal;
-out vec3 Color;
+layout(location=3) in vec2 VertexTexCoords;
 
 uniform mat4 M; // Model transform matrix
 uniform mat4 V; // View transform matrix
 uniform mat4 P; // Projection transform matrix
+
+out vec3 Position;
+out vec3 Normal;
+out vec3 Color;
+out vec2 TexCoord;
+
 
 void main()
 {
@@ -28,6 +31,7 @@ void main()
 
     mat3 N = mat3(vec3(MV[0]), vec3(MV[1]), vec3(MV[2])); // Normal transform matrix
     Normal = normalize(N * VertexNormal);
+    TexCoord = VertexTexCoords;
 
     vec4 VertexPositionInView = MV * vec4(VertexPosition, 1.0f);
     Position = VertexPositionInView.xyz;
