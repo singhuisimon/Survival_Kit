@@ -1,7 +1,7 @@
 /******************************************************************************/
 /*!
 \file       MovementSystem.h
-\author     (you)
+\author     Low Yue Jun (yuejun.low)
 \date       Oct 03 2025
 \brief      Input-driven movement that applies forces to RigidBody.
 /******************************************************************************/

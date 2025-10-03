@@ -1,7 +1,7 @@
 /******************************************************************************/
 /*!
 \file       RigidBody.h
-\author     (you)
+\author     Low Yue Jun (yuejun.low)
 \date       Oct 03 2025
 \brief      Rigid body component with linear + angular forces (mask-based).
 			Inherits Component. Provides full getters/setters. Linear motion

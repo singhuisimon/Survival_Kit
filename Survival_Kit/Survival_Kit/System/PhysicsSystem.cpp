@@ -1,7 +1,7 @@
 /******************************************************************************/
 /*!
 \file       PhysicsSystem.cpp
-\author     (you)
+\author     Low Yue Jun (yuejun.low)
 \date       Oct 03 2025
 \brief      Implementation of PhysicsSystem for RigidBodyComponent.
 /******************************************************************************/
