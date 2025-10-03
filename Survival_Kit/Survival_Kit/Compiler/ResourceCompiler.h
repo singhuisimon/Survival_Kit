@@ -17,6 +17,7 @@
 #include "../Resource/ResourceMetadata.h"
 #include "../Resource/ResourcePaths.h"
 #include "../Manager/LogManager.h"
+#include "../Pipeline/AssetDatabase.h" 
 
 namespace gam300 {
 
@@ -25,13 +26,14 @@ namespace gam300 {
      */
     struct CompileResult {
         bool success = false;
-        std::string compiledPath;     // Path to output .tex/.mesh/etc file
-        std::string error;            // Error message if failed
-        size_t originalSize = 0;      // Size of intermediate file
-        size_t compiledSize = 0;      // Size of compiled file
+        std::string compiledPath;      // Path to output .tex/.mesh/etc file
+        std::string error;             // Error message if failed
+        size_t originalSize = 0;       // Size of intermediate file
+        size_t compiledSize = 0;       // Size of compiled file
         float compressionRatio = 1.0f; // compiledSize / originalSize
 
-        std::string info;             // Additional info about compilation
+        std::string info;              // Additional info about compilation
+		AssetId assetId = 0;           // Asset ID assigned during compilation 
     };
 
     /**

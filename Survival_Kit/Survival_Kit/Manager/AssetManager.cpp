@@ -394,11 +394,31 @@ namespace gam300 {
 		job.intermediatePath = rec->intermediatePath;
 		job.assetType = rec->type;
 
-		// Generate GUID for this asset
-		job.guid.m_Instance = xresource::instance_guid::GenerateGUIDCopy();
+		// FIXED: Use stable GUID from AssetId instead of generating new one
+		// The AssetId is already a GUID, so we reuse it!
+		job.guid.m_Instance.m_Value = rec->id;  // Use existing AssetId as instance GUID
 		job.guid.m_Type = xresource::type_guid::GenerateGUIDCopy(typeName(rec->type));
 
-		// FIXED: Read properties from descriptor file instead of creating empty ones
+		LM.writeLog("AssetManager - Using stable GUID from AssetId: %016llX", job.guid.m_Instance.m_Value);
+
+		// Get the compiled path that will be used
+		std::string compiledPath = m_resourcePaths->getCompiledFilePath(job.guid, assetTypeToResourceType(rec->type));
+
+		// CHECK: Skip if already compiled and up-to-date
+		if (fs::exists(compiledPath)) {
+			// Check if intermediate is newer
+			if (fs::exists(rec->intermediatePath)) {
+				auto intermediateTime = fs::last_write_time(rec->intermediatePath);
+				auto compiledTime = fs::last_write_time(compiledPath);
+
+				if (compiledTime >= intermediateTime) {
+					LM.writeLog("AssetManager - Skipping compilation, already up-to-date: %s", rec->sourcePath.c_str());
+					return;  // Skip compilation
+				}
+			}
+		}
+
+		// Read properties from descriptor file
 		std::string descriptorPath = m_descGen.DefaultDescPathForRecord(*rec);
 		job.properties = readPropertiesFromDescriptor(descriptorPath, rec->type);
 
@@ -422,7 +442,7 @@ namespace gam300 {
 				break;
 			default:
 				LM.writeLog("AssetManager - Unknown asset type, cannot queue compilation");
-				return; // Unknown type
+				return;
 			}
 		}
 
@@ -436,13 +456,22 @@ namespace gam300 {
 	}
 
 	void AssetManager::processCompilationQueue() {
-		// Check for completed compilations
 		std::vector<CompileResult> completed = getCompletedCompilations();
 
 		for (const auto& result : completed) {
 			if (result.success) {
 				LM.writeLog("AssetManager - Compilation successful: %s",
 					result.compiledPath.c_str());
+
+				// Update the AssetRecord with compiled path
+				AssetRecord* rec = m_db.FindMutable(result.assetId);
+				if (rec) {
+					rec->compiledPath = result.compiledPath;
+					// Save database to persist the compiled path
+					if (!m_cfg.databaseFile.empty()) {
+						m_db.Save(m_cfg.databaseFile);
+					}
+				}
 			}
 			else {
 				LM.writeLog("AssetManager - Compilation FAILED: %s",
@@ -513,9 +542,9 @@ namespace gam300 {
 		LM.writeLog("AssetManager - Compiling asset ID: %llu", job.assetId);
 
 		CompileResult result;
+		result.assetId = job.assetId;  // Store assetId in result
 
 		try {
-			// This is safe - runs in separate thread, won't crash ImGui
 			result = m_compilerRegistry->compile(
 				assetTypeToResourceType(job.assetType),
 				job.intermediatePath,
@@ -523,6 +552,9 @@ namespace gam300 {
 				*m_resourcePaths,
 				job.guid
 			);
+
+			// Ensure assetId is preserved
+			result.assetId = job.assetId;
 		}
 		catch (const std::exception& e) {
 			result.success = false;
@@ -535,7 +567,6 @@ namespace gam300 {
 			LM.writeLog("AssetManager - Unknown compilation exception");
 		}
 
-		// Store result
 		{
 			std::lock_guard<std::mutex> lock(m_resultsMutex);
 			m_completedCompilations.push_back(result);
@@ -599,33 +630,65 @@ namespace gam300 {
 		// Find the record before removing it
 		const AssetRecord* rec = m_db.FindBySource(src);
 
-		if (rec && m_cfg.writeDescriptors) {
-			// Get the descriptor path
-			std::string descriptorPath = m_descGen.DefaultDescPathForRecord(*rec);
+		if (rec) {
+			// Delete compiled file if it exists
+			if (!rec->compiledPath.empty() && fs::exists(rec->compiledPath)) {
+				try {
+					fs::remove(rec->compiledPath);
+					LM.writeLog("AssetManager - Deleted compiled file: %s", rec->compiledPath.c_str());
 
-			// Delete the descriptor file
-			if (fs::exists(descriptorPath)) {
-				fs::remove(descriptorPath);
-				LM.writeLog("AssetManager - Deleted descriptor file: %s", descriptorPath.c_str());
+					// Clean up empty parent directories for compiled files
+					fs::path compiledFolder = fs::path(rec->compiledPath).parent_path();
+					fs::path compiledRoot = fs::absolute(m_resourcePaths->getCompiledRootPath());
+
+					while (compiledFolder.has_parent_path()) {
+						if (fs::equivalent(compiledFolder, compiledRoot)) {
+							break;
+						}
+
+						if (fs::exists(compiledFolder) && fs::is_empty(compiledFolder)) {
+							fs::remove(compiledFolder);
+							LM.writeLog("AssetManager - Deleted empty compiled folder: %s",
+								compiledFolder.string().c_str());
+							compiledFolder = compiledFolder.parent_path();
+						}
+						else {
+							break;
+						}
+					}
+				}
+				catch (const std::exception& e) {
+					LM.writeLog("AssetManager - Error deleting compiled file: %s", e.what());
+				}
 			}
 
-			// Clean up empty parent folders
-			fs::path currentFolder = fs::path(descriptorPath).parent_path();
-			fs::path descriptorsRoot = fs::absolute(m_cfg.descriptorRoot);
+			// Delete descriptor file
+			if (m_cfg.writeDescriptors) {
+				std::string descriptorPath = m_descGen.DefaultDescPathForRecord(*rec);
 
-			while (currentFolder.has_parent_path()) {
-				if (fs::equivalent(currentFolder, descriptorsRoot)) {
-					break;
+				if (fs::exists(descriptorPath)) {
+					fs::remove(descriptorPath);
+					LM.writeLog("AssetManager - Deleted descriptor file: %s", descriptorPath.c_str());
 				}
 
-				if (fs::exists(currentFolder) && fs::is_empty(currentFolder)) {
-					fs::remove(currentFolder);
-					LM.writeLog("AssetManager - Deleted empty folder: %s",
-						currentFolder.string().c_str());
-					currentFolder = currentFolder.parent_path();
-				}
-				else {
-					break;
+				// Clean up empty parent folders for descriptors
+				fs::path currentFolder = fs::path(descriptorPath).parent_path();
+				fs::path descriptorsRoot = fs::absolute(m_cfg.descriptorRoot);
+
+				while (currentFolder.has_parent_path()) {
+					if (fs::equivalent(currentFolder, descriptorsRoot)) {
+						break;
+					}
+
+					if (fs::exists(currentFolder) && fs::is_empty(currentFolder)) {
+						fs::remove(currentFolder);
+						LM.writeLog("AssetManager - Deleted empty descriptor folder: %s",
+							currentFolder.string().c_str());
+						currentFolder = currentFolder.parent_path();
+					}
+					else {
+						break;
+					}
 				}
 			}
 		}
