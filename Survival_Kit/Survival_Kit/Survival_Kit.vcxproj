@@ -22,6 +22,7 @@
     <ClCompile Include="Compiler\AudioCompiler.cpp" />
     <ClCompile Include="Compiler\MeshCompiler.cpp" />
     <ClCompile Include="Compiler\ResourceCompiler.cpp" />
+    <ClCompile Include="Compiler\ShaderCompiler.cpp" />
     <ClCompile Include="Compiler\ShaderCompiler.cpp.cpp" />
     <ClCompile Include="Compiler\TextureCompiler.cpp" />
     <ClCompile Include="Component\Bullet.cpp" />
@@ -296,7 +297,7 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;TRACY_ENABLE;TRACY_ON_DEMAND;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;TRACY_ENABLE;TRACY_ON_DEMAND;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)ScriptCore;$(SolutionDir)External_Libraries\include\FMOD API\core;$(SolutionDir)External_Libraries\include\FMOD API\studio;$(ProjectDir)Tracy;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>

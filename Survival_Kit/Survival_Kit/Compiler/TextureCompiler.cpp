@@ -11,7 +11,7 @@
 
  // Include stb_image (make sure it's in your include folder)
 #define STB_IMAGE_IMPLEMENTATION
-#include "../include/stb_image.h"
+#include "../../External_Libraries/include/stb_image.h"
 
 namespace fs = std::filesystem;
 

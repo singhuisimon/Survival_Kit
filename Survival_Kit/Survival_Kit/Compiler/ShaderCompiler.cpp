@@ -1,4 +1,4 @@
-#include "MeshCompiler.h"
+#include "ShaderCompiler.h"
 #include <fstream>
 #include <filesystem>
 
@@ -6,7 +6,7 @@ namespace fs = std::filesystem;
 
 namespace gam300 {
 
-    CompileResult MeshCompiler::compile(
+    CompileResult ShaderCompiler::compile(
         const std::string& intermediatePath,
         const ResourceProperties* properties,
         ResourcePaths& paths,
@@ -14,17 +14,16 @@ namespace gam300 {
     ) {
         CompileResult result;
 
-        LM.writeLog("MeshCompiler - Compiling: %s", intermediatePath.c_str());
+        LM.writeLog("ShaderCompiler - Compiling: %s", intermediatePath.c_str());
 
-        // For now, just copy the intermediate file as compiled
-        // TODO: Implement actual mesh optimization and binary format
+        // For now, just copy the shader source
+        // TODO: Implement shader validation and optimization
 
-        std::string compiledPath = paths.getCompiledFilePath(guid, ResourceType::MESH);
+        std::string compiledPath = paths.getCompiledFilePath(guid, ResourceType::SHADER);
         std::string dir = fs::path(compiledPath).parent_path().string();
         paths.createDirectoryIfNotExists(dir);
 
         try {
-            // Simple copy for now
             fs::copy_file(intermediatePath, compiledPath,
                 fs::copy_options::overwrite_existing);
 
@@ -33,13 +32,13 @@ namespace gam300 {
             result.originalSize = paths.getFileSize(intermediatePath);
             result.compiledSize = paths.getFileSize(compiledPath);
             result.compressionRatio = 1.0f;
-            result.info = "Simple copy (optimization not yet implemented)";
+            result.info = "Simple copy (validation not yet implemented)";
 
-            LM.writeLog("MeshCompiler - Success: %s", compiledPath.c_str());
+            LM.writeLog("ShaderCompiler - Success: %s", compiledPath.c_str());
         }
         catch (const std::exception& e) {
-            result.error = std::string("Failed to compile mesh: ") + e.what();
-            LM.writeLog("MeshCompiler - Error: %s", result.error.c_str());
+            result.error = std::string("Failed to compile shader: ") + e.what();
+            LM.writeLog("ShaderCompiler - Error: %s", result.error.c_str());
         }
 
         return result;

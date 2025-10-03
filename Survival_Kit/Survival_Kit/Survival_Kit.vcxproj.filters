@@ -73,6 +73,7 @@
     <ClCompile Include="Compiler\MeshCompiler.cpp" />
     <ClCompile Include="Compiler\AudioCompiler.cpp" />
     <ClCompile Include="Compiler\ShaderCompiler.cpp.cpp" />
+    <ClCompile Include="Compiler\ShaderCompiler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component\Component.h" />

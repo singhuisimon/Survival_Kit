@@ -1,4 +1,3 @@
-#pragma once
 /**
  * @file ResourceCompiler.h
  * @brief Base interface for resource compilers
@@ -7,7 +6,6 @@
  * @date
  * Copyright (C) 2025 DigiPen Institute of Technology.
  */
-
 #pragma once
 #ifndef __RESOURCE_COMPILER_H__
 #define __RESOURCE_COMPILER_H__
