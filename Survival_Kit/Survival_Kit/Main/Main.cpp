@@ -211,6 +211,8 @@ int main(void) {
 
             frame_count = 0;
             fps_timer = 0.0;
+
+            IMGUIM.updateFPS(current_fps); //to match the FPS together with the ImGui
         }
 
         // Convert frame time from milliseconds to microseconds

@@ -80,6 +80,21 @@ namespace gam300
 		const char* getAssetIcon(AssetType type);
 		void initializeAssetBrowser();
 
+		// TEMPORARY CODE FOR NOW TO TEST FOR PERFORMANCE VIEWER FOR FPS 
+		//for performance monitoring
+		float lastReceivedFPS = 0.0f;
+		static const int FPS_HISTORY_SIZE = 90;  //store up to 90 frames
+		float fpsHistory[FPS_HISTORY_SIZE] = {};
+		float frameTimeHistory[FPS_HISTORY_SIZE] = {}; //for frame time
+		int fpsHistoryOffset = 0;
+
+		// statistics tracking
+		float minFPS = FLT_MAX;
+		float maxFPS = 0.0f;
+		float minFrameTime = FLT_MAX;
+		float maxFrameTime = 0.0f;
+		
+
 	public:
 
 		ImguiManager(ECSManager& ecsManager, GraphicsManager& GFM);
@@ -146,7 +161,7 @@ namespace gam300
 
 		void rescanAssets();
 
-
+		void updateFPS(float fps);
 
 	};
 
