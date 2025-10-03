@@ -42,19 +42,43 @@ namespace gam300 {
 	uint64_t Texture::create_gpu_texture_rgba8(const uint8_t* pixels, uint32_t w, uint32_t h,
 											   bool srgb, bool gen_mips, uint32_t& out_mip_levels) {
 
+		//GLuint tex = 0;
+		//glCreateTextures(GL_TEXTURE_2D, 1, &tex);
+		//const GLenum internalFmt = srgb ? GL_SRGB8_ALPHA8 : GL_RGBA8;
+		//const u32 mips = gen_mips ? calc_mip_count(w, h) : 1;
+		//glTextureStorage2D(tex, mips, internalFmt, w, h);
+
+		//glTextureSubImage2D(tex, 0, 0, 0, w, h, GL_RGBA8, GL_UNSIGNED_BYTE, pixels);
+
+		//if (gen_mips && mips > 1) {
+		//	glGenerateTextureMipmap(tex);
+		//}
+
+		//out_mip_levels = mips;
+		//return static_cast<u64>(tex);
+
+
 		GLuint tex = 0;
-		glCreateTextures(GL_TEXTURE_2D, 1, &tex);
+		glGenTextures(1, &tex);
+		glBindTexture(GL_TEXTURE_2D, tex);
+
 		const GLenum internalFmt = srgb ? GL_SRGB8_ALPHA8 : GL_RGBA8;
 		const u32 mips = gen_mips ? calc_mip_count(w, h) : 1;
-		glTextureStorage2D(tex, mips, internalFmt, w, h);
+		glTexStorage2D(GL_TEXTURE_2D, mips, internalFmt, w, h);
 
-		glTextureSubImage2D(tex, 0, 0, 0, w, h, GL_RGBA8, GL_UNSIGNED_BYTE, pixels);
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 		if (gen_mips && mips > 1) {
 			glGenerateTextureMipmap(tex);
 		}
 
 		out_mip_levels = mips;
+
 		return static_cast<u64>(tex);
 	}
 

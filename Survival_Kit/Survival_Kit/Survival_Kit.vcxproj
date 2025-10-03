@@ -297,7 +297,7 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;TRACY_ENABLE;TRACY_ON_DEMAND;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;TRACY_ENABLE;TRACY_ON_DEMAND;TRACY_HAS_OPENGL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)ScriptCore;$(SolutionDir)External_Libraries\include\FMOD API\core;$(SolutionDir)External_Libraries\include\FMOD API\studio;$(ProjectDir)Tracy;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
@@ -337,7 +337,12 @@ if exist "$(SolutionDir)..\tracy-profiler.exe" (
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);opengl32.lib;ScriptCore.lib;glfw3.lib;fmod_vc.lib;fmodstudio_vc.lib;Jolt.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y /d "$(SolutionDir)External_Libraries\bin\FMOD\*.dll" "$(OutDir)"</Command>
+      <Command>if not exist "$(OutDir)assets" mkdir "$(OutDir)assets"
+xcopy "$(ProjectDir)assets\*" "$(OutDir)assets\" /E /I /Y /Q
+
+if exist "$(SolutionDir)..\tracy-profiler.exe" (
+    copy /Y "$(SolutionDir)..\tracy-profiler.exe" "$(OutDir)"
+)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

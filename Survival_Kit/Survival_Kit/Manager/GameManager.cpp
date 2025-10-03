@@ -35,12 +35,14 @@
 #include "../System/BulletSystem.h"
 #include "../System/CollisionSystem.h"
 #include "../System/TransformSystem.h"
+#include "../System/AudioSystem.h"
 
 // Include Utility headers
 #include "../Utility/Clock.h"
 #include "../Utility/AssetPath.h"
 
-
+// Include Tracy headers
+#include "../Tracy/tracy/Tracy.hpp"
 
 namespace gam300 {
 
@@ -166,6 +168,7 @@ namespace gam300 {
 		SM.register_system<BulletSystem>();
         SM.register_system<RenderSystem>();
         SM.register_system<TransformSystem>();
+        SM.register_system<AudioSystem>();
 
         // Initialize step count
         m_step_count = 0;
@@ -205,6 +208,9 @@ namespace gam300 {
 
     // Update the game state for the current frame
     void GameManager::update(float dt) {
+
+        ZoneScoped;
+
         // Increment step count
         m_step_count++;
 

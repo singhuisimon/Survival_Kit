@@ -17,6 +17,8 @@
 
 #include "../Manager/PrefabManager.h"
 #include "../Manager/AssetManager.h"
+#include "../Manager/TracyManager.h"
+
 
 #include "../Utility/AssetPath.h"
 
@@ -25,6 +27,7 @@
 #include "../Component/RenderComponent.h"
 #include "../Component/Collider.h"
 #include "../Component/AudioComponent.h"
+#include "../Component/MeshComponent.h"
 
 #include <iostream>
 
@@ -44,9 +47,9 @@ namespace gam300 {
     static float assetIconSize = 64.0f;
     static int selectedAssetIndex = -1;
 
-    static bool asset_editor = false;
+    //static bool asset_editor = false;
     static bool prefab_editor = false;
-    static std::filesystem::directory_entry currentAsset;
+    //static std::filesystem::directory_entry currentAsset;
     static std::filesystem::directory_entry selectedPrefab;
 
     // Asset Type names for display
@@ -136,6 +139,11 @@ namespace gam300 {
         ImGui_ImplGlfw_InitForOpenGL(glfwindow, true);
         ImGui_ImplOpenGL3_Init();
 
+        // Initialize descriptor editor
+        m_descriptorEditor = new DescriptorEditor(
+            AM.db(),           // Get AssetDatabase from AssetManager
+            AM.descriptorGenerator() // Get AssetDescriptorGenerator
+        );
 
         return 0;
     }
@@ -167,6 +175,8 @@ namespace gam300 {
 
     void ImguiManager::displayFileList(bool& fileWindow, std::string& shownFile) {
 
+        // ================ When Open File ===========================
+        // scenePath: /Survival_Kit/Assets/Scene
         std::string scenePath = getAssetFilePath("Scene");
         std::vector<std::pair<std::string, std::string>> sceneFiles;
 
@@ -174,12 +184,21 @@ namespace gam300 {
         {
             for (const auto& file : std::filesystem::directory_iterator(scenePath)) {
                 if (std::filesystem::is_regular_file(file.path())) {
+                    std::string filename = file.path().filename().string();
+
+                    ///filepath: Survival_Kit
+                    // std::string filepath = file.path().string();
+                    // std::cout << "Found scene file: " << filepath << std::endl;
+                    //std::cout << "Scene Path: " << scenePath << std::endl;
+
                     sceneFiles.push_back(std::make_pair(file.path().filename().string(), file.path().string()));
                 }
             }
         }
 
 #if 1 // new code
+
+        // ==================== True If File Open ==================
         if (fileWindow)
         {
             ImGui::OpenPopup("Level Select");
@@ -192,39 +211,41 @@ namespace gam300 {
             //std::cout << "is open here\n";
             ImGui::SetWindowSize(ImVec2(500, 200), ImGuiCond_Once);
 
+
+            // =================== Loop through the level select menu =======================
+            // sceneFiles[i]: ...../Scene\Game.scn, .... list of the file
             for (int i = 0; i < sceneFiles.size(); i++)
             {
+                // fileName: Game.scn, GameB.scn .... List of filename for scene
                 std::string fileName = sceneFiles[i].first;
+                
                 if (ImGui::Selectable(fileName.c_str())) {
 
                     ImguiEcsRef.clearAllEntities();
 
-                    //if (sceneFiles[i].second != shownFile) {
-
-                    if (SEM.loadScene(sceneFiles[i].second)) {
+                    if (SEM.loadScene(sceneFiles[i].second)) 
+                    {
 
                         shownFile = sceneFiles[i].second;
-
                         LM.writeLog("IMGUI_Manager::displayFileList(): Scene %s loaded successfully.", sceneFiles[i].first.c_str());
-                        //std::cout << sceneFiles[i].second << std::endl;
-                        //std::cout << "Scene " << sceneFiles[i].first << "loaded successfully from displayFileList" << std::endl;
 
                     }
                     else {
 
                         LM.writeLog("IMGUI_Manager::displayFileList(): Scene %s failed to load. Loading default scene.", sceneFiles[i].first.c_str());
-                        //std::cout << "Scene " << sceneFiles[i].first << "failed to load from displayFileList. Loading default scene." << std::endl;
+
 
                         SEM.saveScene(getAssetFilePath("Scene/Game.scn"));
+                   
                         if (SEM.loadScene(getAssetFilePath("Scene/Game.scn"))) {
 
                             LM.writeLog("IMGUI_Manager::displayFileList(): Default scene loaded successfully.");
-                            //std::cout << "Default scene loaded successfully from displayFileList" << std::endl;
+                          
                         }
                         else {
 
                             LM.writeLog("IMGUI_Manager::displayFileList(): WARNING: Failed to load default scene.");
-                            //std::cout << "WARNING: Failed to load default scene from displayFileList" << std::endl;
+                            
                         }
 
                         shownFile = getAssetFilePath("Scene/Game.scn");
@@ -314,6 +335,7 @@ namespace gam300 {
                     if (ImGui::BeginPopupContextItem(("Entity Context" + std::to_string(i)).c_str()))
                         //if (ImGui::BeginPopup("Selected Entity Menu"))
                     {
+                        //========================Delete Entity=====================================
                         if (ImGui::MenuItem("Delete"))
                         {
                             if (selectedObjIndex >= 0 && selectedObjIndex < static_cast<int>(allEntities.size()))
@@ -324,6 +346,7 @@ namespace gam300 {
                                 selectedObjIndex = -1;
                             }
                         }
+                        //================= Duplicate Function =============================
                         if (ImGui::MenuItem("Duplicate"))
                         {
                             if (selectedObjIndex >= 0 && selectedObjIndex < static_cast<int>(allEntities.size()))
@@ -375,11 +398,21 @@ namespace gam300 {
                                         ImguiEcsRef.addComponent<AudioComponent>(newEntityID, *oldAudio);
                                     }
                                 }
+                                if (ImguiEcsRef.hasComponent<MeshComponent>(oriSelectedEntity.get_id()))
+                                {
+                                    MeshComponent* oldMesh = ImguiEcsRef.getComponent<MeshComponent>(oriSelectedEntity.get_id());
+                                    if (oldMesh)
+                                    {
+
+                                        ImguiEcsRef.addComponent<MeshComponent>(newEntityID, *oldMesh);
+                                    }
+                                }
                                 selectedObjIndex = static_cast<int>(allEntities.size()) - 1;
 
                             }
                         }
                         ImGui::Separator();
+                        // ========================= Prefabs function ====================================
                         if (ImGui::BeginMenu("Prefabs"))
                         {
                             if (ImGui::MenuItem("Create Prefabs"))
@@ -484,6 +517,7 @@ namespace gam300 {
                 ImGui::Separator();
                 ImGui::Text("Components:");
 
+                //========================== Display Added Component ========================================
                 // Display adjustable value in components  
                 if (ImguiEcsRef.hasComponent<Transform3D>(selectedEntity.get_id())) {
                     displayComponentMenu<Transform3D>(selectedEntity.get_id(), "Transform3D");
@@ -491,21 +525,23 @@ namespace gam300 {
                 }
                 if (ImguiEcsRef.hasComponent<RigidBody>(selectedEntity.get_id())) {
                     displayComponentMenu<RigidBody>(selectedEntity.get_id(), "RigidBody");
-                    //displayComponentMenu<RigidBody>(selectedEntity.get_id(), "RigidBody");
+
 
                 }
                 if (ImguiEcsRef.hasComponent<Collider>(selectedEntity.get_id())) {
                     displayComponentMenu<Collider>(selectedEntity.get_id(), "Collider");
-                    //displayComponentMenu<RigidBody>(selectedEntity.get_id(), "RigidBody");
+
 
                 }
                 if (ImguiEcsRef.hasComponent<AudioComponent>(selectedEntity.get_id())) {
                     displayComponentMenu<AudioComponent>(selectedEntity.get_id(), "Audio");
-                    //displayComponentMenu<RigidBody>(selectedEntity.get_id(), "RigidBody");
 
                 }
+                if (ImguiEcsRef.hasComponent<MeshComponent>(selectedEntity.get_id())) {
+                    displayComponentMenu<MeshComponent>(selectedEntity.get_id(), "Mesh");
 
 
+                }
 
                 ImGui::Separator();
                 // Adding components 
@@ -522,6 +558,7 @@ namespace gam300 {
 
                     ImGui::OpenPopup("AddComponentPopup");
                 }
+                // =====================Add Component ====================================
                 if (ImGui::BeginPopup("AddComponentPopup")) {
                     if (ImGui::MenuItem("Transform3D")) {
                         if (!ImguiEcsRef.hasComponent<Transform3D>(selectedEntity.get_id())) {
@@ -545,6 +582,13 @@ namespace gam300 {
                         if (!ImguiEcsRef.hasComponent<AudioComponent>(selectedEntity.get_id()))
                         {
                             ImguiEcsRef.addComponent<AudioComponent>(selectedEntity.get_id());
+                        }
+                    }
+                    if (ImGui::MenuItem("Mesh"))
+                    {
+                        if (!ImguiEcsRef.hasComponent<MeshComponent>(selectedEntity.get_id()))
+                        {
+                            ImguiEcsRef.addComponent<MeshComponent>(selectedEntity.get_id());
                         }
                     }
 
@@ -579,7 +623,7 @@ namespace gam300 {
                 if (ImGui::MenuItem("New"))
                 {
                     std::string sceneFolder = getAssetFilePath("Scene");
-
+                   
                 }
 
                 if (ImGui::MenuItem("Open"))
@@ -593,8 +637,9 @@ namespace gam300 {
                 {
 
                     //To uncomment after Serialisation is fixed
+                    // shownFile: Survival_Kit/Assets/Scene\Game.scn
                     SEM.saveScene(shownFile);
-                    std::cout << shownFile << "\n";
+                    //std::cout << "test here" << shownFile << "\n";
 
                 }
                 if (ImGui::MenuItem("Save as"))
@@ -609,7 +654,7 @@ namespace gam300 {
             //ImGui::SameLine(); // make it appear on the same bar
 
             std::string displayedScene = shownFile;
-            size_t pos = shownFile.find("Assets"); // find "Assets" in the path
+            size_t pos = shownFile.find("Assets"); 
             if (pos != std::string::npos) {
                 displayedScene = shownFile.substr(pos);
             }
@@ -627,18 +672,17 @@ namespace gam300 {
             ImGui::EndMainMenuBar();
 
         }
-        //ImGui::Text("Current Scene: %s", shownFile.c_str());
-        //ImGui::Begin("Current Scene");
-
-        //ImGui::End();
-
+       
+        // ========================== Open top menu =============================  
         if (fileWindow) {
 
-            IMGUIM.displayFileList(fileWindow, shownFile); // for now it open at the start of the engine
+            IMGUIM.displayFileList(fileWindow, shownFile); 
         }
 
-        std::string newPath = getAssetFilePath("Scene/") + saveAsDefaultName;
+        // newPath: /Survival_Kit/Assets/Scene/
+        std::string newPath = getAssetFilePath("Scene/") + saveAsDefaultName; 
 
+        // ======================= Save as Top Menu Panel ============================
         if (showSaveAsPanel)
         {
             ImGui::OpenPopup("Save Scene As");
@@ -649,11 +693,12 @@ namespace gam300 {
 
                 if (ImGui::Button("Save", ImVec2(120, 0)))
                 {
-
+                    // newPath: /Survival_Kit/Assets/Scene/Test4.scn
                     if (!std::filesystem::path(newPath).has_extension()) {
+
                         newPath += ".scn"; // ensure .scn extension
                     }
-
+               
                     if (std::filesystem::exists(newPath))
                     {
                         ImGui::OpenPopup("Confirm Overwrite");
@@ -661,6 +706,8 @@ namespace gam300 {
                     else
                     {
                         SEM.saveScene(newPath);
+
+                        // shownFile: /Survival_Kit/Assets/Scene/NewTest3.scn
                         shownFile = newPath; // update current scene
                         LM.writeLog("Scene saved as: %s", newPath.c_str());
                         showSaveAsPanel = false;
@@ -678,7 +725,7 @@ namespace gam300 {
                     ImGui::CloseCurrentPopup();
                 }
 
-                // overwrite 
+                // =================== Top Menu Pop up overwrite ==================== 
                 if (ImGui::BeginPopupModal("Confirm Overwrite", NULL, ImGuiWindowFlags_AlwaysAutoResize))
                 {
                     ImGui::Text("File %s already exists.\nDo you want to replace it?", saveAsDefaultName);
@@ -687,6 +734,7 @@ namespace gam300 {
                     if (ImGui::Button("Yes", ImVec2(120, 0)))
                     {
 
+                        // newPath: / Survival_Kit / Assets / Scene / Game.scn
                         if (!std::filesystem::path(newPath).has_extension()) {
                             newPath += ".scn";
                         }
@@ -715,6 +763,8 @@ namespace gam300 {
     }
 
     void ImguiManager::shutDown() {
+        delete m_descriptorEditor;
+        m_descriptorEditor = nullptr;
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
@@ -851,9 +901,9 @@ namespace gam300 {
 
         // --- load folders ---//
         std::vector<std::string> assetsFoldersName;
-        if (std::filesystem::exists(BASE_ASSETS_PATH) && std::filesystem::is_directory(BASE_ASSETS_PATH))
+        if (std::filesystem::exists(getAssetsPath()) && std::filesystem::is_directory(getAssetsPath()))
         {
-            for (const auto& entry : std::filesystem::directory_iterator(BASE_ASSETS_PATH))
+            for (const auto& entry : std::filesystem::directory_iterator(getAssetsPath()))
             {
                 if (entry.is_directory())
                     assetsFoldersName.push_back(entry.path().filename().string());
@@ -875,8 +925,11 @@ namespace gam300 {
         ImGui::Text("Projects:");
         if (ImGui::CollapsingHeader("Assets", ImGuiTreeNodeFlags_DefaultOpen))
         {
+           
+            // folder: Textures, Audio, Descriptors
             for (const auto& folder : assetsFoldersName)
             {
+               
                 bool isSelected = (selectedFolder == folder);
                 if (ImGui::Selectable(folder.c_str(), isSelected))
                 {
@@ -891,15 +944,17 @@ namespace gam300 {
         ImGui::NextColumn();
         ImGui::BeginChild("Assets Panel", ImVec2(0, 0), true, ImGuiWindowFlags_HorizontalScrollbar);
         std::vector<std::filesystem::directory_entry> assetsList;
-
+       
+       
         // --- display assets ---
         if (!selectedFolder.empty())
         {
+            
             // to allow search  funcion
             if (!searchStr.empty())
             {
                 // Search across all folders
-                for (const auto& folderEntry : std::filesystem::directory_iterator(BASE_ASSETS_PATH))
+                for (const auto& folderEntry : std::filesystem::directory_iterator(getAssetsPath()))
                 {
                     if (!folderEntry.is_directory()) continue;
 
@@ -913,13 +968,17 @@ namespace gam300 {
 
                         if (lowerName.find(searchStr) != std::string::npos)
                             assetsList.push_back(fileEntry);
+
+
                     }
                 }
             }
+
             else
             {
+                //std::cout << "\nselected Folder: " << selectedFolder << "\n";
                 // normal view: only selected folder
-                std::string currentFolder = BASE_ASSETS_PATH + selectedFolder + "\\";
+                std::filesystem::path currentFolder = std::filesystem::path(getAssetsPath()) / selectedFolder;
                 if (std::filesystem::exists(currentFolder) && std::filesystem::is_directory(currentFolder))
                 {
                     for (const auto& entry : std::filesystem::directory_iterator(currentFolder))
@@ -933,8 +992,6 @@ namespace gam300 {
             }
         }
 
-
-
         // --- display assets grid ---
         if (!assetsList.empty())
         {
@@ -945,7 +1002,12 @@ namespace gam300 {
             float thumbnailSize = 64.0f;
             float cellSize = thumbnailSize + padding;
             float panelWidth = ImGui::GetContentRegionAvail().x;
-            int itemsPerRow = std::max(1, (int)(panelWidth / cellSize));
+            int itemsPerRow = (int)(panelWidth / cellSize);
+            if (itemsPerRow < 1)
+            {
+                itemsPerRow = 1;
+
+            }
 
             ImGui::Columns(itemsPerRow, nullptr, false);
             for (size_t i = 0; i < assetsList.size(); ++i)
@@ -957,7 +1019,15 @@ namespace gam300 {
                 ImGui::PushID(filename.c_str());
                 if (ImGui::Button(filename.c_str(), ImVec2(thumbnailSize, thumbnailSize))) {
 
-
+                    selectedAssetIndex = (int)i;
+                    if (m_descriptorEditor->LoadDescriptor(AM.getAssetIdByFilename(filename), m_currentDescriptor)) {
+                        m_showDescriptorPanel = true;
+                        LM.writeLog("Loaded descriptor for asset: %s", filename.c_str());
+                    }
+                    else {
+                        LM.writeLog("Failed to load descriptor for asset ID: %llu", AM.getAssetIdByFilename(filename));
+                    }
+                   
                     selectedAssetIndex = i;
                     shownFile = fileNamePath;
                     // to ge the type of the file e.g. .scn, .wav
@@ -974,17 +1044,19 @@ namespace gam300 {
                     }
                     if (extension == ".png" || extension == ".jpeg") //to open the image
                     {
-                        asset_editor = true;
-                        currentAsset = assetEntry;
+                        //asset_editor = true;
+                        //currentAsset = assetEntry;
+                        //m_showDescriptorPanel = true;
                     }
                     if (extension == ".prefab") //to open the image
                     {
                         prefab_editor = true;
                         selectedPrefab = assetEntry;
+                        //m_showDescriptorPanel = true;
                     }
                 }
 
-                // ------- show toolip detail ---------- 
+                // ===============show toolip detail ======================
                 if (ImGui::IsItemHovered())
                 {
                     ImGui::BeginTooltip();
@@ -1033,9 +1105,9 @@ namespace gam300 {
             }
             ImGui::Columns(1);
 
-            if (asset_editor) {
+            /*if (asset_editor) {
                 displayAssetEditor(currentAsset);
-            }
+            }*/
 
             if (prefab_editor) {
                 displayPrefabEditor(selectedPrefab);
@@ -1050,16 +1122,128 @@ namespace gam300 {
 
 #endif
 
-    void ImguiManager::displayAssetEditor(const std::filesystem::directory_entry& assetFilepath)
+    void ImguiManager::displayAssetEditor()
     {
-        if (ImGui::Begin("Asset Editor", &asset_editor)) {
-            ImGui::Text("Editing: %s", assetFilepath.path().string().c_str());
-        }
-        ImGui::End();
 
-        if (!asset_editor) {
-            currentAsset = std::filesystem::directory_entry();
+        if (!m_showDescriptorPanel) return;
+
+        if (ImGui::Begin("Descriptor Editor", &m_showDescriptorPanel)) {
+            // Display read-only asset info
+            ImGui::SeparatorText("Asset Information");
+            ImGui::Text("Asset ID: %llu", m_currentDescriptor.assetId);
+            ImGui::Text("GUID: %s", m_currentDescriptor.guid.c_str());
+            ImGui::Text("Source: %s", m_currentDescriptor.sourcePath.c_str());
+            ImGui::Text("Type: %s", getAssetTypeName(m_currentDescriptor.assetType));
+
+            ImGui::Spacing();
+            ImGui::SeparatorText("Editable Properties");
+
+            // Display Name (editable)
+            char displayNameBuf[256];
+            strncpy_s(displayNameBuf, sizeof(displayNameBuf),
+                m_currentDescriptor.displayName.c_str(), _TRUNCATE);
+            if (ImGui::InputText("Display Name", displayNameBuf, sizeof(displayNameBuf))) {
+                m_descriptorEditor->UpdateProperty(
+                    m_currentDescriptor.assetId,
+                    "displayName",
+                    std::string(displayNameBuf)
+                );
+                m_currentDescriptor.displayName = displayNameBuf;
+            }
+
+            // Category (editable)
+            char categoryBuf[128];
+            strncpy_s(categoryBuf, sizeof(categoryBuf),
+                m_currentDescriptor.category.c_str(), _TRUNCATE);
+            if (ImGui::InputText("Category", categoryBuf, sizeof(categoryBuf))) {
+                m_descriptorEditor->UpdateProperty(
+                    m_currentDescriptor.assetId,
+                    "category",
+                    std::string(categoryBuf)
+                );
+                m_currentDescriptor.category = categoryBuf;
+            }
+
+            // Texture-specific settings (only for textures)
+            if (m_currentDescriptor.assetType == AssetType::Texture) {
+                ImGui::Spacing();
+                ImGui::SeparatorText("Texture Settings");
+
+                // Usage Type dropdown
+                std::vector<std::string> usageTypes = m_descriptorEditor->GetPropertyOptions("textureSettings.usageType");
+                if (ImGui::BeginCombo("Usage Type", m_currentDescriptor.textureSettings.usageType.c_str())) {
+                    for (const auto& type : usageTypes) {
+                        bool isSelected = (m_currentDescriptor.textureSettings.usageType == type);
+                        if (ImGui::Selectable(type.c_str(), isSelected)) {
+                            m_descriptorEditor->UpdateProperty(
+                                m_currentDescriptor.assetId,
+                                "textureSettings.usageType",
+                                type
+                            );
+                            m_currentDescriptor.textureSettings.usageType = type;
+                        }
+                    }
+                    ImGui::EndCombo();
+                }
+
+                // Compression dropdown
+                std::vector<std::string> compressionTypes = m_descriptorEditor->GetPropertyOptions("textureSettings.compression");
+                if (ImGui::BeginCombo("Compression", m_currentDescriptor.textureSettings.compression.c_str())) {
+                    for (const auto& comp : compressionTypes) {
+                        bool isSelected = (m_currentDescriptor.textureSettings.compression == comp);
+                        if (ImGui::Selectable(comp.c_str(), isSelected)) {
+                            m_descriptorEditor->UpdateProperty(
+                                m_currentDescriptor.assetId,
+                                "textureSettings.compression",
+                                comp
+                            );
+                            m_currentDescriptor.textureSettings.compression = comp;
+                        }
+                    }
+                    ImGui::EndCombo();
+                }
+
+                // Quality slider
+                float quality = m_currentDescriptor.textureSettings.quality;
+                if (ImGui::SliderFloat("Quality", &quality, 0.0f, 1.0f)) {
+                    m_descriptorEditor->UpdateProperty(
+                        m_currentDescriptor.assetId,
+                        "textureSettings.quality",
+                        std::to_string(quality)
+                    );
+                    m_currentDescriptor.textureSettings.quality = quality;
+                }
+
+                // Generate Mipmaps checkbox
+                bool genMips = m_currentDescriptor.textureSettings.generateMipmaps;
+                if (ImGui::Checkbox("Generate Mipmaps", &genMips)) {
+                    m_descriptorEditor->UpdateProperty(
+                        m_currentDescriptor.assetId,
+                        "textureSettings.generateMipmaps",
+                        genMips ? "true" : "false"
+                    );
+                    m_currentDescriptor.textureSettings.generateMipmaps = genMips;
+                }
+
+                // sRGB checkbox
+                bool srgb = m_currentDescriptor.textureSettings.srgb;
+                if (ImGui::Checkbox("sRGB", &srgb)) {
+                    m_descriptorEditor->UpdateProperty(
+                        m_currentDescriptor.assetId,
+                        "textureSettings.srgb",
+                        srgb ? "true" : "false"
+                    );
+                    m_currentDescriptor.textureSettings.srgb = srgb;
+                }
+            }
+
+            // Dirty state indicator
+            if (m_currentDescriptor.isDirty) {
+                ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Modified");
+            }
         }
+
+        ImGui::End();
     }
 
     void ImguiManager::displayPrefabEditor(const std::filesystem::directory_entry& prefabFilepath)
@@ -1246,7 +1430,7 @@ namespace gam300 {
             }
         }
         else if constexpr (std::is_same_v<componentType, AudioComponent>) {
-            // rigidBody 
+            // audio
             if (AudioComponent* audio = ImguiEcsRef.getComponent<AudioComponent>(selectedEntityID)) {
 
                 if (audio)
@@ -1262,13 +1446,208 @@ namespace gam300 {
                     if (ImGui::RadioButton("SFX", currentType == 1)) {
                         audio->setType(AudioType::SFX);
                     }
+
+                    ImGui::Separator();
+                    ImGui::Text("Play State:");
+                    PlayState playState = audio->getPlayState();
+                    if (ImGui::RadioButton("Play", playState == PlayState::PLAY)) {
+                        audio->setPlayState(PlayState::PLAY);
+                    }
+                    if (ImGui::RadioButton("Pause", playState == PlayState::PAUSE)) {
+                        audio->setPlayState(PlayState::PAUSE);
+                    }
+                    if (ImGui::RadioButton("Stop", playState == PlayState::STOP)) {
+                        audio->setPlayState(PlayState::STOP);
+                    }
+
+                    ImGui::Separator();
+                    ImGui::Text("Volume:");
+                    float volume = audio->getVolume();
+                    if (ImGui::DragFloat("Volume", &volume, 0.001f, 0.f, 1.f)) {
+                        audio->setVolume(volume);
+                    }
+
+                    ImGui::Separator();
+                    ImGui::Text("Pitch:");
+                    float pitch = audio->getPitch();
+                    if (ImGui::DragFloat("Pitch", &pitch, 0.001f, 0.f, 1.f)) {
+                        audio->setPitch(pitch);
+                    }
+
+                    ImGui::Separator();
+                    ImGui::Text("Looping:");
+                    bool looping = audio->isLooping();
+                    if (ImGui::Checkbox("Looping", &looping)) {
+                        audio->setLooping(looping);
+                    }
+
+                    ImGui::Separator();
+                    ImGui::Text("Mute:");
+                    bool mute = audio->isMute();
+                    if (ImGui::Checkbox("Mute", &mute)) {
+                        audio->setMute(mute);
+                    }
+
+                    ImGui::Separator();
+                    ImGui::Text("3D:");
+                    bool is_3d = audio->is3D();
+                    if (ImGui::Checkbox("3D", &is_3d)) {
+                        audio->setIs3D(is_3d);
+                    }
+
+                    ImGui::Separator();
+
+                    std::string advice = "Max Distance needs to be higher than Min Distance to have attenuation";
+                    ImGui::TextDisabled("(i)");
+                    if (ImGui::IsItemHovered())
+                    {
+                        ImGui::BeginTooltip();
+                        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+                        ImGui::TextUnformatted(advice.c_str());
+                        ImGui::PopTextWrapPos();
+                        ImGui::EndTooltip();
+                    }
+
+                    // Disable only if not 3D
+                    ImGui::BeginDisabled(!is_3d);
+
+                    ImGui::Text("Min Distance:");
+                    float min_distance = audio->getMinDistance();
+                    if (ImGui::DragFloat("##MinDistance", &min_distance, 0.1f, 0.f)) {
+                        if (is_3d) {
+                            audio->setMinDistance(min_distance);
+                        }
+                        else {
+                            audio->setMinDistance(1.f);
+                        }
+                    }
+
+                    ImGui::Separator();
+
+                    ImGui::Text("Max Distance:");
+                    float max_distance = audio->getMaxDistance();
+                    if (ImGui::DragFloat("##MaxDistance", &max_distance, 0.1f, 0.f)) {
+                        if (is_3d) {
+                            audio->setMaxDistance(max_distance);
+                        }
+                        else {
+                            audio->setMaxDistance(10.f);
+                        }
+                    }
+
+                    ImGui::EndDisabled();
+
                 }
 
             }
         }
+        else if constexpr (std::is_same_v<componentType, MeshComponent>) {
+            // rigidBody 
+            if (MeshComponent* mesh = ImguiEcsRef.getComponent<MeshComponent>(selectedEntityID)) {
 
+                ImGui::Separator();
+                //ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.6f, 0.6f, 0.6f, 1.0f));
+                ImGui::Text("GUID: %s", mesh->getGUID().c_str());
+                ImGui::Separator();
 
+                // =============== Mesh Dropdown =======================
+                 
+                uint16_t currMesh = mesh->getMeshHandle();
+                std::string meshName = ImguiGraphicRef.getMeshName(currMesh);
+  
+                if (ImGui::BeginCombo("Mesh Shape Type", meshName.c_str())) {
 
+                    size_t meshCount = ImguiGraphicRef.getMeshCount();
+
+                    for (uint16_t i = 0; i < meshCount; i++)
+                    {
+                        std::string name = ImguiGraphicRef.getMeshName(i);
+                        bool selected = (currMesh == i);
+
+                        if (ImGui::Selectable(name.c_str(), selected)) {
+                            mesh->setMeshHandle(i);
+                            mesh->setGUID(ImguiGraphicRef.getMeshGUID(i));
+                        }
+
+                        if (selected) {
+                            ImGui::SetItemDefaultFocus();
+                        }
+                    }
+                    ImGui::EndCombo();
+                }
+
+                ImGui::Spacing();
+
+                // =============== Meterial Dropdown =======================
+                uint16_t currMaterial = mesh->getMaterialHandle();
+                //ImGui::Text("Debug - Current Material Handle: %d", currMaterial);
+                std::string materialName;
+                if (currMaterial == 0) {
+                    materialName = "None";
+                }
+                else {
+                    materialName = "Material " + std::to_string(currMaterial);
+                }
+                if (ImGui::BeginCombo("Material", materialName.c_str())) {
+                    bool noneSelected = (currMaterial == 0);
+                    if (ImGui::Selectable("None", noneSelected)) 
+                    {
+                        mesh->setMaterialHandle(0);
+                        
+                    }
+                    if (noneSelected) {
+                        ImGui::SetItemDefaultFocus();
+                    }
+                    ImGui::Separator();
+
+                    // ================ Show materials ==========================
+                    const auto& materials = ImguiGraphicRef.getMaterialStorage();
+                    if (materials.empty()) 
+                    {
+                        ImGui::TextDisabled("(No materials loaded)");
+                    }
+                    else 
+                    {
+                        for (const auto& [handle, material] : materials) 
+                        {
+                            std::string matName = "Material " + std::to_string(handle);
+                            bool selected = (currMaterial == handle);
+                            if (ImGui::Selectable(matName.c_str(), selected)) {
+                                mesh->setMaterialHandle(handle);
+                               
+                            }
+                            if (selected) {
+                                ImGui::SetItemDefaultFocus();
+                            }
+                        }
+                    }
+                    ImGui::EndCombo();
+
+                }
+
+            }
+        }
+    }
+
+    void ImguiManager::displayPerformanceProfile()
+    {
+        ImGui::SetNextWindowSize(ImVec2(200, 100));
+
+        if (ImGui::Begin("Performance Profile", &hierachyWindow, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize))
+        {
+            if (ImGui::Button("Launch Tracy Window"))
+            {
+                if (!TRACY.isRunning())
+                {
+                    TRACY.launchTracy();
+
+                }
+            }
+
+            TRACY.update();
+        }
+
+        ImGui::End();
     }
 
 }// end of namespace gam300

@@ -20,10 +20,15 @@
             0
           ],
           "scale": [
-            1,
-            1,
-            1
+            5,
+            5,
+            5
           ]
+        },
+        "MeshComponent": {
+          "guid": "plane",
+          "mesh_handle": 1,
+          "material_handle": 0
         }
       }
     },
@@ -38,7 +43,7 @@
           ],
           "prev_position": [
             0,
-            3.3,
+            3.2,
             0
           ],
           "rotation": [
@@ -56,17 +61,22 @@
           "guid": "\\Audio\\laserSmall_001.ogg",
           "type": "SFX",
           "state": "STOP",
-          "volume": 1.0,
-          "pitch": 1.0,
+          "volume": 1.00,
+          "pitch": 1.00,
           "loop": "false",
           "mute": "false",
           "is3D": "true",
-          "minDistance": 1.0,
-          "maxDistance": 10.0
+          "minDistance": 1.00,
+          "maxDistance": 10.00
         },
         "Script": {
           "script_name": "TestScript",
-          "is_active": true
+          "is_active": "true"
+        },
+        "MeshComponent": {
+          "guid": "builtin:plane",
+          "mesh_handle": 0,
+          "material_handle": 0
         }
       }
     }

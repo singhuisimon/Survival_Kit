@@ -15,7 +15,7 @@
 
 #include "../System/AudioSystem.h"
 #include "../System/ScriptSystem.h"
-
+#include "../Tracy/tracy/Tracy.hpp"
 
 namespace gam300 {
 
@@ -269,6 +269,7 @@ namespace gam300 {
 
     // Update all systems
     void ECSManager::updateSystems(float dt) {
+        ZoneScoped;
         SM.update_systems(dt);
     }
 
