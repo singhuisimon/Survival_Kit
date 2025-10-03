@@ -19,6 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Compiler\AudioCompiler.cpp" />
+    <ClCompile Include="Compiler\MeshCompiler.cpp" />
+    <ClCompile Include="Compiler\ResourceCompiler.cpp" />
+    <ClCompile Include="Compiler\ShaderCompiler.cpp.cpp" />
+    <ClCompile Include="Compiler\TextureCompiler.cpp" />
     <ClCompile Include="Component\Bullet.cpp" />
     <ClCompile Include="Component\Collider.cpp" />
     <ClCompile Include="Component\MeshComponent.cpp" />
@@ -88,6 +93,11 @@
     <ClCompile Include="Utility\Vector3D.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Compiler\AudioCompiler.h" />
+    <ClInclude Include="Compiler\MeshCompiler.h" />
+    <ClInclude Include="Compiler\ResourceCompiler.h" />
+    <ClInclude Include="Compiler\ShaderCompiler.h" />
+    <ClInclude Include="Compiler\TextureCompiler.h" />
     <ClInclude Include="Component\AudioComponent.h" />
     <ClInclude Include="Component\Bullet.h" />
     <ClInclude Include="Component\Collider.h" />
