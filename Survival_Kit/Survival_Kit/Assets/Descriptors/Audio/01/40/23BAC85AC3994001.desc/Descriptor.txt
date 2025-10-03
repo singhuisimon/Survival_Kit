@@ -1,7 +1,7 @@
 {
   "asset": {
-    "guid": "FF36885A35A70001",
-    "id": 18390036049442570241,
+    "guid": "23BAC85AC3994001",
+    "id": 2574590429149872129,
     "sourcePath": "C:/Survival_Kit/Survival_Kit/Survival_Kit/Assets/Audio/laserSmall_001.ogg",
     "intermediatePath": "C:\\Survival_Kit\\Survival_Kit/Survival_Kit/Assets/Cache/Intermediate\\laserSmall_001.ogg",
     "compiledPath": "",
@@ -15,7 +15,14 @@
     "displayName": "laserSmall_001.ogg",
     "category": "Audio",
     "tags": [],
-    "lastImported": 1759337500,
+    "lastImported": 1759482853,
     "user": {}
+  }
+  ,"audioSettings": {
+    "outputFormat": "OGG",
+    "compression": "VORBIS",
+    "quality": 0.7,
+    "sampleRate": 44100,
+    "channelMode": "STEREO"
   }
 }

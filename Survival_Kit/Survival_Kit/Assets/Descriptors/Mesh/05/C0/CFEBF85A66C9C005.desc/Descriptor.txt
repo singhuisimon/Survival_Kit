@@ -15,7 +15,7 @@
     "displayName": "E003_trojan_v001.fbx",
     "category": "Mesh",
     "tags": [],
-    "lastImported": 1759387815,
+    "lastImported": 1759482667,
     "user": {}
   }
 }

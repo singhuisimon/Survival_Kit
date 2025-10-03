@@ -204,6 +204,17 @@ namespace gam300 {
                 ind(1); o << "}"; nl(1);
             }
 
+            //ADDED - Audio Settings for Audio compilation 
+            if (recOpt && recOpt->type == AssetType::Audio) {
+                ind(1); o << ",\"audioSettings\": {"; nl(1);
+                ind(2); o << "\"outputFormat\": \"" << EscapeJson(extras->audioSettings.outputFormat) << "\","; nl(1);
+                ind(2); o << "\"compression\": \"" << EscapeJson(extras->audioSettings.compression) << "\","; nl(1);
+                ind(2); o << "\"quality\": " << extras->audioSettings.quality << ","; nl(1);
+                ind(2); o << "\"sampleRate\": " << extras->audioSettings.sampleRate << ","; nl(1);
+                ind(2); o << "\"channelMode\": \"" << EscapeJson(extras->audioSettings.channelMode) << "\""; nl(1);
+                ind(1); o << "}"; nl(1);
+            }
+
         }
         else {
             o << "null"; nl(1);

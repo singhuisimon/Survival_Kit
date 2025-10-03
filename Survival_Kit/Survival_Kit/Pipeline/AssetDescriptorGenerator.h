@@ -18,6 +18,21 @@ namespace gam300 {
 	// Forward declaration to avoid coupling. Defined in AssetDatabase.h
 	struct AssetRecord;
 
+	//for basic audio compilation settings 
+	struct AudioSettings {
+
+		//output format 
+		std::string outputFormat = "OGG"; //the target format could be OGG, WAV
+		std::string compression = "VORBIS"; //VORBIS, PCM
+
+		//quality
+		float quality = 0.7f;	//compression quality 0.0-1.0
+		int sampleRate = 44100; //output sample rate 
+		//channels
+		std::string channelMode = "STEREO"; //MONO or STEREO
+	};
+
+
 	/**
 	* @brief Optional extra metadata to embed in the descriptor.
 	* @details These fields are generic and do not depend on Resource*.
@@ -38,8 +53,13 @@ namespace gam300 {
 		bool srgb = false;
 		std::vector<std::string> inputFiles;
 
+		//new audio settings (for compile settings)
+		AudioSettings audioSettings;
+
 	
 	};
+
+
 
 	/**
 	* @class AssetDescriptorGenerator
