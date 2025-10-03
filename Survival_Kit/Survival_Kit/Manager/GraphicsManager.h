@@ -38,6 +38,10 @@
 // For IMGUI operations
 #include "ImguiManager.h"
 
+// For Tracy operations
+#include "../Tracy/tracy/Tracy.hpp"
+#include "../Tracy/tracy/TracyOpenGL.hpp"
+
 // KENNY TESTING: For testing cursor input
 #include "InputManager.h"
 
@@ -94,6 +98,11 @@ namespace gam300 {
 
         // Render type
         bool isPBR = false;
+
+        // Query Handles
+        GLuint gpuStartQueries[GPU_QUERY_COUNT]{};
+        GLuint gpuEndQueries[GPU_QUERY_COUNT]{};
+        int currentQueryIndex = 0;
 
     public:
         /**
