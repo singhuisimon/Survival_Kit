@@ -52,6 +52,8 @@ namespace gam300 {
     //static std::filesystem::directory_entry currentAsset;
     static std::filesystem::directory_entry selectedPrefab;
 
+    static int tex_index = -1;
+
     // Asset Type names for display
     const char* ImguiManager::getAssetTypeName(AssetType type)
     {
@@ -1009,6 +1011,7 @@ namespace gam300 {
 
             }
 
+            int texture_count = -1;
             ImGui::Columns(itemsPerRow, nullptr, false);
             for (size_t i = 0; i < assetsList.size(); ++i)
             {
@@ -1016,6 +1019,10 @@ namespace gam300 {
                 std::string filename = assetEntry.path().filename().string();
                 std::string fileNamePath = assetEntry.path().string();
 
+                if (assetEntry.path().extension().string() == ".png" || assetEntry.path().extension().string() == ".jpeg") //to open the image
+                {
+                    ++texture_count;
+                }
                 ImGui::PushID(filename.c_str());
                 if (ImGui::Button(filename.c_str(), ImVec2(thumbnailSize, thumbnailSize))) {
 
@@ -1044,9 +1051,11 @@ namespace gam300 {
                     }
                     if (extension == ".png" || extension == ".jpeg") //to open the image
                     {
-                        //asset_editor = true;
-                        //currentAsset = assetEntry;
-                        //m_showDescriptorPanel = true;
+                        tex_index = texture_count; 
+                        
+                    }
+                    else {
+                        tex_index = -1;
                     }
                     if (extension == ".prefab") //to open the image
                     {
@@ -1128,6 +1137,44 @@ namespace gam300 {
         if (!m_showDescriptorPanel) return;
 
         if (ImGui::Begin("Descriptor Editor", &m_showDescriptorPanel)) {
+
+            ImGui::Columns(2, nullptr, true);
+            auto& texture_store = GFXM.getTextureStorage();
+
+            if (tex_index != -1) {
+                // Get texture size
+                float tex_w = static_cast<float>(texture_store[tex_index]->width());
+                float tex_h = static_cast<float>(texture_store[tex_index]->height());
+
+                // Get window size
+                float win_w = static_cast<float>(getWindowWidthHeight().x);
+                float win_h = static_cast<float>(getWindowWidthHeight().y) / 2.0f;
+
+                // Compute texture aspect ratio
+                float aspect = tex_w / tex_h;
+
+                // Compute viewport size preserving aspect ratio
+                ImVec2 viewportSize;
+                if (win_w / win_h > aspect) {
+                    viewportSize.x = win_h * aspect;
+                    viewportSize.y = win_h;
+                }
+                else {
+                    viewportSize.x = win_w;
+                    viewportSize.y = win_w / aspect;
+                }
+
+                // Draw the image
+                ImGui::Image(
+                    (ImTextureID)(intptr_t)((GLuint)texture_store[tex_index]->handle()),
+                    viewportSize,
+                    ImVec2(0, 1), ImVec2(1, 0)
+                );
+
+            }
+
+            ImGui::NextColumn();
+            
             // Display read-only asset info
             ImGui::SeparatorText("Asset Information");
             ImGui::Text("Asset ID: %llu", m_currentDescriptor.assetId);
@@ -1241,6 +1288,8 @@ namespace gam300 {
             if (m_currentDescriptor.isDirty) {
                 ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Modified");
             }
+
+            ImGui::Columns(1);
         }
 
         ImGui::End();
