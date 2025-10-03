@@ -75,7 +75,7 @@
         },
         "MeshComponent": {
           "guid": "builtin:plane",
-          "mesh_handle": 1,
+          "mesh_handle": 0,
           "material_handle": 0
         }
       }

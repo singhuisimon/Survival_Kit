@@ -84,32 +84,39 @@ namespace gam300 {
             LM.writeLog("GraphicsManager::startUp(): Succesfully added shader programs.");
         }
 
+        // Temporarily load textures 
+        auto mouse_tex = Texture::load_from_file(getAssetFilePath("Textures/mouse_kenny.png"), TextureDesc(false, false, true));
+        if (mouse_tex->valid()) {
+            std::cout << "Mouse tex handle is " << mouse_tex->handle() << std::endl;
+            m_textureStorage.push_back(std::move(mouse_tex));
+        }
+
+        auto rabbit_tex = Texture::load_from_file(getAssetFilePath("Textures/rabbit_kenny.png"), TextureDesc(false, false, true));
+        if (rabbit_tex->valid()) {
+            std::cout << "Rabbit tex handle is " << rabbit_tex->handle() << std::endl;
+            m_textureStorage.push_back(std::move(rabbit_tex));
+        }
+
+        auto squirrel_tex = Texture::load_from_file(getAssetFilePath("Textures/squirrel_kenny.png"), TextureDesc(false, false, true));
+        if (squirrel_tex->valid()) { 
+            std::cout << "Squirrel tex handle is " << squirrel_tex->handle() << std::endl; 
+            m_textureStorage.push_back(std::move(squirrel_tex));
+        }
+
         // Set camera as orbiting
         main_camera = Camera3D(ORBITING, glm::vec3(0.0f, 5.0f, 10.0f), glm::vec3(0.f, 0.f, 0.0f), 45.0f, 0.5f, 100.0f);
 
-
         // Set light
         main_light = Light(glm::vec3(0.0f, 5.0f, 0.0f),
-            glm::vec3(0.4f, 0.4f, 0.4f),
-            glm::vec3(1.0f, 1.0f, 1.0f),
-            glm::vec3(1.0f, 1.0f, 1.0f));
+                     glm::vec3(0.4f, 0.4f, 0.4f),
+                     glm::vec3(1.0f, 1.0f, 1.0f),
+                     glm::vec3(1.0f, 1.0f, 1.0f));
 
         // Temporarily load materials manually here
         Material mat1 = Material(glm::vec3(0.3f, 0.5f, 0.9f), glm::vec3(0.3f, 0.5f, 0.9f), glm::vec3(0.8f, 0.8f, 0.8f), 100.0f);
         Material mat2 = Material(glm::vec3(0.9f, 0.5f, 0.3f), glm::vec3(0.9f, 0.5f, 0.3f), glm::vec3(0.8f, 0.8f, 0.8f), 100.0f);
         m_material_storage.emplace(m_material_storage.size(), mat1);
         m_material_storage.emplace(m_material_storage.size(), mat2);
-
-        //// File path for assets
-        //std::string mesh_path = ASM.get_full_path(ASM.MODEL_PATH, DEFAULT_MODEL_MSH_FILE);
-        //std::string animation_path = ASM.get_full_path(ASM.TEXTURE_PATH, DEFAULT_ATLAS_FILE);
-        //std::string font_path = ASM.get_full_path(ASM.FONT_PATH, DEFAULT_FONTS_FILE);
-
-        // Add models
-
-        // Add animations
-
-        // Add fonts
 
         // Creating framebuffer object for IMGUI viewport
         auto temp_fbo = FrameBuffer::create();
@@ -214,7 +221,15 @@ namespace gam300 {
                         &shadersStorage[0]);
                 }
             }
+
+            // Gather input for scrolling
+            double scrollY_offset = IM.getScrollY();
+            if (scrollY_offset != 0) {
+
+                main_camera.cameraOnScroll(IM.getScrollY(), &shadersStorage[0]);
+            }
         }
+
 
 
         // KEYBOARD: Camera control with arrow keys
@@ -254,15 +269,17 @@ namespace gam300 {
         shadersStorage[0].setUniform("P", main_camera.getPerspective()); // Perspective transform
 
         // Set uniform to shader after update light values
-        shadersStorage[0].setUniform("light.position", main_light.getLightPos());  // Position
-        shadersStorage[0].setUniform("light.La", main_light.getLightAmbient());        // Ambient
-        shadersStorage[0].setUniform("light.Ld", main_light.getLightDiffuse());        // Diffuse
+        shadersStorage[0].setUniform("light.position", main_light.getLightPos());       // Position
+        shadersStorage[0].setUniform("light.La", main_light.getLightAmbient());         // Ambient
+        shadersStorage[0].setUniform("light.Ld", main_light.getLightDiffuse());         // Diffuse
         shadersStorage[0].setUniform("light.Ls", main_light.getLightSpecular());        // Specular
 
         //Temporary input for light cursor
         if (IM.isKeyPressed(GLFW_KEY_L)) {
             //std::cout << IM.getMouseDeltaX() << std::endl;
-            main_light.lightOnCursor(IM.getMouseDeltaX(), IM.getMouseDeltaY(), &shadersStorage[0]);
+            if (IM.isMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT)) {
+                main_light.lightOnCursor(IM.getMouseDeltaX(), IM.getMouseDeltaY(), &shadersStorage[0]);
+            }
         }
 
         glEnable(GL_DEPTH_TEST);
@@ -276,16 +293,46 @@ namespace gam300 {
         // Clear the color and depth buffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 
-        //// Enable choosing of mesh
-        //if (IM.isKeyPressed(GLFW_KEY_1)) {
-        //    selected_mesh = 0;
-        //}
-        //if (IM.isKeyPressed(GLFW_KEY_2)) {
-        //    selected_mesh = 1;
-        //}
-        //if (IM.isKeyPressed(GLFW_KEY_3)) {
-        //    selected_mesh = 2;
-        //}
+        // Enable choosing of mesh
+        if (IM.isKeyPressed(GLFW_KEY_1)) {
+            selected_texture = 0;
+        }
+        if (IM.isKeyPressed(GLFW_KEY_2)) {
+            selected_texture = 1;
+        }
+        if (IM.isKeyPressed(GLFW_KEY_3)) {
+            selected_texture = 2;
+        }
+
+        // Testing texture
+        if (IM.isKeyPressed(GLFW_KEY_9)) {
+            textureMode = false;
+        } 
+        if (IM.isKeyPressed(GLFW_KEY_0)) {
+            textureMode = true;
+        }
+        if (textureMode) {
+            glBindTextureUnit(0, m_textureStorage[selected_texture]->handle());
+            shadersStorage[0].setUniform("Texture2D", 0);
+            shadersStorage[0].setUniform("isTexture", true);
+        }
+        else {
+            shadersStorage[0].setUniform("isTexture", false);
+        }
+
+        // Choosing BlinnPhong or PBR
+        if (IM.isKeyPressed(GLFW_KEY_B)) {
+            isPBR = false;
+        }
+        if (IM.isKeyPressed(GLFW_KEY_N)) {
+            isPBR = true;
+        }
+        if (isPBR) {
+            shadersStorage[0].setUniform("isPBR", true);
+        }
+        else {
+            shadersStorage[0].setUniform("isPBR", false);
+        }
 
         // Default mesh and material handle
         uint16_t mesh_handle = 0;
