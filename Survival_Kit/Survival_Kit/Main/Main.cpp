@@ -192,6 +192,7 @@ int main(void) {
 
         IMGUIM.displayAssetsBrowserList();
 
+        IMGUIM.displayAssetEditor();
         IMGUIM.displayPerformanceProfile();
 
         // Editor Start Render
