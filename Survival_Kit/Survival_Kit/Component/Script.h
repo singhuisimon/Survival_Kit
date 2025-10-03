@@ -13,6 +13,8 @@
 #define __SCRIPT_H__
 
 #include "../Component/Component.h"
+#include "ScriptFieldData.h"
+
 #include <string>
 
 namespace gam300 {
@@ -25,6 +27,8 @@ namespace gam300 {
     private:
         std::string m_script_name;  // Name of the script to execute
         bool m_is_active;           // Whether the script is currently active
+        std::vector<ScriptFieldData> m_fields;  // NEW: Store field metadata
+
 
     public:
         /**
@@ -76,6 +80,15 @@ namespace gam300 {
          * @brief Toggle the active state of the script.
          */
         void toggleActive() { m_is_active = !m_is_active; }
+
+
+        const std::vector<ScriptFieldData>& getFields() const { return m_fields; }
+
+        // NEW: Refresh field data from C# (called when script is added/reloaded)
+        void refreshFields();
+
+        // NEW: Update a field value in C#
+        bool updateFieldValue(const std::string& fieldName, const std::variant<float, int, bool, std::string>& value);
     };
 
 } // namespace gam300

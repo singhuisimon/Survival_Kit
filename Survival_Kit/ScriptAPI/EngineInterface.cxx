@@ -218,6 +218,163 @@ namespace ScriptAPI
         SAFE_NATIVE_CALL_END
     }
 
+    //attributes function
+// Replace the GetScriptFields method in EngineInterface.cxx with this version
+// This version doesn't try to cast to specific attribute types
+
+    System::Collections::Generic::List<ScriptFieldInfo^>^ EngineInterface::GetScriptFields(int entityId)
+    {
+        auto result = gcnew System::Collections::Generic::List<ScriptFieldInfo^>();
+
+        SAFE_NATIVE_CALL_BEGIN
+
+            // Validate entity
+            if (entityId < 0 || entityId >= scripts->Count)
+                return result;
+
+        ScriptList^ entityScripts = scripts[entityId];
+        if (entityScripts->Count == 0)
+            return result;
+
+        // Get the first script
+        Script^ script = entityScripts[0];
+        if (script == nullptr)
+            return result;
+
+        // Use reflection to get all fields
+        System::Type^ scriptType = script->GetType();
+        auto fields = scriptType->GetFields(
+            System::Reflection::BindingFlags::Public |
+            System::Reflection::BindingFlags::NonPublic |
+            System::Reflection::BindingFlags::Instance
+        );
+
+        for each (System::Reflection::FieldInfo ^ field in fields)
+        {
+            bool isPublic = field->IsPublic;
+            bool hasSerializeField = false;
+            bool hasRange = false;
+            bool isHidden = false;
+            float rangeMin = 0.0f;
+            float rangeMax = 0.0f;
+            System::String^ tooltip = System::String::Empty;
+
+            // Get all custom attributes
+            auto attributes = field->GetCustomAttributes(false);
+
+            // Loop through attributes and check by name (not type)
+            for each (System::Object ^ attr in attributes)
+            {
+                System::Type^ attrType = attr->GetType();
+                System::String^ attrName = attrType->Name;
+
+                // Check for SerializeField attribute by name
+                if (attrName == "SerializeFieldAttribute")
+                {
+                    hasSerializeField = true;
+
+                    // Try to get Tooltip property
+                    auto tooltipProp = attrType->GetProperty("Tooltip");
+                    if (tooltipProp != nullptr)
+                    {
+                        auto tooltipValue = tooltipProp->GetValue(attr, nullptr);
+                        if (tooltipValue != nullptr)
+                            tooltip = safe_cast<System::String^>(tooltipValue);
+                    }
+                }
+                // Check for HideInInspector attribute by name
+                else if (attrName == "HideInInspectorAttribute")
+                {
+                    isHidden = true;
+                }
+                // Check for Range attribute by name
+                else if (attrName == "RangeAttribute")
+                {
+                    hasRange = true;
+
+                    // Try to get Min property
+                    auto minProp = attrType->GetProperty("Min");
+                    if (minProp != nullptr)
+                    {
+                        auto minValue = minProp->GetValue(attr, nullptr);
+                        if (minValue != nullptr)
+                            rangeMin = safe_cast<float>(minValue);
+                    }
+
+                    // Try to get Max property
+                    auto maxProp = attrType->GetProperty("Max");
+                    if (maxProp != nullptr)
+                    {
+                        auto maxValue = maxProp->GetValue(attr, nullptr);
+                        if (maxValue != nullptr)
+                            rangeMax = safe_cast<float>(maxValue);
+                    }
+                }
+            }
+
+            // Skip if: private without [SerializeField] OR has [HideInInspector]
+            if ((!isPublic && !hasSerializeField) || isHidden)
+                continue;
+
+            // Create field info
+            auto fieldInfo = gcnew ScriptFieldInfo();
+            fieldInfo->name = field->Name;
+            fieldInfo->typeName = field->FieldType->FullName;
+            fieldInfo->value = field->GetValue(script);
+            fieldInfo->isPublic = isPublic;
+            fieldInfo->hasSerializeField = hasSerializeField;
+            fieldInfo->hasRange = hasRange;
+            fieldInfo->rangeMin = rangeMin;
+            fieldInfo->rangeMax = rangeMax;
+            fieldInfo->tooltip = tooltip;
+            fieldInfo->displayName = field->Name;
+
+            result->Add(fieldInfo);
+        }
+
+        SAFE_NATIVE_CALL_END
+
+            return result;
+    }
+
+    bool EngineInterface::SetScriptFieldValue(int entityId, System::String^ fieldName, System::Object^ value)
+    {
+        SAFE_NATIVE_CALL_BEGIN
+
+            // Validate entity
+            if (entityId < 0 || entityId >= scripts->Count)
+                return false;
+
+        ScriptList^ entityScripts = scripts[entityId];
+        if (entityScripts->Count == 0)
+            return false;
+
+        // Get the first script (TODO: Support multiple scripts)
+        Script^ script = entityScripts[0];
+        if (script == nullptr)
+            return false;
+
+        // Use reflection to find and set the field
+        System::Type^ scriptType = script->GetType();
+        System::Reflection::FieldInfo^ field = scriptType->GetField(
+            fieldName,
+            System::Reflection::BindingFlags::Public |
+            System::Reflection::BindingFlags::NonPublic |
+            System::Reflection::BindingFlags::Instance
+        );
+
+        if (field == nullptr)
+            return false;
+
+        // Set the field value
+        field->SetValue(script, value);
+        return true;
+
+        SAFE_NATIVE_CALL_END
+
+            return false;
+    }
+
 
 
 }

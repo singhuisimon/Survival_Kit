@@ -11,6 +11,8 @@
 
 #include "../Component/Script.h"
 #include "../Manager/LogManager.h"
+#include "../ScriptCore/Application.h"
+
 
 namespace gam300 {
 
@@ -35,6 +37,28 @@ namespace gam300 {
 
         // Mark parameter as unused to avoid compiler warning
         (void)dt;
+    }
+
+    void Script::refreshFields() {
+        m_fields.clear();
+
+        // TODO: Call into C# to get field data
+        // This requires adding a function pointer in Application.h
+        // For now, this is a placeholder
+    }
+
+    bool Script::updateFieldValue(const std::string& fieldName, const std::variant<float, int, bool, std::string>& value) {
+        // Find the field
+        for (auto& field : m_fields) {
+            if (field.name == fieldName) {
+                field.value = value;
+
+                // TODO: Call into C# to update the actual field
+                // This requires adding a function pointer in Application.h
+                return true;
+            }
+        }
+        return false;
     }
 
 } // namespace gam300

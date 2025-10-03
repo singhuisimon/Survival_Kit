@@ -97,6 +97,7 @@
     <ClInclude Include="Component\MeshComponent.h" />
     <ClInclude Include="Component\RigidBody.h" />
     <ClInclude Include="Component\Script.h" />
+    <ClInclude Include="Component\ScriptFieldData.h" />
     <ClInclude Include="Component\Transform3D.h" />
     <ClInclude Include="Component\TransformComponent.h" />
     <ClInclude Include="Entity\Entity.h" />

@@ -292,6 +292,19 @@ namespace Core
         executeUpdateForEntityFunc = GetFunctionPtr<void(*)(int)>("ScriptAPI", "ScriptAPI.EngineInterface", "ExecuteUpdateForEntity");
         reloadScriptsFunc = GetFunctionPtr<void(*)(void)>("ScriptAPI", "ScriptAPI.EngineInterface", "Reload");
 
+        getScriptFieldsFunc = GetFunctionPtr<void* (*)(int)>(
+            "ScriptAPI",
+            "ScriptAPI.EngineInterface",
+            "GetScriptFields"
+        );
+
+        setScriptFieldValueFunc = GetFunctionPtr<bool(*)(int, const char*, void*)>(
+            "ScriptAPI",
+            "ScriptAPI.EngineInterface",
+            "SetScriptFieldValue"
+        );
+
+
         std::cout << "Initializing script system..." << std::endl;
         initFunc();
 
@@ -303,6 +316,17 @@ namespace Core
         startFileWatcher();
 
         std::cout << "Script system and file watcher initialized successfully!" << std::endl;
+    }
+    void* Application::GetScriptFields(int entityId) {
+        if (getScriptFieldsFunc)
+            return getScriptFieldsFunc(entityId);
+        return nullptr;
+    }
+
+    bool Application::SetScriptFieldValue(int entityId, const char* fieldName, void* value) {
+        if (setScriptFieldValueFunc)
+            return setScriptFieldValueFunc(entityId, fieldName, value);
+        return false;
     }
 
     bool Application::AddScript(int entityId, const char* scriptName)

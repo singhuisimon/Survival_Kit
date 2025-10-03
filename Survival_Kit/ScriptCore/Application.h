@@ -74,8 +74,12 @@ namespace Core
 
         void UpdateScriptForEntity(int entityId);  // NEW method
 
+        void* GetScriptFields(int entityId);
+        bool SetScriptFieldValue(int entityId, const char* fieldName, void* value);
+    
 
 
+            
     private:
         static std::array<TransformComponent, ENTITY_COUNT> nativeData;
         static void compileScriptAssembly();
@@ -84,6 +88,8 @@ namespace Core
         void(*executeUpdateFunc)() = nullptr;
         void(*reloadScriptsFunc)() = nullptr;  // Add this
         void(*executeUpdateForEntityFunc)(int) = nullptr;  // NEW function pointer
+        void* (*getScriptFieldsFunc)(int) = nullptr;  // Returns list of fields
+        bool(*setScriptFieldValueFunc)(int, const char*, void*) = nullptr;  // Sets a field value
 
         void startScriptEngine();
         void stopScriptEngine();
