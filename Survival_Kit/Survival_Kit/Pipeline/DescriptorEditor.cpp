@@ -283,6 +283,15 @@ namespace gam300 {
             break;
         case AssetType::Mesh:
             desc.category = "Mesh";
+            desc.meshSettings.outputFormat = "OGG";
+            desc.meshSettings.includePos = true;
+            desc.meshSettings.includeNormals = true;
+            desc.meshSettings.includeColors = false;
+            desc.meshSettings.includeTexCoords = true;
+            desc.meshSettings.indexType = "UINT32";
+            desc.meshSettings.scale = 1.0f;
+            desc.meshSettings.optimizeVertices = true;
+            desc.meshSettings.generateNormals = false;
             break;
         case AssetType::Material:
             desc.category = "Material";
@@ -292,6 +301,12 @@ namespace gam300 {
             break;
         case AssetType::Audio:
             desc.category = "Audio";
+            desc.audioSettings.outputFormat = "OGG";
+            desc.audioSettings.compression = "VORBIS";
+            desc.audioSettings.quality = 0.7f;
+            desc.audioSettings.sampleRate = 44100;
+            desc.audioSettings.channelMode = "STEREO";
+            break;
             break;
         case AssetType::Scene:
             desc.category = "Scene";
@@ -348,6 +363,29 @@ namespace gam300 {
             outDescriptor.textureSettings.inputFiles = ParseJsonArray(json, "textureSettings.inputFiles");
         }
 
+        //Parse Audio Settings if present
+        if (json.find("audioSettings") != std::string::npos) {
+            outDescriptor.audioSettings.outputFormat = ParseJsonValue(json, "audioSettings.outputFormat");
+            outDescriptor.audioSettings.compression = ParseJsonValue(json, "audioSettings.compression");
+            outDescriptor.audioSettings.quality = ParseJsonFloat(json, "audioSettings.quality");
+            outDescriptor.audioSettings.sampleRate = ParseJsonFloat(json, "audioSettings.sampleRate");
+            outDescriptor.audioSettings.channelMode = ParseJsonValue(json, "audioSettings.channelMode");
+
+        }
+
+        //parse Mesh Settings if present
+        if (json.find("meshSettings") != std::string::npos) {
+            outDescriptor.meshSettings.outputFormat = ParseJsonValue(json, "meshSettings.outputFormat");
+            outDescriptor.meshSettings.includePos = ParseJsonBool(json, "meshSettings.includePos");
+            outDescriptor.meshSettings.includeNormals = ParseJsonBool(json, "meshSettings.includeNormals");
+            outDescriptor.meshSettings.includeColors = ParseJsonBool(json, "meshSettings.includeColors");
+            outDescriptor.meshSettings.includeTexCoords = ParseJsonBool(json, "meshSettings.includeTexCoords");
+            outDescriptor.meshSettings.indexType = ParseJsonValue(json, "meshSettings.indexType");
+            outDescriptor.meshSettings.scale = ParseJsonFloat(json, "meshSettings.scale");
+            outDescriptor.meshSettings.optimizeVertices = ParseJsonBool(json, "meshSettings.optimizeVertices");
+            outDescriptor.meshSettings.generateNormals = ParseJsonBool(json, "meshSettings.generateNormals");
+        }
+
         return true;
     }
 
@@ -372,6 +410,16 @@ namespace gam300 {
             extras.generateMipmaps = descriptor.textureSettings.generateMipmaps;
             extras.srgb = descriptor.textureSettings.srgb;
             extras.inputFiles = descriptor.textureSettings.inputFiles;
+        }
+
+        //copy audio settings 
+        if (descriptor.assetType == AssetType::Audio) {
+            extras.audioSettings = descriptor.audioSettings;
+        }
+
+        //copy mesh settings
+        if (descriptor.assetType == AssetType::Mesh) {
+            extras.meshSettings = descriptor.meshSettings;
         }
 
         // Copy user properties

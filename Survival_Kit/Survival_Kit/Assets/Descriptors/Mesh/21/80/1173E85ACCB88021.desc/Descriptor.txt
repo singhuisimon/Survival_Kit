@@ -1,0 +1,32 @@
+{
+  "asset": {
+    "guid": "1173E85ACCB88021",
+    "id": 1257604197645844513,
+    "sourcePath": "C:/Survival_Kit/Survival_Kit/Survival_Kit/Assets/Meshes/E007_adware_v001.fbx",
+    "intermediatePath": "C:\\Survival_Kit\\Survival_Kit/Survival_Kit/Assets/Cache/Intermediate\\E007_adware_v001.fbx",
+    "compiledPath": "",
+    "type": 4,
+    "ext": ".fbx",
+    "contentHash": "",
+    "lastWriteTime": 0,
+    "valid": true
+  },
+  "extras": {
+    "displayName": "E007_adware_v001.fbx",
+    "category": "Mesh",
+    "tags": [],
+    "lastImported": 1759492194,
+    "user": {}
+  }
+  ,meshSettings": {
+    outputFormat": "CUSTOM",
+    "includePos": true,
+    "includeNormals": true,
+    "includeColors": false,
+    "includeTexCoords": true,
+    "indexType": "UINT32",
+    "scale": 1,
+    "optimizeVertices": true,
+    "generateNormals": false
+  }
+}

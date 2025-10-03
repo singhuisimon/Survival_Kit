@@ -1,0 +1,32 @@
+{
+  "asset": {
+    "guid": "E173E85ACCB88015",
+    "id": 16245583757534855189,
+    "sourcePath": "C:/Survival_Kit/Survival_Kit/Survival_Kit/Assets/Meshes/E001_worm_host_v001.fbx",
+    "intermediatePath": "C:\\Survival_Kit\\Survival_Kit/Survival_Kit/Assets/Cache/Intermediate\\E001_worm_host_v001.fbx",
+    "compiledPath": "",
+    "type": 4,
+    "ext": ".fbx",
+    "contentHash": "",
+    "lastWriteTime": 0,
+    "valid": true
+  },
+  "extras": {
+    "displayName": "E001_worm_host_v001.fbx",
+    "category": "Mesh",
+    "tags": [],
+    "lastImported": 1759492194,
+    "user": {}
+  }
+  ,meshSettings": {
+    outputFormat": "CUSTOM",
+    "includePos": true,
+    "includeNormals": true,
+    "includeColors": false,
+    "includeTexCoords": true,
+    "indexType": "UINT32",
+    "scale": 1,
+    "optimizeVertices": true,
+    "generateNormals": false
+  }
+}

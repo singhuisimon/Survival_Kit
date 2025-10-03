@@ -32,6 +32,29 @@ namespace gam300 {
 		std::string channelMode = "STEREO"; //MONO or STEREO
 	};
 
+	//for basic mesh compilation settings
+	struct MeshSettings {
+
+		//output format
+		std::string outputFormat = "CUSTOM"; //custom binary format for the engine
+
+		//vertex Data 
+		bool includePos = true; //need position
+		bool includeNormals = true; //for lighting
+		bool includeColors = false; //vertex colors
+		bool includeTexCoords = true; //for texturing
+
+		//index format
+		std::string indexType = "UINT32"; //UINT16 or UINT32
+
+		//transform 
+		float scale = 1.0f; //uniform scale
+
+		//optimizations 
+		bool optimizeVertices = true; //remove duplicates and optimize cache
+		bool generateNormals = false; //generate if missing
+	};
+
 
 	/**
 	* @brief Optional extra metadata to embed in the descriptor.
@@ -55,7 +78,8 @@ namespace gam300 {
 
 		//new audio settings (for compile settings)
 		AudioSettings audioSettings;
-
+		//new mesh settings (for compile settings)
+		MeshSettings meshSettings;
 	
 	};
 

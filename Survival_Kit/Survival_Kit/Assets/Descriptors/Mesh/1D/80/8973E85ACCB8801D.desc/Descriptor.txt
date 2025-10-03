@@ -1,0 +1,32 @@
+{
+  "asset": {
+    "guid": "8973E85ACCB8801D",
+    "id": 9904515482197196829,
+    "sourcePath": "C:/Survival_Kit/Survival_Kit/Survival_Kit/Assets/Meshes/E005_loveletter_v001.fbx",
+    "intermediatePath": "C:\\Survival_Kit\\Survival_Kit/Survival_Kit/Assets/Cache/Intermediate\\E005_loveletter_v001.fbx",
+    "compiledPath": "",
+    "type": 4,
+    "ext": ".fbx",
+    "contentHash": "",
+    "lastWriteTime": 0,
+    "valid": true
+  },
+  "extras": {
+    "displayName": "E005_loveletter_v001.fbx",
+    "category": "Mesh",
+    "tags": [],
+    "lastImported": 1759492194,
+    "user": {}
+  }
+  ,meshSettings": {
+    outputFormat": "CUSTOM",
+    "includePos": true,
+    "includeNormals": true,
+    "includeColors": false,
+    "includeTexCoords": true,
+    "indexType": "UINT32",
+    "scale": 1,
+    "optimizeVertices": true,
+    "generateNormals": false
+  }
+}

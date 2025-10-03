@@ -215,6 +215,21 @@ namespace gam300 {
                 ind(1); o << "}"; nl(1);
             }
 
+            //ADDED - Mesh Settings for Mesh Compilation
+            if (recOpt && recOpt->type == AssetType::Mesh) {
+                ind(1); o << ",\meshSettings\": {"; nl(1);
+                ind(2); o << "\outputFormat\": \"" << EscapeJson(extras->meshSettings.outputFormat) << "\","; nl(1);
+                ind(2); o << "\"includePos\": " << (extras->meshSettings.includePos ? "true" : "false") << ","; nl(1);
+                ind(2); o << "\"includeNormals\": " << (extras->meshSettings.includeNormals ? "true" : "false") << ","; nl(1);
+                ind(2); o << "\"includeColors\": " << (extras->meshSettings.includeColors ? "true" : "false") << ","; nl(1);
+                ind(2); o << "\"includeTexCoords\": " << (extras->meshSettings.includeTexCoords ? "true" : "false") << ","; nl(1);
+                ind(2); o << "\"indexType\": \"" << EscapeJson(extras->meshSettings.indexType) << "\","; nl(1);
+                ind(2); o << "\"scale\": " << extras->meshSettings.scale << ","; nl(1);
+                ind(2); o << "\"optimizeVertices\": " << (extras->meshSettings.optimizeVertices ? "true" : "false") << ","; nl(1);
+                ind(2); o << "\"generateNormals\": " << (extras->meshSettings.generateNormals ? "true" : "false"); nl(1);
+                ind(1); o << "}"; nl(1);
+            }
+
         }
         else {
             o << "null"; nl(1);
