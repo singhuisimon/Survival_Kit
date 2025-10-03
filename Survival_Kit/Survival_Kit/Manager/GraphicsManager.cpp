@@ -50,12 +50,12 @@ namespace gam300 {
 
         m_renderer.setup();
 
-
+#if 0
         TracyGpuContext; //creates the GPU timeline in Tracy
 
         glGenQueries(GPU_QUERY_COUNT, gpuStartQueries);
         glGenQueries(GPU_QUERY_COUNT, gpuEndQueries);
-#if 0
+
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         
         //glEnable(GL_DEPTH_TEST);
@@ -179,7 +179,9 @@ namespace gam300 {
         meshStorage.push_back(std::move(cubeGL));
         meshStorage.push_back(std::move(planeGL));
         meshStorage.push_back(std::move(sphereGL));
+
 #endif
+
         // Log startup
         LM.writeLog("GraphicsManager::startUp() - Graphics Manager started successfully");
         return 0;
@@ -190,38 +192,21 @@ namespace gam300 {
         // Log shutdown
         LM.writeLog("GraphicsManager::shutDown() - Shutting down Graphics Manager");
 
-        // Reset/Clear anything if needed
-
-        //// Clear stored states
-        //m_key_states.clear();
-        //m_prev_key_states.clear();
-
         // Call parent's shutDown()
         Manager::shutDown();
     }
 
-#if 0
     // Update input states, should be called once per frame
     void GraphicsManager::update() {
 
-        ZoneScopedN("GraphicsManager::update"); //CPU zone
-        TracyGpuZone("FrameRender");            // GPU Zone (entire frame)
+#if 0
+        ZoneScopedN("GraphicsManager::update");  //CPU zone
+        TracyGpuZone("FrameRender");             // GPU Zone (entire frame)
 
         int q = currentQueryIndex;
 
         // Start GPU timer
         glQueryCounter(gpuStartQueries[q], GL_TIMESTAMP);
-
-        // update loop 
-        /*
-        to include:
-        -
-        -
-        -
-        -
-        -
-        */
-
         // Temporary input for cursor to move camera
         if (IM.isKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
 
@@ -247,8 +232,6 @@ namespace gam300 {
                 main_camera.cameraOnScroll(IM.getScrollY(), &shadersStorage[0]);
             }
         }
-
-
 
         // KEYBOARD: Camera control with arrow keys
         float keyboardSensitivity = 8.0f; // Adjust this value for keyboard speed
@@ -277,6 +260,7 @@ namespace gam300 {
         if (keyPressed) {
             main_camera.cameraOnCursor(keyDeltaX, keyDeltaY, &shadersStorage[0]);
         }
+
         {
             TracyGpuZone("Camera + Light Setup");
 
@@ -436,9 +420,9 @@ namespace gam300 {
 
         // Move to next slot
         currentQueryIndex = (currentQueryIndex + 1) % GPU_QUERY_COUNT;
-    }
-
 #endif
+
+    }
 
     bool GraphicsManager::loadShaderPrograms(std::vector<std::pair<std::string, std::string>> shaders) {
         for (auto const& file : shaders) { 

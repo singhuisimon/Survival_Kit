@@ -6,7 +6,7 @@
 
 namespace gam300 {
 
-	RenderSystem::RenderSystem() : ComponentSystem<Transform3D, RenderComponent>("RenderSystem") {
+	RenderSystem::RenderSystem() : ComponentSystem<Transform3D, MeshComponent>("RenderSystem") {
 		set_priority(151);
 	}
 
@@ -45,15 +45,17 @@ namespace gam300 {
 	void RenderSystem::process_entity(EntityID entity_id) {
 
 		Transform3D*     transform  = CM.get_component<Transform3D>(entity_id);
-		RenderComponent* renderable = CM.get_component<RenderComponent>(entity_id);
+		MeshComponent*   mesh       = CM.get_component<MeshComponent>(entity_id);
 
-		if (transform && renderable) {
+		if (transform && mesh) {
 
-			u32 mesh_handle = renderable->get_mesh_handle();
+			u16 mesh_handle     = mesh->getMeshHandle();
+			u16 material_handle = mesh->getMaterialHandle();
+			
 			glm::mat4 model_to_world_transform = transform->getTransformationMatrix();
 
 			// Add to draw list
-			m_draw_list.push_back(DrawItem{ mesh_handle,0,0,model_to_world_transform });
+			m_draw_list.push_back(DrawItem{ mesh_handle,0,material_handle,model_to_world_transform });
 		}
 	}
 

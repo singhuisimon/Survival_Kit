@@ -289,8 +289,8 @@ namespace gam300 {
                 {
                     Entity& createNewEntity = ImguiEcsRef.createEntity("New Entity");
 
-                    if (!ImguiEcsRef.hasAllComponents<RenderComponent, Transform3D>(createNewEntity.get_id())) {
-                        ImguiEcsRef.addComponent<RenderComponent>(createNewEntity.get_id());
+                    if (!ImguiEcsRef.hasAllComponents<MeshComponent, Transform3D>(createNewEntity.get_id())) {
+                        ImguiEcsRef.addComponent<MeshComponent>(createNewEntity.get_id());
                         ImguiEcsRef.addComponent<Transform3D>(createNewEntity.get_id());
                     }
 
@@ -1143,8 +1143,8 @@ namespace gam300 {
 
             if (tex_index != -1) {
                 // Get texture size
-                float tex_w = static_cast<float>(texture_store[tex_index]->width());
-                float tex_h = static_cast<float>(texture_store[tex_index]->height());
+                float tex_w = static_cast<float>(texture_store[tex_index].width());
+                float tex_h = static_cast<float>(texture_store[tex_index].height());
 
                 // Get window size
                 float win_w = static_cast<float>(getWindowWidthHeight().x);
@@ -1166,7 +1166,7 @@ namespace gam300 {
 
                 // Draw the image
                 ImGui::Image(
-                    (ImTextureID)(intptr_t)((GLuint)texture_store[tex_index]->handle()),
+                    (ImTextureID)(intptr_t)((GLuint)texture_store[tex_index].handle()),
                     viewportSize,
                     ImVec2(0, 1), ImVec2(1, 0)
                 );
@@ -1657,13 +1657,12 @@ namespace gam300 {
                     }
                     else 
                     {
-                        for (const auto& [handle, material] : materials) 
-                        {
+                        for (size_t handle = 0; handle < materials.size(); ++handle) {
                             std::string matName = "Material " + std::to_string(handle);
                             bool selected = (currMaterial == handle);
                             if (ImGui::Selectable(matName.c_str(), selected)) {
                                 mesh->setMaterialHandle(handle);
-                               
+
                             }
                             if (selected) {
                                 ImGui::SetItemDefaultFocus();

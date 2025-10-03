@@ -134,15 +134,16 @@ namespace gam300 {
         Renderer& getRenderer() { return m_renderer; }
 
         // Get materials storage
-        const std::map<uint16_t, Material>& getMaterialStorage() { return m_material_storage; }
+        const std::vector<Material>& getMaterialStorage() { return m_renderer.getMaterialStorage(); }
 
         // Get meshdata storage
-        const std::vector<MeshData>& getMeshDataStorage() { return m_meshDataStorage; }
+        const std::vector<MeshData>& getMeshDataStorage() { return m_renderer.getMeshDataStorage(); }
 
         // Get texture storage
-        const std::vector<std::optional<Texture>>& getTextureStorage() { return m_textureStorage; }
+        //const std::vector<std::optional<Texture>>& getTextureStorage() { return m_textureStorage; }
+        const std::vector<Texture>& getTextureStorage() { return m_renderer.getTextureStorage(); }
         
-        size_t getMeshCount() const { return meshStorage.size(); }
+        const size_t getMeshCount() const { return m_renderer.mesh_count(); }
 
 
         std::string getMeshName(uint16_t handle) const;

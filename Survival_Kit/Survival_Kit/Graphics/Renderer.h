@@ -30,21 +30,25 @@ namespace gam300 {
 		void render_frame(std::span<const DrawItem> draw_items, Camera3D& active_cam, Light& light);
 
 		inline GLuint get_imgui_texture() const { return static_cast<GLuint>(m_textures[0].handle()); }
-
+		inline const size_t mesh_count() const { return m_mesh_storage.size(); }
+		inline const std::vector<MeshData>& getMeshDataStorage() { return m_mesh_data_storage; }
+		inline const std::vector<Material>& getMaterialStorage() { return t_testing_material;  }
+		inline const std::vector<Texture>& getTextureStorage()   { return t_testing_textures; }
 	private:
 
 		void beginFrame(RenderPass const& pass);
 		void draw(RenderPass const& pass, std::span<const DrawItem> draw_items, Camera3D& active_cam, Light& light);
 		void endFrame(RenderPass const& pass);
 
-		std::unordered_map<u32, MeshGL>			 m_tmp_mesh_storage;
-
+		std::vector<MeshGL>                      m_mesh_storage;
+		std::vector<MeshData>                    m_mesh_data_storage;
 		std::vector<ShaderProgram>               m_shader_storage;
 		std::vector<RenderPass>                  m_passes;
 		std::vector<FrameBuffer>                 m_framebuffers;
 		std::vector<Texture>                     m_textures;
 
-		Material                                 test_material;
+		std::vector<Texture>                     t_testing_textures;
+		std::vector<Material>                    t_testing_material;
 	};
 
 }

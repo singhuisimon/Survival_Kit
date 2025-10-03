@@ -4,13 +4,14 @@
 
 #include "../System/System.h"
 #include "../Component/Transform3D.h"
+#include "../Component/MeshComponent.h"
 #include "../Component/RenderComponent.h"
 #include "../Utility/Constant.h"
 #include "../Graphics/Renderer.h"
 
 namespace gam300 {
 
-	class RenderSystem : public ComponentSystem<Transform3D, RenderComponent> {
+	class RenderSystem : public ComponentSystem<Transform3D, MeshComponent> {
 
 	public:
         /**
