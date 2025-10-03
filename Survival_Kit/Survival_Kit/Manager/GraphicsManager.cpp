@@ -48,8 +48,8 @@ namespace gam300 {
 
         TracyGpuContext; //creates the GPU timeline in Tracy
 
-        glGenQueries(1, &gpuStartQuery);
-        glGenQueries(1, &gpuEndQuery);
+        glGenQueries(GPU_QUERY_COUNT, gpuStartQueries);
+        glGenQueries(GPU_QUERY_COUNT, gpuEndQueries);
 
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         
@@ -202,8 +202,10 @@ namespace gam300 {
         ZoneScopedN("GraphicsManager::update"); //CPU zone
         TracyGpuZone("FrameRender");            // GPU Zone (entire frame)
 
+        int q = currentQueryIndex;
+
         // Start GPU timer
-        glQueryCounter(gpuStartQuery, GL_TIMESTAMP);
+        glQueryCounter(gpuStartQueries[q], GL_TIMESTAMP);
 
         // update loop 
         /*
@@ -410,21 +412,25 @@ namespace gam300 {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         // End GPU timer
-        glQueryCounter(gpuEndQuery, GL_TIMESTAMP);
+        glQueryCounter(gpuEndQueries[q], GL_TIMESTAMP);
 
         TracyGpuCollect; // <-- flush GPU timeline to Tracy
 
         // == Custom GPU frame time plot ==
+        int prev = (q + 1) % GPU_QUERY_COUNT;
         GLint available = 0;
-        glGetQueryObjectiv(gpuEndQuery, GL_QUERY_RESULT_AVAILABLE, &available);
+        glGetQueryObjectiv(gpuEndQueries[prev], GL_QUERY_RESULT_AVAILABLE, &available);
         if (available) {
             GLuint64 startTime = 0, endTime = 0;
-            glGetQueryObjectui64v(gpuStartQuery, GL_QUERY_RESULT, &startTime);
-            glGetQueryObjectui64v(gpuEndQuery, GL_QUERY_RESULT, &endTime);
+            glGetQueryObjectui64v(gpuStartQueries[prev], GL_QUERY_RESULT, &startTime);
+            glGetQueryObjectui64v(gpuEndQueries[prev], GL_QUERY_RESULT, &endTime);
 
-            double gpuTimeMs = (endTime - startTime) / 1e6;
-            TracyPlot("GPU Frame Time(ms)", (float)gpuTimeMs);
+            double gpuTimeMs = (endTime - startTime) / 1e6; // ns ? ms
+            TracyPlot("GPU Frame Time (ms)", (float)gpuTimeMs);
         }
+
+        // Move to next slot
+        currentQueryIndex = (currentQueryIndex + 1) % GPU_QUERY_COUNT;
     }
 
     bool GraphicsManager::loadShaderPrograms(std::vector<std::pair<std::string, std::string>> shaders) {

@@ -99,8 +99,9 @@ namespace gam300 {
         bool isPBR = false;
 
         // Query Handles
-        GLuint gpuStartQuery{0};
-        GLuint gpuEndQuery{0};
+        GLuint gpuStartQueries[GPU_QUERY_COUNT]{};
+        GLuint gpuEndQueries[GPU_QUERY_COUNT]{};
+        int currentQueryIndex = 0;
 
     public:
         /**
