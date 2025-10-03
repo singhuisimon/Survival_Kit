@@ -10,8 +10,7 @@
 #include <filesystem>
 
  // Include stb_image (make sure it's in your include folder)
-#define STB_IMAGE_IMPLEMENTATION
-#include "../../External_Libraries/include/stb_image.h"
+#include "../../External_Libraries/include/stb_image.h"  // No STB_IMAGE_IMPLEMENTATION
 
 namespace fs = std::filesystem;
 
@@ -250,13 +249,18 @@ namespace gam300 {
     }
 
     uint32_t TextureCompiler::calculateCRC32(const unsigned char* data, size_t length) {
-        // Simple CRC32 implementation
         uint32_t crc = 0xFFFFFFFF;
 
         for (size_t i = 0; i < length; ++i) {
             crc ^= data[i];
             for (int j = 0; j < 8; ++j) {
-                crc = (crc >> 1) ^ (0xEDB88320 & -(crc & 1));
+                // Avoid unary minus on unsigned by using conditional
+                if (crc & 1) {
+                    crc = (crc >> 1) ^ 0xEDB88320;
+                }
+                else {
+                    crc = crc >> 1;
+                }
             }
         }
 
