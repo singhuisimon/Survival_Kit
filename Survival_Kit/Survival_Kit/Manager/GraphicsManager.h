@@ -39,6 +39,7 @@
 #include "ImguiManager.h"
 
 // For Tracy operations
+#include "../Tracy/tracy/Tracy.hpp"
 #include "../Tracy/tracy/TracyOpenGL.hpp"
 
 // KENNY TESTING: For testing cursor input
