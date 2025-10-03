@@ -46,9 +46,9 @@ namespace gam300 {
     static float assetIconSize = 64.0f;
     static int selectedAssetIndex = -1;
 
-    static bool asset_editor = false;
+    //static bool asset_editor = false;
     static bool prefab_editor = false;
-    static std::filesystem::directory_entry currentAsset;
+    //static std::filesystem::directory_entry currentAsset;
     static std::filesystem::directory_entry selectedPrefab;
 
     // Asset Type names for display
@@ -138,6 +138,11 @@ namespace gam300 {
         ImGui_ImplGlfw_InitForOpenGL(glfwindow, true);
         ImGui_ImplOpenGL3_Init();
 
+        // Initialize descriptor editor
+        m_descriptorEditor = new DescriptorEditor(
+            AM.db(),           // Get AssetDatabase from AssetManager
+            AM.descriptorGenerator() // Get AssetDescriptorGenerator
+        );
 
         return 0;
     }
@@ -757,6 +762,8 @@ namespace gam300 {
     }
 
     void ImguiManager::shutDown() {
+        delete m_descriptorEditor;
+        m_descriptorEditor = nullptr;
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
@@ -893,9 +900,9 @@ namespace gam300 {
 
         // --- load folders ---//
         std::vector<std::string> assetsFoldersName;
-        if (std::filesystem::exists(BASE_ASSETS_PATH) && std::filesystem::is_directory(BASE_ASSETS_PATH))
+        if (std::filesystem::exists(getAssetsPath()) && std::filesystem::is_directory(getAssetsPath()))
         {
-            for (const auto& entry : std::filesystem::directory_iterator(BASE_ASSETS_PATH))
+            for (const auto& entry : std::filesystem::directory_iterator(getAssetsPath()))
             {
                 if (entry.is_directory())
                     assetsFoldersName.push_back(entry.path().filename().string());
@@ -946,7 +953,7 @@ namespace gam300 {
             if (!searchStr.empty())
             {
                 // Search across all folders
-                for (const auto& folderEntry : std::filesystem::directory_iterator(BASE_ASSETS_PATH))
+                for (const auto& folderEntry : std::filesystem::directory_iterator(getAssetsPath()))
                 {
                     if (!folderEntry.is_directory()) continue;
 
@@ -970,11 +977,7 @@ namespace gam300 {
             {
                 //std::cout << "\nselected Folder: " << selectedFolder << "\n";
                 // normal view: only selected folder
-
-                // currentFolder: /Survival_Kit/Assets/Scene/
-                std::string currentFolder = getAssetFilePath(selectedFolder + "/");
-
-                //std::cout << "current folder: " << currentFolder << "\n";
+                std::filesystem::path currentFolder = std::filesystem::path(getAssetsPath()) / selectedFolder;
                 if (std::filesystem::exists(currentFolder) && std::filesystem::is_directory(currentFolder))
                 {
                     for (const auto& entry : std::filesystem::directory_iterator(currentFolder))
@@ -987,8 +990,6 @@ namespace gam300 {
 
             }
         }
-
-
 
         // --- display assets grid ---
         if (!assetsList.empty())
@@ -1017,7 +1018,15 @@ namespace gam300 {
                 ImGui::PushID(filename.c_str());
                 if (ImGui::Button(filename.c_str(), ImVec2(thumbnailSize, thumbnailSize))) {
 
-
+                    selectedAssetIndex = (int)i;
+                    if (m_descriptorEditor->LoadDescriptor(AM.getAssetIdByFilename(filename), m_currentDescriptor)) {
+                        m_showDescriptorPanel = true;
+                        LM.writeLog("Loaded descriptor for asset: %s", filename.c_str());
+                    }
+                    else {
+                        LM.writeLog("Failed to load descriptor for asset ID: %llu", AM.getAssetIdByFilename(filename));
+                    }
+                   
                     selectedAssetIndex = i;
                     shownFile = fileNamePath;
                     // to ge the type of the file e.g. .scn, .wav
@@ -1034,13 +1043,15 @@ namespace gam300 {
                     }
                     if (extension == ".png" || extension == ".jpeg") //to open the image
                     {
-                        asset_editor = true;
-                        currentAsset = assetEntry;
+                        //asset_editor = true;
+                        //currentAsset = assetEntry;
+                        //m_showDescriptorPanel = true;
                     }
                     if (extension == ".prefab") //to open the image
                     {
                         prefab_editor = true;
                         selectedPrefab = assetEntry;
+                        //m_showDescriptorPanel = true;
                     }
                 }
 
@@ -1093,9 +1104,9 @@ namespace gam300 {
             }
             ImGui::Columns(1);
 
-            if (asset_editor) {
+            /*if (asset_editor) {
                 displayAssetEditor(currentAsset);
-            }
+            }*/
 
             if (prefab_editor) {
                 displayPrefabEditor(selectedPrefab);
@@ -1110,16 +1121,128 @@ namespace gam300 {
 
 #endif
 
-    void ImguiManager::displayAssetEditor(const std::filesystem::directory_entry& assetFilepath)
+    void ImguiManager::displayAssetEditor()
     {
-        if (ImGui::Begin("Asset Editor", &asset_editor)) {
-            ImGui::Text("Editing: %s", assetFilepath.path().string().c_str());
-        }
-        ImGui::End();
 
-        if (!asset_editor) {
-            currentAsset = std::filesystem::directory_entry();
+        if (!m_showDescriptorPanel) return;
+
+        if (ImGui::Begin("Descriptor Editor", &m_showDescriptorPanel)) {
+            // Display read-only asset info
+            ImGui::SeparatorText("Asset Information");
+            ImGui::Text("Asset ID: %llu", m_currentDescriptor.assetId);
+            ImGui::Text("GUID: %s", m_currentDescriptor.guid.c_str());
+            ImGui::Text("Source: %s", m_currentDescriptor.sourcePath.c_str());
+            ImGui::Text("Type: %s", getAssetTypeName(m_currentDescriptor.assetType));
+
+            ImGui::Spacing();
+            ImGui::SeparatorText("Editable Properties");
+
+            // Display Name (editable)
+            char displayNameBuf[256];
+            strncpy_s(displayNameBuf, sizeof(displayNameBuf),
+                m_currentDescriptor.displayName.c_str(), _TRUNCATE);
+            if (ImGui::InputText("Display Name", displayNameBuf, sizeof(displayNameBuf))) {
+                m_descriptorEditor->UpdateProperty(
+                    m_currentDescriptor.assetId,
+                    "displayName",
+                    std::string(displayNameBuf)
+                );
+                m_currentDescriptor.displayName = displayNameBuf;
+            }
+
+            // Category (editable)
+            char categoryBuf[128];
+            strncpy_s(categoryBuf, sizeof(categoryBuf),
+                m_currentDescriptor.category.c_str(), _TRUNCATE);
+            if (ImGui::InputText("Category", categoryBuf, sizeof(categoryBuf))) {
+                m_descriptorEditor->UpdateProperty(
+                    m_currentDescriptor.assetId,
+                    "category",
+                    std::string(categoryBuf)
+                );
+                m_currentDescriptor.category = categoryBuf;
+            }
+
+            // Texture-specific settings (only for textures)
+            if (m_currentDescriptor.assetType == AssetType::Texture) {
+                ImGui::Spacing();
+                ImGui::SeparatorText("Texture Settings");
+
+                // Usage Type dropdown
+                std::vector<std::string> usageTypes = m_descriptorEditor->GetPropertyOptions("textureSettings.usageType");
+                if (ImGui::BeginCombo("Usage Type", m_currentDescriptor.textureSettings.usageType.c_str())) {
+                    for (const auto& type : usageTypes) {
+                        bool isSelected = (m_currentDescriptor.textureSettings.usageType == type);
+                        if (ImGui::Selectable(type.c_str(), isSelected)) {
+                            m_descriptorEditor->UpdateProperty(
+                                m_currentDescriptor.assetId,
+                                "textureSettings.usageType",
+                                type
+                            );
+                            m_currentDescriptor.textureSettings.usageType = type;
+                        }
+                    }
+                    ImGui::EndCombo();
+                }
+
+                // Compression dropdown
+                std::vector<std::string> compressionTypes = m_descriptorEditor->GetPropertyOptions("textureSettings.compression");
+                if (ImGui::BeginCombo("Compression", m_currentDescriptor.textureSettings.compression.c_str())) {
+                    for (const auto& comp : compressionTypes) {
+                        bool isSelected = (m_currentDescriptor.textureSettings.compression == comp);
+                        if (ImGui::Selectable(comp.c_str(), isSelected)) {
+                            m_descriptorEditor->UpdateProperty(
+                                m_currentDescriptor.assetId,
+                                "textureSettings.compression",
+                                comp
+                            );
+                            m_currentDescriptor.textureSettings.compression = comp;
+                        }
+                    }
+                    ImGui::EndCombo();
+                }
+
+                // Quality slider
+                float quality = m_currentDescriptor.textureSettings.quality;
+                if (ImGui::SliderFloat("Quality", &quality, 0.0f, 1.0f)) {
+                    m_descriptorEditor->UpdateProperty(
+                        m_currentDescriptor.assetId,
+                        "textureSettings.quality",
+                        std::to_string(quality)
+                    );
+                    m_currentDescriptor.textureSettings.quality = quality;
+                }
+
+                // Generate Mipmaps checkbox
+                bool genMips = m_currentDescriptor.textureSettings.generateMipmaps;
+                if (ImGui::Checkbox("Generate Mipmaps", &genMips)) {
+                    m_descriptorEditor->UpdateProperty(
+                        m_currentDescriptor.assetId,
+                        "textureSettings.generateMipmaps",
+                        genMips ? "true" : "false"
+                    );
+                    m_currentDescriptor.textureSettings.generateMipmaps = genMips;
+                }
+
+                // sRGB checkbox
+                bool srgb = m_currentDescriptor.textureSettings.srgb;
+                if (ImGui::Checkbox("sRGB", &srgb)) {
+                    m_descriptorEditor->UpdateProperty(
+                        m_currentDescriptor.assetId,
+                        "textureSettings.srgb",
+                        srgb ? "true" : "false"
+                    );
+                    m_currentDescriptor.textureSettings.srgb = srgb;
+                }
+            }
+
+            // Dirty state indicator
+            if (m_currentDescriptor.isDirty) {
+                ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Modified");
+            }
         }
+
+        ImGui::End();
     }
 
     void ImguiManager::displayPrefabEditor(const std::filesystem::directory_entry& prefabFilepath)
@@ -1306,7 +1429,7 @@ namespace gam300 {
             }
         }
         else if constexpr (std::is_same_v<componentType, AudioComponent>) {
-            // rigidBody 
+            // audio
             if (AudioComponent* audio = ImguiEcsRef.getComponent<AudioComponent>(selectedEntityID)) {
 
                 if (audio)
@@ -1322,6 +1445,97 @@ namespace gam300 {
                     if (ImGui::RadioButton("SFX", currentType == 1)) {
                         audio->setType(AudioType::SFX);
                     }
+
+                    ImGui::Separator();
+                    ImGui::Text("Play State:");
+                    PlayState playState = audio->getPlayState();
+                    if (ImGui::RadioButton("Play", playState == PlayState::PLAY)) {
+                        audio->setPlayState(PlayState::PLAY);
+                    }
+                    if (ImGui::RadioButton("Pause", playState == PlayState::PAUSE)) {
+                        audio->setPlayState(PlayState::PAUSE);
+                    }
+                    if (ImGui::RadioButton("Stop", playState == PlayState::STOP)) {
+                        audio->setPlayState(PlayState::STOP);
+                    }
+
+                    ImGui::Separator();
+                    ImGui::Text("Volume:");
+                    float volume = audio->getVolume();
+                    if (ImGui::DragFloat("Volume", &volume, 0.001f, 0.f, 1.f)) {
+                        audio->setVolume(volume);
+                    }
+
+                    ImGui::Separator();
+                    ImGui::Text("Pitch:");
+                    float pitch = audio->getPitch();
+                    if (ImGui::DragFloat("Pitch", &pitch, 0.001f, 0.f, 1.f)) {
+                        audio->setPitch(pitch);
+                    }
+
+                    ImGui::Separator();
+                    ImGui::Text("Looping:");
+                    bool looping = audio->isLooping();
+                    if (ImGui::Checkbox("Looping", &looping)) {
+                        audio->setLooping(looping);
+                    }
+
+                    ImGui::Separator();
+                    ImGui::Text("Mute:");
+                    bool mute = audio->isMute();
+                    if (ImGui::Checkbox("Mute", &mute)) {
+                        audio->setMute(mute);
+                    }
+
+                    ImGui::Separator();
+                    ImGui::Text("3D:");
+                    bool is_3d = audio->is3D();
+                    if (ImGui::Checkbox("3D", &is_3d)) {
+                        audio->setIs3D(is_3d);
+                    }
+
+                    ImGui::Separator();
+
+                    std::string advice = "Max Distance needs to be higher than Min Distance to have attenuation";
+                    ImGui::TextDisabled("(i)");
+                    if (ImGui::IsItemHovered())
+                    {
+                        ImGui::BeginTooltip();
+                        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+                        ImGui::TextUnformatted(advice.c_str());
+                        ImGui::PopTextWrapPos();
+                        ImGui::EndTooltip();
+                    }
+
+                    // Disable only if not 3D
+                    ImGui::BeginDisabled(!is_3d);
+
+                    ImGui::Text("Min Distance:");
+                    float min_distance = audio->getMinDistance();
+                    if (ImGui::DragFloat("##MinDistance", &min_distance, 0.1f, 0.f)) {
+                        if (is_3d) {
+                            audio->setMinDistance(min_distance);
+                        }
+                        else {
+                            audio->setMinDistance(1.f);
+                        }
+                    }
+
+                    ImGui::Separator();
+
+                    ImGui::Text("Max Distance:");
+                    float max_distance = audio->getMaxDistance();
+                    if (ImGui::DragFloat("##MaxDistance", &max_distance, 0.1f, 0.f)) {
+                        if (is_3d) {
+                            audio->setMaxDistance(max_distance);
+                        }
+                        else {
+                            audio->setMaxDistance(10.f);
+                        }
+                    }
+
+                    ImGui::EndDisabled();
+
                 }
 
             }

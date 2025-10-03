@@ -126,7 +126,8 @@ namespace Core
         // Start compiler process
         const auto SUCCESS = CreateProcess
         (
-            L"C:\\Program Files\\dotnet\\dotnet.exe", buildCmd.data(),
+            dotnetExePath.c_str(),  //  Use the variable you already set up
+            buildCmd.data(),
             nullptr, nullptr, true, NULL, nullptr, nullptr,
             &startInfo, &pi
         );
