@@ -6,16 +6,27 @@
 #include <vector>
 #include <ctime>
 #include <memory>
+#include <thread>
+#include <mutex>
+#include <queue>
+#include <atomic>
 
 // Manager base + logging
 #include "Manager.h"
 #include "LogManager.h"
 
-//Pipeline headers (In Pipeline folder)
+// Pipeline headers (In Pipeline folder)
 #include "../Pipeline/AssetDatabase.h"
 #include "../Pipeline/AssetImporter.h"
 #include "../Pipeline/AssetScanner.h"
 #include "../Pipeline/AssetDescriptorGenerator.h" 
+
+// Compiler files (In Compiler folder)
+#include "../Compiler/ResourceCompiler.h"
+#include "../Compiler/TextureCompiler.h"
+#include "../Compiler/MeshCompiler.h"
+#include "../Compiler/AudioCompiler.h"
+#include "../Compiler/ShaderCompiler.h"
 
 //asset path
 #include "../Utility/AssetPath.h"
@@ -27,6 +38,17 @@
 namespace gam300 {
 
 	/**
+	* @brief Job for the compilation thread pool
+	*/
+	struct CompilationJob {
+		AssetId assetId;
+		std::string intermediatePath;
+		AssetType assetType;
+		std::unique_ptr<ResourceProperties> properties;
+		xresource::full_guid guid;
+	};
+
+	/**
 	* @class AssetManager
 	* @brief Central editor tool coordinating scanning, importing and DB.
 	*/
@@ -36,9 +58,19 @@ namespace gam300 {
 		AssetManager(const AssetManager&) = delete; // no copy
 		void operator=(const AssetManager&) = delete; // no assign
 
+		// NEW: Compiler support
+		std::unique_ptr<CompilerRegistry> m_compilerRegistry;
+		std::unique_ptr<ResourcePaths> m_resourcePaths;
+
+		// Thread-safe compilation queue
+		std::queue<CompilationJob> m_compilationQueue;
+		std::vector<CompileResult> m_completedCompilations;
+		std::mutex m_queueMutex;
+		std::mutex m_resultsMutex;
+		std::atomic<bool> m_compilerThreadRunning{ false };
+		std::thread m_compilerThread;
 
 	public:
-
 		// Singleton accessor (same pattern as other managers)
 		static AssetManager& getInstance();
 
@@ -52,10 +84,9 @@ namespace gam300 {
 			bool followSymlinks = false; //!< Recurse through symlinks
 
 			//temporary for now
-			std::string intermediateDirectory = "Cache/Intermediate"; //!< Where import output goes
-			std::string databaseFile = "Cache/assetdb.txt"; //!< Asset DB persistence
-			std::string snapshotFile = "Cache/scan.snapshot"; //!< Scanner warm start
-
+			std::string intermediateDirectory = "Survival_Kit/Survival_Kit/Assets/Cache/Intermediate"; //!< Where import output goes
+			std::string databaseFile = "Survival_Kit/Survival_Kit/Assets/Cache/assetdb.txt"; //!< Asset DB persistence
+			std::string snapshotFile = "Survival_Kit/Survival_Kit/Assets/Cache/scan.snapshot"; //!< Scanner warm start
 
 			bool writeDescriptors = true; //!< Emit .desc files
 			bool descriptorSidecar = true; //!< `foo.png.desc` next to source
@@ -150,12 +181,38 @@ namespace gam300 {
 		 */
 		bool assetExists(const std::string& sourcePath) const;
 
-	private:
 
+		/**
+		 * @brief Initialize the compiler system
+		 * @details Call this in startUp() after scanner is initialized
+		 */
+		void initializeCompilers();
+
+		/**
+		 * @brief Queue an asset for compilation
+		 * @param rec Asset record to compile
+		 */
+		void queueCompilation(const AssetRecord* rec);
+
+		/**
+		 * @brief Process compilation queue (call in scanAndProcess)
+		 */
+		void processCompilationQueue();
+
+		/**
+		 * @brief Get completed compilation results
+		 */
+		std::vector<CompileResult> getCompletedCompilations();
+
+		/**
+		 * @brief Shut down compiler thread safely
+		 */
+		void shutdownCompilers();
+
+	private:
 		void handleAddedOrModified(const std::string& src);
 		void handleRemoved(const std::string& src);
 		static const char* typeName(AssetType t);
-
 
 		// State
 		Config m_cfg{};
@@ -163,6 +220,16 @@ namespace gam300 {
 		AssetImporterRegistry m_importers;
 		AssetDatabase m_db;
 		AssetDescriptorGenerator m_descGen;
+
+		/**
+		 * @brief Compiler worker thread function
+		 */
+		void compilerWorkerThread();
+
+		/**
+		 * @brief Compile a single job (safe, won't crash)
+		 */
+		void compileJob(const CompilationJob& job);
 	};
 
 }	//end of namespace gam300

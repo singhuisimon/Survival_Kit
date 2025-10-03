@@ -71,6 +71,11 @@
     <ClCompile Include="Tracy\TracyClient.cpp" />
     <ClCompile Include="Manager\TracyManager.cpp" />
     <ClCompile Include="Component\MeshComponent.cpp" />
+    <ClCompile Include="Compiler\ResourceCompiler.cpp" />
+    <ClCompile Include="Compiler\TextureCompiler.cpp" />
+    <ClCompile Include="Compiler\MeshCompiler.cpp" />
+    <ClCompile Include="Compiler\AudioCompiler.cpp" />
+    <ClCompile Include="Compiler\ShadowCompiler.cpp" />
     <ClCompile Include="Component\TextureComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -165,6 +170,11 @@
     <ClInclude Include="Component\TextureComponent.h" />
     <ClInclude Include="Graphics\RenderPass.h" />
     <ClInclude Include="Graphics\Renderbuffer.h" />
+    <ClInclude Include="Compiler\ResourceCompiler.h" />
+    <ClInclude Include="Compiler\TextureCompiler.h" />
+    <ClInclude Include="Compiler\MeshCompiler.h" />
+    <ClInclude Include="Compiler\AudioCompiler.h" />
+    <ClInclude Include="Compiler\ShaderCompiler.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Scene\Game.scn" />

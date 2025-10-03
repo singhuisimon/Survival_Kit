@@ -135,6 +135,12 @@ int main(void) {
 
     //std::cout << "Initial script added" << std::endl;
 
+    // AM.shutDown(); //shut down Asset Manager
+
+    // Add a timer for periodic scanning
+    static float scanTimer = 0.0f;
+    const float SCAN_INTERVAL = 1.0f; // Scan every 1 second
+
 
     while (!GM.getGameOver() && !glfwWindowShouldClose(window)) {
 
@@ -145,6 +151,13 @@ int main(void) {
 
         // Start of loop timing
         clock.delta();
+
+        // Periodic asset scanning to detect file changes
+        scanTimer += (GM.getFrameTime() / 1000.0f);
+        if (scanTimer >= SCAN_INTERVAL) {
+            AM.scanAndProcess();  // This will detect deletions and additions
+            scanTimer = 0.0f;
+        }
 
         bool currentSpaceState = GetKeyState(VK_SPACE) & 0x8000;
         if (currentSpaceState && !spacePressed)
@@ -236,10 +249,15 @@ int main(void) {
         FrameMark; //always keep this as the last.
     }
 
-
     //app.ShutdownScripting();
     // Cleanup
     LM.writeLog("Cleaning up resources");
+
+    // Final scan before shutdown to catch any last changes
+    AM.scanAndProcess();
+
+    // Shut down Asset Manager BEFORE GLFW termination
+    AM.shutDown();
 
     // Shut down InputManager
     IM.shutDown();
@@ -247,8 +265,6 @@ int main(void) {
     TRACY.shutDown();
 
     IMGUIM.shutDown();
-
-    AM.shutDown(); //shut down Asset Manager
     
     // Terminate GLFW
     glfwTerminate();
