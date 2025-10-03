@@ -68,12 +68,10 @@ namespace gam300
 
 		bool fileWindow = false;
 		std::string shownFile{};
-		char saveAsDefaultName[128];
+		char saveAsDefaultName[128] = {};
 		bool showSaveAsPanel = false;
 		int selectedAssetIndex = -1;
 		bool showPrefabPanel = false;
-
-		const std::string BASE_ASSETS_PATH = std::filesystem::current_path().string() + "\\Assets\\";
 
 		//for Asset Browser functionality
 		void refreshAssetList();
@@ -83,7 +81,7 @@ namespace gam300
 
 		// Add descriptor editor
 		DescriptorEditor* m_descriptorEditor;
-		EditableDescriptor m_currentDescriptor;
+		EditableDescriptor m_currentDescriptor ;
 		bool m_showDescriptorPanel = false;
 
 	public:
@@ -106,7 +104,7 @@ namespace gam300
 
 		//void displayTopMenuBar();
 
-		void displayFileList(bool& fileWindow, std::string& shownFile);
+		void displayFileList();
 		//void displayFileList();
 
 		void displayHierarchyList();
@@ -117,11 +115,11 @@ namespace gam300
 
 		void displayTopMenu();
 
-		void showPrefabsPanel(EntityID selectedEntity);
+	/*	void showPrefabsPanel(EntityID selectedEntity);*/
 
 		void finishImguiRender(ImGuiIO& imgui_io);
 
-		void handleViewPortClick(ImVec2 mousePos, ImVec2 viewportSize);
+		void handleViewPortClick(ImVec2 mousePos);
 
 		void displayAssetEditor();
 		void displayPrefabEditor(const std::filesystem::directory_entry& prefabFilepath);
@@ -135,7 +133,7 @@ namespace gam300
 		Vector2D getWindowSize(GLFWwindow& window);
 
 		// to retuen the width and height for imguiTex and imguiFbo
-		Vector2D getWindowWidthHeight() { return Vector2D(width, height); }
+		Vector2D getWindowWidthHeight() { return Vector2D(static_cast<float>(width), static_cast<float>(height)); }
 
 		void displayPerformanceProfile();
 

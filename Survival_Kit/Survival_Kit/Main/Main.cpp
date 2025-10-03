@@ -22,7 +22,7 @@ int main(void) {
     ZoneScopedN("MainStartup");
 	
     bool spacePressed = false;
-    bool tracyKeyWasDown = false;
+    //bool tracyKeyWasDown = false;
 
     // Get reference to LogManager (already started by GameManager)
     LM.writeLog("Main: GameManager initialized successfully");

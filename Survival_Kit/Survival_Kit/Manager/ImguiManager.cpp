@@ -90,9 +90,12 @@ namespace gam300 {
     //Prefab counter index
     static int counter = 0;
 
-    ImguiManager::ImguiManager() : ImguiEcsRef(EM), ImguiGraphicRef(GFXM) {}
+    
+    ImguiManager::ImguiManager() : ImguiEcsRef(EM), ImguiGraphicRef(GFXM), m_descriptorEditor(nullptr) {}
 
-    ImguiManager::ImguiManager(ECSManager& ECS, GraphicsManager& GFM) : ImguiEcsRef(ECS), ImguiGraphicRef(GFM) {
+    ImguiManager::ImguiManager(ECSManager& ECS, GraphicsManager& GFM) : ImguiEcsRef(ECS), ImguiGraphicRef(GFM)
+        , m_descriptorEditor(nullptr) {
+        saveAsDefaultName[0] = '\0';
         setType("IMGUI_Manager");
     }
 
@@ -174,7 +177,7 @@ namespace gam300 {
         }
     }
 
-    void ImguiManager::displayFileList(bool& fileWindow, std::string& shownFile) {
+    void ImguiManager::displayFileList() {
 
         // ================ When Open File ===========================
         // scenePath: /Survival_Kit/Assets/Scene
@@ -605,10 +608,10 @@ namespace gam300 {
     }
 #endif
 
-    void ImguiManager::showPrefabsPanel(EntityID selectedEntity)
-    {
-        //if (ImGui::Begin)
-    }
+    //void ImguiManager::showPrefabsPanel(EntityID selectedEntity)
+    //{
+    //    //if (ImGui::Begin)
+    //}
 
     void ImguiManager::displayTopMenu()
     {
@@ -677,7 +680,7 @@ namespace gam300 {
         // ========================== Open top menu =============================  
         if (fileWindow) {
 
-            IMGUIM.displayFileList(fileWindow, shownFile); 
+            IMGUIM.displayFileList(); 
         }
 
         // newPath: /Survival_Kit/Assets/Scene/
@@ -776,7 +779,7 @@ namespace gam300 {
         //Vector2D dimension{ 0,0 };
 
         glfwGetWindowSize(&window, &width, &height);
-        return Vector2D(width, height);
+        return Vector2D(static_cast<float>(width), static_cast<float>(height));
         //std::cout << width << ", " << "height\n";
     }
 
@@ -803,7 +806,7 @@ namespace gam300 {
                 viewportSize,
                 ImVec2(0, 1), ImVec2(1, 0));
 
-            handleViewPortClick(imagePos, viewportSize);
+            handleViewPortClick(imagePos);
         }
 
         //ImVec2 mousePos, viewportSize;
@@ -916,7 +919,7 @@ namespace gam300 {
         }
 
         static std::string selectedFolder = ""; // currently selected folder type e.g. scene, prefab
-        static int selectedAssetIndex = -1;
+        //static int selectedAssetIndex = -1;
         //std::cout << "selectedFolder: " << selectedFolder << "\n";
         // ---set up 2 column ---
         ImGui::Columns(2, nullptr, true);
@@ -1034,7 +1037,7 @@ namespace gam300 {
                         LM.writeLog("Failed to load descriptor for asset ID: %llu", AM.getAssetIdByFilename(filename));
                     }
                    
-                    selectedAssetIndex = i;
+                    selectedAssetIndex = static_cast<int>(i);
                     shownFile = fileNamePath;
                     // to ge the type of the file e.g. .scn, .wav
                     std::string extension = assetEntry.path().extension().string();
@@ -1306,7 +1309,7 @@ namespace gam300 {
         }
     }
 
-    void ImguiManager::handleViewPortClick(ImVec2 mousePos, ImVec2 viewportSize)
+    void ImguiManager::handleViewPortClick(ImVec2 mousePos)
     {
         // Check the mouse hover position for reference
         if (ImGui::IsItemHovered())
@@ -1318,7 +1321,7 @@ namespace gam300 {
             mouseInViewportPos.y = mouseScreen.y - mousePos.y;
 
             ImGui::Text("Mouse local: (%.1f, %.1f)", mouseInViewportPos.x, mouseInViewportPos.y);
-            float aspectRatio = viewportSize.x / viewportSize.y;
+            //float aspectRatio = viewportSize.x / viewportSize.y;
 
         }
     }
