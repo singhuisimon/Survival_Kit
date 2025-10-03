@@ -46,6 +46,11 @@ namespace gam300 {
             LM.writeLog("GraphicsManager::startUp(): GLAD initialized successfully.");
         }
 
+        TracyGpuContext; //creates the GPU timeline in Tracy
+
+        glGenQueries(1, &gpuStartQuery);
+        glGenQueries(1, &gpuEndQuery);
+
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         
         //glEnable(GL_DEPTH_TEST);
@@ -187,6 +192,12 @@ namespace gam300 {
     // Update input states, should be called once per frame
     void GraphicsManager::update() {
 
+        ZoneScopedN("GraphicsManager::update"); //CPU zone
+        TracyGpuZone("FrameRender");            // GPU Zone (entire frame)
+
+        // Start GPU timer
+        glQueryCounter(gpuStartQuery, GL_TIMESTAMP);
+
         // update loop 
         /*
         to include:
@@ -273,8 +284,12 @@ namespace gam300 {
         // Bind framebuffer object for IMGUI viewport
         glBindFramebuffer(GL_FRAMEBUFFER, imgui_fbo->handle());
 
-        // Clear the color and depth buffer
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
+        {
+
+            TracyGpuZone("Clear Buffers");
+            // Clear the color and depth buffer
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        }
 
         //// Enable choosing of mesh
         //if (IM.isKeyPressed(GLFW_KEY_1)) {
@@ -294,6 +309,8 @@ namespace gam300 {
         // KENNY TESTING: ACCESSING ENTITIES AND UPDATING THEIR TRANSFORMS PER FRAME     
         const auto transform_entities_IDs = EM.getEntitiesWithComponent<Transform3D>();
         for (const auto entity_id : transform_entities_IDs) {
+
+            TracyGpuZone("Draw Entity");
 
             // Get entity's transform component using ID
             if (EM.hasComponent<Transform3D>(entity_id)) { // Extra check just in case 
@@ -339,6 +356,23 @@ namespace gam300 {
 
         // Unbind framebuffer object
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        // End GPU timer
+        glQueryCounter(gpuEndQuery, GL_TIMESTAMP);
+
+        TracyGpuCollect; // <-- flush GPU timeline to Tracy
+
+        // == Custom GPU frame time plot ==
+        GLint available = 0;
+        glGetQueryObjectiv(gpuEndQuery, GL_QUERY_RESULT_AVAILABLE, &available);
+        if (available) {
+            GLuint64 startTime = 0, endTime = 0;
+            glGetQueryObjectui64v(gpuStartQuery, GL_QUERY_RESULT, &startTime);
+            glGetQueryObjectui64v(gpuEndQuery, GL_QUERY_RESULT, &endTime);
+
+            double gpuTimeMs = (endTime - startTime) / 1e6;
+            TracyPlot("GPU Frame Time(ms)", (float)gpuTimeMs);
+        }
     }
 
     bool GraphicsManager::loadShaderPrograms(std::vector<std::pair<std::string, std::string>> shaders) {

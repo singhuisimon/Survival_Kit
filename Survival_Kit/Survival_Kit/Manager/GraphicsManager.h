@@ -36,6 +36,9 @@
 // For IMGUI operations
 #include "ImguiManager.h"
 
+// For Tracy operations
+#include "../Tracy/tracy/TracyOpenGL.hpp"
+
 // KENNY TESTING: For testing cursor input
 #include "InputManager.h"
 
@@ -85,6 +88,10 @@ namespace gam300 {
 
         // Mesh selection
         int selected_mesh{ 0 };
+
+        // Query Handles
+        GLuint gpuStartQuery{0};
+        GLuint gpuEndQuery{0};
 
     public:
         /**

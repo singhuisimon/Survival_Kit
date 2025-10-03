@@ -64,7 +64,7 @@ namespace gam300 {
         PROCESS_INFORMATION pi;
 
         // Auto-connect to localhost game
-        std::string args = "\"" + m_tracyPath + "\" -a 127.0.0.1";
+        std::string args = "\"" + m_tracyPath + "\" -a 127.0.0.1 -capture";
 
         if (CreateProcessA(
             nullptr, (LPSTR)args.c_str(),

@@ -31,6 +31,7 @@
 #include "../System/PhysicsSystem.h"
 #include "../System/BulletSystem.h"
 #include "../System/CollisionSystem.h"
+#include "../System/AudioSystem.h"
 
 // Include Utility headers
 #include "../Utility/Clock.h"
@@ -154,6 +155,7 @@ namespace gam300 {
         SM.register_system<PhysicsSystem>();
         SM.register_system<CollisionSystem>();
 		SM.register_system<BulletSystem>();
+        SM.register_system<AudioSystem>();
 
         // Initialize step count
         m_step_count = 0;
