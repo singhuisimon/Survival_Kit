@@ -25,6 +25,7 @@
 #include "../Component/Bullet.h"
 #include "../Component/Script.h"
 #include "../Component/MeshComponent.h"
+#include "../Component/TextureComponent.h"
 
 // Include system headers
 #include "../System/MovementSystem.h"
@@ -33,6 +34,7 @@
 #include "../Component/RigidBody.h"
 #include "../System/BulletSystem.h"
 #include "../System/CollisionSystem.h"
+#include "../System/TransformSystem.h"
 
 // Include Utility headers
 #include "../Utility/Clock.h"
@@ -135,9 +137,9 @@ namespace gam300 {
 
 		CM.register_component<AudioComponent>();
 		logManager.writeLog("GameManager::startUp() - AudioComponent component registered successfully");
+
         CM.register_component<RenderComponent>();
         logManager.writeLog("GameManager::startUp() - RenderComponent component registered successfully");
-		LM.writeLog("GameManager::startUp() - AudioComponent component registered successfully");
 
 		CM.register_component<Bullet>();
 		LM.writeLog("GameManager::startUp() - Bullet component registered successfully");
@@ -148,17 +150,22 @@ namespace gam300 {
         CM.register_component<MeshComponent>();
         LM.writeLog("GameManager::startUp() - Mesh component registered successfully");
 
+        CM.register_component<TextureComponent>();
+        LM.writeLog("GameManager::startUp() - Texture componennt registered successfully");
+
         // Check the scene path
         const std::string scenePath = getAssetFilePath("Scene/Game.scn");
         LM.writeLog("GameManager::startUp() - Attempting to load scene from '%s'", scenePath.c_str());
 
-        SM.register_system<RenderSystem>();
+
 
 		// Register the Systems with the ECSManager
         SM.register_system<MovementSystem>();
         SM.register_system<PhysicsSystem>();
         SM.register_system<CollisionSystem>();
 		SM.register_system<BulletSystem>();
+        SM.register_system<RenderSystem>();
+        SM.register_system<TransformSystem>();
 
         // Initialize step count
         m_step_count = 0;

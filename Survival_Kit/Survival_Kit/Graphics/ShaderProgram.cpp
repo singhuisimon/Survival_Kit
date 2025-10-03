@@ -134,7 +134,7 @@ namespace gam300 {
         }
         else {
             LM.writeLog("ShaderProgram::setUniform(): vec2 (float x, y) uniform variable doesn't exist.");
-            std::exit(EXIT_FAILURE);
+            //std::exit(EXIT_FAILURE);
         }
     }
 
@@ -146,7 +146,7 @@ namespace gam300 {
         }
         else {
             LM.writeLog("ShaderProgram::setUniform(): vec3 (float x, y, z) uniform variable doesn't exist.");
-            std::exit(EXIT_FAILURE);
+           //std::exit(EXIT_FAILURE);
         }
     }
 
@@ -158,7 +158,7 @@ namespace gam300 {
         }
         else {
             LM.writeLog("ShaderProgram::setUniform(): vec4 (float x, y, z, w) uniform variable doesn't exist.");
-            std::exit(EXIT_FAILURE);
+            //std::exit(EXIT_FAILURE);
         }
     }
 
@@ -170,7 +170,7 @@ namespace gam300 {
         }
         else {
             LM.writeLog("ShaderProgram::setUniform(): vec2 (glm::vec2) uniform variable doesn't exist.");
-            std::exit(EXIT_FAILURE);
+            //std::exit(EXIT_FAILURE);
         }
     }
 
@@ -182,7 +182,7 @@ namespace gam300 {
         }
         else {
             LM.writeLog("ShaderProgram::setUniform(): vec3 (glm::vec3) uniform variable doesn't exist.");
-            std::exit(EXIT_FAILURE);
+            //std::exit(EXIT_FAILURE);
         }
     }
 
@@ -194,7 +194,7 @@ namespace gam300 {
         }
         else {
             LM.writeLog("ShaderProgram::setUniform(): vec4 (glm::vec4) uniform variable doesn't exist.");
-            std::exit(EXIT_FAILURE);
+            //std::exit(EXIT_FAILURE);
         }
     }
 
@@ -206,7 +206,7 @@ namespace gam300 {
         }
         else {
             LM.writeLog("ShaderProgram::setUniform(): mat3 (glm::mat3) uniform variable doesn't exist.");
-            std::exit(EXIT_FAILURE);
+            //std::exit(EXIT_FAILURE);
         }
     }
 
@@ -218,7 +218,7 @@ namespace gam300 {
         }
         else {
             LM.writeLog("ShaderProgram::setUniform(): mat4 (glm::mat4) uniform variable doesn't exist.");
-            std::exit(EXIT_FAILURE);
+            //std::exit(EXIT_FAILURE);
         }
     }
 
@@ -230,7 +230,7 @@ namespace gam300 {
         }
         else {
             LM.writeLog("ShaderProgram::setUniform(): float uniform variable doesn't exist.");
-            std::exit(EXIT_FAILURE);
+            //std::exit(EXIT_FAILURE);
         }
     }
 
@@ -242,7 +242,7 @@ namespace gam300 {
         }
         else {
             LM.writeLog("ShaderProgram::setUniform(): integer uniform variable doesn't exist.");
-            std::exit(EXIT_FAILURE);
+            //std::exit(EXIT_FAILURE);
         }
     }
 
@@ -254,7 +254,7 @@ namespace gam300 {
         }
         else {
             LM.writeLog("ShaderProgram::setUniform(): unsigned integer uniform variable doesn't exist.");
-            std::exit(EXIT_FAILURE);
+            //std::exit(EXIT_FAILURE);
         }
     }
 
@@ -266,7 +266,7 @@ namespace gam300 {
         }
         else {
             LM.writeLog("ShaderProgram::setUniform(): unsigned integer (array) uniform variable doesn't exist.");
-            std::exit(EXIT_FAILURE);
+            //std::exit(EXIT_FAILURE);
         }
     }
 
@@ -278,7 +278,7 @@ namespace gam300 {
         }
         else {
             LM.writeLog("ShaderProgram::setUniform(): boolean uniform variable doesn't exist.");
-            std::exit(EXIT_FAILURE);
+            //std::exit(EXIT_FAILURE);
         }
     }
 

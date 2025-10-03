@@ -27,6 +27,7 @@
 // To support graphical operations
 #include "../Utility/Constant.h"
 #include "../Graphics/Renderer.h"
+#include "../Graphics/Material.h"
 
 // For IMGUI operations
 #include "ImguiManager.h"

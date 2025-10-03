@@ -1,6 +1,7 @@
 #include "../Graphics/Renderer.h"
 #include "../Manager/InputManager.h"
 
+#include <glm-0.9.9.8/glm/gtx/matrix_decompose.hpp>
 
 #pragma region NAMESPACE
 
@@ -39,9 +40,13 @@ namespace {
 		std::string vertex_obj_path{ gam300::getAssetFilePath("Shaders/survival_kit_obj.vert")   };
 		std::string fragment_obj_path{ gam300::getAssetFilePath("Shaders/survival_kit_obj.frag") };
 
+		std::string vertex_debug_path{ gam300::getAssetFilePath("Shaders/debug.vert") };
+		std::string fragment_debug_path{ gam300::getAssetFilePath("Shaders/debug.frag") };
+
 		// Pair vertex and fragment shader files
 		std::vector<std::pair<std::string, std::string>> shader_files{
 			std::make_pair(vertex_obj_path, fragment_obj_path),
+			std::make_pair(vertex_debug_path, fragment_debug_path)
 		};
 
 		shd = loadShaderPrograms(shader_files);
@@ -62,30 +67,9 @@ namespace {
 		ms.emplace(2, std::move(s));
 	}
 
-	inline void test_setup_fbo(std::optional<gam300::FrameBuffer>& fbo, GLuint& tex, int w, int h) {
-
-		glBindFramebuffer(GL_FRAMEBUFFER, static_cast<GLuint>(fbo->handle()));
-
-		glGenTextures(1, &tex);
-		glBindTexture(GL_TEXTURE_2D, tex);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-		fbo->attach_color(GL_COLOR_ATTACHMENT0, tex);
-
-		GLuint rboDepth;
-		glCreateRenderbuffers(1, &rboDepth);
-		glNamedRenderbufferStorage(rboDepth, GL_DEPTH_COMPONENT24, w, h);
-		fbo->attach_renderbuffer(GL_DEPTH_ATTACHMENT, rboDepth);
-
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glBindTexture(GL_TEXTURE_2D, 0);
+	inline void test_poll() {
+		
 	}
-
 }
 
 #pragma endregion
@@ -99,72 +83,178 @@ namespace gam300 {
 		test_load_shaders(m_shader_storage);
 		test_load_mesh(m_tmp_mesh_storage);
 
-		auto tmp = FrameBuffer::create();
-
-		if (tmp->valid()) {
-			d_fbo = std::move(tmp);
+		// Create a framebuffer and configure it's settings
+		auto fp_fbo = FrameBuffer::create();
+		if (fp_fbo.has_value()) {
+			m_framebuffers.push_back(std::move(*fp_fbo));
+		}
+		else {
+			LM.writeLog("Renderer::setup() - Failed to create framebuffer!");
 		}
 
-		test_setup_fbo(d_fbo, d_imgui_texture, width, height);
+		// Allocate storage for a texture on the GPU, this texture will be attached to the framebuffer
+		auto fp_tex = Texture::alloc_storage_on_gpu(width, height);
+		if (fp_tex.has_value()) {
+			m_textures.push_back(std::move(*fp_tex));
+		}
+		else {
+			LM.writeLog("Renderer::setup() - Failed to allocate storage on the GPU!");
+		}
 
-		LM.writeLog("Renderer::setup this=%p\n", (void*)this);
+		// Allocate extra attachments to the framebuffer
+
+		// Testing
+		GLuint rboDepth;
+		glCreateRenderbuffers(1, &rboDepth);
+		glNamedRenderbufferStorage(rboDepth, GL_DEPTH_COMPONENT24, width, height);
+		// end testing
+
+		auto& fpfbo_ = m_framebuffers[0];
+		auto& fptex_ = m_textures[0];
+
+		fpfbo_.attach_color(GL_COLOR_ATTACHMENT0, static_cast<GLuint>(fptex_.handle()));
+		fpfbo_.attach_depth(GL_DEPTH_ATTACHMENT, rboDepth);
+
+		// Create a render pass for that framebuffer
+		RenderPass first_pass
+		{
+			.pass_name = "First Pass",
+			.fbo_handle = 0,
+			.shdpgm_handle = 0
+
+			// Leave the rest as default settings
+		};
+
+		// Register the pass with the renderer
+		m_passes.push_back(first_pass);
+
+		RenderPass debug_pass
+		{
+			.pass_name = "Debug Pass",
+			.fbo_handle = 0,
+			.shdpgm_handle = 1,
+			.clear_color = false,
+			.clear_depth = false,
+			.depth_write = false,
+			.culling = false,
+			.passtype = PassType::DEBUG
+		};
+
+		m_passes.push_back(debug_pass);
 	}
 
-	void Renderer::beginFrame() {
+	void Renderer::beginFrame(RenderPass const& pass) {
 
-		glEnable(GL_DEPTH_TEST);
+		auto& fbo = m_framebuffers[pass.fbo_handle];
+		glBindFramebuffer(GL_FRAMEBUFFER, static_cast<GLuint>(fbo.handle()));
+
+		auto& viewport = pass.view_port;
+		glViewport(viewport.x, viewport.y, viewport.z, viewport.w);
+
+		pass.depth_test ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS);
-		glClearDepth(1.0f);
+		glDepthMask(pass.depth_write ? GL_TRUE : GL_FALSE);
 
-		glBindFramebuffer(GL_FRAMEBUFFER, d_fbo->handle());
+		if (pass.culling) {
+			glEnable(GL_CULL_FACE);
+			glCullFace(GL_BACK);      
+			glFrontFace(GL_CCW);
+		}
+		else {
+			glDisable(GL_CULL_FACE);
+		}
 
-		glViewport(0, 0, width, height);
+		if (pass.blending) {
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glBlendEquation(GL_FUNC_ADD);
+		}
+		else {
+			glDisable(GL_BLEND);
+		}
 
-		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		GLbitfield clear_mask = 0;
 
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		if (pass.clear_color) {
+			glClearColor(pass.clear_color_value.r,
+				pass.clear_color_value.g,
+				pass.clear_color_value.b,
+				pass.clear_color_value.a);
+			clear_mask |= GL_COLOR_BUFFER_BIT;
+		}
+
+		if (pass.clear_depth) {
+			// If depth writes are disabled *before* clear, enable them just for clearing
+			glDepthMask(GL_TRUE);
+			clear_mask |= GL_DEPTH_BUFFER_BIT;
+		}
+
+		// Finally clear whatever bits were requested
+		if (clear_mask != 0) {
+			glClear(clear_mask);
+		}
+
+		glDepthMask(pass.depth_write ? GL_TRUE : GL_FALSE);
+
+		auto& prog = m_shader_storage[pass.shdpgm_handle];
+		prog.programUse();
 	}
 
 	void Renderer::render_frame(std::span<const DrawItem> draw_items, Camera3D& active_cam, Light& light) {
 
-		beginFrame();
-		draw(draw_items, active_cam, light);
-		endFrame();
-
+		for (const auto& pass : m_passes) {
+			beginFrame(pass);
+			draw(pass, draw_items, active_cam, light);
+			endFrame(pass);
+		}
 	}
 
-	void Renderer::draw(std::span<const DrawItem> draw_items, Camera3D& active_cam, Light& light) {
+	void Renderer::draw(RenderPass const& pass, std::span<const DrawItem> draw_items, Camera3D& active_cam, Light& light) {
 
-		m_shader_storage[0].programUse();
+		auto& prog = m_shader_storage[pass.shdpgm_handle];
+
+		prog.setUniform("V", active_cam.getLookAt());                // View transform
+		prog.setUniform("P", active_cam.getPerspective());           // Perspective transform
+
+		prog.setUniform("light.position", light.getLightPos());      // Position
+		prog.setUniform("light.La", light.getLightAmbient());        // Ambient
+		prog.setUniform("light.Ld", light.getLightDiffuse());        // Diffuse
+		prog.setUniform("light.Ls", light.getLightSpecular());       // Specular
 
 		for (const auto& item : draw_items) {
 			
-			// Temporary transformations
-			m_shader_storage[0].setUniform("M", item.m_model_to_world_transform); // Model transform
-			m_shader_storage[0].setUniform("V", active_cam.getLookAt());          // View transform
-			m_shader_storage[0].setUniform("P", active_cam.getPerspective());     // Perspective transform
+			if (pass.passtype == PassType::DEBUG) {
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+				glEnable(GL_POLYGON_OFFSET_LINE);
+				glPolygonOffset(-1.f, -1.f);
+				glLineWidth(1.0f);
+			}
+			else {
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			}
 
-			m_shader_storage[0].setUniform("light.position", light.getLightPos());      // Position
-			m_shader_storage[0].setUniform("light.La", light.getLightAmbient());        // Ambient
-			m_shader_storage[0].setUniform("light.Ld", light.getLightDiffuse());        // Diffuse
-			m_shader_storage[0].setUniform("light.Ls", light.getLightSpecular());       // Specular
+			// Temporary transformations
+			prog.setUniform("M", item.m_model_to_world_transform); // Model transform
+			prog.setUniform("material.Ka", test_material.getMaterialAmbient());
+			prog.setUniform("material.Kd", test_material.getMaterialDiffuse());
+			prog.setUniform("material.Ks", test_material.getMaterialSpecular());
+			prog.setUniform("material.shininess", test_material.getMaterialShininess());
 
 			u32 mesh_handle = item.m_mesh_handle;
 			m_tmp_mesh_storage[mesh_handle].vao.bind();
 
-			GLenum primitive = m_tmp_mesh_storage[mesh_handle].primitive_type;
-			GLuint draw_count = m_tmp_mesh_storage[mesh_handle].draw_count;
-			GLenum index_type = m_tmp_mesh_storage[mesh_handle].index_type;
+			GLenum  primitive  = m_tmp_mesh_storage[mesh_handle].primitive_type;
+			GLsizei draw_count = m_tmp_mesh_storage[mesh_handle].draw_count;
+			GLenum  index_type = m_tmp_mesh_storage[mesh_handle].index_type;
 
 			glDrawElements(primitive, draw_count, index_type, NULL);
 			glBindVertexArray(0);
 		}
 	}
 
-	void Renderer::endFrame() {
-		m_shader_storage[0].programFree();
+	void Renderer::endFrame(RenderPass const& pass) {
+		auto& prog = m_shader_storage[pass.shdpgm_handle];
+		prog.programFree();
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
-
-
 }

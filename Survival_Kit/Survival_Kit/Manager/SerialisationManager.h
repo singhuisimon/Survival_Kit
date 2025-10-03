@@ -112,6 +112,16 @@ namespace gam300 {
     };
 
     /**
+    * @brief Serializer for TextureComponent components.
+    * @author Tan Jun Rui
+    */
+    class TextureComponentSerializer : public IComponentSerializer {
+    public:
+        std::string serialize(Component* component) override;
+        Component*  deserialize(EntityID entityId, const std::string& jsonData) override;
+    };
+
+    /**
      * @brief Manager for serializing and deserializing game entities.
      * @details Handles loading entities from scene files and saving them back.
      */

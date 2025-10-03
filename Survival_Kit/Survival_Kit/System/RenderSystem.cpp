@@ -7,7 +7,7 @@
 namespace gam300 {
 
 	RenderSystem::RenderSystem() : ComponentSystem<Transform3D, RenderComponent>("RenderSystem") {
-		set_priority(101);
+		set_priority(151);
 	}
 
 	bool RenderSystem::init(SystemManager&) {
@@ -15,6 +15,7 @@ namespace gam300 {
 
 		m_draw_list.reserve(1000);
 		m_camera = Camera3D(ORBITING, glm::vec3(0.0f, 5.0f, 5.0f), glm::vec3(0.f, 0.f, 0.0f), 45.0f, 0.5f, 100.0f);
+		
 
 		return true;
 	}

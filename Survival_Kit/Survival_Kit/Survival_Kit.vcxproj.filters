@@ -71,6 +71,7 @@
     <ClCompile Include="Tracy\TracyClient.cpp" />
     <ClCompile Include="Manager\TracyManager.cpp" />
     <ClCompile Include="Component\MeshComponent.cpp" />
+    <ClCompile Include="Component\TextureComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component\Component.h" />
@@ -161,6 +162,9 @@
     <ClInclude Include="System\ScriptSystem.h" />
     <ClInclude Include="Manager\TracyManager.h" />
     <ClInclude Include="Component\MeshComponent.h" />
+    <ClInclude Include="Component\TextureComponent.h" />
+    <ClInclude Include="Graphics\RenderPass.h" />
+    <ClInclude Include="Graphics\RenderBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Scene\Game.scn" />

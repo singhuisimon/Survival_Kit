@@ -12,6 +12,8 @@
 #ifndef __TRANSFORM3D_H__
 #define __TRANSFORM3D_H__
 
+#include <vector>
+
 #include <glm-0.9.9.8/glm/gtc/quaternion.hpp>
 
 #include "../Component/Component.h"
@@ -29,6 +31,12 @@ namespace gam300 {
         Vector3D m_prev_position;   // Previous position (useful for physics/interpolation)
         Vector3D m_rotation;        // Rotation in degrees (Euler angles: x, y, z)
         Vector3D m_scale;           // Scale factors for each axis
+
+        glm::mat4                   m_worldxform_mat;
+
+        EntityID                    m_parent;
+        std::vector<EntityID>       m_children;
+        bool                        m_dirtyflag;
 
     public:
         /**
@@ -83,7 +91,7 @@ namespace gam300 {
          * @brief Set the current rotation in degrees.
          * @param rotation New rotation vector (Euler angles).
          */
-        void setRotation(const Vector3D& rotation) { m_rotation = rotation; }
+        void setRotation(const Vector3D& rotation) { m_rotation = rotation; m_dirtyflag = true; }
 
         /**
          * @brief Rotate by the given angles in degrees.
@@ -102,7 +110,7 @@ namespace gam300 {
          * @brief Set the current scale.
          * @param scale New scale vector.
          */
-        void setScale(const Vector3D& scale) { m_scale = scale; }
+        void setScale(const Vector3D& scale) { m_scale = scale; m_dirtyflag = true; }
 
         /**
          * @brief Set uniform scale for all axes.
@@ -148,6 +156,61 @@ namespace gam300 {
          * @return Up direction vector.
          */
         Vector3D getUp() const;
+
+        /**
+         * @brief Set the parent of this transformation.
+         */
+        void setParent(EntityID parent);
+
+        /**
+         * @brief Get entity id of the parent of this transformation.
+         * @return Entity id of the parent transformation.
+         */
+        const EntityID getParent() const;
+
+        /**
+         * @brief Get the list of children of this transformation.
+         * @return Vector that contains a list of children of this transformation.
+         */
+        const std::vector<EntityID>& getChildren() const;
+
+        /**
+         * @brief Adds a child transformation to this transformation.
+         */
+        void addChild(EntityID c);
+
+        /**
+         * @brief Finds a specific child from this transformation.
+         */
+        size_t findChild(EntityID c) const;
+
+        /**
+         * @brief Removes a child transformation from this transformation.
+         */
+        void removeChild(EntityID c);
+
+        /**
+         * @brief Set the dirty flag of this transfomration.
+         */
+        void markDirty(bool dirty);
+
+        /**
+         * @brief Checks if the dirty flag is set to true.
+         * @return true if dirty flag is set to true.
+         */
+        bool isDirty() const;
+
+        /**
+         * @brief Sets a matrix final transformation matrix.
+         */
+        void setTransformationMatrix(glm::mat4& mat);
+
+        /**
+         * @brief Computes the model to world transform, assume all local.
+         * @return the matrix deescribing the model to world transform
+         */
+        glm::mat4 computeLocalTransformationMatrix() const;
+
     };
 
 } // namespace gam300
