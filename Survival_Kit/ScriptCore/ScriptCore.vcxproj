@@ -128,7 +128,7 @@
       <EnableUAC>false</EnableUAC>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /s /r /y /q "$(SolutionDir)External_Libraries\bin\dotnet" "$(OutDir)"</Command>
+    <Command>xcopy /E /I /Y "$(SolutionDir)External_Libraries\bin\dotnet" "$(OutDir)dotnet\"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -151,7 +151,7 @@
       <EnableUAC>false</EnableUAC>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /s /r /y /q "$(SolutionDir)External_Libraries\include\dotnet" "$(OutDir)"</Command>
+    <Command>xcopy /E /I /Y "$(SolutionDir)External_Libraries\bin\dotnet" "$(OutDir)dotnet\"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
