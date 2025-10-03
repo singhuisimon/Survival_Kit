@@ -230,6 +230,19 @@ namespace gam300 {
                 ind(1); o << "}"; nl(1);
             }
 
+            //Added shader settings for shader assets
+            if (recOpt && recOpt->type == AssetType::Shader) {
+                ind(1); o << ",\"shaderSettings\": {"; nl(1);
+                ind(2); o << "\"vertexShader\": \"" << EscapeJson(extras->shaderSettings.vertexShader) << "\","; nl(1);
+                ind(2); o << "\"fragmentShader\": \"" << EscapeJson(extras->shaderSettings.fragmentShader) << "\","; nl(1);
+                ind(2); o << "\"outputFormat\": \"" << EscapeJson(extras->shaderSettings.outputFormat) << "\","; nl(1);
+                ind(2); o << "\"targetAPI\": \"" << EscapeJson(extras->shaderSettings.targetAPI) << "\","; nl(1);
+                ind(2); o << "\"targetVersion\": \"" << EscapeJson(extras->shaderSettings.targetVersion) << "\","; nl(1);
+                ind(2); o << "\"optimizationLevel\": \"" << EscapeJson(extras->shaderSettings.optimizationLevel) << "\","; nl(1);
+                ind(2); o << "\"stripDebugInfo\": " << (extras->shaderSettings.stripDebugInfo ? "true" : "false"); nl(1);
+                ind(1); o << "}"; nl(1);
+            }
+
         }
         else {
             o << "null"; nl(1);

@@ -56,6 +56,7 @@ namespace gam300 {
 
 		AudioSettings audioSettings;
 		MeshSettings meshSettings;
+		ShaderSettings shaderSettings;
 
 		//track the modification status
 		bool isDirty = false;

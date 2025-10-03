@@ -55,6 +55,23 @@ namespace gam300 {
 		bool generateNormals = false; //generate if missing
 	};
 
+	//basic shader compilation settings
+	struct ShaderSettings {
+		//input files
+		std::string vertexShader = ""; //Path to .vert source
+		std::string fragmentShader = ""; //Path to .frag source
+
+		//output format 
+		std::string outputFormat = "GLSL"; //SPIRV or GLSL
+
+		//target platform is OPENGL
+		std::string targetAPI = "OPENGL"; 
+		std::string targetVersion = "460"; //what is thisisssssss
+
+		//optimization 
+		std::string optimizationLevel = "PERFORMANCE"; //none, size, performance
+		bool stripDebugInfo = true; //remove debug symbols 
+	};
 
 	/**
 	* @brief Optional extra metadata to embed in the descriptor.
@@ -80,7 +97,9 @@ namespace gam300 {
 		AudioSettings audioSettings;
 		//new mesh settings (for compile settings)
 		MeshSettings meshSettings;
-	
+		//new shader settings (for compiler)
+		ShaderSettings shaderSettings; 
+
 	};
 
 

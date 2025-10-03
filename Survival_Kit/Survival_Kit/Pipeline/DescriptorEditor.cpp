@@ -298,6 +298,14 @@ namespace gam300 {
             break;
         case AssetType::Shader:
             desc.category = "Shader";
+            desc.shaderSettings.vertexShader = "";
+            desc.shaderSettings.fragmentShader = "";
+            desc.shaderSettings.outputFormat = "GLSL";
+            desc.shaderSettings.targetAPI = "OPENGL";
+            desc.shaderSettings.targetVersion = "460";
+            desc.shaderSettings.optimizationLevel = "PERFORMANCE";
+            desc.shaderSettings.stripDebugInfo = true;
+
             break;
         case AssetType::Audio:
             desc.category = "Audio";
@@ -386,6 +394,17 @@ namespace gam300 {
             outDescriptor.meshSettings.generateNormals = ParseJsonBool(json, "meshSettings.generateNormals");
         }
 
+        //parse shader settings if present
+        if (json.find("shaderSettings") != std::string::npos) {
+            outDescriptor.shaderSettings.vertexShader = ParseJsonValue(json, "shaderSettings.vertexShader");
+            outDescriptor.shaderSettings.fragmentShader = ParseJsonValue(json, "shaderSettings.fragmentShader");
+            outDescriptor.shaderSettings.outputFormat = ParseJsonValue(json, "shaderSettings.outputFormat");
+            outDescriptor.shaderSettings.targetAPI = ParseJsonValue(json, "shaderSettings.targetAPI");
+            outDescriptor.shaderSettings.targetVersion = ParseJsonValue(json, "shaderSettings.targetVersion");
+            outDescriptor.shaderSettings.optimizationLevel = ParseJsonValue(json, "shaderSettings.optimizationLevel");
+            outDescriptor.shaderSettings.stripDebugInfo = ParseJsonBool(json, "shaderSettings.stripDebugInfo");
+        }
+
         return true;
     }
 
@@ -420,6 +439,11 @@ namespace gam300 {
         //copy mesh settings
         if (descriptor.assetType == AssetType::Mesh) {
             extras.meshSettings = descriptor.meshSettings;
+        }
+
+        // Copy shader settings if applicable
+        if (descriptor.assetType == AssetType::Shader) {
+            extras.shaderSettings = descriptor.shaderSettings;
         }
 
         // Copy user properties
