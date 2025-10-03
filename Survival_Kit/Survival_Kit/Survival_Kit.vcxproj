@@ -22,8 +22,7 @@
     <ClCompile Include="Compiler\AudioCompiler.cpp" />
     <ClCompile Include="Compiler\MeshCompiler.cpp" />
     <ClCompile Include="Compiler\ResourceCompiler.cpp" />
-    <ClCompile Include="Compiler\ShaderCompiler.cpp" />
-    <ClCompile Include="Compiler\ShaderCompiler.cpp.cpp" />
+    <ClCompile Include="Compiler\ShadowCompiler.cpp" />
     <ClCompile Include="Compiler\TextureCompiler.cpp" />
     <ClCompile Include="Component\Bullet.cpp" />
     <ClCompile Include="Component\Collider.cpp" />
