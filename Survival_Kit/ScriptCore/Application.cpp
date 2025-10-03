@@ -84,8 +84,7 @@ namespace Core
 
     void Application::compileScriptAssembly()
     {
-        const char* PROJ_PATH =
-            "..\\..\\ManagedScripts\\ManagedScripts.csproj";
+        const char* PROJ_PATH = "..\\..\\ManagedScripts\\ManagedScripts.csproj";
 
         // Get current executable directory
         std::string execPath(MAX_PATH, '\0');
@@ -95,20 +94,19 @@ namespace Core
 
         std::cout << "Executable path: " << execPath << std::endl;
 
-
-        // Look for dotnet one level up (shared between Debug/Release)
-        std::string sharedDotnetPath = execPath + "\\..\\dotnet\\dotnet.exe";
+        // NEW: Look for dotnet in the SAME directory (since post-build copies it here)
+        std::string bundledDotnetPath = execPath + "\\dotnet\\dotnet.exe";
         std::wstring dotnetExePath;
 
-        if (std::filesystem::exists(sharedDotnetPath))
+        if (std::filesystem::exists(bundledDotnetPath))
         {
-            dotnetExePath = std::filesystem::absolute(sharedDotnetPath).wstring();
-            std::cout << "Using shared bundled .NET at: " << sharedDotnetPath << std::endl;
+            dotnetExePath = std::filesystem::absolute(bundledDotnetPath).wstring();
+            std::cout << "Using bundled .NET at: " << bundledDotnetPath << std::endl;
         }
         else
         {
             dotnetExePath = L"C:\\Program Files\\dotnet\\dotnet.exe";
-            std::cout << "Using system .NET" << std::endl;
+            std::cout << "Using system .NET (bundled version not found)" << std::endl;
         }
 
         std::wstring buildCmd = L" build \"" +
@@ -116,17 +114,16 @@ namespace Core
             L"\" -c Debug --no-self-contained " +
             L"-o \"./tmp_build/\" -r \"win-x64\"";
 
-
-
         STARTUPINFOW startInfo;
         PROCESS_INFORMATION pi;
         ZeroMemory(&startInfo, sizeof(startInfo));
         ZeroMemory(&pi, sizeof(pi));
         startInfo.cb = sizeof(startInfo);
-        // Start compiler process
+
+        // Use the dotnetExePath variable (not hardcoded!)
         const auto SUCCESS = CreateProcess
         (
-            dotnetExePath.c_str(),  //  Use the variable you already set up
+            dotnetExePath.c_str(),  //  Uses the bundled or system dotnet
             buildCmd.data(),
             nullptr, nullptr, true, NULL, nullptr, nullptr,
             &startInfo, &pi

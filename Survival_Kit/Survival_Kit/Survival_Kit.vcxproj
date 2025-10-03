@@ -303,7 +303,11 @@ xcopy "$(ProjectDir)assets\*" "$(OutDir)assets\" /E /I /Y /Q
 
 if exist "$(SolutionDir)..\tracy-profiler.exe" (
     copy /Y "$(SolutionDir)..\tracy-profiler.exe" "$(OutDir)"
-)</Command>
+)
+
+xcopy /E /I /Y "$(SolutionDir)External_Libraries\bin\dotnet" "$(OutDir)dotnet\"
+
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -331,7 +335,11 @@ xcopy "$(ProjectDir)assets\*" "$(OutDir)assets\" /E /I /Y /Q
 
 if exist "$(SolutionDir)..\tracy-profiler.exe" (
     copy /Y "$(SolutionDir)..\tracy-profiler.exe" "$(OutDir)"
-)</Command>
+)
+
+xcopy /E /I /Y "$(SolutionDir)External_Libraries\bin\dotnet" "$(OutDir)dotnet\"
+
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
