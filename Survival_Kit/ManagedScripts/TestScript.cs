@@ -1,66 +1,78 @@
 ﻿using ScriptAPI;
-
+using System;
 
 public class TestScript : Script
 {
-    // ========== PUBLIC FIELDS (Always serialized) ==========
-    public float moveSpeed = 5.0f;
-    public int health = 100;
-    public string playerName = "Player";
-    public bool isActive = true;
+    // Movement parameters
+    private float moveForce = 40.0f;
+    private float kinematicSpeed = 5.0f;
+    private float rotationTorque = 20.0f;
+    private bool enableRotation = true;
+    private bool circularMovement = true;
 
-    // ========== PRIVATE FIELDS (NOT serialized by default) ==========
-    private float internalCooldown = 1.0f;  // This will NOT show in editor
-
-    // ========== PRIVATE WITH [SerializeField] (WILL be serialized) ==========
-    [SerializeField]
-    private float jumpForce = 10.0f;
-
-    [SerializeField]
-    private int lives = 3;
-
-    [SerializeField]
-    private string secretCode = "ABC123";
-
-    [SerializeField]
-    private bool canDoubleJump = false;
-
-    // ========== WITH RANGE ATTRIBUTE ==========
-    [SerializeField]
-    [Range(0f, 100f)]
-    private float attackPower = 50f;
-
-    // ========== WITH TOOLTIP ==========
-    [SerializeField("The speed at which the player dashes")]
-    private float dashSpeed = 15.0f;
-
-    // ========== HIDDEN PUBLIC FIELD ==========
-    [HideInInspector]
-    public float debugValue = 99.9f;  // Public but hidden in editor
-
-    private int frameCount = 0;
+    private float time = 0.0f;
+    private bool initialized = false;
 
     public override void Update()
     {
-        frameCount++;
-
-        // Print values every 120 frames (~2 seconds)
-        if (frameCount % 120 == 0)
+        // Get the MovementController component
+        MovementControllerComponent movement = GetMovementController();
+        
+        // Initialize once
+        if (!initialized)
         {
-            Console.WriteLine("=== TestSerializeScript Values ===");
-            Console.WriteLine($"Public - moveSpeed: {moveSpeed}");
-            Console.WriteLine($"Public - health: {health}");
-            Console.WriteLine($"Public - playerName: {playerName}");
-            Console.WriteLine($"Public - isActive: {isActive}");
-            Console.WriteLine($"[SerializeField] - jumpForce: {jumpForce}");
-            Console.WriteLine($"[SerializeField] - lives: {lives}");
-            Console.WriteLine($"[SerializeField] - secretCode: {secretCode}");
-            Console.WriteLine($"[SerializeField] - canDoubleJump: {canDoubleJump}");
-            Console.WriteLine($"[SerializeField][Range] - attackPower: {attackPower}");
-            Console.WriteLine($"[SerializeField(tooltip)] - dashSpeed: {dashSpeed}");
-            Console.WriteLine($"Private - internalCooldown: {internalCooldown} (not serialized)");
-            Console.WriteLine($"[HideInInspector] - debugValue: {debugValue} (hidden)");
-            Console.WriteLine("==================================\n");
+            Console.WriteLine("=== MovementTest Script Started ===");
+            
+            // Apply initial settings
+            movement.SetMoveForce(moveForce);
+            movement.SetKinematicSpeed(kinematicSpeed);
+            movement.SetRotationTorque(rotationTorque);
+            
+            Console.WriteLine($"MoveForce: {movement.GetMoveForce()}");
+            Console.WriteLine($"KinematicSpeed: {movement.GetKinematicSpeed()}");
+            Console.WriteLine($"RotationTorque: {movement.GetRotationTorque()}");
+            
+            Console.WriteLine("===================================\n");
+            initialized = true;
+        }
+        
+        time += 0.016f; // Approximate delta time
+        
+        Vector3 direction;
+        
+        if (circularMovement)
+        {
+            // Move in a circle pattern
+            float x = (float)Math.Cos(time);
+            float z = (float)Math.Sin(time);
+            direction = new Vector3(x, 0.0f, z);
+        }
+        else
+        {
+            // Move straight forward
+            direction = new Vector3(0.0f, 0.0f, 1.0f);
+        }
+        
+        movement.SetDesiredDirection(direction);
+        
+        // Apply rotation if enabled
+        if (enableRotation)
+        {
+            Vector3 rotation = new Vector3(0.0f, 1.0f, 0.0f);
+            movement.SetDesiredRotation(rotation);
+        }
+        else
+        {
+            movement.SetDesiredRotation(new Vector3(0.0f, 0.0f, 0.0f));
+        }
+        
+        // Log every 2 seconds
+        if ((int)(time * 60) % 120 == 0)
+        {
+            Vector3 dir = movement.GetDesiredDirection();
+            Vector3 rot = movement.GetDesiredRotation();
+            
+            Console.WriteLine($"[{time:F2}s] Dir: ({dir.X:F2}, {dir.Y:F2}, {dir.Z:F2}) | Rot: ({rot.X:F2}, {rot.Y:F2}, {rot.Z:F2})");
         }
     }
 }

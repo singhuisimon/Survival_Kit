@@ -27,6 +27,8 @@
     <ClCompile Include="Component\Bullet.cpp" />
     <ClCompile Include="Component\Collider.cpp" />
     <ClCompile Include="Component\MeshComponent.cpp" />
+    <ClCompile Include="Component\MovementController.cpp" />
+    <ClCompile Include="Component\RenderComponent.cpp" />
     <ClCompile Include="Component\RigidBody.cpp" />
     <ClCompile Include="Component\AudioComponent.cpp" />
     <ClCompile Include="Component\Script.cpp" />
@@ -70,6 +72,7 @@
     <ClCompile Include="Pipeline\Importers\SceneImporter.cpp" />
     <ClCompile Include="Pipeline\Importers\ShaderImporter.cpp" />
     <ClCompile Include="Pipeline\Importers\TextureImporter.cpp" />
+    <ClCompile Include="Pipeline\ScriptExports.cpp" />
     <ClCompile Include="Resource\ResourceLoaders.cpp" />
     <ClCompile Include="Resource\ResourcePaths.cpp" />
     <ClCompile Include="Pipeline\AssetDatabase.cpp" />
@@ -80,6 +83,7 @@
     <ClCompile Include="Manager\SerialisationBinManager.cpp" />
     <ClCompile Include="Manager\SerialisationManager.cpp" />
     <ClCompile Include="Manager\SystemManager.cpp" />
+    <ClCompile Include="System\MovementControllerSystem.cpp" />
     <ClCompile Include="System\RenderSystem.cpp" />
     <ClCompile Include="System\BulletSystem.cpp" />
     <ClCompile Include="System\CollisionSystem.cpp" />
@@ -107,6 +111,7 @@
     <ClInclude Include="Component\Component.h" />
     <ClInclude Include="Component\ComponentPool.h" />
     <ClInclude Include="Component\ComponentView.h" />
+    <ClInclude Include="Component\MovementController.h" />
     <ClInclude Include="Component\RenderComponent.h" />
     <ClInclude Include="Component\MeshComponent.h" />
     <ClInclude Include="Component\RigidBody.h" />
@@ -160,6 +165,7 @@
     <ClInclude Include="Manager\TracyManager.h" />
     <ClInclude Include="Manager\TorqueManager.h" />
     <ClInclude Include="Pipeline\DescriptorEditor.h" />
+    <ClInclude Include="Pipeline\ScriptExports.h" />
     <ClInclude Include="Resource\ResourceData.h" />
     <ClInclude Include="Resource\ResourceMetadata.h" />
     <ClInclude Include="Resource\ResourcePaths.h" />
@@ -175,6 +181,7 @@
     <ClInclude Include="Pipeline\Importers\TextureImporter.h" />
     <ClInclude Include="Manager\SerialisationBinManager.h" />
     <ClInclude Include="Manager\SerialisationManager.h" />
+    <ClInclude Include="System\MovementControllerSystem.h" />
     <ClInclude Include="System\RenderSystem.h" />
     <ClInclude Include="System\BulletSystem.h" />
     <ClInclude Include="System\CollisionSystem.h" />

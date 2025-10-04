@@ -46,8 +46,22 @@ namespace Core
         void ReloadScripts();
         void Run(); // not using currently
         void CheckAndReloadScripts();
-
         static void HelloWorld();
+
+        //movement\
+
+
+     // MovementController helper functions
+        static void SetMovementControllerDirection(int entityId, float x, float y, float z);
+        static void GetMovementControllerDirection(int entityId, float* x, float* y, float* z);
+        static void SetMovementControllerRotation(int entityId, float x, float y, float z);
+        static void GetMovementControllerRotation(int entityId, float* x, float* y, float* z);
+        static void SetMovementControllerMoveForce(int entityId, float force);
+        static float GetMovementControllerMoveForce(int entityId);
+        static void SetMovementControllerKinematicSpeed(int entityId, float speed);
+        static float GetMovementControllerKinematicSpeed(int entityId);
+        static void SetMovementControllerRotationTorque(int entityId, float torque);
+        static float GetMovementControllerRotationTorque(int entityId);
 
         //file creation
         static bool CreateMonoBehaviourScript(const std::string& scriptName);
