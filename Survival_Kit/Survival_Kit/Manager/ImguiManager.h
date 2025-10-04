@@ -72,6 +72,8 @@ namespace gam300
 		bool showSaveAsPanel = false;
 		int selectedAssetIndex = -1;
 		bool showPrefabPanel = false;
+		bool showScriptOptions = false;
+		bool makeScript = false;
 		bool showReplacePrefab = false;
 
 		//for Asset Browser functionality

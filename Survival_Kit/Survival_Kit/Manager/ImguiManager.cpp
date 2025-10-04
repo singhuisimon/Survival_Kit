@@ -11,6 +11,7 @@
  // Include header file
 #include "ImguiManager.h"
 #include "ECSManager.h"
+#include "MonoBehaviour.h"
 
 #include "SerialisationManager.h"
 #include "SerialisationBinManager.h"
@@ -54,6 +55,7 @@ namespace gam300 {
     static std::filesystem::directory_entry selectedPrefab;
 
     static int tex_index = -1;
+    static int selectedScriptIndex = -1;
 
     // Asset Type names for display
     const char* ImguiManager::getAssetTypeName(AssetType type)
@@ -740,6 +742,30 @@ namespace gam300 {
                     ImGui::SetTooltip("Save scene as new file.");
 
                 }
+
+                ImGui::Separator();
+                // -------------- Open Script -----------------------------
+                if (ImGui::MenuItem("Open Script"))
+                {
+                    showScriptOptions = true;
+                }
+                if (ImGui::IsItemHovered())
+                {
+
+                    ImGui::SetTooltip("Open Script from file.");
+
+                }
+                // ------------------ New Script ---------------------------
+                if (ImGui::MenuItem("New Script"))
+                {
+                    makeScript = true;
+                }
+                if (ImGui::IsItemHovered())
+                {
+
+                    ImGui::SetTooltip("Create new script.");
+
+                }
                 ImGui::EndMenu();
                 ImGui::Separator();
 
@@ -772,6 +798,65 @@ namespace gam300 {
         if (fileWindow) {
 
             IMGUIM.displayFileList();
+        }
+
+        if (showScriptOptions) {
+
+            if (ImGui::Begin("Script Options", &showScriptOptions, ImGuiWindowFlags_AlwaysAutoResize)) {
+
+                static std::vector<std::string> availableScripts = getAvailableScripts();
+
+                const char* currentScript = (selectedScriptIndex >= 0 && selectedScriptIndex < availableScripts.size())
+                    ? availableScripts[selectedScriptIndex].c_str()
+                    : "Select Script";
+
+                if (ImGui::BeginCombo("Select Script", currentScript)) {
+                    for (int i = 0; i < availableScripts.size(); ++i) {
+                        bool isSelected = (i == selectedScriptIndex);
+                        if (ImGui::Selectable(availableScripts[i].c_str(), isSelected)) {
+                            selectedScriptIndex = i;
+                            Core::MonoBehaviour::OpenScriptInEditor(availableScripts[i]);
+                            showScriptOptions = false; // auto-close after selection (optional)
+                        }
+
+                        if (isSelected)
+                            ImGui::SetItemDefaultFocus();
+                    }
+                    ImGui::EndCombo();
+                }
+
+            }
+            ImGui::End();
+
+            if (!showScriptOptions) {
+                selectedScriptIndex = -1;
+            }
+
+        }
+
+        if (makeScript)
+        {
+            if (ImGui::Begin("Create New Script", &makeScript, ImGuiWindowFlags_AlwaysAutoResize))
+            {
+                static char scriptNameBuffer[128] = "";
+                static std::string newScriptName;
+
+                if (ImGui::InputText("New Script Name", scriptNameBuffer, sizeof(scriptNameBuffer)))
+                {
+                    newScriptName = scriptNameBuffer;
+                }
+
+                if (ImGui::Button("Create", ImVec2(120, 0)))
+                {
+                    if (!newScriptName.empty())
+                    {
+                        Core::MonoBehaviour::CreateScript(newScriptName);
+                        scriptNameBuffer[0] = '\0';
+                        newScriptName.clear();
+                    }
+                }
+            }
+            ImGui::End();
         }
 
         // newPath: /Survival_Kit/Assets/Scene/
@@ -1783,7 +1868,7 @@ namespace gam300 {
 
                 ImGui::Separator();
 
-                char scriptNameBuffer[128];
+                /*char scriptNameBuffer[128];
 
                 strcpy_s(scriptNameBuffer, sizeof(scriptNameBuffer), script->getScriptName().c_str());
 
@@ -1795,6 +1880,34 @@ namespace gam300 {
                     }
 
                     script->setScriptName(newScriptName);
+                }*/
+
+                static std::vector<std::string> availableScripts = getAvailableScripts();
+                static int selectedScriptIndex = -1;
+
+                std::string currentScriptName = script->getScriptName();
+
+                // Find current script in the list (if exists)
+                for (size_t i = 0; i < availableScripts.size(); ++i) {
+                    if (availableScripts[i] == currentScriptName) {
+                        selectedScriptIndex = static_cast<int>(i);
+                        break;
+                    }
+                }
+
+                // --- Dropdown combo box ---
+                if (ImGui::BeginCombo("Select Script", currentScriptName.c_str())) {
+                    for (int i = 0; i < availableScripts.size(); ++i) {
+                        bool isSelected = (i == selectedScriptIndex);
+                        if (ImGui::Selectable(availableScripts[i].c_str(), isSelected)) {
+                            selectedScriptIndex = i;
+                            script->setScriptName(availableScripts[i]);
+                        }
+
+                        if (isSelected)
+                            ImGui::SetItemDefaultFocus();
+                    }
+                    ImGui::EndCombo();
                 }
 
                 ImGui::Separator();
