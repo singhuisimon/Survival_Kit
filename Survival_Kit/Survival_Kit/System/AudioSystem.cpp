@@ -183,6 +183,10 @@ namespace gam300 {
 			return;
 		}
 
+		//**DEBUG: Log what state we're seeing**
+			LM.writeLog("AudioSystem::process_entity() - Entity %u state: %d",
+				entity_id, static_cast<int>(audio->getPlayState()));
+
 		switch (audio->getPlayState()) {
 		case PlayState::PLAY:
 			playSound(entity_id, audio);
@@ -243,7 +247,6 @@ namespace gam300 {
 
 				//update the channel itself and check if its virtual
 				//i add most while half awake if anything goes wrong find me - amanda
-				isChannelVirtual(id);
 				float volume = 0.0f;
 				float pitch = 0.0f;
 				channel_it->second->getVolume(&volume);
@@ -260,12 +263,49 @@ namespace gam300 {
 					channel_it->second->setMute(audio->isMute());
 				}
 
+				FMOD_MODE current_mode;
+				channel_it->second->getMode(&current_mode);
+
+				if (audio->isLooping()) {
+					// Should be looping
+					if (!(current_mode & FMOD_LOOP_NORMAL)) {
+						channel_it->second->setMode((current_mode & ~FMOD_LOOP_OFF) | FMOD_LOOP_NORMAL);
+						channel_it->second->setLoopCount(-1);
+						LM.writeLog("AudioSystem::playSound() - Changed entity %u to LOOP mode", id);
+					}
+				}
+				else {
+					// Should NOT be looping
+					if (current_mode & FMOD_LOOP_NORMAL) {
+						channel_it->second->setMode((current_mode & ~FMOD_LOOP_NORMAL) | FMOD_LOOP_OFF);
+						channel_it->second->setLoopCount(0);
+						LM.writeLog("AudioSystem::playSound() - Changed entity %u to NO LOOP mode", id);
+					}
+				}
+
+				// Update 3D attributes if needed
+				if (audio->is3D()) {
+					Transform3D* transform = EM.getComponent<Transform3D>(id);
+					if (transform) {
+						update3DAttributes(id, audio, transform);
+					}
+				}
+
+				isChannelVirtual(id);
+
 				LM.writeLog("AudioSystem::playSound() - Sound %s on entity %u is already playing", audio->getGUID().c_str(), id);
 				return;
 			}
-			else {
+			else if(!is_playing && !is_paused){
+				LM.writeLog("AudioSystem::playSound() - Sound %s on entity % u stop playing already", audio->getGUID().c_str(), id);
+				/*if (audio->getPlayState() != PlayState::STOP) {
+					audio->setPlayState(PlayState::STOP);
+				}*/
+
+				stopSound(id);
+				return;
 				// Channel is not playing, remove it from active channels
-				m_activechannels.erase(channel_it);
+				//m_activechannels.erase(channel_it);
 			}
 		}
 
@@ -358,8 +398,19 @@ namespace gam300 {
 	void AudioSystem::stopSound(EntityID id) {
 		auto it = m_activechannels.find(id);
 		if (it != m_activechannels.end() && it->second) {
+			
+			// Quick volume ramp to prevent clicking
+			float current_volume;
+			it->second->getVolume(&current_volume);
+
+			// Ramp down volume over a few frames
+			const int ramp_steps = 5;
+			for (int i = ramp_steps; i > 0; --i) {
+				it->second->setVolume(current_volume * (i / (float)ramp_steps));
+			}
+			
+			it->second->setVolume(0.0f);
 			it->second->stop();
-			m_activechannels.erase(it);
 			AudioComponent* audio = EM.getComponent<AudioComponent>(id);
 			if (audio) {
 				audio->setPlayState(PlayState::STOP);
