@@ -151,7 +151,7 @@ namespace gam300 {
 			}
 		}
 
-		m_previousguids.clear();
+		m_previousHandles.clear();
 
 		if (m_sfxgroup) {
 			m_sfxgroup->release();
@@ -206,34 +206,37 @@ namespace gam300 {
 
 	//Core helpers
 	void AudioSystem::playSound(EntityID id, AudioComponent* audio) {
-		if (!audio || audio->getGUID().empty()) {
+		if (!audio || audio->getHandle() == 0) {
+			LM.writeLog("FAIL TO GET HANDLE WELP OR MAYBE THE AUDIO IS NON EXISTENCE");
 			return;
 		}
 
-		auto it = m_loadedsounds.find(audio->getGUID());
+		auto it = m_loadedsounds.find(audio->getHandle());
 
 		//If sound not loaded, try to load it
 		if (it == m_loadedsounds.end()) {
-			if (!loadSoundTemp(audio->getGUID(), audio->isLooping())) {
+			if (!loadSoundTemp(audio->getHandle(), audio->isLooping())) {
+				LM.writeLog("FAIL TO LOAD SOUND");
 				return;
 			}
-			it = m_loadedsounds.find(audio->getGUID());
+			it = m_loadedsounds.find(audio->getHandle());
 		}
 
 		LM.writeLog("AudioSystem::playSound() - sound is loaded");
 
 		FMOD::Sound* sound = it->second;
 		if (!sound) {
+			LM.writeLog("FIAL TO GET SOUND");
 			return;
 		}
 
-		auto channel_prev = m_previousguids.find(id);
-		if (channel_prev != m_previousguids.end() && channel_prev->second != audio->getGUID()) {
+		auto channel_prev = m_previousHandles.find(id);
+		if (channel_prev != m_previousHandles.end() && channel_prev->second != audio->getHandle()) {
 			// New sound or different sound, stop previous if any
 			stopSound(id);
 		}
 
-		m_previousguids[id] = audio->getGUID();
+		m_previousHandles[id] = audio->getHandle();
 
 		//check if it has been played b4 / recorded in the active channels map
 		auto channel_it = m_activechannels.find(id);
@@ -293,11 +296,11 @@ namespace gam300 {
 
 				isChannelVirtual(id);
 
-				LM.writeLog("AudioSystem::playSound() - Sound %s on entity %u is already playing", audio->getGUID().c_str(), id);
+				LM.writeLog("AudioSystem::playSound() - Sound %llu on entity %u is already playing", audio->getHandle(), id);
 				return;
 			}
 			else if(!is_playing && !is_paused){
-				LM.writeLog("AudioSystem::playSound() - Sound %s on entity % u stop playing already", audio->getGUID().c_str(), id);
+				LM.writeLog("AudioSystem::playSound() - Sound %llu on entity % u stop playing already", audio->getHandle(), id);
 				/*if (audio->getPlayState() != PlayState::STOP) {
 					audio->setPlayState(PlayState::STOP);
 				}*/
@@ -389,7 +392,7 @@ namespace gam300 {
 				channel->setPaused(false); // Start playing
 
 				m_activechannels[id] = channel;
-				LM.writeLog("AudioSystem::playSound() - Playing sound %s on entity %u", audio->getGUID().c_str(), id);
+				LM.writeLog("AudioSystem::playSound() - Playing sound %llu on entity %u", audio->getHandle(), id);
 			}
 		}
 
@@ -431,15 +434,23 @@ namespace gam300 {
 		}
 	}
 
-	bool AudioSystem::loadSoundTemp(const std::string& path, bool loop) {
+	bool AudioSystem::loadSoundTemp(AssetId handle, bool loop) {
 		(void)loop;
 		if (!m_coresystem) {
+			LM.writeLog("CORE NONEXIST");
 			return false;
 		}
 
-		if (m_loadedsounds.find(path) != m_loadedsounds.end()) {
+		if (m_loadedsounds.find(handle) != m_loadedsounds.end()) {
 			return true; // already loaded
 		}
+
+		const AssetRecord* record = AM.getAssetRecord(handle);
+		if (!record || !record->valid) {
+			return false;
+		}
+
+		std::string fullPath = record->sourcePath;
 
 		FMOD_MODE mode = FMOD_DEFAULT;
 
@@ -452,22 +463,22 @@ namespace gam300 {
 		}*/
 
 		FMOD::Sound* sound = nullptr;
-		if (m_coresystem->createSound(getAssetFilePath(path).c_str(), mode, nullptr, &sound) != FMOD_OK) {
-			LM.writeLog("AudioSystem::loadSoundTemp() - Failed to load %s", path.c_str());
+		if (m_coresystem->createSound(fullPath.c_str(), mode, nullptr, &sound) != FMOD_OK) {
+			LM.writeLog("AudioSystem::loadSoundTemp() - Failed to load %s (ID %llu)", fullPath.c_str(), handle);
 			return false;
 		}
 
-		m_loadedsounds[path] = sound;
-		LM.writeLog("AudioSystem::loadSoundTemp() - Loaded %s", path.c_str());
+		m_loadedsounds[handle] = sound;
+		LM.writeLog("AudioSystem::loadSoundTemp() - Loaded %s (ID %llu)", fullPath.c_str(), handle);
 		return true;
 	}
 
-	void AudioSystem::unloadSound(const std::string& path) {
-		auto it = m_loadedsounds.find(path);
+	void AudioSystem::unloadSound(AssetId handle) {
+		auto it = m_loadedsounds.find(handle);
 		if (it != m_loadedsounds.end() && it->second) {
 			it->second->release();
 			m_loadedsounds.erase(it);
-			LM.writeLog("AudioSystem::unloadSound() - Unloaded sound %s", path.c_str());
+			LM.writeLog("AudioSystem::unloadSound() - Unloaded sound %llu", handle);
 		}
 	}
 
@@ -522,7 +533,7 @@ namespace gam300 {
 			}
 		}
 
-		std::vector<std::string> editorguids_to_remove;
+		std::vector<AssetId> editorguids_to_remove;
 		for (const auto& pair : m_editorchannel) {
 			bool is_playing = false;
 			bool is_paused = false;
@@ -540,8 +551,8 @@ namespace gam300 {
 			LM.writeLog("AudioSystem::cleanupInactiveChannels() - Removed inactive channel for entity %u", id);
 		}
 
-		for (const std::string& guid : editorguids_to_remove) {
-			m_editorchannel.erase(guid);
+		for (AssetId& handle : editorguids_to_remove) {
+			m_editorchannel.erase(handle);
 		}
 	}
 
@@ -565,19 +576,24 @@ namespace gam300 {
 		}
 	}
 
-	void AudioSystem::playeditor(const std::string& path) {
-		if (path.empty()) {
+	void AudioSystem::playeditor(AssetId handle) {
+		/*if (path.empty()) {
+			return;
+		}*/
+
+		if (handle == 0) {
+			LM.writeLog("playEditor(): INVALID ASSET ID");
 			return;
 		}
 
-		auto it = m_loadedsounds.find(path);
+		auto it = m_loadedsounds.find(handle);
 
 		//If sound not loaded, try to load it
 		if (it == m_loadedsounds.end()) {
-			if (!loadSoundTemp(path, false)) {
+			if (!loadSoundTemp(handle, false)) {
 				return;
 			}
-			it = m_loadedsounds.find(path);
+			it = m_loadedsounds.find(handle);
 		}
 
 		LM.writeLog("AudioSystem::playSound() - sound is loaded");
@@ -588,7 +604,7 @@ namespace gam300 {
 		}
 
 		//check if it has been played b4 / recorded in the active channels map
-		auto channel_it = m_editorchannel.find(path);
+		auto channel_it = m_editorchannel.find(handle);
 		if (channel_it != m_editorchannel.end() && channel_it->second) {
 			bool is_playing = false;
 			channel_it->second->isPlaying(&is_playing);
@@ -596,7 +612,7 @@ namespace gam300 {
 			channel_it->second->getPaused(&is_paused);
 			if (is_playing && !is_paused) {
 				// Already playing, do not restart
-				LM.writeLog("AudioSystem::playSound() - Sound %s is already playing", path);
+				LM.writeLog("AudioSystem::playSound() - Sound %llu is already playing", handle);
 				return;
 			}
 			else {
@@ -613,23 +629,23 @@ namespace gam300 {
 				channel->setVolume(1.0);
 				channel->setPitch(1.0);
 				channel->setMode(FMOD_2D);
-				m_editorchannel[path] = channel;
-				LM.writeLog("AudioSystem::playSound() - Playing sound %s on enditor", path);
+				m_editorchannel[handle] = channel;
+				LM.writeLog("AudioSystem::playSound() - Playing sound %llu on enditor", handle);
 			}
 		}
 	}
 
-	void AudioSystem::stopeditor(const std::string& path) {
-		auto it = m_editorchannel.find(path);
+	void AudioSystem::stopeditor(AssetId handle) {
+		auto it = m_editorchannel.find(handle);
 		if (it != m_editorchannel.end() && it->second) {
 			it->second->stop();
 			m_editorchannel.erase(it);
-			LM.writeLog("AudioSystem::stopSound() - Stopped sound %s on editor", path);
+			LM.writeLog("AudioSystem::stopSound() - Stopped sound %llu on editor", handle);
 		}
 	}
 
-	PlayState AudioSystem::editorchannel_status(const std::string& path) {
-		auto it = m_editorchannel.find(path);
+	PlayState AudioSystem::editorchannel_status(AssetId handle) {
+		auto it = m_editorchannel.find(handle);
 		if (it != m_editorchannel.end() && it->second) {
 			bool is_playing = false;
 			bool is_paused = false;

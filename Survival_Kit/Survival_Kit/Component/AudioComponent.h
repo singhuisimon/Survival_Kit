@@ -15,6 +15,7 @@
 #include "../Component/Component.h"
 #include "../Utility/Vector3D.h"
 #include "../Manager/LogManager.h"
+#include "../Manager/AssetManager.h"
 #include <string>
 
 namespace gam300 {
@@ -34,14 +35,16 @@ namespace gam300 {
 		//AudioComponent(const std::string& guid = "",
 		//	//int64_t audioID = -1,
 		//	AudioType type = AudioType::SFX,
+		//	PlayState playstate = PlayState::STOP,
 		//	float volume = 1.0f,
 		//	float pitch = 1.0f,
 		//	bool loop = false,
-		//	PlayState playstate = PlayState::STOP,
+		//	bool mute = false,
 		//	bool is3D = true,
-		//	Vector3D position = Vector3D());
+		//	float minDistance = 1.0f,
+		//	float maxDistance = 100.0f);
 
-		AudioComponent(const std::string& guid = "",
+		AudioComponent(AssetId audioHandle = 0,
 			//int64_t audioID = -1,
 			AudioType type = AudioType::SFX,
 			PlayState playstate = PlayState::STOP,
@@ -57,8 +60,9 @@ namespace gam300 {
 		void update(float dt) override;
 
 		// Getters
-		const std::string& getGUID() const { return m_guid; }
+		//const std::string& getGUID() const { return m_guid; }
 		//int64_t getAudioID() const { return m_audioID; }
+		AssetId getHandle() const { return m_audioHandle; }
 		AudioType getType() const { return m_type; }
 		PlayState getPlayState() const { return m_playState; }
 		float getVolume() const { return m_volume; }
@@ -80,8 +84,9 @@ namespace gam300 {
 		float getMaxDistance() const { return m_maxDistance; }
 
 		// Setters
-		void setGUID(const std::string& guid) { m_guid = guid; }
+		//void setGUID(const std::string& guid) { m_guid = guid; }
 		//void setAudioID(int64_t audioID) { m_audioID = audioID; }
+		void setHandle(AssetId handle) { m_audioHandle = handle; }
 		void setType(AudioType type) { m_type = type; }
 		void setPlayState(PlayState state) { m_playState = state; }
 		void setVolume(float volume) { m_volume = volume; }
@@ -93,8 +98,9 @@ namespace gam300 {
 		void setMaxDistance(float maxDistance) { m_maxDistance = maxDistance; }
 
 	private:
-		std::string m_guid;		///< Unique identifier for the audio resource
+		//std::string m_guid;		///< Unique identifier for the audio resource
 		//int64_t m_audioID;	///< Audio engine specific ID (e.g., FMOD sound ID)
+		AssetId m_audioHandle;	///< Audio handle for audio resource.
 		AudioType m_type;		///< Type of audio (SFX or BGM)
 		PlayState m_playState;	///< Current playback state
 		float m_volume;			///< Volume level (0.0 to 1.0)

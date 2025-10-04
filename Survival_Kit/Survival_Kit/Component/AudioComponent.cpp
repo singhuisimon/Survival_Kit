@@ -15,23 +15,27 @@
 namespace gam300 {
 
 	// Constructor
+
 	//AudioComponent::AudioComponent(const std::string& guid,
 	//	//int64_t audioID = -1,
-	//	AudioType type, float volume, float pitch, bool loop, PlayState playstate, bool is3D, Vector3D position)
-	//	: m_guid(guid), 
-	//	//m_audioID(audioID),
-	//	m_type(type), m_volume(volume), m_pitch(pitch), m_loop(loop), m_playState(PlayState::STOP), m_is3D(is3D), m_position(position) {
+	//	AudioType type, PlayState playstate, float volume, float pitch, bool loop,
+	//	bool mute, bool is3D, float minDistance, float maxDistance) :
+	//	m_guid(guid), m_type(type), m_playState(playstate), m_volume(volume), m_pitch(pitch), m_loop(loop),
+	//	m_mute(mute), m_is3D(is3D), m_minDistance(minDistance), m_maxDistance(maxDistance) {
+	//	std::string val;
+	//	val = (m_is3D) ? "true" : "false";
+	//	LM.writeLog("AudioComponent::AudioComponent() - AudioComponent created with GUID: %s with 3d set as %s", guid.c_str(), val.c_str());
 	//}
 
-	AudioComponent::AudioComponent(const std::string& guid,
+	AudioComponent::AudioComponent(AssetId audioHandle,
 		//int64_t audioID = -1,
 		AudioType type, PlayState playstate, float volume, float pitch, bool loop,
 		bool mute, bool is3D, float minDistance, float maxDistance) :
-		m_guid(guid), m_type(type), m_playState(playstate), m_volume(volume), m_pitch(pitch), m_loop(loop),
+		m_audioHandle(audioHandle), m_type(type), m_playState(playstate), m_volume(volume), m_pitch(pitch), m_loop(loop),
 		m_mute(mute), m_is3D(is3D), m_minDistance(minDistance), m_maxDistance(maxDistance) {
 		std::string val;
 		val = (m_is3D) ? "true" : "false";
-		LM.writeLog("AudioComponent::AudioComponent() - AudioComponent created with GUID: %s with 3d set as %s", guid.c_str(), val.c_str());
+		LM.writeLog("AudioComponent::AudioComponent() - AudioComponent created with GUID: %llu with 3d set as %s", audioHandle, val.c_str());
 	}
 
 	// Initialize the component
