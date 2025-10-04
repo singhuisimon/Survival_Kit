@@ -209,8 +209,10 @@ namespace gam300
 		* Handles mouse click events in the viewport
 		* @param mousePos
 		* The mouse position in ImGui coordinates.
+		* * @param viewportSize
+		* The size of the viewport
 		**************************************************************************/
-		void handleViewPortClick(ImVec2 mousePos);
+		void handleViewPortClick(ImVec2 mousePos, ImVec2 viewportSize);
 
 		/**************************************************************************
 		* @brief
