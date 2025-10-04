@@ -15,7 +15,10 @@ namespace gam300 {
 
 		m_draw_list.reserve(1000);
 		m_camera = Camera3D(ORBITING, glm::vec3(0.0f, 5.0f, 5.0f), glm::vec3(0.f, 0.f, 0.0f), 45.0f, 0.5f, 100.0f);
-		
+		m_light = Light(glm::vec3(0.0f, 8.0f, 0.0f),
+						glm::vec3(0.4f, 0.4f, 0.4f),
+						glm::vec3(1.0f, 1.0f, 1.0f),
+						glm::vec3(1.0f, 1.0f, 1.0f));
 
 		return true;
 	}
