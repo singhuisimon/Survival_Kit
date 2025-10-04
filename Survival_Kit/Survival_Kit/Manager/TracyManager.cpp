@@ -42,6 +42,9 @@ namespace gam300 {
     }
 
     void TracyManager::launchTracy() {
+#ifndef TRACY_ENABLE
+        return;
+#else
         // Check if already running
         if (m_running && m_processHandle) {
             DWORD exitCode = 0;
@@ -77,6 +80,7 @@ namespace gam300 {
             m_processHandle = pi.hProcess;
             m_running = true;
         }
+#endif
     }
 
     void TracyManager::update() {
