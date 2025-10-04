@@ -76,8 +76,8 @@
     <ClCompile Include="Compiler\AudioCompiler.cpp" />
     <ClCompile Include="Compiler\ShadowCompiler.cpp" />
     <ClCompile Include="Component\TextureComponent.cpp" />
-    <ClCompile Include="Component\RenderComponent.cpp" />
     <ClCompile Include="Component\MovementController.cpp" />
+    <ClCompile Include="Component\RenderComponent.cpp" />
     <ClCompile Include="System\MovementControllerSystem.cpp" />
     <ClCompile Include="Pipeline\ScriptExports.cpp" />
   </ItemGroup>
