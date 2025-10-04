@@ -78,6 +78,8 @@
     <ClCompile Include="Component\TextureComponent.cpp" />
     <ClCompile Include="Component\RenderComponent.cpp" />
     <ClCompile Include="Component\MovementController.cpp" />
+    <ClCompile Include="System\MovementControllerSystem.cpp" />
+    <ClCompile Include="Pipeline\ScriptExports.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component\Component.h" />
@@ -177,6 +179,8 @@
     <ClInclude Include="Compiler\AudioCompiler.h" />
     <ClInclude Include="Compiler\ShaderCompiler.h" />
     <ClInclude Include="Component\MovementController.h" />
+    <ClInclude Include="System\MovementControllerSystem.h" />
+    <ClInclude Include="Pipeline\ScriptExports.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Scene\Game.scn" />

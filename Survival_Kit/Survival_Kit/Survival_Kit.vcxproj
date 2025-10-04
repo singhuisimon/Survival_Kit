@@ -72,6 +72,7 @@
     <ClCompile Include="Pipeline\Importers\SceneImporter.cpp" />
     <ClCompile Include="Pipeline\Importers\ShaderImporter.cpp" />
     <ClCompile Include="Pipeline\Importers\TextureImporter.cpp" />
+    <ClCompile Include="Pipeline\ScriptExports.cpp" />
     <ClCompile Include="Resource\ResourceLoaders.cpp" />
     <ClCompile Include="Resource\ResourcePaths.cpp" />
     <ClCompile Include="Pipeline\AssetDatabase.cpp" />
@@ -82,6 +83,7 @@
     <ClCompile Include="Manager\SerialisationBinManager.cpp" />
     <ClCompile Include="Manager\SerialisationManager.cpp" />
     <ClCompile Include="Manager\SystemManager.cpp" />
+    <ClCompile Include="System\MovementControllerSystem.cpp" />
     <ClCompile Include="System\RenderSystem.cpp" />
     <ClCompile Include="System\BulletSystem.cpp" />
     <ClCompile Include="System\CollisionSystem.cpp" />
@@ -163,6 +165,7 @@
     <ClInclude Include="Manager\TracyManager.h" />
     <ClInclude Include="Manager\TorqueManager.h" />
     <ClInclude Include="Pipeline\DescriptorEditor.h" />
+    <ClInclude Include="Pipeline\ScriptExports.h" />
     <ClInclude Include="Resource\ResourceData.h" />
     <ClInclude Include="Resource\ResourceMetadata.h" />
     <ClInclude Include="Resource\ResourcePaths.h" />
@@ -178,6 +181,7 @@
     <ClInclude Include="Pipeline\Importers\TextureImporter.h" />
     <ClInclude Include="Manager\SerialisationBinManager.h" />
     <ClInclude Include="Manager\SerialisationManager.h" />
+    <ClInclude Include="System\MovementControllerSystem.h" />
     <ClInclude Include="System\RenderSystem.h" />
     <ClInclude Include="System\BulletSystem.h" />
     <ClInclude Include="System\CollisionSystem.h" />
@@ -319,6 +323,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)External_Libraries\lib\Jolt_Debug;$(SolutionDir)External_Libraries\lib;$(SolutionDir).bin\$(Configuration)-$(Platform)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);ScriptCore.lib;opengl32.lib;glfw3.lib;Jolt.lib;fmodL_vc.lib;fmodstudio_vc.lib</AdditionalDependencies>
+      <ImportLibrary>$(OutDir)$(TargetName).lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
       <Command>if not exist "$(OutDir)assets" mkdir "$(OutDir)assets"
@@ -347,6 +352,7 @@ if exist "$(SolutionDir)..\tracy-profiler.exe" (
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir).bin\$(Configuration)-$(Platform)\;$(SolutionDir)External_Libraries\lib\Jolt_Release;$(SolutionDir)External_Libraries\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);opengl32.lib;ScriptCore.lib;glfw3.lib;fmod_vc.lib;fmodstudio_vc.lib;Jolt.lib</AdditionalDependencies>
+      <ImportLibrary>$(OutDir)$(TargetName).lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
       <Command>if not exist "$(OutDir)assets" mkdir "$(OutDir)assets"

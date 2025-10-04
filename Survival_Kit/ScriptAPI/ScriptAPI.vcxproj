@@ -88,6 +88,7 @@
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)External_Libraries\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>ScriptCore.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -118,6 +119,7 @@
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)External_Libraries\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>ScriptCore.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -127,13 +129,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="EngineInterface.cxx" />
+    <ClCompile Include="MovementControllerComponent.cxx" />
     <ClCompile Include="Script.cxx" />
     <ClCompile Include="TransformComponent.cxx" />
-
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Debug.hxx" />
     <ClInclude Include="EngineInterface.hxx" />
+    <ClInclude Include="MovementControllerComponent.hxx" />
     <ClInclude Include="Script.hxx" />
     <ClInclude Include="TransformComponent.hxx" />
   </ItemGroup>

@@ -16,6 +16,7 @@
 #include "../System/AudioSystem.h"
 #include "../System/ScriptSystem.h"
 #include "../Tracy/tracy/Tracy.hpp"
+#include "../System/MovementControllerSystem.h"
 
 namespace gam300 {
 
@@ -76,6 +77,17 @@ namespace gam300 {
 
 
         LM.writeLog("ECSManager::startUp() - ECS Manager started successfully");
+
+        auto movementSystem = EM.registerSystem<MovementControllerSystem>();
+        if (!movementSystem) {
+            LM.writeLog("ECSManager::startUp() - Failed to register MovementControllerSystem");
+        }
+        else {
+            LM.writeLog("ECSManager::startUp() - MovementControllerSystem registered successfully");
+        }
+
+        LM.writeLog("ECSManager::startUp() - ECS Manager started successfully");
+        return 0;
 
         return 0;
     }

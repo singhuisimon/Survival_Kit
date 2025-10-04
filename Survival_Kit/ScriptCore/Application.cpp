@@ -3,11 +3,26 @@
 #include <filesystem>
 
 #pragma comment(lib, "shlwapi.lib")
+#include "../Survival_Kit/Component/MovementController.h"
+#include "../Survival_Kit/Manager/ECSManager.h"
+#include "../Survival_Kit/Utility/Vector3D.h"
 
 // Rest of your code stays the same...
-
+extern "C" {
+    __declspec(dllimport) void SetMovementDirection(int entityId, float x, float y, float z);
+    __declspec(dllimport) void GetMovementDirection(int entityId, float* x, float* y, float* z);
+    __declspec(dllimport) void SetMovementRotation(int entityId, float x, float y, float z);
+    __declspec(dllimport) void GetMovementRotation(int entityId, float* x, float* y, float* z);
+    __declspec(dllimport) void SetMovementMoveForce(int entityId, float force);
+    __declspec(dllimport) float GetMovementMoveForce(int entityId);
+    __declspec(dllimport) void SetMovementKinematicSpeed(int entityId, float speed);
+    __declspec(dllimport) float GetMovementKinematicSpeed(int entityId);
+    __declspec(dllimport) void SetMovementRotationTorque(int entityId, float torque);
+    __declspec(dllimport) float GetMovementRotationTorque(int entityId);
+}
 namespace Core
 {
+
 
     std::array<TransformComponent, Application::ENTITY_COUNT> Application::nativeData;
     void Application::Run()
@@ -669,6 +684,56 @@ namespace Core
         {
             executeUpdateForEntityFunc(entityId);
         }
+    }
+
+    void Application::SetMovementControllerDirection(int entityId, float x, float y, float z)
+    {
+        ::SetMovementDirection(entityId, x, y, z);
+    }
+
+    void Application::GetMovementControllerDirection(int entityId, float* x, float* y, float* z)
+    {
+        ::GetMovementDirection(entityId, x, y, z);
+    }
+
+    void Application::SetMovementControllerRotation(int entityId, float x, float y, float z)
+    {
+        ::SetMovementRotation(entityId, x, y, z);
+    }
+
+    void Application::GetMovementControllerRotation(int entityId, float* x, float* y, float* z)
+    {
+        ::GetMovementRotation(entityId, x, y, z);
+    }
+
+    void Application::SetMovementControllerMoveForce(int entityId, float force)
+    {
+        ::SetMovementMoveForce(entityId, force);
+    }
+
+    float Application::GetMovementControllerMoveForce(int entityId)
+    {
+        return ::GetMovementMoveForce(entityId);
+    }
+
+    void Application::SetMovementControllerKinematicSpeed(int entityId, float speed)
+    {
+        ::SetMovementKinematicSpeed(entityId, speed);
+    }
+
+    float Application::GetMovementControllerKinematicSpeed(int entityId)
+    {
+        return ::GetMovementKinematicSpeed(entityId);
+    }
+
+    void Application::SetMovementControllerRotationTorque(int entityId, float torque)
+    {
+        ::SetMovementRotationTorque(entityId, torque);
+    }
+
+    float Application::GetMovementControllerRotationTorque(int entityId)
+    {
+        return ::GetMovementRotationTorque(entityId);
     }
 
 }
