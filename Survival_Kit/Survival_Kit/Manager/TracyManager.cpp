@@ -1,3 +1,17 @@
+/**
+ * @file TracyManager.cpp
+ * @brief Implementation of the TracyManager class.
+ * @details 
+ * Handles launching and managing the external Tracy profiler process.
+ * Utilizes Windows API functions to spawn and track the profiler executable.
+ * 
+ * @author Amanda Leow Boon Suan (100%)
+ * @date 2/10/2025
+ * Copyright (C) 2025 DigiPen Institute of Technology.
+ * Reproduction or disclosure of this file or its contents without the
+ * prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+
 #include "TracyManager.h"
 #include <cstdlib>
 #include <filesystem>
@@ -45,7 +59,7 @@ namespace gam300 {
 #ifndef TRACY_ENABLE
         return;
 #else
-        // Check if already running
+        // Prevent multiple concurrent profiler instances
         if (m_running && m_processHandle) {
             DWORD exitCode = 0;
             if (GetExitCodeProcess(m_processHandle, &exitCode) && exitCode == STILL_ACTIVE) {
@@ -59,6 +73,7 @@ namespace gam300 {
             }
         }
 
+        // Verify that the executable path is valid
         if (m_tracyPath.empty() || !std::filesystem::exists(m_tracyPath)) {
             return;
         }
@@ -87,6 +102,7 @@ namespace gam300 {
         if (m_running && m_processHandle) {
             DWORD exitCode = 0;
             if (GetExitCodeProcess(m_processHandle, &exitCode) && exitCode != STILL_ACTIVE) {
+                // Process has ended
                 CloseHandle(m_processHandle);
                 m_processHandle = nullptr;
                 m_running = false;

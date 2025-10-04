@@ -1,5 +1,5 @@
 /**
- * @file AudioSystem.h
+ * @file AudioSystem.cpp
  * @brief Wrappers for FMOD audio system.
  * @details Contains the prototype of wrappers for FMOD audio system functionalities.
  * @author Amanda Leow Boon Suan (100%)
@@ -62,30 +62,12 @@ namespace gam300 {
 			return false;
 		}
 
-		//setListenerAttributes(Vector3D(0.0f, 0.0f, 0.0f), Vector3D(0.0f, 0.0f, 1.0f), Vector3D(0.0f, 1.0f, 0.0f), Vector3D(0.0f, 0.0f, 0.0f));
-
 		LM.writeLog("AudioSystem::init() - Audio System Initialized");
 		return true;
 	}
 
 	void AudioSystem::update(float dt) {
 		(void)dt;
-
-		//LM.writeLog("AudioSystem::update() - Updating Audio System");
-
-		/*if (IM.isKeyPressed(GLFW_KEY_P)) {
-			LM.writeLog("AudioSystem::update() - Play sound on Cube pressed");
-			Entity* retrievecube = EM.getEntityByName("New Entity_1");
-			if (retrievecube) {
-				if (retrievecube->has_component(get_component_type_id<AudioComponent>())) {
-					AudioComponent* audio = EM.getComponent<AudioComponent>(retrievecube->get_id());
-					if (audio) {
-						audio->setPlayState(PlayState::PLAY);
-					}
-				}
-			}
-
-		}*/
 
 		//Iterate through all entities with AudioComponent
 		auto entities = EM.getEntitiesWithComponent<AudioComponent>();
@@ -249,7 +231,6 @@ namespace gam300 {
 				// Already playing, do not restart
 
 				//update the channel itself and check if its virtual
-				//i add most while half awake if anything goes wrong find me - amanda
 				float volume = 0.0f;
 				float pitch = 0.0f;
 				channel_it->second->getVolume(&volume);
@@ -300,15 +281,9 @@ namespace gam300 {
 				return;
 			}
 			else if(!is_playing && !is_paused){
-				LM.writeLog("AudioSystem::playSound() - Sound %llu on entity % u stop playing already", audio->getHandle(), id);
-				/*if (audio->getPlayState() != PlayState::STOP) {
-					audio->setPlayState(PlayState::STOP);
-				}*/
-
 				stopSound(id);
+				LM.writeLog("AudioSystem::playSound() - Sound %llu on entity % u stop playing already", audio->getHandle(), id);
 				return;
-				// Channel is not playing, remove it from active channels
-				//m_activechannels.erase(channel_it);
 			}
 		}
 
@@ -374,7 +349,6 @@ namespace gam300 {
 					}
 					else {
 						FMOD_VECTOR pos = { 0.0f, 0.0f, 0.0f };
-						//FMOD_VECTOR vel = { 0.0f, 0.0f, 0.0f };
 						channel->set3DAttributes(&pos, nullptr);
 					}
 
@@ -457,10 +431,6 @@ namespace gam300 {
 		//always load as 3D sound for this project
 		mode |= FMOD_3D;
 		mode |= FMOD_LOOP_OFF;
-
-		/*if (loop) {
-			mode |= FMOD_LOOP_NORMAL;
-		}*/
 
 		FMOD::Sound* sound = nullptr;
 		if (m_coresystem->createSound(fullPath.c_str(), mode, nullptr, &sound) != FMOD_OK) {
@@ -577,10 +547,6 @@ namespace gam300 {
 	}
 
 	void AudioSystem::playeditor(AssetId handle) {
-		/*if (path.empty()) {
-			return;
-		}*/
-
 		if (handle == 0) {
 			LM.writeLog("playEditor(): INVALID ASSET ID");
 			return;
