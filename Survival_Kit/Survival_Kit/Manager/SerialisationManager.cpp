@@ -418,7 +418,21 @@ namespace gam300 {
         std::stringstream ss;
         ss << std::fixed << std::setprecision(2);
         ss << "{\n";
-        ss << "          \"guid\": \"" << audio->getGUID() << "\",\n";
+
+        std::string path;
+        AssetId handle = audio->getHandle();
+        if (handle != 0) {
+            const AssetRecord* record = AM.getAssetRecord(handle);
+            if (record && record->valid) {
+                path = record->sourcePath;
+            }
+        }
+
+        if (path.empty()) {
+            path = audio->getHandle();
+        }
+
+        ss << "          \"guid\": \"" << path << "\",\n";
         //ss << "          \"audioID\": " << audio->getAudioID() << ",\n"; // Placeholder for audioID
         ss << "          \"type\": \"" << (audio->getType() == AudioType::BGM ? "BGM" : "SFX") << "\",\n";
         ss << "          \"state\": \""
@@ -439,18 +453,18 @@ namespace gam300 {
     //AudioComponentDeserializer implementation
     Component* AudioComponentSerializer::deserialize(EntityID entityId, const std::string& jsonData) {
         //GUID
-        std::string guid = SerialisationManager::extractQuotedValue(jsonData, "guid");
+        std::string path = SerialisationManager::extractQuotedValue(jsonData, "guid");
 
-        /*int64_t audioID = -1;
-        int64_t audioIDData = SerialisationManager::extractObjectValue(jsonData, "audioID");
-        if (!audioIDData.empty()) {
-            try {
-                audioID = std::stoll(audioIDData);
+        AssetId handle = 0;
+        //std::string guid;
+
+        if (!path.empty()) {
+            std::string fullpath = getAssetFilePath(path);
+            handle = AM.getAssetId(fullpath);
+            if (handle == 0) {
+                LM.writeLog("AudioComponentSerializer::Deserialize() - Asset not found for %s, check assetdb.txt", path.c_str());
             }
-            catch (const std::exception&) {
-                LM.writeLog("AudioComponentSerializer::deserialize() - Fail to parse audioID");
-            }
-        }*/
+        }
 
         //Type
         std::string typeData = SerialisationManager::extractQuotedValue(jsonData, "type");
@@ -537,13 +551,13 @@ namespace gam300 {
                 LM.writeLog("AudioComponentSerializer::deserialize() - Fail to parse maxDistance");
             }
         }
-        LM.writeLog("AudioComponentSerializer::deserialize() - Parsed AudioComponent data: guid=%s, type=%s, state=%s, volume=%.2f, pitch=%.2f, loop=%s, mute=%s, is3D=%s, minDistance=%.2f, maxDistance=%.2f",
-            guid.c_str(), (type == AudioType::BGM ? "BGM" : "SFX"),
+        LM.writeLog("AudioComponentSerializer::deserialize() - Parsed AudioComponent data: guid=%s, handle=%llu, type=%s, state=%s, volume=%.2f, pitch=%.2f, loop=%s, mute=%s, is3D=%s, minDistance=%.2f, maxDistance=%.2f",
+            path.c_str(), handle, (type == AudioType::BGM ? "BGM" : "SFX"),
             (state == PlayState::PLAY ? "PLAY" : state == PlayState::PAUSE ? "PAUSE" : "STOP"),
             volume, pitch, loop ? "true" : "false", mute ? "true" : "false", is3D ? "true" : "false", minDistance, maxDistance);
 
         // Create the Audio_Component
-        AudioComponent* audio = EM.addComponent<AudioComponent>(entityId, guid, type, state, volume, pitch, loop, mute, is3D, minDistance, maxDistance);
+        AudioComponent* audio = EM.addComponent<AudioComponent>(entityId, handle, type, state, volume, pitch, loop, mute, is3D, minDistance, maxDistance);
 
         // Set the play state
         if (audio) {

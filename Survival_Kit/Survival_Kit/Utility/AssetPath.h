@@ -12,6 +12,7 @@
 #define __ASSET_PATH_H__
 
 #include <string>
+#include <vector>
 
 namespace gam300 {
 
@@ -64,6 +65,10 @@ namespace gam300 {
     std::string buildDescriptorPath(const std::string& assetType,
         const std::string& guid,
         const std::string& filename = "Descriptor.txt");
+
+    std::string getRepository();
+    std::string getManagedScriptsPath();
+    std::vector<std::string> getAvailableScripts();
 
 } // end of namespace gam300
 #endif // __ASSET_PATH_H__

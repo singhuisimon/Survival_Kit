@@ -26,6 +26,9 @@
 #include <unordered_map>
 #include <string>
 
+#include "../Manager/AssetManager.h"
+#include "../Manager/ResourceManager.h"
+
 namespace gam300 {
 
 	class AudioSystem : public ComponentSystem<AudioComponent, Transform3D, RigidBody> {
@@ -44,8 +47,8 @@ namespace gam300 {
 		void stopSound(EntityID id);
 		void pauseSound(EntityID id, bool pause);
 
-		void playeditor(const std::string& path);
-		void stopeditor(const std::string& path);
+		void playeditor(AssetId handle);
+		void stopeditor(AssetId handle);
 
 		//bool playEvent(EntityID id, const std::string& eventpath);
 		//bool stopEvent(EntityID id, bool immediate = true);
@@ -53,10 +56,12 @@ namespace gam300 {
 
 		//Temporary loading functions
 		//bool loadBankTemp(const std::string& path);
-		bool loadSoundTemp(const std::string& path, bool loop = false);
+		//bool loadSoundTemp(const std::string& path, bool loop = false);
+		bool loadSoundTemp(AssetId handle, bool loop = false);
 
 		//void unloadBank(const std::string& path);
-		void unloadSound(const std::string& path);
+		//void unloadSound(const std::string& path);
+		void unloadSound(AssetId handle);
 
 		void setListenerAttributes(const Vector3D& position, const Vector3D& forward, const Vector3D& up, const Vector3D& velocity);
 
@@ -68,7 +73,7 @@ namespace gam300 {
 		//void getBusVolume(const std::string& buspath, float& volume) const;
 		void getSFXGroupVolume(float& volume) const;
 
-		PlayState editorchannel_status(const std::string& path);
+		PlayState editorchannel_status(AssetId handle);
 
 		bool isChannelVirtual(EntityID id);
 		//bool isEventValid(const std::string& eventpath); //not sure if need
@@ -89,10 +94,12 @@ namespace gam300 {
 		//FMOD::Studio::Bank* m_masterbank = nullptr;
 
 		//A map from GUID -> FMOD::Sound*
-		std::unordered_map<std::string, FMOD::Sound*> m_loadedsounds;
+		std::unordered_map<AssetId, FMOD::Sound*> m_loadedsounds;
+		//std::unordered_map<std::string, FMOD::Sound*> m_loadedsounds;
 		std::unordered_map<EntityID, FMOD::Channel*> m_activechannels;
-		std::unordered_map<EntityID, std::string> m_previousguids;
-		std::unordered_map<std::string, FMOD::Channel*> m_editorchannel;
+		std::unordered_map<EntityID, AssetId> m_previousHandles;
+		//std::unordered_map<EntityID, std::string> m_previousguids;
+		std::unordered_map<AssetId, FMOD::Channel*> m_editorchannel;
 
 		//std::unordered_map<std::string, FMOD::Studio::Bank*> m_loadedbanks;
 		//std::unordered_map<EntityID, FMOD::Studio::EventInstance*> m_activeevents;

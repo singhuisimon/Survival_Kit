@@ -10,6 +10,7 @@
 
 #include "AssetPath.h"
 #include <filesystem>
+#include <iostream>
 
 namespace fs = std::filesystem;
 
@@ -82,7 +83,7 @@ namespace gam300 {
         }
 
         return fs::current_path().string();
-     }
+    }
 
 
     //get local cache directory (for intermediate files, NOT descriptors
@@ -156,6 +157,60 @@ namespace gam300 {
 
         // Return the full path including the filename
         return (descriptorDir / filename).generic_string();
+    }
+
+    std::string getRepository() {
+        fs::path currentPath = fs::current_path();
+
+        while (!currentPath.empty()) {
+            if (fs::exists(currentPath / "Survival_Kit.sln") ||
+                fs::exists(currentPath / ".git")) {
+                std::cout << "[DEBUG] Repo root found: " << currentPath << std::endl;
+                return currentPath.string();
+            }
+            currentPath = currentPath.parent_path();
+        }
+
+        std::cout << "[WARN] Could not find repo root, using current path: "
+            << fs::current_path() << std::endl;
+        return fs::current_path().string();
+    }
+
+    std::string getManagedScriptsPath() {
+        fs::path repoRoot = getRepository();
+
+        // Look for both "ManagedScripts" and "managedscripts"
+        fs::path managedScriptsPath = repoRoot / "ManagedScripts";
+        if (!fs::exists(managedScriptsPath)) {
+            fs::path alt = repoRoot / "managedscripts";
+            if (fs::exists(alt)) managedScriptsPath = alt;
+        }
+
+        std::cout << "[DEBUG] ManagedScripts path: " << managedScriptsPath << std::endl;
+        return managedScriptsPath.generic_string();
+    }
+
+    std::vector<std::string> getAvailableScripts() {
+        std::vector<std::string> scripts;
+        fs::path scriptsPath = getManagedScriptsPath();
+
+        if (!fs::exists(scriptsPath)) {
+            std::cerr << "[ERROR] ManagedScripts folder not found: " << scriptsPath << std::endl;
+            return scripts;
+        }
+
+        for (const auto& entry : fs::directory_iterator(scriptsPath)) {
+            if (entry.is_regular_file() && entry.path().extension() == ".cs") {
+                scripts.push_back(entry.path().stem().string()); // remove ".cs"
+            }
+        }
+
+        // Print what we found
+        std::cout << "[DEBUG] Found " << scripts.size() << " script(s):\n";
+        for (const auto& s : scripts)
+            std::cout << "  - " << s << std::endl;
+
+        return scripts;
     }
 
 

@@ -11,6 +11,7 @@
  // Include header file
 #include "ImguiManager.h"
 #include "ECSManager.h"
+#include "MonoBehaviour.h"
 
 #include "SerialisationManager.h"
 #include "SerialisationBinManager.h"
@@ -28,6 +29,7 @@
 #include "../Component/Collider.h"
 #include "../Component/AudioComponent.h"
 #include "../Component/MeshComponent.h"
+#include "../Component/Script.h"
 
 #include <iostream>
 
@@ -53,6 +55,7 @@ namespace gam300 {
     static std::filesystem::directory_entry selectedPrefab;
 
     static int tex_index = -1;
+    static int selectedScriptIndex = -1;
 
     // Asset Type names for display
     const char* ImguiManager::getAssetTypeName(AssetType type)
@@ -67,21 +70,6 @@ namespace gam300 {
         case AssetType::Scene: return "Scene";
         case AssetType::Unknown:
         default: return "Unknown";
-        }
-    }
-
-    // get Asset icon based on type
-    const char* ImguiManager::getAssetIcon(AssetType type)
-    {
-        switch (type) {
-        case AssetType::Texture: return "[IMG]";
-        case AssetType::Audio: return "[SND]";
-        case AssetType::Mesh: return "[3D]";
-        case AssetType::Shader: return "[SHD]";
-        case AssetType::Material: return "[MAT]";
-        case AssetType::Scene: return "[SCN]";
-        case AssetType::Unknown:
-        default: return "[?]";
         }
     }
 
@@ -119,17 +107,13 @@ namespace gam300 {
         imgui_io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
         imgui_io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
         imgui_io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
-        //io.ConfigViewportsNoAutoMerge = true;
-        //io.ConfigViewportsNoTaskBarIcon = true;
-
+      
         // Setup Dear ImGui style
         ImGui::StyleColorsDark();
-        //ImGui::StyleColorsLight();
-
+      
         // Setup scaling
         ImGuiStyle& style = ImGui::GetStyle();
-        //style.ScaleAllSizes(main_scale);        // Bake a fixed style scale. (until we have a solution for dynamic style scaling, changing this requires resetting Style + calling this again)
-        //style.FontScaleDpi = main_scale;        // Set initial font scale. (using io.ConfigDpiScaleFonts=true makes this unnecessary. We leave both here for documentation purpose)
+       
 
         // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
         if (imgui_io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -181,6 +165,9 @@ namespace gam300 {
         // ================ When Open File ===========================
         // scenePath: /Survival_Kit/Assets/Scene
         std::string scenePath = getAssetFilePath("Scene");
+        assert(!scenePath.empty() && "Scene path is empty!");
+        assert(std::filesystem::exists(scenePath) && std::filesystem::is_directory(scenePath) && "Scene folder does not exist!");
+
         std::vector<std::pair<std::string, std::string>> sceneFiles;
 
         if (std::filesystem::exists(scenePath) && std::filesystem::is_directory(scenePath))
@@ -188,50 +175,39 @@ namespace gam300 {
             for (const auto& file : std::filesystem::directory_iterator(scenePath)) {
                 if (std::filesystem::is_regular_file(file.path())) {
                     std::string filename = file.path().filename().string();
-
-                    ///filepath: Survival_Kit
-                    // std::string filepath = file.path().string();
-                    // std::cout << "Found scene file: " << filepath << std::endl;
-                    //std::cout << "Scene Path: " << scenePath << std::endl;
-
-                    sceneFiles.push_back(std::make_pair(file.path().filename().string(), file.path().string()));
+                    sceneFiles.push_back(std::make_pair(file.path().filename().string(), file.path().generic_string()));
                 }
             }
         }
-
-#if 1 // new code
 
         // ==================== True If File Open ==================
         if (fileWindow)
         {
             ImGui::OpenPopup("Level Select");
-            //std::cout << "is open here\n";
-
+           
         }
 
         if (ImGui::BeginPopupModal("Level Select", nullptr, ImGuiWindowFlags_NoDocking))
         {
-            //std::cout << "is open here\n";
+       
             ImGui::SetWindowSize(ImVec2(500, 200), ImGuiCond_Once);
 
 
             // =================== Loop through the level select menu =======================
-            // sceneFiles[i]: ...../Scene\Game.scn, .... list of the file
+            // sceneFiles[i]: .....\Scene\Game.scn, .... list of the file
             for (int i = 0; i < sceneFiles.size(); i++)
             {
                 // fileName: Game.scn, GameB.scn .... List of filename for scene
                 std::string fileName = sceneFiles[i].first;
-                
+
                 if (ImGui::Selectable(fileName.c_str())) {
 
                     ImguiEcsRef.clearAllEntities();
 
-                    if (SEM.loadScene(sceneFiles[i].second)) 
+                    if (SEM.loadScene(sceneFiles[i].second))
                     {
-
                         shownFile = sceneFiles[i].second;
                         LM.writeLog("IMGUI_Manager::displayFileList(): Scene %s loaded successfully.", sceneFiles[i].first.c_str());
-
                     }
                     else {
 
@@ -239,19 +215,21 @@ namespace gam300 {
 
 
                         SEM.saveScene(getAssetFilePath("Scene/Game.scn"));
-                   
+
                         if (SEM.loadScene(getAssetFilePath("Scene/Game.scn"))) {
 
                             LM.writeLog("IMGUI_Manager::displayFileList(): Default scene loaded successfully.");
-                          
+
                         }
                         else {
 
                             LM.writeLog("IMGUI_Manager::displayFileList(): WARNING: Failed to load default scene.");
-                            
+
                         }
 
                         shownFile = getAssetFilePath("Scene/Game.scn");
+
+                        
                     }
                     fileWindow = false; // reset
                     ImGui::CloseCurrentPopup();
@@ -264,8 +242,6 @@ namespace gam300 {
             }
             ImGui::EndPopup();
         }
-#endif 
-
     }
 
     static std::string prefab_name;
@@ -278,10 +254,28 @@ namespace gam300 {
         if (ImGui::Begin("Hierarchy", &hierachyWindow, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize)) {
             const auto& allEntities = ImguiEcsRef.getAllEntities();
 
-            // Add new entity
+        
             if (ImGui::Button("+"))
             {
                 ImGui::OpenPopup("New Action");
+
+            }
+            // what does + button do
+            if (ImGui::IsItemHovered())
+            {
+               
+                ImGui::SetTooltip("Add New Entity");
+               
+            }
+
+            if (!shownFile.empty())
+            {
+                ImVec2 textSize = ImGui::CalcTextSize(shownFile.c_str());
+                ImVec2 pos = ImGui::GetCursorScreenPos();
+
+                ImGui::GetWindowDrawList()->AddRectFilled(pos, ImVec2(pos.x + textSize.x + 10, pos.y + textSize.y + 4), IM_COL32(0, 66, 150, 250), 0.0f);
+                ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 1.0f), "%s", std::filesystem::path(shownFile).stem().string().c_str());
+                ImGui::Separator();
             }
 
             if (ImGui::BeginPopup("New Action"))
@@ -295,7 +289,6 @@ namespace gam300 {
                         ImguiEcsRef.addComponent<Transform3D>(createNewEntity.get_id());
                     }
 
-                    // always show the new entity that is create 
                     selectedObjIndex = static_cast<int>(allEntities.size()) - 1;
                 }
 
@@ -303,19 +296,6 @@ namespace gam300 {
                 ImGui::EndPopup();
             }
 
-
-            // Debug code
-            // std::cout << "Entity count: " << allEntities.size() << "\n";
-
-            /*  for (auto& e_name : allEntities)
-                {
-                    std::cout << "Entity Name: " << e_name.get_name() << "\n";
-                }
-           */
-           //int currObjIndex = -1;
-
-           //Toggle Select object
-           //std::cout << "Check entities list from Imgui: " << allEntities.size() << std::endl;
 
             if (allEntities.empty())
             {
@@ -349,6 +329,11 @@ namespace gam300 {
                                 selectedObjIndex = -1;
                             }
                         }
+                        if (ImGui::IsItemHovered())
+                        {
+                            ImGui::SetTooltip("Delete current entity.");
+                        }
+                        
                         //================= Duplicate Function =============================
                         if (ImGui::MenuItem("Duplicate"))
                         {
@@ -410,9 +395,21 @@ namespace gam300 {
                                         ImguiEcsRef.addComponent<MeshComponent>(newEntityID, *oldMesh);
                                     }
                                 }
+                                if (ImguiEcsRef.hasComponent<Script>(oriSelectedEntity.get_id()))
+                                {
+                                    Script* script = ImguiEcsRef.getComponent<Script>(oriSelectedEntity.get_id());
+                                    if (script)
+                                    {
+                                        ImguiEcsRef.addComponent<Script>(newEntityID, *script);
+                                    }
+                                }
                                 selectedObjIndex = static_cast<int>(allEntities.size()) - 1;
 
                             }
+                        }
+                        if (ImGui::IsItemHovered())
+                        {
+                            ImGui::SetTooltip("Duplicate current entity.");
                         }
                         ImGui::Separator();
                         // ========================= Prefabs function ====================================
@@ -425,14 +422,20 @@ namespace gam300 {
 
                             }
 
-                            ImGui::Separator();
-                            if (ImGui::MenuItem("Replace Prefabs"))
+                            if (ImGui::IsItemHovered())
                             {
-
+                                ImGui::SetTooltip("Create a prefab");
                             }
+
+                            ImGui::Separator();
+                         /*   if (ImGui::MenuItem("Replace Prefabs"))
+                            {
+                                showReplacePrefab = true;
+                            }*/
 
                             ImGui::EndMenu();
                         }
+                        
 
                         ImGui::EndPopup();
                     }
@@ -440,6 +443,7 @@ namespace gam300 {
                     //++currObjIndex;
                 }
 
+                // ==================== create prefabs =====================================
                 if (showPrefabPanel && prefab_index >= 0 && prefab_index < static_cast<int>(allEntities.size()))
                 {
                     const Entity& prefabSelectedEntity = allEntities[prefab_index];
@@ -447,21 +451,23 @@ namespace gam300 {
                     if (PM.createPrefabFromEntity(prefabSelectedEntity.get_id(), prefab_name, true)) {
                         ImGui::OpenPopup("Create Prefab Panel");
                     }
-
+                    
                     showPrefabPanel = false;
 
                 }
+               
 
                 if (ImGui::BeginPopupModal("Create Prefab Panel", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
                 {
                     ImGui::Text("%s has been created.", prefab_name.c_str());
-
+                    ImGui::Text("%d", prefab_index);
                     if (ImGui::Button("Close"))
+                       
                         ImGui::CloseCurrentPopup();
 
                     ImGui::EndPopup();
                 }
-
+               
             }
 
         }
@@ -545,6 +551,11 @@ namespace gam300 {
 
 
                 }
+                if (ImguiEcsRef.hasComponent<Script>(selectedEntity.get_id())) {
+                    displayComponentMenu<Script>(selectedEntity.get_id(), "Script");
+
+
+                }
 
                 ImGui::Separator();
                 // Adding components 
@@ -560,19 +571,37 @@ namespace gam300 {
                     //ImGui::Text("Component"); // for now only transform3D component
 
                     ImGui::OpenPopup("AddComponentPopup");
+                    
                 }
-                // =====================Add Component ====================================
+                if (ImGui::IsItemHovered())
+                {
+                    ImGui::SetTooltip("Add new component.");
+                }
+                // ===================== Add Component ====================================
                 if (ImGui::BeginPopup("AddComponentPopup")) {
+                    // -------------------- Transform3D component -----------------------
                     if (ImGui::MenuItem("Transform3D")) {
                         if (!ImguiEcsRef.hasComponent<Transform3D>(selectedEntity.get_id())) {
                             ImguiEcsRef.addComponent<Transform3D>(selectedEntity.get_id());
                         }
                     }
+                    if (ImGui::IsItemHovered())
+                    {
+                        ImGui::SetTooltip("Position, rotation, and scale of the object.");
+                    }
+
+                    // --------------- Rigid Body component -------------------------
                     if (ImGui::MenuItem("RigidBody")) {
                         if (!ImguiEcsRef.hasComponent<RigidBody>(selectedEntity.get_id())) {
                             ImguiEcsRef.addComponent<RigidBody>(selectedEntity.get_id());
                         }
                     }
+
+                    if (ImGui::IsItemHovered())
+                    {
+                        ImGui::SetTooltip("Simulates physical: movement, rotation, and collisions.");
+                    }
+                    // --------------- Collider Component -------------------------
                     if (ImGui::MenuItem("Collider"))
                     {
                         if (!ImguiEcsRef.hasComponent<Collider>(selectedEntity.get_id()))
@@ -580,6 +609,11 @@ namespace gam300 {
                             ImguiEcsRef.addComponent<Collider>(selectedEntity.get_id());
                         }
                     }
+                    if (ImGui::IsItemHovered())
+                    {
+                        ImGui::SetTooltip("Defines the object's collision boundaries.");
+                    }
+                    // ------------------------ Audio Component -----------------
                     if (ImGui::MenuItem("Audio"))
                     {
                         if (!ImguiEcsRef.hasComponent<AudioComponent>(selectedEntity.get_id()))
@@ -587,12 +621,33 @@ namespace gam300 {
                             ImguiEcsRef.addComponent<AudioComponent>(selectedEntity.get_id());
                         }
                     }
+                    if (ImGui::IsItemHovered())
+                    {
+                        ImGui::SetTooltip("Adds sound playback to this object.");
+                    }
+                    // ----------------------- Mesh component --------------------------
                     if (ImGui::MenuItem("Mesh"))
                     {
                         if (!ImguiEcsRef.hasComponent<MeshComponent>(selectedEntity.get_id()))
                         {
                             ImguiEcsRef.addComponent<MeshComponent>(selectedEntity.get_id());
                         }
+                    }
+                    if (ImGui::IsItemHovered())
+                    {
+                        ImGui::SetTooltip("Defines the visual 3D model of the object.");
+                    }
+                    // ------------------------------ Script component ---------------------------------
+                    if (ImGui::MenuItem("Script"))
+                    {
+                        if (!ImguiEcsRef.hasComponent<Script>(selectedEntity.get_id()))
+                        {
+                            ImguiEcsRef.addComponent<Script>(selectedEntity.get_id());
+                        }
+                    }
+                    if (ImGui::IsItemHovered())
+                    {
+                        ImGui::SetTooltip("Adds custom behavior. ");
                     }
 
                     ImGui::EndPopup();
@@ -625,17 +680,40 @@ namespace gam300 {
             {
                 if (ImGui::MenuItem("New"))
                 {
-                    std::string sceneFolder = getAssetFilePath("Scene");
-                   
-                }
 
+                    // need to improve, for now just create new untitled file 
+                    static int untitledCount = 1;
+                    std::string sceneFolder = getAssetFilePath("Scene");
+
+                    // clear all entities to ensure empty scene
+                    ImguiEcsRef.clearAllEntities();
+
+                    std::string newScenePath = sceneFolder + "/Untitled" + std::to_string(untitledCount) + ".scn";
+                    untitledCount++;  // increment for next new scene
+                    // ImguiEcsRef.clearAllEntities();
+                    SEM.saveScene(newScenePath);
+                    shownFile = newScenePath;
+                    //LM.writeLog("New scene created: %s", newScenePath.c_str());
+                }
+                if (ImGui::IsItemHovered())
+                {
+                    ImGui::SetTooltip("Create new scene");
+                }
+                // ----------------Open scene ---------------------
                 if (ImGui::MenuItem("Open"))
                 {
                     fileWindow = true;
 
 
                 }
+                if (ImGui::IsItemHovered())
+                {
+
+                    ImGui::SetTooltip("Open Scene");
+
+                }
                 ImGui::Separator();
+                // --------------------- save scene -----------------------
                 if (ImGui::MenuItem("Save"))
                 {
 
@@ -645,19 +723,59 @@ namespace gam300 {
                     //std::cout << "test here" << shownFile << "\n";
 
                 }
+             
+                if (ImGui::IsItemHovered())
+                {
+
+                    ImGui::SetTooltip("Save Scene");
+
+                }
+                // ------------------- save as scene ----------------------------
                 if (ImGui::MenuItem("Save as"))
                 {
                     showSaveAsPanel = true;
+
+                }
+                if (ImGui::IsItemHovered())
+                {
+
+                    ImGui::SetTooltip("Save scene as new file.");
+
+                }
+
+                ImGui::Separator();
+                // -------------- Open Script -----------------------------
+                if (ImGui::MenuItem("Open Script"))
+                {
+                    showScriptOptions = true;
+                }
+                if (ImGui::IsItemHovered())
+                {
+
+                    ImGui::SetTooltip("Open Script from file.");
+
+                }
+                // ------------------ New Script ---------------------------
+                if (ImGui::MenuItem("New Script"))
+                {
+                    makeScript = true;
+                }
+                if (ImGui::IsItemHovered())
+                {
+
+                    ImGui::SetTooltip("Create new script.");
 
                 }
                 ImGui::EndMenu();
                 ImGui::Separator();
 
             }
-            //ImGui::SameLine(); // make it appear on the same bar
-
+            //ImGui::SameLine(); // make 
+            // 
+            // it appear on the same bar
+           
             std::string displayedScene = shownFile;
-            size_t pos = shownFile.find("Assets"); 
+            size_t pos = shownFile.find("Assets");
             if (pos != std::string::npos) {
                 displayedScene = shownFile.substr(pos);
             }
@@ -675,15 +793,74 @@ namespace gam300 {
             ImGui::EndMainMenuBar();
 
         }
-       
+
         // ========================== Open top menu =============================  
         if (fileWindow) {
 
-            IMGUIM.displayFileList(); 
+            IMGUIM.displayFileList();
+        }
+
+        if (showScriptOptions) {
+
+            if (ImGui::Begin("Script Options", &showScriptOptions, ImGuiWindowFlags_AlwaysAutoResize)) {
+
+                static std::vector<std::string> availableScripts = getAvailableScripts();
+
+                const char* currentScript = (selectedScriptIndex >= 0 && selectedScriptIndex < availableScripts.size())
+                    ? availableScripts[selectedScriptIndex].c_str()
+                    : "Select Script";
+
+                if (ImGui::BeginCombo("Select Script", currentScript)) {
+                    for (int i = 0; i < availableScripts.size(); ++i) {
+                        bool isSelected = (i == selectedScriptIndex);
+                        if (ImGui::Selectable(availableScripts[i].c_str(), isSelected)) {
+                            selectedScriptIndex = i;
+                            Core::MonoBehaviour::OpenScriptInEditor(availableScripts[i]);
+                            showScriptOptions = false; // auto-close after selection (optional)
+                        }
+
+                        if (isSelected)
+                            ImGui::SetItemDefaultFocus();
+                    }
+                    ImGui::EndCombo();
+                }
+
+            }
+            ImGui::End();
+
+            if (!showScriptOptions) {
+                selectedScriptIndex = -1;
+            }
+
+        }
+
+        if (makeScript)
+        {
+            if (ImGui::Begin("Create New Script", &makeScript, ImGuiWindowFlags_AlwaysAutoResize))
+            {
+                static char scriptNameBuffer[128] = "";
+                static std::string newScriptName;
+
+                if (ImGui::InputText("New Script Name", scriptNameBuffer, sizeof(scriptNameBuffer)))
+                {
+                    newScriptName = scriptNameBuffer;
+                }
+
+                if (ImGui::Button("Create", ImVec2(120, 0)))
+                {
+                    if (!newScriptName.empty())
+                    {
+                        Core::MonoBehaviour::CreateScript(newScriptName);
+                        scriptNameBuffer[0] = '\0';
+                        newScriptName.clear();
+                    }
+                }
+            }
+            ImGui::End();
         }
 
         // newPath: /Survival_Kit/Assets/Scene/
-        std::string newPath = getAssetFilePath("Scene/") + saveAsDefaultName; 
+        std::string newPath = getAssetFilePath("Scene/") + saveAsDefaultName;
 
         // ======================= Save as Top Menu Panel ============================
         if (showSaveAsPanel)
@@ -701,7 +878,7 @@ namespace gam300 {
 
                         newPath += ".scn"; // ensure .scn extension
                     }
-               
+
                     if (std::filesystem::exists(newPath))
                     {
                         ImGui::OpenPopup("Confirm Overwrite");
@@ -805,7 +982,7 @@ namespace gam300 {
                 viewportSize,
                 ImVec2(0, 1), ImVec2(1, 0));
 
-            handleViewPortClick(imagePos);
+            handleViewPortClick(imagePos, viewportSize);
         }
 
         //ImVec2 mousePos, viewportSize;
@@ -904,6 +1081,8 @@ namespace gam300 {
 
         // --- load folders ---//
         std::vector<std::string> assetsFoldersName;
+        assert(!getAssetsPath().empty() && "Assets path should not be empty.");
+
         if (std::filesystem::exists(getAssetsPath()) && std::filesystem::is_directory(getAssetsPath()))
         {
             for (const auto& entry : std::filesystem::directory_iterator(getAssetsPath()))
@@ -928,11 +1107,11 @@ namespace gam300 {
         ImGui::Text("Projects:");
         if (ImGui::CollapsingHeader("Assets", ImGuiTreeNodeFlags_DefaultOpen))
         {
-           
+
             // folder: Textures, Audio, Descriptors
             for (const auto& folder : assetsFoldersName)
             {
-               
+
                 bool isSelected = (selectedFolder == folder);
                 if (ImGui::Selectable(folder.c_str(), isSelected))
                 {
@@ -947,12 +1126,12 @@ namespace gam300 {
         ImGui::NextColumn();
         ImGui::BeginChild("Assets Panel", ImVec2(0, 0), true, ImGuiWindowFlags_HorizontalScrollbar);
         std::vector<std::filesystem::directory_entry> assetsList;
-       
-       
+
+
         // --- display assets ---
         if (!selectedFolder.empty())
         {
-            
+
             // to allow search  funcion
             if (!searchStr.empty())
             {
@@ -1017,8 +1196,9 @@ namespace gam300 {
             for (size_t i = 0; i < assetsList.size(); ++i)
             {
                 const auto& assetEntry = assetsList[i];
+                assert(assetEntry.exists() && "Asset file entry should exist.");
                 std::string filename = assetEntry.path().filename().string();
-                std::string fileNamePath = assetEntry.path().string();
+                std::string fileNamePath = assetEntry.path().generic_string();
 
                 if (assetEntry.path().extension().string() == ".png" || assetEntry.path().extension().string() == ".jpeg") //to open the image
                 {
@@ -1028,6 +1208,10 @@ namespace gam300 {
                 if (ImGui::Button(filename.c_str(), ImVec2(thumbnailSize, thumbnailSize))) {
 
                     selectedAssetIndex = static_cast<int>(i);
+
+                    assert(m_descriptorEditor && "Descriptor Editor pointer is null!");
+                    assert(&AM && "AssetManager reference invalid!");
+
                     if (m_descriptorEditor->LoadDescriptor(AM.getAssetIdByFilename(filename), m_currentDescriptor)) {
                         m_showDescriptorPanel = true;
                         LM.writeLog("Loaded descriptor for asset: %s", filename.c_str());
@@ -1035,7 +1219,7 @@ namespace gam300 {
                     else {
                         LM.writeLog("Failed to load descriptor for asset ID: %llu", AM.getAssetIdByFilename(filename));
                     }
-                   
+
                     selectedAssetIndex = static_cast<int>(i);
                     shownFile = fileNamePath;
                     // to ge the type of the file e.g. .scn, .wav
@@ -1052,8 +1236,8 @@ namespace gam300 {
                     }
                     if (extension == ".png" || extension == ".jpeg") //to open the image
                     {
-                        tex_index = texture_count; 
-                        
+                        tex_index = texture_count;
+
                     }
                     else {
                         tex_index = -1;
@@ -1120,6 +1304,7 @@ namespace gam300 {
             }*/
 
             if (prefab_editor) {
+                assert(selectedPrefab.exists() && "Selected prefab does not exist!");
                 displayPrefabEditor(selectedPrefab);
             }
         }
@@ -1175,7 +1360,7 @@ namespace gam300 {
             }
 
             ImGui::NextColumn();
-            
+
             // Display read-only asset info
             ImGui::SeparatorText("Asset Information");
             ImGui::Text("Asset ID: %llu", m_currentDescriptor.assetId);
@@ -1308,19 +1493,23 @@ namespace gam300 {
         }
     }
 
-    void ImguiManager::handleViewPortClick(ImVec2 mousePos)
+    void ImguiManager::handleViewPortClick(ImVec2 mousePos, ImVec2 viewportSize)
     {
         // Check the mouse hover position for reference
         if (ImGui::IsItemHovered())
         {
+
             ImVec2 mouseScreen = ImGui::GetIO().MousePos;
+            // Get aspect ratio between scene dimensions and viewport dimensions
+            ImVec2 ar = { getWindowWidthHeight().x / viewportSize.x,
+                          getWindowWidthHeight().y / viewportSize.y };
 
             ImVec2 mouseInViewportPos;
-            mouseInViewportPos.x = mouseScreen.x - mousePos.x;
-            mouseInViewportPos.y = mouseScreen.y - mousePos.y;
+            mouseInViewportPos.x = (mouseScreen.x - mousePos.x - viewportSize.x * 0.5f) * ar.x;
+            mouseInViewportPos.y = (mouseScreen.y - mousePos.y - viewportSize.y * 0.5f) * ar.y;
 
             ImGui::Text("Mouse local: (%.1f, %.1f)", mouseInViewportPos.x, mouseInViewportPos.y);
-            
+
 
         }
     }
@@ -1602,10 +1791,10 @@ namespace gam300 {
                 ImGui::Separator();
 
                 // =============== Mesh Dropdown =======================
-                 
+
                 uint16_t currMesh = mesh->getMeshHandle();
                 std::string meshName = ImguiGraphicRef.getMeshName(currMesh);
-  
+
                 if (ImGui::BeginCombo("Mesh Shape Type", meshName.c_str())) {
 
                     size_t meshCount = ImguiGraphicRef.getMeshCount();
@@ -1641,10 +1830,10 @@ namespace gam300 {
                 }
                 if (ImGui::BeginCombo("Material", materialName.c_str())) {
                     bool noneSelected = (currMaterial == 0);
-                    if (ImGui::Selectable("None", noneSelected)) 
+                    if (ImGui::Selectable("None", noneSelected))
                     {
                         mesh->setMaterialHandle(0);
-                        
+
                     }
                     if (noneSelected) {
                         ImGui::SetItemDefaultFocus();
@@ -1653,11 +1842,11 @@ namespace gam300 {
 
                     // ================ Show materials ==========================
                     const auto& materials = ImguiGraphicRef.getMaterialStorage();
-                    if (materials.empty()) 
+                    if (materials.empty())
                     {
                         ImGui::TextDisabled("(No materials loaded)");
                     }
-                    else 
+                    else
                     {
                         for (uint16_t handle = 0; handle < materials.size(); ++handle) {
                             std::string matName = "Material " + std::to_string(handle);
@@ -1677,6 +1866,65 @@ namespace gam300 {
 
             }
         }
+        else if constexpr (std::is_same_v<componentType, Script>) {
+            // script 
+            if (Script* script = ImguiEcsRef.getComponent<Script>(selectedEntityID)) {
+
+                ImGui::Separator();
+
+                /*char scriptNameBuffer[128];
+
+                strcpy_s(scriptNameBuffer, sizeof(scriptNameBuffer), script->getScriptName().c_str());
+
+                if (ImGui::InputText("Script Name", scriptNameBuffer, sizeof(scriptNameBuffer), ImGuiInputTextFlags_EnterReturnsTrue)) {
+                    std::string newScriptName = scriptNameBuffer;
+
+                    if (newScriptName.empty()) {
+                        newScriptName = script->getScriptName();
+                    }
+
+                    script->setScriptName(newScriptName);
+                }*/
+
+                static std::vector<std::string> availableScripts = getAvailableScripts();
+                static int selectedScriptIndex = -1;
+
+                std::string currentScriptName = script->getScriptName();
+
+                // Find current script in the list (if exists)
+                for (size_t i = 0; i < availableScripts.size(); ++i) {
+                    if (availableScripts[i] == currentScriptName) {
+                        selectedScriptIndex = static_cast<int>(i);
+                        break;
+                    }
+                }
+
+                // --- Dropdown combo box ---
+                if (ImGui::BeginCombo("Select Script", currentScriptName.c_str())) {
+                    for (int i = 0; i < availableScripts.size(); ++i) {
+                        bool isSelected = (i == selectedScriptIndex);
+                        if (ImGui::Selectable(availableScripts[i].c_str(), isSelected)) {
+                            selectedScriptIndex = i;
+                            script->setScriptName(availableScripts[i]);
+                        }
+
+                        if (isSelected)
+                            ImGui::SetItemDefaultFocus();
+                    }
+                    ImGui::EndCombo();
+                }
+
+                ImGui::Separator();
+
+                bool active = script->isActive();
+                if (ImGui::Checkbox("Active", &active)) {
+                    script->setActive(active);
+                }
+
+
+
+            }
+        }
     }
 
     void ImguiManager::displayPerformanceProfile()
@@ -1685,6 +1933,11 @@ namespace gam300 {
 
         if (ImGui::Begin("Performance Profile", &hierachyWindow, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize))
         {
+
+#ifndef TRACY_ENABLE
+
+            ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Tracy not available in Release");
+#else
             if (ImGui::Button("Launch Tracy Window"))
             {
                 if (!TRACY.isRunning())
@@ -1695,6 +1948,7 @@ namespace gam300 {
             }
 
             TRACY.update();
+#endif
             ImGui::Separator();
 
             // Use FPS calculated in Main.cpp for consistency
