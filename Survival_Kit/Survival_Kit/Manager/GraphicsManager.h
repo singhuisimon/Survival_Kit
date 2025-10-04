@@ -100,6 +100,7 @@ namespace gam300 {
         GLuint gpuStartQueries[GPU_QUERY_COUNT]{};
         GLuint gpuEndQueries[GPU_QUERY_COUNT]{};
         int currentQueryIndex = 0;
+        bool m_queriesCreated = false;
 
         Renderer m_renderer;
 
@@ -150,6 +151,8 @@ namespace gam300 {
         Material* getMaterial(uint16_t handle);
 
         std::string getMeshGUID(uint16_t handle) const;
+
+        void preShutdownGPU();
     };
 
 } // end of namespace gam300
