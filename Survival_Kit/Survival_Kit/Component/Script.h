@@ -25,6 +25,7 @@ namespace gam300 {
     private:
         std::string m_script_name;  // Name of the script to execute
         bool m_is_active;           // Whether the script is currently active
+        
 
     public:
         /**

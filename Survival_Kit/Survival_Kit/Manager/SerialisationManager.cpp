@@ -24,6 +24,7 @@
 #include "../Component/AudioComponent.h"
 #include "../Component/Collider.h"
 #include "../Component/Bullet.h"
+#include "../Component/MovementController.h"
 
 #include "../Component/Script.h"
 #include "../Component/MeshComponent.h"
@@ -133,7 +134,6 @@ namespace gam300 {
         return transform;
     }
 
-    // serialisation
 // ==================== RigidBody Serializer ====================
     std::string RigidBodySerializer::serialize(Component* component) {
         RigidBody* rb = static_cast<RigidBody*>(component);
@@ -759,6 +759,68 @@ namespace gam300 {
         return bullet;
     }
 
+    // ==================== MovementController Serializer ====================
+    std::string MovementControllerSerializer::serialize(Component* component)
+    {
+        MovementController* mc = static_cast<MovementController*>(component);
+        if (!mc) return "{}";
+
+        std::stringstream ss;
+        ss << "{\n";
+        ss << "          \"mode\": " << static_cast<int>(mc->getMovementMode()) << ",\n";
+        ss << "          \"move_force\": " << mc->getMoveForce() << ",\n";
+        ss << "          \"kinematic_speed\": " << mc->getKinematicSpeed() << ",\n";
+        ss << "          \"rotation_torque\": " << mc->getRotationTorque() << "\n";
+        ss << "        }";
+
+        return ss.str();
+    }
+
+    Component* MovementControllerSerializer::deserialize(EntityID entityId, const std::string& jsonData)
+    {
+        // Parse mode - Use extractNumberValue for numbers
+        int mode = 0; // Default: SCRIPT_CONTROLLED
+        std::string mode_str = SerialisationManager::extractNumberValue(jsonData, "mode");
+        if (!mode_str.empty()) {
+            mode = std::stoi(mode_str);
+        }
+
+        // Parse move_force - Use extractNumberValue
+        float moveForce = 40.0f;
+        std::string force_str = SerialisationManager::extractNumberValue(jsonData, "move_force");
+        if (!force_str.empty()) {
+            moveForce = std::stof(force_str);
+        }
+
+        // Parse kinematic_speed - Use extractNumberValue
+        float kinematicSpeed = 2.0f;
+        std::string speed_str = SerialisationManager::extractNumberValue(jsonData, "kinematic_speed");
+        if (!speed_str.empty()) {
+            kinematicSpeed = std::stof(speed_str);
+        }
+
+        // Parse rotation_torque - Use extractNumberValue
+        float rotationTorque = 20.0f;
+        std::string torque_str = SerialisationManager::extractNumberValue(jsonData, "rotation_torque");
+        if (!torque_str.empty()) {
+            rotationTorque = std::stof(torque_str);
+        }
+
+        // Create component
+        MovementController* mc = EM.addComponent<MovementController>(
+            entityId,
+            static_cast<MovementMode>(mode),
+            moveForce,
+            kinematicSpeed
+        );
+
+        if (mc) {
+            mc->setRotationTorque(rotationTorque);
+        }
+
+        return mc;
+    }
+
 	// ==================== END Component Serialisation Implementation ====================
 
     // Initialize singleton instance
@@ -888,6 +950,20 @@ namespace gam300 {
             }
             else {
                 LM.writeLog("Bullet serializer not found for entity %d", entityId);
+            }
+            });
+
+        // ==============Register MovementController component serializers==========================
+        registerComponentSerializer("MovementController", std::make_shared<MovementControllerSerializer>());
+
+        registerComponentCreator("MovementController", [this](EntityID entityId, const std::string& componentData) {
+            auto serializer = m_component_serializers["MovementController"];
+            if (serializer) {
+                serializer->deserialize(entityId, componentData);
+                LM.writeLog("MovementController created for entity %d", entityId);
+            }
+            else {
+                LM.writeLog("MovementController serializer not found for entity %d", entityId);
             }
             });
 
@@ -1263,6 +1339,16 @@ namespace gam300 {
                 if (Bullet* bullet = EM.getComponent<Bullet>(entity.get_id())) {
                     componentStrings.push_back(getIndent(4) + "\"Bullet\": " +
                         serializer->second->serialize(bullet));
+                    hasComponents = true;
+                }
+            }
+
+            // ==================== Check for MovementController component ====================
+            if (auto serializer = m_component_serializers.find("MovementController");
+                serializer != m_component_serializers.end()) {
+                if (MovementController* mc = EM.getComponent<MovementController>(entity.get_id())) {
+                    componentStrings.push_back(getIndent(4) + "\"MovementController\": " +
+                        serializer->second->serialize(mc));
                     hasComponents = true;
                 }
             }

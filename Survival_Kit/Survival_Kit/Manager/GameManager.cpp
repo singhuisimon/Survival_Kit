@@ -26,12 +26,12 @@
 #include "../Component/Script.h"
 #include "../Component/MeshComponent.h"
 #include "../Component/TextureComponent.h"
+#include "../Component/MovementController.h"
 
 // Include system headers
 #include "../System/MovementSystem.h"
 #include "../System/PhysicsSystem.h"
 #include "../System/RenderSystem.h"
-#include "../Component/RigidBody.h"
 #include "../System/BulletSystem.h"
 #include "../System/CollisionSystem.h"
 #include "../System/TransformSystem.h"
@@ -155,11 +155,13 @@ namespace gam300 {
         CM.register_component<TextureComponent>();
         LM.writeLog("GameManager::startUp() - Texture componennt registered successfully");
 
+        CM.register_component<MovementController>();
+        LM.writeLog("GameManager::startUp() - MovementController component registered successfully");
+
+
         // Check the scene path
         const std::string scenePath = getAssetFilePath("Scene/Game.scn");
         LM.writeLog("GameManager::startUp() - Attempting to load scene from '%s'", scenePath.c_str());
-
-
 
 		// Register the Systems with the ECSManager
         SM.register_system<MovementSystem>();
