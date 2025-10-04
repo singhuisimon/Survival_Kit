@@ -194,7 +194,7 @@ namespace gam300 {
                     // std::cout << "Found scene file: " << filepath << std::endl;
                     //std::cout << "Scene Path: " << scenePath << std::endl;
 
-                    sceneFiles.push_back(std::make_pair(file.path().filename().string(), file.path().string()));
+                    sceneFiles.push_back(std::make_pair(file.path().filename().string(), file.path().generic_string()));
                 }
             }
         }
@@ -252,6 +252,8 @@ namespace gam300 {
                         }
 
                         shownFile = getAssetFilePath("Scene/Game.scn");
+
+                        
                     }
                     fileWindow = false; // reset
                     ImGui::CloseCurrentPopup();
@@ -325,6 +327,12 @@ namespace gam300 {
             }
             else
             {
+
+                //std::cout << shownFile << "\n";
+                ImGui::Spacing();
+                ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.0f, 1.0f), "%s", std::filesystem::path(shownFile).stem().string().c_str());
+                ImGui::Spacing();
+
                 //std::cout << "There are entities to get in IMGUI\n";
                 for (int i = 0; i < allEntities.size(); i++)
                 {
@@ -654,7 +662,9 @@ namespace gam300 {
                 ImGui::Separator();
 
             }
-            //ImGui::SameLine(); // make it appear on the same bar
+            //ImGui::SameLine(); // make 
+            // 
+            // it appear on the same bar
 
             std::string displayedScene = shownFile;
             size_t pos = shownFile.find("Assets"); 
@@ -1018,7 +1028,7 @@ namespace gam300 {
             {
                 const auto& assetEntry = assetsList[i];
                 std::string filename = assetEntry.path().filename().string();
-                std::string fileNamePath = assetEntry.path().string();
+                std::string fileNamePath = assetEntry.path().generic_string();
 
                 if (assetEntry.path().extension().string() == ".png" || assetEntry.path().extension().string() == ".jpeg") //to open the image
                 {
