@@ -73,21 +73,6 @@ namespace gam300 {
         }
     }
 
-    // get Asset icon based on type
-    const char* ImguiManager::getAssetIcon(AssetType type)
-    {
-        switch (type) {
-        case AssetType::Texture: return "[IMG]";
-        case AssetType::Audio: return "[SND]";
-        case AssetType::Mesh: return "[3D]";
-        case AssetType::Shader: return "[SHD]";
-        case AssetType::Material: return "[MAT]";
-        case AssetType::Scene: return "[SCN]";
-        case AssetType::Unknown:
-        default: return "[?]";
-        }
-    }
-
     // Entity index
     int selectedObjIndex = -1;
 
@@ -122,17 +107,13 @@ namespace gam300 {
         imgui_io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
         imgui_io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
         imgui_io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
-        //io.ConfigViewportsNoAutoMerge = true;
-        //io.ConfigViewportsNoTaskBarIcon = true;
-
+      
         // Setup Dear ImGui style
         ImGui::StyleColorsDark();
-        //ImGui::StyleColorsLight();
-
+      
         // Setup scaling
         ImGuiStyle& style = ImGui::GetStyle();
-        //style.ScaleAllSizes(main_scale);        // Bake a fixed style scale. (until we have a solution for dynamic style scaling, changing this requires resetting Style + calling this again)
-        //style.FontScaleDpi = main_scale;        // Set initial font scale. (using io.ConfigDpiScaleFonts=true makes this unnecessary. We leave both here for documentation purpose)
+       
 
         // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
         if (imgui_io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -184,6 +165,9 @@ namespace gam300 {
         // ================ When Open File ===========================
         // scenePath: /Survival_Kit/Assets/Scene
         std::string scenePath = getAssetFilePath("Scene");
+        assert(!scenePath.empty() && "Scene path is empty!");
+        assert(std::filesystem::exists(scenePath) && std::filesystem::is_directory(scenePath) && "Scene folder does not exist!");
+
         std::vector<std::pair<std::string, std::string>> sceneFiles;
 
         if (std::filesystem::exists(scenePath) && std::filesystem::is_directory(scenePath))
@@ -191,35 +175,26 @@ namespace gam300 {
             for (const auto& file : std::filesystem::directory_iterator(scenePath)) {
                 if (std::filesystem::is_regular_file(file.path())) {
                     std::string filename = file.path().filename().string();
-
-                    ///filepath: Survival_Kit
-                    // std::string filepath = file.path().string();
-                    // std::cout << "Found scene file: " << filepath << std::endl;
-                    //std::cout << "Scene Path: " << scenePath << std::endl;
-
-                    sceneFiles.push_back(std::make_pair(file.path().filename().string(), file.path().string()));
+                    sceneFiles.push_back(std::make_pair(file.path().filename().string(), file.path().generic_string()));
                 }
             }
         }
-
-#if 1 // new code
 
         // ==================== True If File Open ==================
         if (fileWindow)
         {
             ImGui::OpenPopup("Level Select");
-            //std::cout << "is open here\n";
-
+           
         }
 
         if (ImGui::BeginPopupModal("Level Select", nullptr, ImGuiWindowFlags_NoDocking))
         {
-            //std::cout << "is open here\n";
+       
             ImGui::SetWindowSize(ImVec2(500, 200), ImGuiCond_Once);
 
 
             // =================== Loop through the level select menu =======================
-            // sceneFiles[i]: ...../Scene\Game.scn, .... list of the file
+            // sceneFiles[i]: .....\Scene\Game.scn, .... list of the file
             for (int i = 0; i < sceneFiles.size(); i++)
             {
                 // fileName: Game.scn, GameB.scn .... List of filename for scene
@@ -231,10 +206,8 @@ namespace gam300 {
 
                     if (SEM.loadScene(sceneFiles[i].second))
                     {
-
                         shownFile = sceneFiles[i].second;
                         LM.writeLog("IMGUI_Manager::displayFileList(): Scene %s loaded successfully.", sceneFiles[i].first.c_str());
-
                     }
                     else {
 
@@ -255,6 +228,8 @@ namespace gam300 {
                         }
 
                         shownFile = getAssetFilePath("Scene/Game.scn");
+
+                        
                     }
                     fileWindow = false; // reset
                     ImGui::CloseCurrentPopup();
@@ -267,8 +242,6 @@ namespace gam300 {
             }
             ImGui::EndPopup();
         }
-#endif 
-
     }
 
     static std::string prefab_name;
@@ -281,10 +254,28 @@ namespace gam300 {
         if (ImGui::Begin("Hierarchy", &hierachyWindow, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize)) {
             const auto& allEntities = ImguiEcsRef.getAllEntities();
 
-            // Add new entity
+        
             if (ImGui::Button("+"))
             {
                 ImGui::OpenPopup("New Action");
+
+            }
+            // what does + button do
+            if (ImGui::IsItemHovered())
+            {
+               
+                ImGui::SetTooltip("Add New Entity");
+               
+            }
+
+            if (!shownFile.empty())
+            {
+                ImVec2 textSize = ImGui::CalcTextSize(shownFile.c_str());
+                ImVec2 pos = ImGui::GetCursorScreenPos();
+
+                ImGui::GetWindowDrawList()->AddRectFilled(pos, ImVec2(pos.x + textSize.x + 10, pos.y + textSize.y + 4), IM_COL32(0, 66, 150, 250), 0.0f);
+                ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 1.0f), "%s", std::filesystem::path(shownFile).stem().string().c_str());
+                ImGui::Separator();
             }
 
             if (ImGui::BeginPopup("New Action"))
@@ -298,7 +289,6 @@ namespace gam300 {
                         ImguiEcsRef.addComponent<Transform3D>(createNewEntity.get_id());
                     }
 
-                    // always show the new entity that is create 
                     selectedObjIndex = static_cast<int>(allEntities.size()) - 1;
                 }
 
@@ -306,19 +296,6 @@ namespace gam300 {
                 ImGui::EndPopup();
             }
 
-
-            // Debug code
-            // std::cout << "Entity count: " << allEntities.size() << "\n";
-
-            /*  for (auto& e_name : allEntities)
-                {
-                    std::cout << "Entity Name: " << e_name.get_name() << "\n";
-                }
-           */
-           //int currObjIndex = -1;
-
-           //Toggle Select object
-           //std::cout << "Check entities list from Imgui: " << allEntities.size() << std::endl;
 
             if (allEntities.empty())
             {
@@ -352,6 +329,11 @@ namespace gam300 {
                                 selectedObjIndex = -1;
                             }
                         }
+                        if (ImGui::IsItemHovered())
+                        {
+                            ImGui::SetTooltip("Delete current entity.");
+                        }
+                        
                         //================= Duplicate Function =============================
                         if (ImGui::MenuItem("Duplicate"))
                         {
@@ -425,6 +407,10 @@ namespace gam300 {
 
                             }
                         }
+                        if (ImGui::IsItemHovered())
+                        {
+                            ImGui::SetTooltip("Duplicate current entity.");
+                        }
                         ImGui::Separator();
                         // ========================= Prefabs function ====================================
                         if (ImGui::BeginMenu("Prefabs"))
@@ -436,14 +422,20 @@ namespace gam300 {
 
                             }
 
-                            ImGui::Separator();
-                            if (ImGui::MenuItem("Replace Prefabs"))
+                            if (ImGui::IsItemHovered())
                             {
-
+                                ImGui::SetTooltip("Create a prefab");
                             }
+
+                            ImGui::Separator();
+                         /*   if (ImGui::MenuItem("Replace Prefabs"))
+                            {
+                                showReplacePrefab = true;
+                            }*/
 
                             ImGui::EndMenu();
                         }
+                        
 
                         ImGui::EndPopup();
                     }
@@ -451,6 +443,7 @@ namespace gam300 {
                     //++currObjIndex;
                 }
 
+                // ==================== create prefabs =====================================
                 if (showPrefabPanel && prefab_index >= 0 && prefab_index < static_cast<int>(allEntities.size()))
                 {
                     const Entity& prefabSelectedEntity = allEntities[prefab_index];
@@ -458,21 +451,23 @@ namespace gam300 {
                     if (PM.createPrefabFromEntity(prefabSelectedEntity.get_id(), prefab_name, true)) {
                         ImGui::OpenPopup("Create Prefab Panel");
                     }
-
+                    
                     showPrefabPanel = false;
 
                 }
+               
 
                 if (ImGui::BeginPopupModal("Create Prefab Panel", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
                 {
                     ImGui::Text("%s has been created.", prefab_name.c_str());
-
+                    ImGui::Text("%d", prefab_index);
                     if (ImGui::Button("Close"))
+                       
                         ImGui::CloseCurrentPopup();
 
                     ImGui::EndPopup();
                 }
-
+               
             }
 
         }
@@ -576,19 +571,37 @@ namespace gam300 {
                     //ImGui::Text("Component"); // for now only transform3D component
 
                     ImGui::OpenPopup("AddComponentPopup");
+                    
                 }
-                // =====================Add Component ====================================
+                if (ImGui::IsItemHovered())
+                {
+                    ImGui::SetTooltip("Add new component.");
+                }
+                // ===================== Add Component ====================================
                 if (ImGui::BeginPopup("AddComponentPopup")) {
+                    // -------------------- Transform3D component -----------------------
                     if (ImGui::MenuItem("Transform3D")) {
                         if (!ImguiEcsRef.hasComponent<Transform3D>(selectedEntity.get_id())) {
                             ImguiEcsRef.addComponent<Transform3D>(selectedEntity.get_id());
                         }
                     }
+                    if (ImGui::IsItemHovered())
+                    {
+                        ImGui::SetTooltip("Position, rotation, and scale of the object.");
+                    }
+
+                    // --------------- Rigid Body component -------------------------
                     if (ImGui::MenuItem("RigidBody")) {
                         if (!ImguiEcsRef.hasComponent<RigidBody>(selectedEntity.get_id())) {
                             ImguiEcsRef.addComponent<RigidBody>(selectedEntity.get_id());
                         }
                     }
+
+                    if (ImGui::IsItemHovered())
+                    {
+                        ImGui::SetTooltip("Simulates physical: movement, rotation, and collisions.");
+                    }
+                    // --------------- Collider Component -------------------------
                     if (ImGui::MenuItem("Collider"))
                     {
                         if (!ImguiEcsRef.hasComponent<Collider>(selectedEntity.get_id()))
@@ -596,6 +609,11 @@ namespace gam300 {
                             ImguiEcsRef.addComponent<Collider>(selectedEntity.get_id());
                         }
                     }
+                    if (ImGui::IsItemHovered())
+                    {
+                        ImGui::SetTooltip("Defines the object's collision boundaries.");
+                    }
+                    // ------------------------ Audio Component -----------------
                     if (ImGui::MenuItem("Audio"))
                     {
                         if (!ImguiEcsRef.hasComponent<AudioComponent>(selectedEntity.get_id()))
@@ -603,6 +621,11 @@ namespace gam300 {
                             ImguiEcsRef.addComponent<AudioComponent>(selectedEntity.get_id());
                         }
                     }
+                    if (ImGui::IsItemHovered())
+                    {
+                        ImGui::SetTooltip("Adds sound playback to this object.");
+                    }
+                    // ----------------------- Mesh component --------------------------
                     if (ImGui::MenuItem("Mesh"))
                     {
                         if (!ImguiEcsRef.hasComponent<MeshComponent>(selectedEntity.get_id()))
@@ -610,12 +633,21 @@ namespace gam300 {
                             ImguiEcsRef.addComponent<MeshComponent>(selectedEntity.get_id());
                         }
                     }
+                    if (ImGui::IsItemHovered())
+                    {
+                        ImGui::SetTooltip("Defines the visual 3D model of the object.");
+                    }
+                    // ------------------------------ Script component ---------------------------------
                     if (ImGui::MenuItem("Script"))
                     {
                         if (!ImguiEcsRef.hasComponent<Script>(selectedEntity.get_id()))
                         {
                             ImguiEcsRef.addComponent<Script>(selectedEntity.get_id());
                         }
+                    }
+                    if (ImGui::IsItemHovered())
+                    {
+                        ImGui::SetTooltip("Adds custom behavior. ");
                     }
 
                     ImGui::EndPopup();
@@ -648,17 +680,40 @@ namespace gam300 {
             {
                 if (ImGui::MenuItem("New"))
                 {
+
+                    // need to improve, for now just create new untitled file 
+                    static int untitledCount = 1;
                     std::string sceneFolder = getAssetFilePath("Scene");
 
-                }
+                    // clear all entities to ensure empty scene
+                    ImguiEcsRef.clearAllEntities();
 
+                    std::string newScenePath = sceneFolder + "/Untitled" + std::to_string(untitledCount) + ".scn";
+                    untitledCount++;  // increment for next new scene
+                    // ImguiEcsRef.clearAllEntities();
+                    SEM.saveScene(newScenePath);
+                    shownFile = newScenePath;
+                    //LM.writeLog("New scene created: %s", newScenePath.c_str());
+                }
+                if (ImGui::IsItemHovered())
+                {
+                    ImGui::SetTooltip("Create new scene");
+                }
+                // ----------------Open scene ---------------------
                 if (ImGui::MenuItem("Open"))
                 {
                     fileWindow = true;
 
 
                 }
+                if (ImGui::IsItemHovered())
+                {
+
+                    ImGui::SetTooltip("Open Scene");
+
+                }
                 ImGui::Separator();
+                // --------------------- save scene -----------------------
                 if (ImGui::MenuItem("Save"))
                 {
 
@@ -668,6 +723,14 @@ namespace gam300 {
                     //std::cout << "test here" << shownFile << "\n";
 
                 }
+             
+                if (ImGui::IsItemHovered())
+                {
+
+                    ImGui::SetTooltip("Save Scene");
+
+                }
+                // ------------------- save as scene ----------------------------
                 if (ImGui::MenuItem("Save as"))
                 {
                     showSaveAsPanel = true;
@@ -684,12 +747,20 @@ namespace gam300 {
                     makeScript = true;
                 }
 
+                if (ImGui::IsItemHovered())
+                {
+
+                    ImGui::SetTooltip("Save scene as new file.");
+
+                }
                 ImGui::EndMenu();
                 ImGui::Separator();
 
             }
-            //ImGui::SameLine(); // make it appear on the same bar
-
+            //ImGui::SameLine(); // make 
+            // 
+            // it appear on the same bar
+           
             std::string displayedScene = shownFile;
             size_t pos = shownFile.find("Assets");
             if (pos != std::string::npos) {
@@ -997,6 +1068,8 @@ namespace gam300 {
 
         // --- load folders ---//
         std::vector<std::string> assetsFoldersName;
+        assert(!getAssetsPath().empty() && "Assets path should not be empty.");
+
         if (std::filesystem::exists(getAssetsPath()) && std::filesystem::is_directory(getAssetsPath()))
         {
             for (const auto& entry : std::filesystem::directory_iterator(getAssetsPath()))
@@ -1110,8 +1183,9 @@ namespace gam300 {
             for (size_t i = 0; i < assetsList.size(); ++i)
             {
                 const auto& assetEntry = assetsList[i];
+                assert(assetEntry.exists() && "Asset file entry should exist.");
                 std::string filename = assetEntry.path().filename().string();
-                std::string fileNamePath = assetEntry.path().string();
+                std::string fileNamePath = assetEntry.path().generic_string();
 
                 if (assetEntry.path().extension().string() == ".png" || assetEntry.path().extension().string() == ".jpeg") //to open the image
                 {
@@ -1121,6 +1195,10 @@ namespace gam300 {
                 if (ImGui::Button(filename.c_str(), ImVec2(thumbnailSize, thumbnailSize))) {
 
                     selectedAssetIndex = static_cast<int>(i);
+
+                    assert(m_descriptorEditor && "Descriptor Editor pointer is null!");
+                    assert(&AM && "AssetManager reference invalid!");
+
                     if (m_descriptorEditor->LoadDescriptor(AM.getAssetIdByFilename(filename), m_currentDescriptor)) {
                         m_showDescriptorPanel = true;
                         LM.writeLog("Loaded descriptor for asset: %s", filename.c_str());
@@ -1213,6 +1291,7 @@ namespace gam300 {
             }*/
 
             if (prefab_editor) {
+                assert(selectedPrefab.exists() && "Selected prefab does not exist!");
                 displayPrefabEditor(selectedPrefab);
             }
         }
