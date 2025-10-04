@@ -10,8 +10,8 @@ struct Material
 
 // For PBR (Temporary hardcoded values, will add into materials subsequently)
 const float ROUGH = 0.3f;                              // Roughness
-const float METAL = 1.0f;                              // Metallic (1.0f) or dielectric (0.0f)
-const vec3 PBR_COLOR = vec3(1.0f, 0.0f, 0.0f);         // Diffuse color for metal
+const float METAL = 0.0f;                              // Metallic (1.0f) or dielectric (0.0f)
+const vec3 PBR_COLOR = vec3(1.0f, 0.0f, 0.0f);         // Diffuse color for metal (Now replaced by material kd)
 //float effect;                                  // Additional effect (discard, cartoon, etc)
 
 struct Light 
@@ -34,6 +34,7 @@ uniform Material material;
 uniform mat4 V;         // View transform matrix
 const float PI = 3.14159265358979323846;
 uniform bool isPBR;
+uniform bool isGamma;
 
 // For handling textures
 uniform bool isTexture;
@@ -83,7 +84,7 @@ vec3 schlickFresnel(float lDotH)
 {
     vec3 f0 = vec3(0.04f); // Dielectrics
     if (METAL == 1.0f)
-        f0 = PBR_COLOR;
+        f0 = material.Kd;
     return f0 + (1.0f - f0) * pow(1.0f - lDotH, 5);
 }
 
@@ -99,7 +100,7 @@ vec3 schlickFresnel(float lDotH)
 //
 vec3 microfacetModel(vec3 position, vec3 n) 
 {  
-    vec3 diffuseBrdf = PBR_COLOR;
+    vec3 diffuseBrdf = material.Kd;
 
     vec3 lightI = light.La;
     vec3 lightPositionInView = (V * vec4(light.position, 1.0f)).xyz;
@@ -175,15 +176,18 @@ void main()
         shadeColor = microfacetModel(Position, normalize(Normal));
     }
 
-    // Gamma correction
-    shadeColor = pow(shadeColor, vec3(1.0/2.2));
-
     if(isTexture){
         vec4 texColor = texture(Texture2D, TexCoord);
         float texture_factor = 0.7f; // Texture 1.0f - 0.0f shadeColor
-        FragColor = mix(vec4(shadeColor, 1.0), texColor, 0.7f);
-        //FragColor = texture(Texture2D, TexCoord);
+        shadeColor = mix(shadeColor, texColor.xyz, texture_factor);
+    }
+
+    // Gamma correction
+    if(isGamma) {
+        // RGB to sRGB
+        FragColor = vec4(pow(shadeColor, vec3(1.0/2.2)), 1.0);
     } else {
         FragColor = vec4(shadeColor, 1.0);
     }
+
 }
