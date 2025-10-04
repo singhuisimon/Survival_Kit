@@ -23,10 +23,12 @@
 #include "../Component/RigidBody.h"
 #include "../Component/AudioComponent.h"
 #include "../Component/Collider.h"
+#include "../Component/Bullet.h"
 
 #include "../Component/Script.h"
 #include "../Component/MeshComponent.h"
 #include "../Component/TextureComponent.h"
+
 #include <fstream>
 #include <sstream>
 #include <functional>
@@ -131,111 +133,233 @@ namespace gam300 {
         return transform;
     }
 
-    // ==================== RigidBody Serializer ====================
-    // RigidBodySerializer implementation
+    // serialisation
+// ==================== RigidBody Serializer ====================
     std::string RigidBodySerializer::serialize(Component* component) {
+        RigidBody* rb = static_cast<RigidBody*>(component);
+        if (!rb) return "{}";
 
-        RigidBody* rigidBody = static_cast<RigidBody*>(component);
+        auto& fm = rb->getForceManager();
+        auto& tm = rb->getTorqueManager();
 
-        if (!rigidBody) {
-            return "{}";
-        }
+        auto durationToString = [](auto d) -> const char* {
+            using std::underlying_type_t;
+            // Works for both Force::DURATION and Torque::DURATION
+            switch (d) {
+            case decltype(d)::Temp:    return "Temp";
+            case decltype(d)::Perm:    return "Perm";
+            default:                   return "Impulse";
+            }
+            };
+
         std::stringstream ss;
-
         ss << "{\n";
-        //ss << "          \"Mass\": \"" << rigidBody->getMass() << "\"\n";
-        ss << "          \"Mass\": " << rigidBody->getMass() << ",\n";
+        ss << "          \"mass\": " << rb->getMass() << ",\n";
 
-        const Vector3D& vel = rigidBody->getVelocity();
-        ss << "          \"velocity\": [\n";
-        ss << "            " << vel.x << ",\n";
-        ss << "            " << vel.y << ",\n";
-        ss << "            " << vel.z << "\n";
+        const Vector3D& vel = rb->getVelocity();
+        ss << "          \"velocity\": [ " << vel.x << ", " << vel.y << ", " << vel.z << " ],\n";
+
+        const Vector3D& acc = rb->getAcceleration();
+        ss << "          \"acceleration\": [ " << acc.x << ", " << acc.y << ", " << acc.z << " ],\n";
+
+        const Vector3D& w = rb->getAngularVelocity();
+        ss << "          \"angularVelocity\": [ " << w.x << ", " << w.y << ", " << w.z << " ],\n";
+
+        const Vector3D& I = rb->getInertiaDiagonal();
+        ss << "          \"inertiaDiag\": [ " << I.x << ", " << I.y << ", " << I.z << " ],\n";
+
+        ss << "          \"layer\": " << rb->getLayer() << ",\n";
+
+        // numeric bitfields (not booleans)
+        ss << "          \"forceMask\": " << rb->getForceMask() << ",\n";
+        ss << "          \"torqueMask\": " << rb->getTorqueMask() << ",\n";
+
+        // -------- forces --------
+        ss << "          \"forces\": [\n";
+        const auto& forces = fm.GetForces();
+        for (size_t i = 0; i < forces.size(); ++i) {
+            const auto& f = forces[i];
+            ss << "            { ";
+
+            // common fields
+            ss << "\"mask\": " << f->GetForceMask() << ", "
+                << "\"duration\": \"" << durationToString(f->GetDurationType()) << "\", "
+                << "\"active\": " << (f->GetIsActive() ? "true" : "false") << ", "
+                << "\"lifetime\": " << f->GetLifetime() << ", "
+                << "\"age\": " << f->GetAge() << ", ";
+
+            if (auto ld = dynamic_cast<const LinearDirectionalForce*>(f.get())) {
+                const auto d = ld->GetUnitDirection();
+                ss << "\"type\": \"LinearDirectional\", "
+                    << "\"dir\": [ " << d.x << ", " << d.y << ", " << d.z << " ], "
+                    << "\"magnitude\": " << ld->GetMagnitude();
+            }
+            else if (auto dr = dynamic_cast<const DragForce*>(f.get())) {
+                ss << "\"type\": \"Drag\", "
+                    << "\"hDrag\": " << dr->GetHorizontalDragCoefficient() << ", "
+                    << "\"vDrag\": " << dr->GetVerticalDragCoefficient();
+            }
+            else {
+                ss << "\"type\": \"Unknown\"";
+            }
+            ss << " }";
+            if (i + 1 < forces.size()) ss << ",";
+            ss << "\n";
+        }
         ss << "          ],\n";
-        //ss << "        }";
 
-        const Vector3D& accel = rigidBody->getAcceleration();
-        ss << "          \"acceleration\": [\n";
-        ss << "            " << accel.x << ",\n";
-        ss << "            " << accel.y << ",\n";
-        ss << "            " << accel.z << "\n";
-        ss << "          ],\n";
+        // -------- torques --------
+        ss << "          \"torques\": [\n";
+        const auto& torques = tm.GetTorques();
+        for (size_t i = 0; i < torques.size(); ++i) {
+            const auto& t = torques[i];
+            ss << "            { ";
 
+            ss << "\"mask\": " << t->GetTorqueMask() << ", "
+                << "\"duration\": \"" << durationToString(t->GetDurationType()) << "\", "
+                << "\"active\": " << (t->GetIsActive() ? "true" : "false") << ", "
+                << "\"lifetime\": " << t->GetLifetime() << ", "
+                << "\"age\": " << t->GetAge() << ", ";
 
-        const Vector3D& angularVel = rigidBody->getAngularVelocity();
-        ss << "          \"angularVelocity\": [\n";
-        ss << "            " << angularVel.x << ",\n";
-        ss << "            " << angularVel.y << ",\n";
-        ss << "            " << angularVel.z << "\n";
-        ss << "          ],\n";
-
-        const Vector3D& inertiaDiag = rigidBody->getInertiaDiagonal();
-        ss << "          \"inertiaDiag\": [\n";
-        ss << "            " << inertiaDiag.x << ",\n";
-        ss << "            " << inertiaDiag.y << ",\n";
-        ss << "            " << inertiaDiag.z << "\n";
-        ss << "          ],\n";
-
-
-        ss << "          \"layer\": " << rigidBody->getLayer() << ",\n";
-
-        ss << "          \"forceMask\": " << ((rigidBody->getForceMask() != 0u) ? "true" : "false") << ",\n";
-
-        ss << "          \"torqueMask\": " << ((rigidBody->getTorqueMask() != 0u) ? "true" : "false") << "\n";
-
+            if (auto ad = dynamic_cast<const AngularDirectionalTorque*>(t.get())) {
+                const auto a = ad->GetUnitAxis();
+                ss << "\"type\": \"AngularDirectional\", "
+                    << "\"axis\": [ " << a.x << ", " << a.y << ", " << a.z << " ], "
+                    << "\"magnitude\": " << ad->GetMagnitude();
+            }
+            else if (auto ag = dynamic_cast<const AngularDrag*>(t.get())) {
+                ss << "\"type\": \"AngularDrag\", "
+                    << "\"drag\": [ " << ag->GetDragX() << ", " << ag->GetDragY() << ", " << ag->GetDragZ() << " ]";
+            }
+            else {
+                ss << "\"type\": \"Unknown\"";
+            }
+            ss << " }";
+            if (i + 1 < torques.size()) ss << ",";
+            ss << "\n";
+        }
+        ss << "          ]\n";
 
         ss << "        }";
-
-
         return ss.str();
     }
 
-    // RigidBodySerializer implementation
     Component* RigidBodySerializer::deserialize(EntityID entityId, const std::string& jsonData) {
-
-        // Parse the rigid body type 
+        // ---- scalars / vectors ----
         float mass = 1.0f;
-        std::string massData = SerialisationManager::extractObjectValue(jsonData, "mass");
-        if (!massData.empty()) mass = std::stof(massData);
+        if (auto s = SerialisationManager::extractNumberValue(jsonData, "mass"); !s.empty())
+            mass = std::stof(s);
 
-        Vector3D velocity = Vector3D::ZERO;
-        //std::string velString = "velocity";
-        //addComponentVec3D()
-        Vector3D velcom = SerialisationManager::addComponentVec3D(velocity, jsonData, "velocity");
-
-
-        Vector3D acceleration = Vector3D::ZERO;
-        Vector3D accelCom = SerialisationManager::addComponentVec3D(acceleration, jsonData, "acceleration");
-
-        Vector3D angularVel = Vector3D::ZERO;
-        Vector3D angularVelcom = SerialisationManager::addComponentVec3D(angularVel, jsonData, "angularVelocity");
-
-        Vector3D inertiaDiag = Vector3D::ONE;
-        Vector3D inertiaDiagCom = SerialisationManager::addComponentVec3D(inertiaDiag, jsonData, "inertiaDiag");
+        Vector3D vel = SerialisationManager::addComponentVec3D(Vector3D::ZERO, jsonData, "velocity");
+        Vector3D acc = SerialisationManager::addComponentVec3D(Vector3D::ZERO, jsonData, "acceleration");
+        Vector3D w = SerialisationManager::addComponentVec3D(Vector3D::ZERO, jsonData, "angularVelocity");
+        Vector3D I = SerialisationManager::addComponentVec3D(Vector3D::ONE, jsonData, "inertiaDiag");
 
         int layer = 0;
-        std::string layerData = SerialisationManager::extractNumberValue(jsonData, "layer");
-        if (!layerData.empty()) {
-            layer = std::stoi(layerData);
-        }
+        if (auto s = SerialisationManager::extractNumberValue(jsonData, "layer"); !s.empty())
+            layer = std::stoi(s);
 
         unsigned forceMask = 0xFFFFFFFFu;
-        std::string applyForcesData = SerialisationManager::extractNumberValue(jsonData, "forceMask");
-        if (!applyForcesData.empty()) {
-            forceMask = (applyForcesData == "true") ? 0xFFFFFFFFu : 0u;
-        }
+        if (auto s = SerialisationManager::extractNumberValue(jsonData, "forceMask"); !s.empty())
+            forceMask = static_cast<unsigned>(std::stoul(s)); // numeric, not boolean
 
         unsigned torqueMask = 0xFFFFFFFFu;
-        std::string torqueMaskData = SerialisationManager::extractNumberValue(jsonData, "torqueMask");
-        if (!torqueMaskData.empty()) {
-            torqueMask = (torqueMaskData == "true") ? 0xFFFFFFFFu : 0u;
+        if (auto s = SerialisationManager::extractNumberValue(jsonData, "torqueMask"); !s.empty())
+            torqueMask = static_cast<unsigned>(std::stoul(s)); // numeric, not boolean
+
+        RigidBody* rb = EM.addComponent<RigidBody>(
+            entityId, mass, vel, acc, I, w, forceMask, torqueMask, layer);
+
+        if (!rb) return nullptr;
+
+        // duration mappers
+        auto toForceDuration = [](const std::string& s) {
+            using D = Force::DURATION;
+            if (s == "Temp") return D::Temp;
+            if (s == "Perm") return D::Perm;
+            return D::Impulse;
+            };
+        auto toTorqueDuration = [](const std::string& s) {
+            using D = Torque::DURATION;
+            if (s == "Temp") return D::Temp;
+            if (s == "Perm") return D::Perm;
+            return D::Impulse;
+            };
+
+        // ---- rebuild forces ----
+        if (auto arr = SerialisationManager::extractObjectValue(jsonData, "forces"); !arr.empty()) {
+            for (const auto& obj : SerialisationManager::splitJsonArray(arr)) {
+                const std::string type = SerialisationManager::extractQuotedValue(obj, "type");
+                const unsigned mask = [&] {
+                    auto s = SerialisationManager::extractNumberValue(obj, "mask");
+                    return s.empty() ? 0u : static_cast<unsigned>(std::stoul(s));
+                    }();
+                const auto dur = toForceDuration(SerialisationManager::extractQuotedValue(obj, "duration"));
+
+                if (type == "LinearDirectional") {
+                    Vector3D dir = SerialisationManager::addComponentVec3D(Vector3D::ZERO, obj, "dir");
+                    float mag = 0.f;
+                    if (auto s = SerialisationManager::extractNumberValue(obj, "magnitude"); !s.empty())
+                        mag = std::stof(s);
+                    rb->getForceManager().AddForce<LinearDirectionalForce>(dir, mag, mask, dur);
+                }
+                else if (type == "Drag") {
+                    float h = 0.f, v = 0.f;
+                    if (auto s = SerialisationManager::extractNumberValue(obj, "hDrag"); !s.empty()) h = std::stof(s);
+                    if (auto s = SerialisationManager::extractNumberValue(obj, "vDrag"); !s.empty()) v = std::stof(s);
+                    rb->getForceManager().AddForce<DragForce>(h, v, mask, dur);
+                }
+                else {
+                    continue;
+                }
+
+                // apply meta (lifetime/age/active) to the last added force
+                auto& stack = rb->getForceManager().GetForces();
+                auto& last = *stack.back();
+                if (auto s = SerialisationManager::extractNumberValue(obj, "lifetime"); !s.empty()) last.SetLifetime(std::stof(s));
+                if (auto s = SerialisationManager::extractNumberValue(obj, "age");      !s.empty()) last.SetAge(std::stof(s));
+                if (auto s = SerialisationManager::extractNumberValue(obj, "active"); !s.empty())
+                    last.SetIsActive(s.find("true") != std::string::npos || s == "1");
+            }
         }
 
-        RigidBody* rigidBody = EM.addComponent<RigidBody>(entityId, mass, velcom, accelCom, angularVelcom, inertiaDiagCom, layer, forceMask, torqueMask);
+        // ---- rebuild torques ----
+        if (auto arr = SerialisationManager::extractObjectValue(jsonData, "torques"); !arr.empty()) {
+            for (const auto& obj : SerialisationManager::splitJsonArray(arr)) {
+                const std::string type = SerialisationManager::extractQuotedValue(obj, "type");
+                const unsigned mask = [&] {
+                    auto s = SerialisationManager::extractNumberValue(obj, "mask");
+                    return s.empty() ? 0u : static_cast<unsigned>(std::stoul(s));
+                    }();
+                const auto dur = toTorqueDuration(SerialisationManager::extractQuotedValue(obj, "duration"));
 
-        return rigidBody;
+                if (type == "AngularDirectional") {
+                    Vector3D axis = SerialisationManager::addComponentVec3D(Vector3D::ZERO, obj, "axis");
+                    float mag = 0.f;
+                    if (auto s = SerialisationManager::extractNumberValue(obj, "magnitude"); !s.empty())
+                        mag = std::stof(s);
+                    rb->getTorqueManager().AddTorque<AngularDirectionalTorque>(axis, mag, mask, dur);
+                }
+                else if (type == "AngularDrag") {
+                    Vector3D drag = SerialisationManager::addComponentVec3D(Vector3D::ZERO, obj, "drag");
+                    rb->getTorqueManager().AddTorque<AngularDrag>(drag.x, drag.y, drag.z, mask, dur);
+                }
+                else {
+                    continue;
+                }
 
+                auto& stack = rb->getTorqueManager().GetTorques();
+                auto& last = *stack.back();
+                if (auto s = SerialisationManager::extractNumberValue(obj, "lifetime"); !s.empty()) last.SetLifetime(std::stof(s));
+                if (auto s = SerialisationManager::extractNumberValue(obj, "age");      !s.empty()) last.SetAge(std::stof(s));
+                if (auto s = SerialisationManager::extractNumberValue(obj, "active"); !s.empty())
+                    last.SetIsActive(s.find("true") != std::string::npos || s == "1");
+            }
+        }
+
+        return rb;
     }
+
 
     // ==================== Collider Serializer ====================
     std::string ColliderSerializer::serialize(Component* component)
@@ -557,6 +681,70 @@ namespace gam300 {
         return tex_comp;
     }
 
+    // ==================== Bullet Serializer ====================
+    std::string BulletSerializer::serialize(Component* component)
+    {
+        Bullet* bullet = static_cast<Bullet*>(component);
+        if (!bullet)
+        {
+            return "{}";
+        }
+
+        std::stringstream ss;
+        ss << std::fixed << std::setprecision(3);
+        ss << "{\n";
+
+        // Serialize direction
+        const Vector3D& direction = bullet->getDirection();
+        ss << "          \"direction\": [\n";
+        ss << "            " << direction.x << ",\n";
+        ss << "            " << direction.y << ",\n";
+        ss << "            " << direction.z << "\n";
+        ss << "          ],\n";
+
+        // Serialize speed
+        ss << "          \"speed\": " << bullet->getSpeed() << ",\n";
+
+        // Serialize active state
+        ss << "          \"isActive\": " << (bullet->isActive() ? "true" : "false") << "\n";
+
+        ss << "        }";
+        return ss.str();
+    }
+
+    Component* BulletSerializer::deserialize(EntityID entityId, const std::string& jsonData)
+    {
+        // Extract direction with default value
+        Vector3D direction = { 0.0f, 0.0f, 1.0f };  // Default forward direction
+        Vector3D directionCom = SerialisationManager::addComponentVec3D(direction, jsonData, "direction");
+
+        // Extract speed with default value
+        float speed = 10.0f;  // Default speed
+        std::string speedData = SerialisationManager::extractNumberValue(jsonData, "speed");
+        if (!speedData.empty()) {
+            speed = std::stof(speedData);
+        }
+
+        // Extract active state with default value
+        bool isActive = true;  // Default to active
+        std::string activeData = SerialisationManager::extractNumberValue(jsonData, "isActive");
+        if (!activeData.empty()) {
+            isActive = (activeData == "true");
+        }
+
+        // Create the Bullet component with extracted values
+        // Note: Adjust constructor parameters based on your Bullet class constructor
+        Bullet* bullet = EM.addComponent<Bullet>(entityId, directionCom, speed);
+
+        if (bullet && !isActive) {
+            bullet->deactivate();
+        }
+
+        return bullet;
+    }
+
+	// ==================== END Component Serialisation Implementation ====================
+
     // Initialize singleton instance
     SerialisationManager::SerialisationManager() {
         setType("SerialisationManager");
@@ -669,14 +857,26 @@ namespace gam300 {
                 LM.writeLog("TextureComponent created for entity %d", entityId);
             }
             else {
-                LM.writeLog("Texture Comonent serializer not found for entity &d", entityId);
+                LM.writeLog("Texture Component serializer not found for entity &d", entityId);
             }
             });
 
+        // ==============Register Bullet component serializers==========================
+        registerComponentSerializer("Bullet", std::make_shared<BulletSerializer>());
+
+        registerComponentCreator("Bullet", [this](EntityID entityId, const std::string& componentData) {
+            auto serializer = m_component_serializers["Bullet"];
+            if (serializer) {
+                serializer->deserialize(entityId, componentData);
+                LM.writeLog("Bullet component created for entity %d", entityId);
+            }
+            else {
+                LM.writeLog("Bullet serializer not found for entity %d", entityId);
+            }
+            });
 
         // Log startup
         LM.writeLog("SerialisationManager::startUp() - Serialisation Manager started successfully");
-
         return 0;
     }
 
@@ -1020,8 +1220,6 @@ namespace gam300 {
                 }
             }
 
-     
-
             // ===================== Check for Mesh component =====================
             if (auto serializer = m_component_serializers.find("MeshComponent");
                 serializer != m_component_serializers.end()) {
@@ -1041,6 +1239,16 @@ namespace gam300 {
                 }
 
 
+            }
+           
+            // ===================== Check for Bullet component =====================
+            if (auto serializer = m_component_serializers.find("Bullet");
+                serializer != m_component_serializers.end()) {
+                if (Bullet* bullet = EM.getComponent<Bullet>(entity.get_id())) {
+                    componentStrings.push_back(getIndent(4) + "\"Bullet\": " +
+                        serializer->second->serialize(bullet));
+                    hasComponents = true;
+                }
             }
 
 

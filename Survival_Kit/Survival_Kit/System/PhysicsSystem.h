@@ -1,7 +1,7 @@
 /******************************************************************************/
 /*!
 \file       PhysicsSystem.h
-\author     (you)
+\author     Low Yue Jun (yuejun.low)
 \date       Oct 03 2025
 \brief      Physics system that updates RigidBody each frame.
            - Finds (Transform3D, RigidBody) pairs
