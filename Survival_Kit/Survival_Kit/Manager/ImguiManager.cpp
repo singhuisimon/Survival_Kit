@@ -28,6 +28,7 @@
 #include "../Component/Collider.h"
 #include "../Component/AudioComponent.h"
 #include "../Component/MeshComponent.h"
+#include "../Component/Script.h"
 
 #include <iostream>
 
@@ -221,12 +222,12 @@ namespace gam300 {
             {
                 // fileName: Game.scn, GameB.scn .... List of filename for scene
                 std::string fileName = sceneFiles[i].first;
-                
+
                 if (ImGui::Selectable(fileName.c_str())) {
 
                     ImguiEcsRef.clearAllEntities();
 
-                    if (SEM.loadScene(sceneFiles[i].second)) 
+                    if (SEM.loadScene(sceneFiles[i].second))
                     {
 
                         shownFile = sceneFiles[i].second;
@@ -239,16 +240,16 @@ namespace gam300 {
 
 
                         SEM.saveScene(getAssetFilePath("Scene/Game.scn"));
-                   
+
                         if (SEM.loadScene(getAssetFilePath("Scene/Game.scn"))) {
 
                             LM.writeLog("IMGUI_Manager::displayFileList(): Default scene loaded successfully.");
-                          
+
                         }
                         else {
 
                             LM.writeLog("IMGUI_Manager::displayFileList(): WARNING: Failed to load default scene.");
-                            
+
                         }
 
                         shownFile = getAssetFilePath("Scene/Game.scn");
@@ -410,6 +411,14 @@ namespace gam300 {
                                         ImguiEcsRef.addComponent<MeshComponent>(newEntityID, *oldMesh);
                                     }
                                 }
+                                if (ImguiEcsRef.hasComponent<Script>(oriSelectedEntity.get_id()))
+                                {
+                                    Script* script = ImguiEcsRef.getComponent<Script>(oriSelectedEntity.get_id());
+                                    if (script)
+                                    {
+                                        ImguiEcsRef.addComponent<Script>(newEntityID, *script);
+                                    }
+                                }
                                 selectedObjIndex = static_cast<int>(allEntities.size()) - 1;
 
                             }
@@ -546,6 +555,11 @@ namespace gam300 {
 
 
                 }
+                if (ImguiEcsRef.hasComponent<Script>(selectedEntity.get_id())) {
+                    displayComponentMenu<Script>(selectedEntity.get_id(), "Script");
+
+
+                }
 
                 ImGui::Separator();
                 // Adding components 
@@ -593,6 +607,13 @@ namespace gam300 {
                         if (!ImguiEcsRef.hasComponent<MeshComponent>(selectedEntity.get_id()))
                         {
                             ImguiEcsRef.addComponent<MeshComponent>(selectedEntity.get_id());
+                        }
+                    }
+                    if (ImGui::MenuItem("Script"))
+                    {
+                        if (!ImguiEcsRef.hasComponent<Script>(selectedEntity.get_id()))
+                        {
+                            ImguiEcsRef.addComponent<Script>(selectedEntity.get_id());
                         }
                     }
 
@@ -686,15 +707,15 @@ namespace gam300 {
             ImGui::EndMainMenuBar();
 
         }
-       
+
         // ========================== Open top menu =============================  
         if (fileWindow) {
 
-            IMGUIM.displayFileList(); 
+            IMGUIM.displayFileList();
         }
 
         // newPath: /Survival_Kit/Assets/Scene/
-        std::string newPath = getAssetFilePath("Scene/") + saveAsDefaultName; 
+        std::string newPath = getAssetFilePath("Scene/") + saveAsDefaultName;
 
         // ======================= Save as Top Menu Panel ============================
         if (showSaveAsPanel)
@@ -712,7 +733,7 @@ namespace gam300 {
 
                         newPath += ".scn"; // ensure .scn extension
                     }
-               
+
                     if (std::filesystem::exists(newPath))
                     {
                         ImGui::OpenPopup("Confirm Overwrite");
@@ -939,11 +960,11 @@ namespace gam300 {
         ImGui::Text("Projects:");
         if (ImGui::CollapsingHeader("Assets", ImGuiTreeNodeFlags_DefaultOpen))
         {
-           
+
             // folder: Textures, Audio, Descriptors
             for (const auto& folder : assetsFoldersName)
             {
-               
+
                 bool isSelected = (selectedFolder == folder);
                 if (ImGui::Selectable(folder.c_str(), isSelected))
                 {
@@ -958,12 +979,12 @@ namespace gam300 {
         ImGui::NextColumn();
         ImGui::BeginChild("Assets Panel", ImVec2(0, 0), true, ImGuiWindowFlags_HorizontalScrollbar);
         std::vector<std::filesystem::directory_entry> assetsList;
-       
-       
+
+
         // --- display assets ---
         if (!selectedFolder.empty())
         {
-            
+
             // to allow search  funcion
             if (!searchStr.empty())
             {
@@ -1046,7 +1067,7 @@ namespace gam300 {
                     else {
                         LM.writeLog("Failed to load descriptor for asset ID: %llu", AM.getAssetIdByFilename(filename));
                     }
-                   
+
                     selectedAssetIndex = static_cast<int>(i);
                     shownFile = fileNamePath;
                     // to ge the type of the file e.g. .scn, .wav
@@ -1063,8 +1084,8 @@ namespace gam300 {
                     }
                     if (extension == ".png" || extension == ".jpeg") //to open the image
                     {
-                        tex_index = texture_count; 
-                        
+                        tex_index = texture_count;
+
                     }
                     else {
                         tex_index = -1;
@@ -1186,7 +1207,7 @@ namespace gam300 {
             }
 
             ImGui::NextColumn();
-            
+
             // Display read-only asset info
             ImGui::SeparatorText("Asset Information");
             ImGui::Text("Asset ID: %llu", m_currentDescriptor.assetId);
@@ -1331,7 +1352,7 @@ namespace gam300 {
             mouseInViewportPos.y = mouseScreen.y - mousePos.y;
 
             ImGui::Text("Mouse local: (%.1f, %.1f)", mouseInViewportPos.x, mouseInViewportPos.y);
-            
+
 
         }
     }
@@ -1613,10 +1634,10 @@ namespace gam300 {
                 ImGui::Separator();
 
                 // =============== Mesh Dropdown =======================
-                 
+
                 uint16_t currMesh = mesh->getMeshHandle();
                 std::string meshName = ImguiGraphicRef.getMeshName(currMesh);
-  
+
                 if (ImGui::BeginCombo("Mesh Shape Type", meshName.c_str())) {
 
                     size_t meshCount = ImguiGraphicRef.getMeshCount();
@@ -1652,10 +1673,10 @@ namespace gam300 {
                 }
                 if (ImGui::BeginCombo("Material", materialName.c_str())) {
                     bool noneSelected = (currMaterial == 0);
-                    if (ImGui::Selectable("None", noneSelected)) 
+                    if (ImGui::Selectable("None", noneSelected))
                     {
                         mesh->setMaterialHandle(0);
-                        
+
                     }
                     if (noneSelected) {
                         ImGui::SetItemDefaultFocus();
@@ -1664,11 +1685,11 @@ namespace gam300 {
 
                     // ================ Show materials ==========================
                     const auto& materials = ImguiGraphicRef.getMaterialStorage();
-                    if (materials.empty()) 
+                    if (materials.empty())
                     {
                         ImGui::TextDisabled("(No materials loaded)");
                     }
-                    else 
+                    else
                     {
                         for (uint16_t handle = 0; handle < materials.size(); ++handle) {
                             std::string matName = "Material " + std::to_string(handle);
@@ -1685,6 +1706,37 @@ namespace gam300 {
                     ImGui::EndCombo();
 
                 }
+
+            }
+        }
+        else if constexpr (std::is_same_v<componentType, Script>) {
+            // script 
+            if (Script* script = ImguiEcsRef.getComponent<Script>(selectedEntityID)) {
+
+                ImGui::Separator();
+
+                char scriptNameBuffer[128];
+
+                strcpy_s(scriptNameBuffer, sizeof(scriptNameBuffer), script->getScriptName().c_str());
+
+                if (ImGui::InputText("Script Name", scriptNameBuffer, sizeof(scriptNameBuffer), ImGuiInputTextFlags_EnterReturnsTrue)) {
+                    std::string newScriptName = scriptNameBuffer;
+
+                    if (newScriptName.empty()) {
+                        newScriptName = script->getScriptName();
+                    }
+
+                    script->setScriptName(newScriptName);
+                }
+
+                ImGui::Separator();
+
+                bool active = script->isActive();
+                if (ImGui::Checkbox("Active", &active)) {
+                    script->setActive(active);
+                }
+
+
 
             }
         }
