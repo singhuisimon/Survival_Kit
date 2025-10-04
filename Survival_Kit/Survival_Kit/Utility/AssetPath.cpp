@@ -213,5 +213,40 @@ namespace gam300 {
         return scripts;
     }
 
+    std::string getRelativeAssetPath(const std::string& absolutePath)
+    {
+        std::filesystem::path full(absolutePath);
+        std::string norm = full.lexically_normal().string();
+
+        // normalize slashes
+        std::replace(norm.begin(), norm.end(), '/', '\\');
+
+        // look for "\Assets\" to strip everything before it
+        size_t pos = norm.find("\\Assets\\");
+        if (pos != std::string::npos)
+        {
+            // keep everything after "\Assets"
+            return norm.substr(pos + std::string("\\Assets").length());
+        }
+
+        // fallback: just filename
+        return "\\" + full.filename().string();
+    }
+
+    std::string escapeBackslashesForJSON(const std::string& input)
+    {
+        std::string escaped;
+        escaped.reserve(input.size() * 2);
+
+        for (char c : input)
+        {
+            if (c == '\\')
+                escaped += "\\\\";
+            else
+                escaped += c;
+        }
+
+        return escaped;
+    }
 
 } // end of namespace gam300

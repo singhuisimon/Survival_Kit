@@ -70,5 +70,7 @@ namespace gam300 {
     std::string getManagedScriptsPath();
     std::vector<std::string> getAvailableScripts();
 
+    std::string getRelativeAssetPath(const std::string& absolutePath);
+    std::string escapeBackslashesForJSON(const std::string& input);
 } // end of namespace gam300
 #endif // __ASSET_PATH_H__

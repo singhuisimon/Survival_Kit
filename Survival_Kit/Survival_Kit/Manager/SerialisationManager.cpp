@@ -424,7 +424,9 @@ namespace gam300 {
         if (handle != 0) {
             const AssetRecord* record = AM.getAssetRecord(handle);
             if (record && record->valid) {
-                path = record->sourcePath;
+                path = getRelativeAssetPath(record->sourcePath);
+                path = escapeBackslashesForJSON(path);
+                LM.writeLog("GETTING RELATIVE + ESCAPE BACKSLASH ASSETPATH %s", path.c_str());
             }
         }
 
