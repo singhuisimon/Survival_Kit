@@ -736,21 +736,34 @@ namespace gam300 {
                     showSaveAsPanel = true;
 
                 }
-
-                ImGui::Separator();
-                if (ImGui::MenuItem("Open Script"))
-                {
-                    showScriptOptions = true;
-                }
-                if (ImGui::MenuItem("New Script"))
-                {
-                    makeScript = true;
-                }
-
                 if (ImGui::IsItemHovered())
                 {
 
                     ImGui::SetTooltip("Save scene as new file.");
+
+                }
+
+                ImGui::Separator();
+                // -------------- Open Script -----------------------------
+                if (ImGui::MenuItem("Open Script"))
+                {
+                    showScriptOptions = true;
+                }
+                if (ImGui::IsItemHovered())
+                {
+
+                    ImGui::SetTooltip("Open Script from file.");
+
+                }
+                // ------------------ New Script ---------------------------
+                if (ImGui::MenuItem("New Script"))
+                {
+                    makeScript = true;
+                }
+                if (ImGui::IsItemHovered())
+                {
+
+                    ImGui::SetTooltip("Create new script.");
 
                 }
                 ImGui::EndMenu();
