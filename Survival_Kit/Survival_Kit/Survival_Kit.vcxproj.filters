@@ -40,7 +40,6 @@
     <ClCompile Include="Graphics\Sampler.cpp" />
     <ClCompile Include="Graphics\Texture.cpp" />
     <ClCompile Include="Graphics\Common.cpp" />
-    <ClCompile Include="Component\RenderComponent.cpp" />
     <ClCompile Include="System\RenderSystem.cpp" />
     <ClCompile Include="System\MovementSystem.cpp" />
     <ClCompile Include="Component\AudioComponent.cpp" />
