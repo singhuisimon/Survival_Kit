@@ -22,7 +22,6 @@ int main(void) {
     ZoneScopedN("MainStartup");
 	
     bool spacePressed = false;
-    bool tracyKeyWasDown = false;
 
     // Get reference to LogManager (already started by GameManager)
     LM.writeLog("Main: GameManager initialized successfully");
@@ -135,6 +134,12 @@ int main(void) {
 
     //std::cout << "Initial script added" << std::endl;
 
+    // AM.shutDown(); //shut down Asset Manager
+
+    // Add a timer for periodic scanning
+    static float scanTimer = 0.0f;
+    const float SCAN_INTERVAL = 1.0f; // Scan every 1 second
+
 
     while (!GM.getGameOver() && !glfwWindowShouldClose(window)) {
 
@@ -145,6 +150,13 @@ int main(void) {
 
         // Start of loop timing
         clock.delta();
+
+        // Periodic asset scanning to detect file changes
+        scanTimer += (GM.getFrameTime() / 1000.0f);
+        if (scanTimer >= SCAN_INTERVAL) {
+            AM.scanAndProcess();  // This will detect deletions and additions
+            scanTimer = 0.0f;
+        }
 
         bool currentSpaceState = GetKeyState(VK_SPACE) & 0x8000;
         if (currentSpaceState && !spacePressed)
@@ -179,6 +191,7 @@ int main(void) {
 
         IMGUIM.displayAssetsBrowserList();
 
+        IMGUIM.displayAssetEditor();
         IMGUIM.displayPerformanceProfile();
 
         // Editor Start Render
@@ -212,7 +225,8 @@ int main(void) {
             frame_count = 0;
             fps_timer = 0.0;
 
-            IMGUIM.updateFPS(current_fps); //to match the FPS together with the ImGui
+            // for performance profile use
+            IMGUIM.updateFPS(current_fps);
         }
 
         // Convert frame time from milliseconds to microseconds
@@ -234,25 +248,30 @@ int main(void) {
         FrameMark; //always keep this as the last.
     }
 
-
     //app.ShutdownScripting();
     // Cleanup
     LM.writeLog("Cleaning up resources");
 
+    // Final scan before shutdown to catch any last changes
+    AM.scanAndProcess();
+
+    // Shut down Asset Manager BEFORE GLFW termination
+    AM.shutDown();
+
     // Shut down InputManager
     IM.shutDown();
     
-    TRACY.shutDown();
-
     IMGUIM.shutDown();
-
-    AM.shutDown(); //shut down Asset Manager
     
+    GFXM.preShutdownGPU(); //to safely release the tracy calls.
+
     // Terminate GLFW
     glfwTerminate();
 
     // Properly shut down the GameManager (which will also shut down all other managers)
     GM.shutDown();
+
+    TRACY.shutDown();
 
     return 0;
 }

@@ -10,7 +10,7 @@
  */
 
 
-//include header files here
+ //include header files here
 #include "ResourcePaths.h"
 
 //include libraries 
@@ -23,17 +23,23 @@
 
 namespace gam300 {
 
-	//constructor 
-	ResourcePaths::ResourcePaths() {
-		//initialize the paths to directory assets
-		std::string asset_path = getAssetsPath();
-		m_descriptors_root_path = asset_path + "Descriptors/";
-		m_intermediate_root_path = asset_path + "Intermediate/";
-		m_compiled_root_path = asset_path + "Compiled/";
-	}
+    //constructor 
+    ResourcePaths::ResourcePaths() {
+        //initialize the paths to directory assets
+        std::string asset_path = getAssetsPath();
 
-	//initialize directory structure
-	bool ResourcePaths::initializeDirectories() {
+        m_descriptors_root_path = asset_path + "Descriptors/";
+        m_intermediate_root_path = asset_path + "/Cache/Intermediate/";
+
+        // CHANGED: Use Compiled folder at the same level as Assets folder
+        // Get the parent directory of Assets (the repository root containing Assets folder)
+        std::filesystem::path assets_dir(asset_path);
+        std::filesystem::path repo_root = assets_dir.parent_path();
+        m_compiled_root_path = (repo_root / "Compiled").string() + "/";
+    }
+
+    //initialize directory structure
+    bool ResourcePaths::initializeDirectories() {
         try {
             // Create root directories
             if (!createDirectoryIfNotExists(m_descriptors_root_path)) return false;
@@ -50,7 +56,7 @@ namespace gam300 {
         catch (const std::exception&) {
             return false;
         }
-	}
+    }
 
 
 
@@ -162,7 +168,7 @@ namespace gam300 {
 
     //path utilities 
     bool ResourcePaths::fileExists(const std::string& file_path) const {
-        return std::filesystem::exists(file_path); 
+        return std::filesystem::exists(file_path);
     }
 
     uint64_t ResourcePaths::getFileModificationTime(const std::string& file_path) const {
@@ -182,7 +188,6 @@ namespace gam300 {
     }
 
     uint64_t ResourcePaths::getFileSize(const std::string& file_path) const {
-
         try {
             if (!std::filesystem::exists(file_path)) {
                 return 0;
@@ -198,50 +203,51 @@ namespace gam300 {
         try {
             std::filesystem::path from_path(from);
             std::filesystem::path to_path(to);
-            std::filesystem::path relative = std::filesystem::relative(to_path, from_path);
-            return normalizePath(relative.string());
+            return std::filesystem::relative(to_path, from_path).generic_string();
         }
         catch (const std::exception&) {
-            return to; // Return absolute path if relative calculation fails
+            return to;
         }
     }
 
     std::string ResourcePaths::normalizePath(const std::string& path) const {
         std::string normalized = path;
         std::replace(normalized.begin(), normalized.end(), '\\', '/');
+
+        //remove trailing slash
+        while (!normalized.empty() && normalized.back() == '/') {
+            normalized.pop_back();
+        }
+
         return normalized;
     }
 
     std::string ResourcePaths::generateGUIDSubdirectory(const xresource::full_guid& guid) const {
-
-        //convert GUID to hex string
         std::stringstream ss;
         ss << std::hex << std::uppercase << std::setfill('0') << std::setw(16) << guid.m_Instance.m_Value;
-        std::string hex_str = ss.str();
+        std::string guid_str = ss.str();
 
-        //pad with zeros if needed 
-        while (hex_str.length() < 16) {
-            hex_str = "0" + hex_str;
+        //Extract two-character directories from GUID
+        //using last 4 characters for two levels of directories
+        if (guid_str.length() >= 4) {
+            std::string dir2 = guid_str.substr(guid_str.length() - 2, 2);
+            std::string dir1 = guid_str.substr(guid_str.length() - 4, 2);
+            return dir1 + "/" + dir2 + "/";
         }
 
-        //create subdirectory structure using first 4 hex digits: 
-        std::string sub_dir1 = hex_str.substr(0, 2); //first 2 char
-        std::string sub_dir2 = hex_str.substr(2, 2); //next 2 char
-
-        return sub_dir1 + "/" + sub_dir2 + "/";
+        return "";
     }
 
-
     std::string ResourcePaths::ensureTrailingSeparator(const std::string& path) const {
-
-        if (path.empty()) return "/";
+        if (path.empty()) {
+            return path;
+        }
 
         std::string normalized = normalizePath(path);
-        if (normalized.back() != '/') normalized += '/';
+        if (normalized.back() != '/') {
+            normalized += '/';
+        }
 
         return normalized;
     }
-
-
-
 } // end of namespace gam300

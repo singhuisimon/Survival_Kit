@@ -42,7 +42,7 @@ namespace gam300
         bool     ValidateAge();
         void     Update(double deltaTime);
 
-        virtual Vector3D CalculateTorque(const Vector3D &currentAngularVelocity) const = 0;
+        virtual Vector3D CalculateTorque(const Vector3D& currentAngularVelocity) const = 0;
         virtual std::unique_ptr<Torque> Clone() const = 0;
     };
 
@@ -50,19 +50,19 @@ namespace gam300
     {
     private:
         Vector3D unitAxis;   // must be unit
-        float    magnitude;  // N·m
+        float    magnitude;  // 
 
     public:
-        AngularDirectionalTorque(const Vector3D &axisUnit, float magnitude,
+        AngularDirectionalTorque(const Vector3D& axisUnit, float magnitude,
             unsigned mask, DURATION type);
 
         Vector3D GetUnitAxis() const;
-        void     SetUnitAxis(const Vector3D &axis);
+        void     SetUnitAxis(const Vector3D& axis);
 
         float    GetMagnitude() const;
         void     SetMagnitude(float value);
 
-        Vector3D CalculateTorque(const Vector3D &currentAngularVelocity) const override;
+        Vector3D CalculateTorque(const Vector3D& currentAngularVelocity) const override;
         std::unique_ptr<Torque> Clone() const override;
     };
 
@@ -84,7 +84,7 @@ namespace gam300
         void  SetDragY(float v);
         void  SetDragZ(float v);
 
-        Vector3D CalculateTorque(const Vector3D &currentAngularVelocity) const override;
+        Vector3D CalculateTorque(const Vector3D& currentAngularVelocity) const override;
         std::unique_ptr<Torque> Clone() const override;
     };
 
@@ -102,10 +102,10 @@ namespace gam300
         TorqueManager();
         ~TorqueManager() = default;
 
-        TorqueManager(const TorqueManager &other);
-        TorqueManager(TorqueManager &&other) noexcept;
-        TorqueManager &operator=(const TorqueManager &other);
-        TorqueManager &operator=(TorqueManager &&other) noexcept;
+        TorqueManager(const TorqueManager& other);
+        TorqueManager(TorqueManager&& other) noexcept;
+        TorqueManager& operator=(const TorqueManager& other);
+        TorqueManager& operator=(TorqueManager&& other) noexcept;
 
         template<typename T, typename... Args>
         void AddTorque(Args&&... args)
@@ -113,7 +113,7 @@ namespace gam300
             torques.push_back(std::make_unique<T>(std::forward<Args>(args)...));
         }
 
-        void   AddTorque(const Torque &t);
+        void   AddTorque(const Torque& t);
 
         size_t GetActiveTorqueCount() const;
         size_t GetTotalTorqueCount() const;
@@ -130,16 +130,18 @@ namespace gam300
         Vector3D GetTotalTorque() const;
 
         // angular velocity for drag-like torques
-        void          SetCurrentAngularVelocity(const Vector3D &w);
-        const Vector3D &GetCurrentAngularVelocity() const;
+        void          SetCurrentAngularVelocity(const Vector3D& w);
+        const Vector3D& GetCurrentAngularVelocity() const;
 
         // mask <-> name helpers
-        void        RegisterMaskName(unsigned mask, const std::string &name);
+        void        RegisterMaskName(unsigned mask, const std::string& name);
         bool        UnregisterMaskName(unsigned mask);
         std::string GetMaskName(unsigned mask) const;
-        unsigned    FindMaskByName(const std::string &name) const;
+        unsigned    FindMaskByName(const std::string& name) const;
         std::vector<std::pair<unsigned, std::string>> ListMaskNames() const;
-        Vector3D    CalculateTorqueByMaskName(const std::string &name) const;
+        Vector3D    CalculateTorqueByMaskName(const std::string& name) const;
+        const std::vector<std::unique_ptr<Torque>>& GetTorques() const;
+
     };
 }
 

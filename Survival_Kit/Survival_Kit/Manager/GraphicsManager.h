@@ -26,15 +26,18 @@
 
 // To support graphical operations
 #include "../Utility/Constant.h"
-#include "../Graphics/ShaderProgram.h"
-#include "../Graphics/Camera.h"
-#include "../Graphics/Light.h"
-#include "../Graphics/Shape.h"
+#include "../Graphics/Renderer.h"
 #include "../Graphics/Material.h"
 #include "../Graphics/Framebuffer.h" 
+#include "../Graphics/Texture.h"
+
 
 // For IMGUI operations
 #include "ImguiManager.h"
+
+// For Tracy operations
+#include "../Tracy/tracy/Tracy.hpp"
+#include "../Tracy/tracy/TracyOpenGL.hpp"
 
 // KENNY TESTING: For testing cursor input
 #include "InputManager.h"
@@ -69,6 +72,7 @@ namespace gam300 {
         std::vector<ShaderProgram> shadersStorage;
         std::vector<MeshGL>        meshStorage;
         std::vector<MeshData>      m_meshDataStorage;
+        std::vector<std::optional<Texture>>       m_textureStorage;
 
         // Storage for materials
         std::map<uint16_t, Material> m_material_storage;
@@ -84,7 +88,21 @@ namespace gam300 {
         std::optional<FrameBuffer> imgui_fbo; 
 
         // Mesh selection
-        int selected_mesh{ 0 };
+        int selected_texture{ 0 };
+
+        // Texture flag
+        bool textureMode = false;
+
+        // Render type
+        bool isPBR = false;
+
+        // Query Handles
+        GLuint gpuStartQueries[GPU_QUERY_COUNT]{};
+        GLuint gpuEndQueries[GPU_QUERY_COUNT]{};
+        int currentQueryIndex = 0;
+        bool m_queriesCreated = false;
+
+        Renderer m_renderer;
 
     public:
         /**
@@ -112,15 +130,29 @@ namespace gam300 {
         // To load all shader program at start up (the pair of 2 strings are the vertex and fragment shaders' filepath)
         bool loadShaderPrograms(std::vector<std::pair<std::string, std::string>> shaders);
 
-        GLuint getImguiTex() { return imguiTex; }
-        //GLuint getImguiFbo() { return imguiFbo; }
+        GLuint getImguiTex() const { return m_renderer.get_imgui_texture(); }
+
+        Renderer& getRenderer() { return m_renderer; }
 
         // Get materials storage
-        const std::map<uint16_t, Material>& getMaterialStorage() { return m_material_storage; }
+        const std::vector<Material>& getMaterialStorage() { return m_renderer.getMaterialStorage(); }
 
         // Get meshdata storage
-        const std::vector<MeshData>& getMeshDataStorage() { return m_meshDataStorage; }
+        const std::vector<MeshData>& getMeshDataStorage() { return m_renderer.getMeshDataStorage(); }
+
+        // Get texture storage
+        //const std::vector<std::optional<Texture>>& getTextureStorage() { return m_textureStorage; }
+        const std::vector<Texture>& getTextureStorage() { return m_renderer.getTextureStorage(); }
         
+        const size_t getMeshCount() const { return m_renderer.mesh_count(); }
+
+
+        std::string getMeshName(uint16_t handle) const;
+        Material* getMaterial(uint16_t handle);
+
+        std::string getMeshGUID(uint16_t handle) const;
+
+        void preShutdownGPU();
     };
 
 } // end of namespace gam300

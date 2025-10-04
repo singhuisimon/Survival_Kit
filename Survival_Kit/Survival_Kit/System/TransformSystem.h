@@ -19,7 +19,7 @@
 namespace gam300{
 
 	class TransformSystem : public ComponentSystem<Transform3D> {
-
+      
 	public:
         /**
          * @brief Constructor for TransformSystem.
@@ -49,6 +49,14 @@ namespace gam300{
          * @param entity_id The ID of the entity to process.
          */
         void process_entity(EntityID entity_id) override;
+
+    private:
+
+        /**
+         * @brief Propagate transformations from parent to children.
+         * @param root is the root transformation to propagate from.
+         */
+        void propagate(EntityID root);
 	};
 
 

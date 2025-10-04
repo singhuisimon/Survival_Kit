@@ -43,7 +43,7 @@ namespace gam300
 		bool     ValidateAge();
 		void     Update(double deltaTime);
 
-		virtual Vector3D CalculateForce(const Vector3D &currentVelocity) const = 0;
+		virtual Vector3D CalculateForce(const Vector3D& currentVelocity) const = 0;
 		virtual std::unique_ptr<Force> Clone() const = 0;
 	};
 
@@ -54,16 +54,16 @@ namespace gam300
 		float    magnitude;
 
 	public:
-		LinearDirectionalForce(const Vector3D &direction, float magnitude,
+		LinearDirectionalForce(const Vector3D& direction, float magnitude,
 			unsigned mask, DURATION type);
 
 		Vector3D GetUnitDirection() const;
-		void     SetUnitDirection(const Vector3D &direction);
+		void     SetUnitDirection(const Vector3D& direction);
 
 		float    GetMagnitude() const;
 		void     SetMagnitude(float value);
 
-		Vector3D CalculateForce(const Vector3D &currentVelocity) const override;
+		Vector3D CalculateForce(const Vector3D& currentVelocity) const override;
 		std::unique_ptr<Force> Clone() const override;
 	};
 
@@ -84,7 +84,7 @@ namespace gam300
 		// NOTE: original naming quirk kept: setter named like a getter.
 		void  GetVerticalDragCoefficient(float value);
 
-		Vector3D CalculateForce(const Vector3D &currentVelocity) const override;
+		Vector3D CalculateForce(const Vector3D& currentVelocity) const override;
 		std::unique_ptr<Force> Clone() const override;
 	};
 
@@ -102,10 +102,10 @@ namespace gam300
 		ForceManager();
 		~ForceManager() = default;
 
-		ForceManager(const ForceManager &other);
-		ForceManager(ForceManager &&other) noexcept;
-		ForceManager &operator=(const ForceManager &other);
-		ForceManager &operator=(ForceManager &&other) noexcept;
+		ForceManager(const ForceManager& other);
+		ForceManager(ForceManager&& other) noexcept;
+		ForceManager& operator=(const ForceManager& other);
+		ForceManager& operator=(ForceManager&& other) noexcept;
 
 		template<typename T, typename... Args>
 		void AddForce(Args&&... args)
@@ -114,7 +114,7 @@ namespace gam300
 		}
 
 		// clone and add
-		void   AddForce(const Force &force);
+		void   AddForce(const Force& force);
 
 		size_t GetActiveForceCount() const;
 		size_t GetTotalForceCount() const;
@@ -131,22 +131,23 @@ namespace gam300
 		Vector3D GetTotalForce() const;
 
 		// velocity source for drag, etc.
-		void    SetCurrentVelocity(const Vector3D &velocity);
-		const   Vector3D &GetCurrentVelocity() const;
+		void    SetCurrentVelocity(const Vector3D& velocity);
+		Vector3D const& GetCurrentVelocity() const;
 
 		// Registers/overwrites the display name for a mask
-		void        RegisterMaskName(unsigned mask, const std::string &name);
+		void        RegisterMaskName(unsigned mask, const std::string& name);
 		// Removes mask<->name mapping (both directions)
 		bool        UnregisterMaskName(unsigned mask);
 		// Fetch name for a mask (returns empty string if none)
 		std::string GetMaskName(unsigned mask) const;
 		// Find a mask by name (returns 0 if not found)
-		unsigned    FindMaskByName(const std::string &name) const;
+		unsigned    FindMaskByName(const std::string& name) const;
 		// List all pairs
 		std::vector<std::pair<unsigned, std::string>> ListMaskNames() const;
 
 		// Convenience: compute using a registered mask name (0 => no-op)
-		Vector3D    CalculateForceByMaskName(const std::string &name) const;
+		Vector3D    CalculateForceByMaskName(const std::string& name) const;
+		std::vector<std::unique_ptr<Force>> const& GetForces() const;
 	};
 }
 

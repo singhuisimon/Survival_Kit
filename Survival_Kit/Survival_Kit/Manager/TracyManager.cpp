@@ -42,6 +42,9 @@ namespace gam300 {
     }
 
     void TracyManager::launchTracy() {
+#ifndef TRACY_ENABLE
+        return;
+#else
         // Check if already running
         if (m_running && m_processHandle) {
             DWORD exitCode = 0;
@@ -64,7 +67,7 @@ namespace gam300 {
         PROCESS_INFORMATION pi;
 
         // Auto-connect to localhost game
-        std::string args = "\"" + m_tracyPath + "\" -a 127.0.0.1";
+        std::string args = "\"" + m_tracyPath + "\" -a 127.0.0.1 -capture";
 
         if (CreateProcessA(
             nullptr, (LPSTR)args.c_str(),
@@ -77,6 +80,7 @@ namespace gam300 {
             m_processHandle = pi.hProcess;
             m_running = true;
         }
+#endif
     }
 
     void TracyManager::update() {

@@ -72,18 +72,18 @@ namespace gam300 {
 			};
 
 			m.indices = {
-				// right (0..3) X+
-				0,1,2,  0,2,3,
-				// left (4..7) X-
-				4,5,6,  4,6,7,
-				// top (8..11) Y+
-				8,9,10,  8,10,11,
-				// bottom (12..15) Y-
-				12,13,14,  12,14,15,
-				// front (16..19) Z+
-				16,17,18,  16,18,19,
-				// back (20..23) Z- (note the swap to keep CCW from *outside*)
-				20,21,22,  20,22,23
+				// +X face
+				0, 2, 1,  0, 3, 2,
+				// -X face
+				4, 6, 5,  4, 7, 6,
+				// +Y face
+				8, 10, 9,  8, 11, 10,
+				// -Y face
+				12, 14, 13,  12, 15, 14,
+				// +Z face
+				16, 18, 17,  16, 19, 18,
+				// -Z face
+				20, 22, 21,  20, 23, 22,
 			};
 
 			return m;
@@ -122,8 +122,8 @@ namespace gam300 {
 			};
 
 			m.indices = {
-				0, 1, 2,
-				0, 2, 3
+				0, 2, 1,
+				0, 3, 2
 			};
 
 			return m;
@@ -221,18 +221,28 @@ namespace gam300 {
 			GLsizeiptr position_attribute_size = sizeof(glm::vec3);
 			GLsizeiptr position_data_size = position_attribute_size * static_cast<GLsizeiptr>(mesh.positions.size());
 
-			GLsizeiptr color_data_offset = position_data_size;
-			GLsizeiptr color_attribute_size = sizeof(glm::vec3);
-			GLsizeiptr color_data_size = color_attribute_size * static_cast<GLsizeiptr>(mesh.normals.size());
+			GLsizeiptr normal_data_offset = position_data_size;
+			GLsizeiptr normal_attribute_size = sizeof(glm::vec3);
+			GLsizeiptr normal_data_size = normal_attribute_size * static_cast<GLsizeiptr>(mesh.normals.size());
 
-			GLsizeiptr buffer_size = position_data_size + color_data_size;
+			GLsizeiptr color_data_offset = position_data_size + normal_data_size;
+			GLsizeiptr color_attribute_size = sizeof(glm::vec3);
+			GLsizeiptr color_data_size = color_attribute_size * static_cast<GLsizeiptr>(mesh.colors.size());
+
+			GLsizeiptr texcoords_data_offset = position_data_size + normal_data_size + color_data_size;
+			GLsizeiptr texcoords_attribute_size = sizeof(glm::vec2);
+			GLsizeiptr texcoords_data_size = texcoords_attribute_size * static_cast<GLsizeiptr>(mesh.texcoords.size());
+
+			GLsizeiptr buffer_size = position_data_size + normal_data_size + color_data_size + texcoords_data_size;
 
 			// Wrapper for named buffer storage
 			mgl.vbo.storage(buffer_size, nullptr, GL_DYNAMIC_STORAGE_BIT);
 
 			// Load data into sub buffer		
 			mgl.vbo.sub_data(position_data_offset, position_data_size, mesh.positions.data());
-			mgl.vbo.sub_data(color_data_offset, color_data_size, mesh.normals.data());
+			mgl.vbo.sub_data(normal_data_offset, normal_data_size, mesh.normals.data());
+			mgl.vbo.sub_data(color_data_offset, color_data_size, mesh.colors.data());
+			mgl.vbo.sub_data(texcoords_data_offset, texcoords_data_size, mesh.texcoords.data());
 
 			// Set up the VAO
 			mgl.vao.create();
@@ -243,11 +253,23 @@ namespace gam300 {
 			mgl.vao.attrib_format(0, 3, GL_FLOAT, false, 0);
 			mgl.vao.attrib_binding(0, 0);
 
-			// Bind the vertex array for the colors
+			// Bind the vertex array for the normals
 			mgl.vao.enable_attrib(1);
-			mgl.vao.bind_vertex_buffer(1, mgl.vbo, color_data_offset, color_attribute_size);
+			mgl.vao.bind_vertex_buffer(1, mgl.vbo, normal_data_offset, normal_attribute_size);
 			mgl.vao.attrib_format(1, 3, GL_FLOAT, false, 0);
 			mgl.vao.attrib_binding(1, 1);
+
+			// Bind the vertex array for the colors
+			mgl.vao.enable_attrib(2);
+			mgl.vao.bind_vertex_buffer(2, mgl.vbo, color_data_offset, color_attribute_size);
+			mgl.vao.attrib_format(2, 3, GL_FLOAT, false, 0);
+			mgl.vao.attrib_binding(2, 2);
+
+			// Bind the vertex array for the texcoords
+			mgl.vao.enable_attrib(3);
+			mgl.vao.bind_vertex_buffer(3, mgl.vbo, texcoords_data_offset, texcoords_attribute_size);
+			mgl.vao.attrib_format(3, 2, GL_FLOAT, false, 0);
+			mgl.vao.attrib_binding(3, 3);
 
 			// Create an element buffer object to transfer topology
 			mgl.ebo.create();

@@ -25,18 +25,24 @@
 #include "../Component/Bullet.h"
 #include "../Component/Script.h"
 #include "../Component/MeshComponent.h"
+#include "../Component/TextureComponent.h"
 
 // Include system headers
 #include "../System/MovementSystem.h"
 #include "../System/PhysicsSystem.h"
+#include "../System/RenderSystem.h"
+#include "../Component/RigidBody.h"
 #include "../System/BulletSystem.h"
 #include "../System/CollisionSystem.h"
+#include "../System/TransformSystem.h"
+#include "../System/AudioSystem.h"
 
 // Include Utility headers
 #include "../Utility/Clock.h"
 #include "../Utility/AssetPath.h"
 
-
+// Include Tracy headers
+#include "../Tracy/tracy/Tracy.hpp"
 
 namespace gam300 {
 
@@ -132,7 +138,10 @@ namespace gam300 {
         LM.writeLog("GameManager::startUp() - Collider component started successfully");
 
 		CM.register_component<AudioComponent>();
-		LM.writeLog("GameManager::startUp() - AudioComponent component registered successfully");
+		logManager.writeLog("GameManager::startUp() - AudioComponent component registered successfully");
+
+        CM.register_component<RenderComponent>();
+        logManager.writeLog("GameManager::startUp() - RenderComponent component registered successfully");
 
 		CM.register_component<Bullet>();
 		LM.writeLog("GameManager::startUp() - Bullet component registered successfully");
@@ -143,9 +152,13 @@ namespace gam300 {
         CM.register_component<MeshComponent>();
         LM.writeLog("GameManager::startUp() - Mesh component registered successfully");
 
+        CM.register_component<TextureComponent>();
+        LM.writeLog("GameManager::startUp() - Texture componennt registered successfully");
+
         // Check the scene path
         const std::string scenePath = getAssetFilePath("Scene/Game.scn");
         LM.writeLog("GameManager::startUp() - Attempting to load scene from '%s'", scenePath.c_str());
+
 
 
 		// Register the Systems with the ECSManager
@@ -153,6 +166,9 @@ namespace gam300 {
         SM.register_system<PhysicsSystem>();
         SM.register_system<CollisionSystem>();
 		SM.register_system<BulletSystem>();
+        SM.register_system<RenderSystem>();
+        SM.register_system<TransformSystem>();
+        SM.register_system<AudioSystem>();
 
         // Initialize step count
         m_step_count = 0;
@@ -192,6 +208,9 @@ namespace gam300 {
 
     // Update the game state for the current frame
     void GameManager::update(float dt) {
+
+        ZoneScoped;
+
         // Increment step count
         m_step_count++;
 

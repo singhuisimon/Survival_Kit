@@ -1,7 +1,7 @@
 /******************************************************************************/
 /*!
 \file       MovementSystem.cpp
-\author     (you)
+\author     Low Yue Jun (yuejun.low)
 \date       Oct 03 2025
 \brief      Applies direct transform edits for static bodies, and stacks
 		   persistent forces for dynamic bodies via RigidBody's ForceManager.

@@ -27,6 +27,8 @@ namespace gam300 {
 		static std::optional<Texture> load_from_file(const std::filesystem::path& path,
 													 const TextureDesc& desc);
 
+		static std::optional<Texture> alloc_storage_on_gpu(const int w, const int h);
+
 		Texture(Texture&& other) noexcept { move_from(other); }
 		Texture& operator=(Texture&& other) noexcept {
 			if (this != &other) { destroy(); move_from(other); }
@@ -63,6 +65,7 @@ namespace gam300 {
 			if (m_handle != kInvalid) { destroy_gpu_texture(m_handle); m_handle = kInvalid; }
 			m_width = m_height = m_mip_levels = 0; m_srgb = false;
 		}
+
 		void move_from(Texture& o) noexcept {
 			m_handle = o.m_handle; m_width = o.m_width; m_height = o.m_height;
 			m_mip_levels = o.m_mip_levels; m_srgb = o.m_srgb;

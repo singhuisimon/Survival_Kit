@@ -35,6 +35,7 @@
 
 //for Asset showcases
 #include "../Pipeline/AssetDatabase.h"
+#include "../Pipeline/DescriptorEditor.h"
 #include "AssetManager.h"
 
 
@@ -67,21 +68,23 @@ namespace gam300
 
 		bool fileWindow = false;
 		std::string shownFile{};
-		char saveAsDefaultName[128];
+		char saveAsDefaultName[128] = {};
 		bool showSaveAsPanel = false;
 		int selectedAssetIndex = -1;
 		bool showPrefabPanel = false;
-
-		const std::string BASE_ASSETS_PATH = std::filesystem::current_path().string() + "\\Assets\\";
+		bool showReplacePrefab = false;
 
 		//for Asset Browser functionality
 		void refreshAssetList();
 		const char* getAssetTypeName(AssetType type);
-		const char* getAssetIcon(AssetType type);
 		void initializeAssetBrowser();
 
-		// TEMPORARY CODE FOR NOW TO TEST FOR PERFORMANCE VIEWER FOR FPS 
-		//for performance monitoring
+		// Add descriptor editor
+		DescriptorEditor* m_descriptorEditor;
+		EditableDescriptor m_currentDescriptor;
+		bool m_showDescriptorPanel = false;
+
+		// performance profile 
 		float lastReceivedFPS = 0.0f;
 		static const int FPS_HISTORY_SIZE = 90;  //store up to 90 frames
 		float fpsHistory[FPS_HISTORY_SIZE] = {};
@@ -93,7 +96,6 @@ namespace gam300
 		float maxFPS = 0.0f;
 		float minFrameTime = FLT_MAX;
 		float maxFrameTime = 0.0f;
-		
 
 	public:
 
@@ -115,7 +117,7 @@ namespace gam300
 
 		//void displayTopMenuBar();
 
-		void displayFileList(bool& fileWindow, std::string& shownFile);
+		void displayFileList();
 		//void displayFileList();
 
 		void displayHierarchyList();
@@ -126,15 +128,16 @@ namespace gam300
 
 		void displayTopMenu();
 
-		void showPrefabsPanel(EntityID selectedEntity);
+		/*void showPrefabsPanel(EntityID selectedEntity);*/
 
 		void finishImguiRender(ImGuiIO& imgui_io);
 
-		void handleViewPortClick(ImVec2 mousePos, ImVec2 viewportSize);
+		void handleViewPortClick(ImVec2 mousePos);
 
-		void displayAssetEditor(const std::filesystem::directory_entry& assetFilepath);
-
+		void displayAssetEditor();
 		void displayPrefabEditor(const std::filesystem::directory_entry& prefabFilepath);
+
+		
 
 
 		//EntityID pickEntityFromViewport(ImVec2 mouseViewportPos, ImVec2 viewportSize, Camera3D& camera);
@@ -145,7 +148,7 @@ namespace gam300
 		Vector2D getWindowSize(GLFWwindow& window);
 
 		// to retuen the width and height for imguiTex and imguiFbo
-		Vector2D getWindowWidthHeight() { return Vector2D(width, height); }
+		Vector2D getWindowWidthHeight() { return Vector2D(static_cast<float>(width), static_cast<float>(height)); }
 
 		void displayPerformanceProfile();
 
@@ -161,7 +164,9 @@ namespace gam300
 
 		void rescanAssets();
 
+		// for the performance view part
 		void updateFPS(float fps);
+
 
 	};
 

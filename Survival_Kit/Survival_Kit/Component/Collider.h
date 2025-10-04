@@ -1,7 +1,7 @@
 /******************************************************************************/
 /*!
 \file       Collider.h
-\author     (you)
+\author     Low Yue Jun (yuejun.low)
 \date       Oct 03 2025
 \brief      Collider component that supports an AABB shape (minimal).
 			World AABB is built off Transform3D (position + local offset).

@@ -15,6 +15,8 @@
 #include <glm-0.9.9.8/glm/gtc/quaternion.hpp>
 #include <glm-0.9.9.8/glm/gtx/quaternion.hpp>
 #include "../Component/Transform3D.h"
+#include "../Graphics/Texture.h"
+
 #include "../Component/MeshComponent.h"
 
 namespace gam300 {
@@ -45,6 +47,20 @@ namespace gam300 {
         else {
             LM.writeLog("GraphicsManager::startUp(): GLAD initialized successfully.");
         }
+
+        m_renderer.setup();
+
+        TracyGpuContext; //creates the GPU timeline in Tracy
+
+        glGenQueries(GPU_QUERY_COUNT, gpuStartQueries);
+        glGenQueries(GPU_QUERY_COUNT, gpuEndQueries);
+        m_queriesCreated = true;
+
+#if 0
+        TracyGpuContext; //creates the GPU timeline in Tracy
+
+        glGenQueries(GPU_QUERY_COUNT, gpuStartQueries);
+        glGenQueries(GPU_QUERY_COUNT, gpuEndQueries);
 
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         
@@ -84,32 +100,39 @@ namespace gam300 {
             LM.writeLog("GraphicsManager::startUp(): Succesfully added shader programs.");
         }
 
+        // Temporarily load textures 
+        auto mouse_tex = Texture::load_from_file(getAssetFilePath("Textures/mouse_kenny.png"), TextureDesc(false, false, true));
+        if (mouse_tex->valid()) {
+            std::cout << "Mouse tex handle is " << mouse_tex->handle() << std::endl;
+            m_textureStorage.push_back(std::move(mouse_tex));
+        }
+
+        auto rabbit_tex = Texture::load_from_file(getAssetFilePath("Textures/rabbit_kenny.png"), TextureDesc(false, false, true));
+        if (rabbit_tex->valid()) {
+            std::cout << "Rabbit tex handle is " << rabbit_tex->handle() << std::endl;
+            m_textureStorage.push_back(std::move(rabbit_tex));
+        }
+
+        auto squirrel_tex = Texture::load_from_file(getAssetFilePath("Textures/squirrel_kenny.png"), TextureDesc(false, false, true));
+        if (squirrel_tex->valid()) { 
+            std::cout << "Squirrel tex handle is " << squirrel_tex->handle() << std::endl; 
+            m_textureStorage.push_back(std::move(squirrel_tex));
+        }
+
         // Set camera as orbiting
         main_camera = Camera3D(ORBITING, glm::vec3(0.0f, 5.0f, 10.0f), glm::vec3(0.f, 0.f, 0.0f), 45.0f, 0.5f, 100.0f);
 
-
         // Set light
         main_light = Light(glm::vec3(0.0f, 5.0f, 0.0f),
-            glm::vec3(0.4f, 0.4f, 0.4f),
-            glm::vec3(1.0f, 1.0f, 1.0f),
-            glm::vec3(1.0f, 1.0f, 1.0f));
+                     glm::vec3(0.4f, 0.4f, 0.4f),
+                     glm::vec3(1.0f, 1.0f, 1.0f),
+                     glm::vec3(1.0f, 1.0f, 1.0f));
 
         // Temporarily load materials manually here
         Material mat1 = Material(glm::vec3(0.3f, 0.5f, 0.9f), glm::vec3(0.3f, 0.5f, 0.9f), glm::vec3(0.8f, 0.8f, 0.8f), 100.0f);
         Material mat2 = Material(glm::vec3(0.9f, 0.5f, 0.3f), glm::vec3(0.9f, 0.5f, 0.3f), glm::vec3(0.8f, 0.8f, 0.8f), 100.0f);
         m_material_storage.emplace(m_material_storage.size(), mat1);
         m_material_storage.emplace(m_material_storage.size(), mat2);
-
-        //// File path for assets
-        //std::string mesh_path = ASM.get_full_path(ASM.MODEL_PATH, DEFAULT_MODEL_MSH_FILE);
-        //std::string animation_path = ASM.get_full_path(ASM.TEXTURE_PATH, DEFAULT_ATLAS_FILE);
-        //std::string font_path = ASM.get_full_path(ASM.FONT_PATH, DEFAULT_FONTS_FILE);
-
-        // Add models
-
-        // Add animations
-
-        // Add fonts
 
         // Creating framebuffer object for IMGUI viewport
         auto temp_fbo = FrameBuffer::create();
@@ -163,6 +186,7 @@ namespace gam300 {
         meshStorage.push_back(std::move(planeGL));
         meshStorage.push_back(std::move(sphereGL));
 
+#endif
 
         // Log startup
         LM.writeLog("GraphicsManager::startUp() - Graphics Manager started successfully");
@@ -174,12 +198,6 @@ namespace gam300 {
         // Log shutdown
         LM.writeLog("GraphicsManager::shutDown() - Shutting down Graphics Manager");
 
-        // Reset/Clear anything if needed
-
-        //// Clear stored states
-        //m_key_states.clear();
-        //m_prev_key_states.clear();
-
         // Call parent's shutDown()
         Manager::shutDown();
     }
@@ -187,16 +205,40 @@ namespace gam300 {
     // Update input states, should be called once per frame
     void GraphicsManager::update() {
 
-        // update loop 
-        /*
-        to include:
-        -
-        -
-        -
-        -
-        -
-        */
+        ZoneScopedN("GraphicsManager::update"); // CPU zone for entire update
+        TracyGpuZone("FrameRender");            // GPU zone for frame
 
+        int q = currentQueryIndex;
+
+        glQueryCounter(gpuStartQueries[q], GL_TIMESTAMP);
+
+        // === Main Rendering Pass ===
+        auto& renderer = getRenderer();
+
+        glQueryCounter(gpuEndQueries[q], GL_TIMESTAMP);
+        TracyGpuCollect; // flush GPU timeline to Tracy
+
+        // Calculate GPU frame time
+        int prev = (q + 1) % GPU_QUERY_COUNT;
+        GLint available = 0;
+        glGetQueryObjectiv(gpuEndQueries[prev], GL_QUERY_RESULT_AVAILABLE, &available);
+        if (available) {
+            GLuint64 startTime = 0, endTime = 0;
+            glGetQueryObjectui64v(gpuStartQueries[prev], GL_QUERY_RESULT, &startTime);
+            glGetQueryObjectui64v(gpuEndQueries[prev], GL_QUERY_RESULT, &endTime);
+            double gpuTimeMs = (endTime - startTime) / 1e6; // convert ns - ms
+            TracyPlot("GPU Frame Time (ms)", (float)gpuTimeMs);
+        }
+
+        currentQueryIndex = (currentQueryIndex + 1) % GPU_QUERY_COUNT;
+#if 0
+        ZoneScopedN("GraphicsManager::update");  //CPU zone
+        TracyGpuZone("FrameRender");             // GPU Zone (entire frame)
+
+        int q = currentQueryIndex;
+
+        // Start GPU timer
+        glQueryCounter(gpuStartQueries[q], GL_TIMESTAMP);
         // Temporary input for cursor to move camera
         if (IM.isKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
 
@@ -214,8 +256,14 @@ namespace gam300 {
                         &shadersStorage[0]);
                 }
             }
-        }
 
+            // Gather input for scrolling
+            double scrollY_offset = IM.getScrollY();
+            if (scrollY_offset != 0) {
+
+                main_camera.cameraOnScroll(IM.getScrollY(), &shadersStorage[0]);
+            }
+        }
 
         // KEYBOARD: Camera control with arrow keys
         float keyboardSensitivity = 8.0f; // Adjust this value for keyboard speed
@@ -245,47 +293,89 @@ namespace gam300 {
             main_camera.cameraOnCursor(keyDeltaX, keyDeltaY, &shadersStorage[0]);
         }
 
-        // Set up shader program
-        shadersStorage[0].programUse();
+        {
+            TracyGpuZone("Camera + Light Setup");
 
-        // Temporary transformations for camera
-        //shadersStorage[0].setUniform("M", transform.getTransformationMatrix()); // Model transform
-        shadersStorage[0].setUniform("V", main_camera.getLookAt()); // View transform
-        shadersStorage[0].setUniform("P", main_camera.getPerspective()); // Perspective transform
+            // Set up shader program
+            shadersStorage[0].programUse();
 
-        // Set uniform to shader after update light values
-        shadersStorage[0].setUniform("light.position", main_light.getLightPos());  // Position
-        shadersStorage[0].setUniform("light.La", main_light.getLightAmbient());        // Ambient
-        shadersStorage[0].setUniform("light.Ld", main_light.getLightDiffuse());        // Diffuse
-        shadersStorage[0].setUniform("light.Ls", main_light.getLightSpecular());        // Specular
+            // Temporary transformations for camera
+            //shadersStorage[0].setUniform("M", transform.getTransformationMatrix()); // Model transform
+            shadersStorage[0].setUniform("V", main_camera.getLookAt()); // View transform
+            shadersStorage[0].setUniform("P", main_camera.getPerspective()); // Perspective transform
 
+            // Set uniform to shader after update light values
+            shadersStorage[0].setUniform("light.position", main_light.getLightPos());       // Position
+            shadersStorage[0].setUniform("light.La", main_light.getLightAmbient());         // Ambient
+            shadersStorage[0].setUniform("light.Ld", main_light.getLightDiffuse());         // Diffuse
+            shadersStorage[0].setUniform("light.Ls", main_light.getLightSpecular());        // Specular
+        }
         //Temporary input for light cursor
         if (IM.isKeyPressed(GLFW_KEY_L)) {
             //std::cout << IM.getMouseDeltaX() << std::endl;
-            main_light.lightOnCursor(IM.getMouseDeltaX(), IM.getMouseDeltaY(), &shadersStorage[0]);
+            if (IM.isMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT)) {
+                main_light.lightOnCursor(IM.getMouseDeltaX(), IM.getMouseDeltaY(), &shadersStorage[0]);
+            }
         }
 
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LESS); // Default comparison
-        glClearDepth(1.0f);
-        
+        {
+            TracyGpuZone("Frame Setup");
+            glEnable(GL_DEPTH_TEST);
+            glDepthFunc(GL_LESS); // Default comparison
+            glClearDepth(1.0f);
 
-        // Bind framebuffer object for IMGUI viewport
-        glBindFramebuffer(GL_FRAMEBUFFER, imgui_fbo->handle());
+            // Bind framebuffer object for IMGUI viewport
+            glBindFramebuffer(GL_FRAMEBUFFER, imgui_fbo->handle());
 
-        // Clear the color and depth buffer
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
+        }
 
-        //// Enable choosing of mesh
-        //if (IM.isKeyPressed(GLFW_KEY_1)) {
-        //    selected_mesh = 0;
-        //}
-        //if (IM.isKeyPressed(GLFW_KEY_2)) {
-        //    selected_mesh = 1;
-        //}
-        //if (IM.isKeyPressed(GLFW_KEY_3)) {
-        //    selected_mesh = 2;
-        //}
+        {
+
+            TracyGpuZone("Clear Buffers");
+            // Clear the color and depth buffer
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        }
+
+        // Enable choosing of mesh
+        if (IM.isKeyPressed(GLFW_KEY_1)) {
+            selected_texture = 0;
+        }
+        if (IM.isKeyPressed(GLFW_KEY_2)) {
+            selected_texture = 1;
+        }
+        if (IM.isKeyPressed(GLFW_KEY_3)) {
+            selected_texture = 2;
+        }
+
+        // Testing texture
+        if (IM.isKeyPressed(GLFW_KEY_9)) {
+            textureMode = false;
+        } 
+        if (IM.isKeyPressed(GLFW_KEY_0)) {
+            textureMode = true;
+        }
+        if (textureMode) {
+            glBindTextureUnit(0, m_textureStorage[selected_texture]->handle());
+            shadersStorage[0].setUniform("Texture2D", 0);
+            shadersStorage[0].setUniform("isTexture", true);
+        }
+        else {
+            shadersStorage[0].setUniform("isTexture", false);
+        }
+
+        // Choosing BlinnPhong or PBR
+        if (IM.isKeyPressed(GLFW_KEY_B)) {
+            isPBR = false;
+        }
+        if (IM.isKeyPressed(GLFW_KEY_N)) {
+            isPBR = true;
+        }
+        if (isPBR) {
+            shadersStorage[0].setUniform("isPBR", true);
+        }
+        else {
+            shadersStorage[0].setUniform("isPBR", false);
+        }
 
         // Default mesh and material handle
         uint16_t mesh_handle = 0;
@@ -294,6 +384,8 @@ namespace gam300 {
         // KENNY TESTING: ACCESSING ENTITIES AND UPDATING THEIR TRANSFORMS PER FRAME     
         const auto transform_entities_IDs = EM.getEntitiesWithComponent<Transform3D>();
         for (const auto entity_id : transform_entities_IDs) {
+
+            TracyGpuZone("Draw Entity");
 
             // Get entity's transform component using ID
             if (EM.hasComponent<Transform3D>(entity_id)) { // Extra check just in case 
@@ -339,6 +431,29 @@ namespace gam300 {
 
         // Unbind framebuffer object
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        // End GPU timer
+        glQueryCounter(gpuEndQueries[q], GL_TIMESTAMP);
+
+        TracyGpuCollect; // <-- flush GPU timeline to Tracy
+
+        // == Custom GPU frame time plot ==
+        int prev = (q + 1) % GPU_QUERY_COUNT;
+        GLint available = 0;
+        glGetQueryObjectiv(gpuEndQueries[prev], GL_QUERY_RESULT_AVAILABLE, &available);
+        if (available) {
+            GLuint64 startTime = 0, endTime = 0;
+            glGetQueryObjectui64v(gpuStartQueries[prev], GL_QUERY_RESULT, &startTime);
+            glGetQueryObjectui64v(gpuEndQueries[prev], GL_QUERY_RESULT, &endTime);
+
+            double gpuTimeMs = (endTime - startTime) / 1e6; // ns ? ms
+            TracyPlot("GPU Frame Time (ms)", (float)gpuTimeMs);
+        }
+
+        // Move to next slot
+        currentQueryIndex = (currentQueryIndex + 1) % GPU_QUERY_COUNT;
+#endif
+
     }
 
     bool GraphicsManager::loadShaderPrograms(std::vector<std::pair<std::string, std::string>> shaders) {
@@ -367,5 +482,71 @@ namespace gam300 {
         return true;
     }
 
+    std::string GraphicsManager::getMeshName(uint16_t handle) const
+    {
+        if (handle == 0) {
+            return "Cube";
+        }
+        else if (handle == 1) {
+            return "Plane";
+        }
+        else if (handle == 2) {
+            return "Sphere";
+        }
+        else if (handle < meshStorage.size()) {
+            // For any future custom meshes loaded beyond the built-in 3
+            return "Custom Mesh " + std::to_string(handle);
+        }
+        else {
+            // Invalid handle
+            return "Invalid Mesh";
+        }
+    }
+    Material* GraphicsManager::getMaterial(uint16_t handle)
+    {
+        auto it = m_material_storage.find(handle);
+        if (it != m_material_storage.end()) {
+            return const_cast<Material*>(&it->second);
+        }
+        return nullptr;
+    }
+
+    std::string GraphicsManager::getMeshGUID(uint16_t handle) const
+    {
+        if (handle == 0)
+        {
+            return "builtin:cube";
+        }
+        else if (handle == 1)
+        {
+            return "builtin:plane";
+        }
+        else if (handle == 2)
+        {
+            return "builtin:sphere";
+        }
+        else if (handle < meshStorage.size()) {
+            
+            return "custom:mesh_" + std::to_string(handle);
+        }
+        else {
+            return "";  // Invalid
+        }
+    }
+
+    void GraphicsManager::preShutdownGPU() {
+        if (glfwGetCurrentContext() && m_queriesCreated)
+        {
+            LM.writeLog("GraphicsManager::preShutdownGPU() - Releasing GPU queries before GLFW termination.");
+            glDeleteQueries(GPU_QUERY_COUNT, gpuStartQueries);
+            glDeleteQueries(GPU_QUERY_COUNT, gpuEndQueries);
+            m_queriesCreated = false;
+        }
+        else
+        {
+            LM.writeLog("GraphicsManager::preShutdownGPU() - No context or queries to delete.");
+        }
+    }
+ 
 
 } // end of namespace gam300
