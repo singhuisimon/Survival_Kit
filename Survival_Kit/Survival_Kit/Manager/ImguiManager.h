@@ -72,6 +72,7 @@ namespace gam300
 		bool showSaveAsPanel = false;
 		int selectedAssetIndex = -1;
 		bool showPrefabPanel = false;
+		bool showReplacePrefab = false;
 
 		//for Asset Browser functionality
 		void refreshAssetList();
@@ -137,6 +138,8 @@ namespace gam300
 
 		void displayAssetEditor();
 		void displayPrefabEditor(const std::filesystem::directory_entry& prefabFilepath);
+
+		
 
 
 		//EntityID pickEntityFromViewport(ImVec2 mouseViewportPos, ImVec2 viewportSize, Camera3D& camera);
