@@ -1933,6 +1933,11 @@ namespace gam300 {
 
         if (ImGui::Begin("Performance Profile", &hierachyWindow, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize))
         {
+
+#ifndef TRACY_ENABLE
+
+            ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Tracy not available in Release");
+#else
             if (ImGui::Button("Launch Tracy Window"))
             {
                 if (!TRACY.isRunning())
@@ -1943,6 +1948,7 @@ namespace gam300 {
             }
 
             TRACY.update();
+#endif
             ImGui::Separator();
 
             // Use FPS calculated in Main.cpp for consistency
