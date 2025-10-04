@@ -77,7 +77,6 @@ namespace gam300
 		//for Asset Browser functionality
 		void refreshAssetList();
 		const char* getAssetTypeName(AssetType type);
-		const char* getAssetIcon(AssetType type);
 		void initializeAssetBrowser();
 
 		// Add descriptor editor
