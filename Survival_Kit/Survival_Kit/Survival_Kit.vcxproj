@@ -320,7 +320,7 @@
     <PostBuildEvent>
       <Command>if not exist "$(OutDir)assets" mkdir "$(OutDir)assets"
 xcopy "$(ProjectDir)assets\*" "$(OutDir)assets\" /E /I /Y /Q
-
+xcopy /y /d "$(SolutionDir)External_Libraries\bin\FMOD\*.dll" "$(OutDir)"
 if exist "$(SolutionDir)..\tracy-profiler.exe" (
     copy /Y "$(SolutionDir)..\tracy-profiler.exe" "$(OutDir)"
 )</Command>
@@ -348,7 +348,7 @@ if exist "$(SolutionDir)..\tracy-profiler.exe" (
     <PostBuildEvent>
       <Command>if not exist "$(OutDir)assets" mkdir "$(OutDir)assets"
 xcopy "$(ProjectDir)assets\*" "$(OutDir)assets\" /E /I /Y /Q
-
+xcopy /y /d "$(SolutionDir)External_Libraries\bin\FMOD\*.dll" "$(OutDir)"
 if exist "$(SolutionDir)..\tracy-profiler.exe" (
     copy /Y "$(SolutionDir)..\tracy-profiler.exe" "$(OutDir)"
 )</Command>
