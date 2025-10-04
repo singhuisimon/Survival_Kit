@@ -79,6 +79,8 @@ namespace gam300 {
 		int  selected_texture = 0;
 		bool textureMode = false;
 		bool isPBR = false;
+		bool isDebug = false;
+		bool isGamma = false;
 	}
 
 	inline void test_poll() {
@@ -96,7 +98,7 @@ namespace gam300 {
 			selected_texture = 2;
 		}
 
-		// Testing texture
+		// Toggle texture mode (9 is off, 0 is on)
 		if (IM.isKeyPressed(GLFW_KEY_9)) {
 			textureMode = false;
 		}
@@ -104,12 +106,20 @@ namespace gam300 {
 			textureMode = true;
 		}
 
-		// Choosing BlinnPhong or PBR
+		// Choosing BlinnPhong or PBR (B is BlinnPhong, N is PBR)
 		if (IM.isKeyPressed(GLFW_KEY_B)) {
 			isPBR = false;
 		}
 		if (IM.isKeyPressed(GLFW_KEY_N)) {
 			isPBR = true;
+		}
+
+		// Toggle Debug mode (H is off, J is on)
+		if (IM.isKeyPressed(GLFW_KEY_H)) {
+			isDebug = false;
+		}
+		if (IM.isKeyPressed(GLFW_KEY_J)) {
+			isDebug = true;
 		}
 
 	}
@@ -190,6 +200,9 @@ namespace gam300 {
 
 #pragma endregion
 
+		if (isDebug) {
+
+		}
 
 		RenderPass debug_pass
 		{
@@ -207,6 +220,7 @@ namespace gam300 {
 
 #pragma region TEXTURE_LOAD_TEMP
 		{
+
 			// Temporarily load textures 
 			auto mouse_tex = Texture::load_from_file(getAssetFilePath("Textures/mouse_kenny.png"), TextureDesc(false, false, true));
 			if (mouse_tex->valid()) {
@@ -304,6 +318,8 @@ namespace gam300 {
 
 		for (const auto& pass : m_passes) {
 
+			if (!isDebug && (pass.passtype == PassType::DEBUG)) { continue; }
+
 			TracyGpuZone("RenderPass");
 
 			beginFrame(pass);
@@ -371,6 +387,14 @@ namespace gam300 {
 			glBindTextureUnit(0, t_testing_textures[selected_texture].handle());
 			prog.setUniform("Texture2D", 0);
 			prog.setUniform("isTexture", true);
+
+			if (t_testing_textures[selected_texture].is_srgb()) {
+				prog.setUniform("isGamma", true);
+			}
+			else {
+				prog.setUniform("isGamma", false);
+			}
+			
 		}
 		else {
 			prog.setUniform("isTexture", false);
@@ -382,6 +406,7 @@ namespace gam300 {
 		else {
 			prog.setUniform("isPBR", false);
 		}
+
 #pragma endregion
 
 		for (const auto& item : draw_items) {
@@ -423,6 +448,7 @@ namespace gam300 {
 	void Renderer::endFrame(RenderPass const& pass) {
 		auto& prog = m_shader_storage[pass.shdpgm_handle];
 		prog.programFree();
+		glBindTextureUnit(0, 0);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 }
