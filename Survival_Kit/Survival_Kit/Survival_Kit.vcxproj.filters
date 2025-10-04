@@ -40,7 +40,6 @@
     <ClCompile Include="Graphics\Sampler.cpp" />
     <ClCompile Include="Graphics\Texture.cpp" />
     <ClCompile Include="Graphics\Common.cpp" />
-    <ClCompile Include="Component\RenderComponent.cpp" />
     <ClCompile Include="System\RenderSystem.cpp" />
     <ClCompile Include="System\MovementSystem.cpp" />
     <ClCompile Include="Component\AudioComponent.cpp" />
@@ -77,6 +76,8 @@
     <ClCompile Include="Compiler\AudioCompiler.cpp" />
     <ClCompile Include="Compiler\ShadowCompiler.cpp" />
     <ClCompile Include="Component\TextureComponent.cpp" />
+    <ClCompile Include="Component\RenderComponent.cpp" />
+    <ClCompile Include="Component\MovementController.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component\Component.h" />
@@ -175,6 +176,7 @@
     <ClInclude Include="Compiler\MeshCompiler.h" />
     <ClInclude Include="Compiler\AudioCompiler.h" />
     <ClInclude Include="Compiler\ShaderCompiler.h" />
+    <ClInclude Include="Component\MovementController.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Scene\Game.scn" />

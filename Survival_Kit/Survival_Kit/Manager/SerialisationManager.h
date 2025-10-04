@@ -122,10 +122,20 @@ namespace gam300 {
     };
 
     /**
-    * @brief Serializer for MeshComponent components.
-    * @author Chua Wen Bin Kennys
+    * @brief Serializer for BulletComponent components.
+    * @author Simon Chan
     */
     class BulletSerializer : public IComponentSerializer {
+    public:
+        std::string serialize(Component* component) override;
+        Component* deserialize(EntityID entityId, const std::string& jsonData) override;
+    };
+
+    /**
+    * @brief Serializer for MovementComponent components.
+    * @author Simon Chan
+    */
+    class MovementControllerSerializer : public IComponentSerializer {
     public:
         std::string serialize(Component* component) override;
         Component* deserialize(EntityID entityId, const std::string& jsonData) override;
