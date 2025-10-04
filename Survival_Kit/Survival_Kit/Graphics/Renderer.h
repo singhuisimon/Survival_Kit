@@ -20,6 +20,9 @@
 
 #include "../Glad/glad.h"
 
+#include "../Tracy/tracy/Tracy.hpp"
+#include "../Tracy/tracy/TracyOpenGL.hpp"
+
 namespace gam300 {
 
 	class Renderer {

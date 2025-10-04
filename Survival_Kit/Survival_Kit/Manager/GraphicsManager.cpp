@@ -50,6 +50,12 @@ namespace gam300 {
 
         m_renderer.setup();
 
+        TracyGpuContext; //creates the GPU timeline in Tracy
+
+        glGenQueries(GPU_QUERY_COUNT, gpuStartQueries);
+        glGenQueries(GPU_QUERY_COUNT, gpuEndQueries);
+        m_queriesCreated = true;
+
 #if 0
         TracyGpuContext; //creates the GPU timeline in Tracy
 
@@ -199,6 +205,32 @@ namespace gam300 {
     // Update input states, should be called once per frame
     void GraphicsManager::update() {
 
+        ZoneScopedN("GraphicsManager::update"); // CPU zone for entire update
+        TracyGpuZone("FrameRender");            // GPU zone for frame
+
+        int q = currentQueryIndex;
+
+        glQueryCounter(gpuStartQueries[q], GL_TIMESTAMP);
+
+        // === Main Rendering Pass ===
+        auto& renderer = getRenderer();
+
+        glQueryCounter(gpuEndQueries[q], GL_TIMESTAMP);
+        TracyGpuCollect; // flush GPU timeline to Tracy
+
+        // Calculate GPU frame time
+        int prev = (q + 1) % GPU_QUERY_COUNT;
+        GLint available = 0;
+        glGetQueryObjectiv(gpuEndQueries[prev], GL_QUERY_RESULT_AVAILABLE, &available);
+        if (available) {
+            GLuint64 startTime = 0, endTime = 0;
+            glGetQueryObjectui64v(gpuStartQueries[prev], GL_QUERY_RESULT, &startTime);
+            glGetQueryObjectui64v(gpuEndQueries[prev], GL_QUERY_RESULT, &endTime);
+            double gpuTimeMs = (endTime - startTime) / 1e6; // convert ns - ms
+            TracyPlot("GPU Frame Time (ms)", (float)gpuTimeMs);
+        }
+
+        currentQueryIndex = (currentQueryIndex + 1) % GPU_QUERY_COUNT;
 #if 0
         ZoneScopedN("GraphicsManager::update");  //CPU zone
         TracyGpuZone("FrameRender");             // GPU Zone (entire frame)
@@ -499,6 +531,20 @@ namespace gam300 {
         }
         else {
             return "";  // Invalid
+        }
+    }
+
+    void GraphicsManager::preShutdownGPU() {
+        if (glfwGetCurrentContext() && m_queriesCreated)
+        {
+            LM.writeLog("GraphicsManager::preShutdownGPU() - Releasing GPU queries before GLFW termination.");
+            glDeleteQueries(GPU_QUERY_COUNT, gpuStartQueries);
+            glDeleteQueries(GPU_QUERY_COUNT, gpuEndQueries);
+            m_queriesCreated = false;
+        }
+        else
+        {
+            LM.writeLog("GraphicsManager::preShutdownGPU() - No context or queries to delete.");
         }
     }
  

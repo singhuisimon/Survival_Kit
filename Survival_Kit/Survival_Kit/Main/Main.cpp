@@ -22,7 +22,6 @@ int main(void) {
     ZoneScopedN("MainStartup");
 	
     bool spacePressed = false;
-    bool tracyKeyWasDown = false;
 
     // Get reference to LogManager (already started by GameManager)
     LM.writeLog("Main: GameManager initialized successfully");
@@ -262,15 +261,17 @@ int main(void) {
     // Shut down InputManager
     IM.shutDown();
     
-    TRACY.shutDown();
-
     IMGUIM.shutDown();
     
+    GFXM.preShutdownGPU(); //to safely release the tracy calls.
+
     // Terminate GLFW
     glfwTerminate();
 
     // Properly shut down the GameManager (which will also shut down all other managers)
     GM.shutDown();
+
+    TRACY.shutDown();
 
     return 0;
 }

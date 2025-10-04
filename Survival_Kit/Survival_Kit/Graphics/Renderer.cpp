@@ -297,9 +297,15 @@ namespace gam300 {
 
 	void Renderer::render_frame(std::span<const DrawItem> draw_items, Camera3D& active_cam, Light& light) {
 
+		//ZoneScoped;
+		TracyGpuZone("RenderFrame");
+
 		test_poll();
 
 		for (const auto& pass : m_passes) {
+
+			TracyGpuZone("RenderPass");
+
 			beginFrame(pass);
 			draw(pass, draw_items, active_cam, light);
 			endFrame(pass);
@@ -307,6 +313,9 @@ namespace gam300 {
 	}
 
 	void Renderer::draw(RenderPass const& pass, std::span<const DrawItem> draw_items, Camera3D& active_cam, Light& light) {
+
+		ZoneScoped;
+		TracyGpuZone("DrawMeshes");
 
 		auto& prog = m_shader_storage[pass.shdpgm_handle];
 
