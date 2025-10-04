@@ -982,7 +982,7 @@ namespace gam300 {
                 viewportSize,
                 ImVec2(0, 1), ImVec2(1, 0));
 
-            handleViewPortClick(imagePos);
+            handleViewPortClick(imagePos, viewportSize);
         }
 
         //ImVec2 mousePos, viewportSize;
@@ -1493,16 +1493,20 @@ namespace gam300 {
         }
     }
 
-    void ImguiManager::handleViewPortClick(ImVec2 mousePos)
+    void ImguiManager::handleViewPortClick(ImVec2 mousePos, ImVec2 viewportSize)
     {
         // Check the mouse hover position for reference
         if (ImGui::IsItemHovered())
         {
+
             ImVec2 mouseScreen = ImGui::GetIO().MousePos;
+            // Get aspect ratio between scene dimensions and viewport dimensions
+            ImVec2 ar = { getWindowWidthHeight().x / viewportSize.x,
+                          getWindowWidthHeight().y / viewportSize.y };
 
             ImVec2 mouseInViewportPos;
-            mouseInViewportPos.x = mouseScreen.x - mousePos.x;
-            mouseInViewportPos.y = mouseScreen.y - mousePos.y;
+            mouseInViewportPos.x = (mouseScreen.x - mousePos.x - viewportSize.x * 0.5f) * ar.x;
+            mouseInViewportPos.y = (mouseScreen.y - mousePos.y - viewportSize.y * 0.5f) * ar.y;
 
             ImGui::Text("Mouse local: (%.1f, %.1f)", mouseInViewportPos.x, mouseInViewportPos.y);
 
