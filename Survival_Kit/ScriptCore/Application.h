@@ -39,6 +39,10 @@ namespace Core
         float x = 0.0f;
         float y = 0.0f;
     };
+
+#pragma warning(push)
+#pragma warning(disable:4251) //disable dll-interface warning for stl types
+
     class DLL_API Application
     {
     public:
@@ -164,6 +168,6 @@ namespace Core
         }
     };
 
-
+#pragma warning(pop)
 
 }
