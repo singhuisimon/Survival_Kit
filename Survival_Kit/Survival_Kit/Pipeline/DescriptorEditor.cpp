@@ -283,15 +283,38 @@ namespace gam300 {
             break;
         case AssetType::Mesh:
             desc.category = "Mesh";
+            desc.meshSettings.outputFormat = "OGG";
+            desc.meshSettings.includePos = true;
+            desc.meshSettings.includeNormals = true;
+            desc.meshSettings.includeColors = false;
+            desc.meshSettings.includeTexCoords = true;
+            desc.meshSettings.indexType = "UINT32";
+            desc.meshSettings.scale = 1.0f;
+            desc.meshSettings.optimizeVertices = true;
+            desc.meshSettings.generateNormals = false;
             break;
         case AssetType::Material:
             desc.category = "Material";
             break;
         case AssetType::Shader:
             desc.category = "Shader";
+            desc.shaderSettings.vertexShader = "";
+            desc.shaderSettings.fragmentShader = "";
+            desc.shaderSettings.outputFormat = "GLSL";
+            desc.shaderSettings.targetAPI = "OPENGL";
+            desc.shaderSettings.targetVersion = "460";
+            desc.shaderSettings.optimizationLevel = "PERFORMANCE";
+            desc.shaderSettings.stripDebugInfo = true;
+
             break;
         case AssetType::Audio:
             desc.category = "Audio";
+            desc.audioSettings.outputFormat = "OGG";
+            desc.audioSettings.compression = "VORBIS";
+            desc.audioSettings.quality = 0.7f;
+            desc.audioSettings.sampleRate = 44100;
+            desc.audioSettings.channelMode = "STEREO";
+            break;
             break;
         case AssetType::Scene:
             desc.category = "Scene";
@@ -348,6 +371,41 @@ namespace gam300 {
             outDescriptor.textureSettings.inputFiles = ParseJsonArray(json, "textureSettings.inputFiles");
         }
 
+        //Parse Audio Settings if present
+        if (json.find("audioSettings") != std::string::npos) {
+            outDescriptor.audioSettings.outputFormat = ParseJsonValue(json, "audioSettings.outputFormat");
+            outDescriptor.audioSettings.compression = ParseJsonValue(json, "audioSettings.compression");
+            outDescriptor.audioSettings.quality = ParseJsonFloat(json, "audioSettings.quality");
+            outDescriptor.audioSettings.sampleRate = ParseJsonFloat(json, "audioSettings.sampleRate");
+            outDescriptor.audioSettings.channelMode = ParseJsonValue(json, "audioSettings.channelMode");
+
+        }
+
+        //parse Mesh Settings if present
+        if (json.find("meshSettings") != std::string::npos) {
+            outDescriptor.meshSettings.outputFormat = ParseJsonValue(json, "meshSettings.outputFormat");
+            outDescriptor.meshSettings.includePos = ParseJsonBool(json, "meshSettings.includePos");
+            outDescriptor.meshSettings.includeNormals = ParseJsonBool(json, "meshSettings.includeNormals");
+            outDescriptor.meshSettings.includeColors = ParseJsonBool(json, "meshSettings.includeColors");
+            outDescriptor.meshSettings.includeTexCoords = ParseJsonBool(json, "meshSettings.includeTexCoords");
+            outDescriptor.meshSettings.indexType = ParseJsonValue(json, "meshSettings.indexType");
+            outDescriptor.meshSettings.scale = ParseJsonFloat(json, "meshSettings.scale");
+            outDescriptor.meshSettings.optimizeVertices = ParseJsonBool(json, "meshSettings.optimizeVertices");
+            outDescriptor.meshSettings.generateNormals = ParseJsonBool(json, "meshSettings.generateNormals");
+        }
+
+        //parse shader settings if present
+        if (json.find("shaderSettings") != std::string::npos) {
+            outDescriptor.shaderSettings.vertexShader = ParseJsonValue(json, "shaderSettings.vertexShader");
+            outDescriptor.shaderSettings.fragmentShader = ParseJsonValue(json, "shaderSettings.fragmentShader");
+            outDescriptor.shaderSettings.outputFormat = ParseJsonValue(json, "shaderSettings.outputFormat");
+            outDescriptor.shaderSettings.targetAPI = ParseJsonValue(json, "shaderSettings.targetAPI");
+            outDescriptor.shaderSettings.targetVersion = ParseJsonValue(json, "shaderSettings.targetVersion");
+            outDescriptor.shaderSettings.optimizationLevel = ParseJsonValue(json, "shaderSettings.optimizationLevel");
+            outDescriptor.shaderSettings.stripDebugInfo = ParseJsonBool(json, "shaderSettings.stripDebugInfo");
+        }
+
+
         return true;
     }
 
@@ -373,6 +431,22 @@ namespace gam300 {
             extras.srgb = descriptor.textureSettings.srgb;
             extras.inputFiles = descriptor.textureSettings.inputFiles;
         }
+
+        //copy audio settings 
+        if (descriptor.assetType == AssetType::Audio) {
+            extras.audioSettings = descriptor.audioSettings;
+        }
+
+        //copy mesh settings
+        if (descriptor.assetType == AssetType::Mesh) {
+            extras.meshSettings = descriptor.meshSettings;
+        }
+
+        // Copy shader settings if applicable
+        if (descriptor.assetType == AssetType::Shader) {
+            extras.shaderSettings = descriptor.shaderSettings;
+        }
+
 
         // Copy user properties
         extras.user = descriptor.userProperties;

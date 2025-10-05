@@ -204,6 +204,47 @@ namespace gam300 {
                 ind(1); o << "}"; nl(1);
             }
 
+            //ADDED - Audio Settings for Audio compilation 
+            if (recOpt && recOpt->type == AssetType::Audio) {
+                ind(1); o << ",\"audioSettings\": {"; nl(1);
+                ind(2); o << "\"outputFormat\": \"" << EscapeJson(extras->audioSettings.outputFormat) << "\","; nl(1);
+                ind(2); o << "\"compression\": \"" << EscapeJson(extras->audioSettings.compression) << "\","; nl(1);
+                ind(2); o << "\"quality\": " << extras->audioSettings.quality << ","; nl(1);
+                ind(2); o << "\"sampleRate\": " << extras->audioSettings.sampleRate << ","; nl(1);
+                ind(2); o << "\"channelMode\": \"" << EscapeJson(extras->audioSettings.channelMode) << "\""; nl(1);
+                ind(1); o << "}"; nl(1);
+            }
+
+            //ADDED - Mesh Settings for Mesh Compilation
+            if (recOpt && recOpt->type == AssetType::Mesh) {
+                ind(1); o << ",\meshSettings\": {"; nl(1);
+                ind(2); o << "\outputFormat\": \"" << EscapeJson(extras->meshSettings.outputFormat) << "\","; nl(1);
+                ind(2); o << "\"includePos\": " << (extras->meshSettings.includePos ? "true" : "false") << ","; nl(1);
+                ind(2); o << "\"includeNormals\": " << (extras->meshSettings.includeNormals ? "true" : "false") << ","; nl(1);
+                ind(2); o << "\"includeColors\": " << (extras->meshSettings.includeColors ? "true" : "false") << ","; nl(1);
+                ind(2); o << "\"includeTexCoords\": " << (extras->meshSettings.includeTexCoords ? "true" : "false") << ","; nl(1);
+                ind(2); o << "\"indexType\": \"" << EscapeJson(extras->meshSettings.indexType) << "\","; nl(1);
+                ind(2); o << "\"scale\": " << extras->meshSettings.scale << ","; nl(1);
+                ind(2); o << "\"optimizeVertices\": " << (extras->meshSettings.optimizeVertices ? "true" : "false") << ","; nl(1);
+                ind(2); o << "\"generateNormals\": " << (extras->meshSettings.generateNormals ? "true" : "false"); nl(1);
+                ind(1); o << "}"; nl(1);
+            }
+
+            //Added shader settings for shader assets
+            if (recOpt && recOpt->type == AssetType::Shader) {
+                ind(1); o << ",\"shaderSettings\": {"; nl(1);
+                ind(2); o << "\"vertexShader\": \"" << EscapeJson(extras->shaderSettings.vertexShader) << "\","; nl(1);
+                ind(2); o << "\"fragmentShader\": \"" << EscapeJson(extras->shaderSettings.fragmentShader) << "\","; nl(1);
+                ind(2); o << "\"outputFormat\": \"" << EscapeJson(extras->shaderSettings.outputFormat) << "\","; nl(1);
+                ind(2); o << "\"targetAPI\": \"" << EscapeJson(extras->shaderSettings.targetAPI) << "\","; nl(1);
+                ind(2); o << "\"targetVersion\": \"" << EscapeJson(extras->shaderSettings.targetVersion) << "\","; nl(1);
+                ind(2); o << "\"optimizationLevel\": \"" << EscapeJson(extras->shaderSettings.optimizationLevel) << "\","; nl(1);
+                ind(2); o << "\"stripDebugInfo\": " << (extras->shaderSettings.stripDebugInfo ? "true" : "false"); nl(1);
+                ind(1); o << "}"; nl(1);
+            }
+
+
+
         }
         else {
             o << "null"; nl(1);
