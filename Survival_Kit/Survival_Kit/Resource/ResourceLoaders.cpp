@@ -194,7 +194,7 @@ void xresource::loader<gam300::ResourceGUID::texture_type_guid_v>::Destroy(
 
 
 // ========== MESH LOADER IMPLEMENTATION ==========
-
+#if 0
 xresource::loader<gam300::ResourceGUID::mesh_type_guid_v>::data_type*
 xresource::loader<gam300::ResourceGUID::mesh_type_guid_v>::Load(
     xresource::mgr& mgr, const full_guid& guid)
@@ -305,6 +305,174 @@ xresource::loader<gam300::ResourceGUID::mesh_type_guid_v>::Load(
 
     LM.writeLog("MeshLoader - Loaded mesh GUID: %llX, VAO: %u, Vertices: %u, Indices: %u",
         guid.m_Instance.m_Value, mesh->VAO, vertexCount, indexCount);
+
+    return mesh.release();
+}
+#endif
+
+// In ResourceLoaders.cpp - Update the MeshLoader::Load function
+
+xresource::loader<gam300::ResourceGUID::mesh_type_guid_v>::data_type*
+xresource::loader<gam300::ResourceGUID::mesh_type_guid_v>::Load(
+    xresource::mgr& mgr, const full_guid& guid)
+{
+    gam300::ResourceManager* rm = gam300::getResourceManager(mgr);
+
+    // Get compiled file path
+    std::string compiled_path = rm->getPaths().getCompiledFilePath(guid, gam300::ResourceType::MESH);
+
+    if (!rm->getPaths().fileExists(compiled_path)) {
+        LM.writeLog("MeshLoader - Compiled file not found: %s", compiled_path.c_str());
+        return nullptr;
+    }
+
+    // Open compiled binary file
+    std::ifstream file(compiled_path, std::ios::binary);
+    if (!file.is_open()) {
+        LM.writeLog("MeshLoader - Failed to open: %s", compiled_path.c_str());
+        return nullptr;
+    }
+
+    // Read compiled resource header
+    gam300::CompiledResourceHeader header;
+    if (!gam300::readCompiledHeader(file, header)) {
+        return nullptr;
+    }
+
+    // Verify resource type
+    if (header.resourceType != static_cast<uint32_t>(gam300::ResourceType::MESH)) {
+        LM.writeLog("MeshLoader - Resource type mismatch");
+        return nullptr;
+    }
+
+    // Read compiled mesh data header
+    gam300::CompiledMeshData meshHeader;
+    file.read(reinterpret_cast<char*>(&meshHeader), sizeof(meshHeader));
+    if (!file) {
+        LM.writeLog("MeshLoader - Failed to read mesh header");
+        return nullptr;
+    }
+
+    // Create mesh resource
+    auto mesh = std::make_unique<data_type>();
+
+    // Read separate arrays (matching MeshCompiler output)
+    std::vector<glm::vec3> positions(meshHeader.vertexCount);
+    std::vector<glm::vec3> normals(meshHeader.vertexCount);
+    std::vector<glm::vec3> colors(meshHeader.vertexCount);
+    std::vector<glm::vec2> texcoords(meshHeader.vertexCount);
+
+    // Read positions
+    file.read(reinterpret_cast<char*>(positions.data()),
+        meshHeader.vertexCount * sizeof(glm::vec3));
+
+    // Read normals
+    if (meshHeader.hasNormals) {
+        file.read(reinterpret_cast<char*>(normals.data()),
+            meshHeader.vertexCount * sizeof(glm::vec3));
+    }
+
+    // Read colors
+    if (meshHeader.hasColors) {
+        file.read(reinterpret_cast<char*>(colors.data()),
+            meshHeader.vertexCount * sizeof(glm::vec3));
+    }
+
+    // Read texcoords
+    if (meshHeader.hasTexCoords) {
+        file.read(reinterpret_cast<char*>(texcoords.data()),
+            meshHeader.vertexCount * sizeof(glm::vec2));
+    }
+
+    // Read indices
+    mesh->indices.resize(meshHeader.indexCount);
+    file.read(reinterpret_cast<char*>(mesh->indices.data()),
+        meshHeader.indexCount * sizeof(unsigned int));
+
+    if (!file) {
+        LM.writeLog("MeshLoader - Failed to read mesh data");
+        return nullptr;
+    }
+
+    // Convert to interleaved format for OpenGL
+    // Format: pos(3) + normal(3) + color(3) + uv(2) = 11 floats per vertex
+    mesh->vertices.resize(meshHeader.vertexCount * 11);
+
+    for (uint32_t i = 0; i < meshHeader.vertexCount; ++i) {
+        size_t offset = i * 11;
+
+        // Position (3 floats)
+        mesh->vertices[offset + 0] = positions[i].x;
+        mesh->vertices[offset + 1] = positions[i].y;
+        mesh->vertices[offset + 2] = positions[i].z;
+
+        // Normal (3 floats)
+        mesh->vertices[offset + 3] = normals[i].x;
+        mesh->vertices[offset + 4] = normals[i].y;
+        mesh->vertices[offset + 5] = normals[i].z;
+
+        // Color (3 floats)
+        mesh->vertices[offset + 6] = colors[i].x;
+        mesh->vertices[offset + 7] = colors[i].y;
+        mesh->vertices[offset + 8] = colors[i].z;
+
+        // TexCoord (2 floats)
+        mesh->vertices[offset + 9] = texcoords[i].x;
+        mesh->vertices[offset + 10] = texcoords[i].y;
+    }
+
+    // Create OpenGL buffers
+    glGenVertexArrays(1, &mesh->VAO);
+    glGenBuffers(1, &mesh->VBO);
+    glGenBuffers(1, &mesh->EBO);
+
+    glBindVertexArray(mesh->VAO);
+
+    // Upload interleaved vertex data
+    glBindBuffer(GL_ARRAY_BUFFER, mesh->VBO);
+    glBufferData(GL_ARRAY_BUFFER,
+        mesh->vertices.size() * sizeof(float),
+        mesh->vertices.data(), GL_STATIC_DRAW);
+
+    // Upload index data
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+        mesh->indices.size() * sizeof(unsigned int),
+        mesh->indices.data(), GL_STATIC_DRAW);
+
+    // Setup vertex attributes - interleaved format
+    size_t stride = 11 * sizeof(float);
+
+    // Position attribute (location = 0)
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // Normal attribute (location = 1)
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    // Color attribute (location = 2)
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, stride, (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    // TexCoord attribute (location = 3)
+    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, stride, (void*)(9 * sizeof(float)));
+    glEnableVertexAttribArray(3);
+
+    glBindVertexArray(0);
+
+    // Check for OpenGL errors
+    GLenum error = glGetError();
+    if (error != GL_NO_ERROR) {
+        LM.writeLog("MeshLoader - OpenGL error: 0x%X", error);
+        glDeleteVertexArrays(1, &mesh->VAO);
+        glDeleteBuffers(1, &mesh->VBO);
+        glDeleteBuffers(1, &mesh->EBO);
+        return nullptr;
+    }
+
+    LM.writeLog("MeshLoader - Loaded mesh GUID: %llX, VAO: %u, Vertices: %u, Indices: %u",
+        guid.m_Instance.m_Value, mesh->VAO, meshHeader.vertexCount, meshHeader.indexCount);
 
     return mesh.release();
 }
