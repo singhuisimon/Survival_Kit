@@ -1,3 +1,13 @@
+/**
+ * @file AudioCompiler.h
+ * @brief Audio resource compiler.
+ * @details Compiles intermediate audio files to optimized binary format.
+ * @author Simon Chan
+ * @date October 2025
+ * Copyright (C) 2025 DigiPen Institute of Technology.
+ * Reproduction or disclosure of this file or its contents without the
+ * prior written consent of DigiPen Institute of Technology is prohibited.
+ */
 #pragma once
 #ifndef __AUDIO_COMPILER_H__
 #define __AUDIO_COMPILER_H__

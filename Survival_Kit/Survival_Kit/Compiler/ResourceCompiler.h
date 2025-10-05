@@ -2,7 +2,7 @@
  * @file ResourceCompiler.h
  * @brief Base interface for resource compilers
  * @details Defines the common interface for all resource type compilers
- * @author Your Name
+ * @author Simon Chan
  * @date
  * Copyright (C) 2025 DigiPen Institute of Technology.
  */

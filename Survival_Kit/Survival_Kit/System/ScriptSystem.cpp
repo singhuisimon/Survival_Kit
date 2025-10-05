@@ -51,7 +51,7 @@ namespace gam300 {
         }
     }
 
-    void ScriptSystem::update(float dt) {
+    void ScriptSystem::update([[maybe_unused]] float dt) {
         if (!m_script_engine_initialized || !m_script_app) {
             return;
         }
