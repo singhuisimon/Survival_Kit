@@ -228,8 +228,8 @@ namespace gam300 {
 
             //ADDED - Mesh Settings for Mesh Compilation
             if (recOpt && recOpt->type == AssetType::Mesh) {
-                ind(1); o << ",\meshSettings\": {"; nl(1);
-                ind(2); o << "\outputFormat\": \"" << EscapeJson(extras->meshSettings.outputFormat) << "\","; nl(1);
+                ind(1); o << ",\"meshSettings\": {"; nl(1);
+                ind(2); o << "\"outputFormat\": \"" << EscapeJson(extras->meshSettings.outputFormat) << "\","; nl(1);
                 ind(2); o << "\"includePos\": " << (extras->meshSettings.includePos ? "true" : "false") << ","; nl(1);
                 ind(2); o << "\"includeNormals\": " << (extras->meshSettings.includeNormals ? "true" : "false") << ","; nl(1);
                 ind(2); o << "\"includeColors\": " << (extras->meshSettings.includeColors ? "true" : "false") << ","; nl(1);

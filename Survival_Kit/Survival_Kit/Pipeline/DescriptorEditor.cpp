@@ -385,7 +385,7 @@ namespace gam300 {
             outDescriptor.audioSettings.outputFormat = ParseJsonValue(json, "audioSettings.outputFormat");
             outDescriptor.audioSettings.compression = ParseJsonValue(json, "audioSettings.compression");
             outDescriptor.audioSettings.quality = ParseJsonFloat(json, "audioSettings.quality");
-            outDescriptor.audioSettings.sampleRate = ParseJsonFloat(json, "audioSettings.sampleRate");
+            outDescriptor.audioSettings.sampleRate = static_cast<int>(ParseJsonFloat(json, "audioSettings.sampleRate"));
             outDescriptor.audioSettings.channelMode = ParseJsonValue(json, "audioSettings.channelMode");
 
         }
