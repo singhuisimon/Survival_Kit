@@ -1,4 +1,16 @@
 #pragma once
+
+/**
+ * @file AssetManager.h
+ * @brief Declares the AssetManager for coordinating asset pipeline tasks.
+ * @author Wai Lwin Thit, Rio Shannon Yvon Leonardo
+ * @date 18/09/2025
+ * Copyright (C) 2025 DigiPen Institute of Technology.
+ * Reproduction or disclosure of this file or its contents without the
+ * prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+
+
 #ifndef __ASSET_MANAGER_H__
 #define __ASSET_MANAGER_H__
 
@@ -77,22 +89,22 @@ namespace gam300 {
 
 		// ---------------- Configuration ----------------
 		struct Config {
-			std::vector<std::string> sourceRoots; //!< Folders to scan
-			std::vector<std::string> scanExtensions; //!< Allowed extensions (no dots); empty = all
-			std::vector<std::string> ignoreSubstrings; //!< Quick ignore substrings
-			bool includeHidden = false; //!< Scan dot-files on POSIX
-			bool followSymlinks = false; //!< Recurse through symlinks
+			std::vector<std::string> sourceRoots; // Folders to scan
+			std::vector<std::string> scanExtensions; // Allowed extensions (no dots); empty = all
+			std::vector<std::string> ignoreSubstrings; // Quick ignore substrings
+			bool includeHidden = false; // Scan dot-files on POSIX
+			bool followSymlinks = false; // Recurse through symlinks
 
 			//temporary for now
 			std::string intermediateDirectory = "Survival_Kit/Survival_Kit/Assets/Cache/Intermediate"; //!< Where import output goes
 			std::string databaseFile = "Survival_Kit/Survival_Kit/Assets/Cache/assetdb.txt"; //!< Asset DB persistence
 			std::string snapshotFile = "Survival_Kit/Survival_Kit/Assets/Cache/scan.snapshot"; //!< Scanner warm start
 
-			bool writeDescriptors = true; //!< Emit .desc files
-			bool descriptorSidecar = true; //!< `foo.png.desc` next to source
-			std::string descriptorRoot; //!< Used when sidecar = false
+			bool writeDescriptors = true; // Emit .desc files
+			bool descriptorSidecar = true; // `foo.png.desc` next to source
+			std::string descriptorRoot; // Used when sidecar = false
 
-			std::string repoRoot; //!< Base path to resolve relative asset paths
+			std::string repoRoot; // Base path to resolve relative asset paths
 		};
 
 		/**

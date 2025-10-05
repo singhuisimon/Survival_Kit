@@ -1,10 +1,12 @@
-/*
-* @author Wai Lwin Thit
-* @brief for editing descriptors
-* @date 29 September 2025
-* 
-*/
-
+/**
+ * @file DescriptorEditor.h
+ * @brief Declares the descriptor editing interface for the editor, for editing Descriptors
+ * @author Wai Lwin Thit (100%)
+ * @date 29/09/2025
+ * Copyright (C) 2025 DigiPen Institute of Technology.
+ * Reproduction or disclosure of this file or its contents without the
+ * prior written consent of DigiPen Institute of Technology is prohibited.
+ */
 
 
 #pragma once

@@ -1,4 +1,16 @@
 #pragma once
+
+/**
+ * @file AssetDescriptorGenerator.h
+ * @brief Declares the asset descriptor generator class. 
+ * @author Wai Lwin Thit, Rio Shannon Yvon Leonardo
+ * @date 15/09/2025
+ * Copyright (C) 2025 DigiPen Institute of Technology.
+ * Reproduction or disclosure of this file or its contents without the
+ * prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+
+
 #ifndef __ASSET_DESCGENERATOR_H__
 #define __ASSET_DESCGENERATOR_H__
 #include <string>
@@ -78,11 +90,11 @@ namespace gam300 {
 	*/
 	struct DescriptorExtras
 	{
-		std::string displayName; //!< Friendly name for editor
-		std::string category; //!< Category string (e.g., "Texture", "Mesh")
-		std::vector<std::string> tags; //!< Free-form tags
-		std::time_t lastImported = 0; //!< When importer last ran (epoch seconds)
-		std::unordered_map<std::string, std::string> user; //!< Arbitrary key/value pairs
+		std::string displayName; 
+		std::string category; 
+		std::vector<std::string> tags; 
+		std::time_t lastImported = 0; 
+		std::unordered_map<std::string, std::string> user; 
 	
 		//added texture settings -- needed for compiler
 		std::string usageType;
@@ -158,9 +170,9 @@ namespace gam300 {
 		static bool WriteText(const std::string& path, const std::string& text);
 
 
-		bool m_sidecar = true; //!< Sidecar mode by default
-		std::string m_outputRoot; //!< Used when m_sidecar == false
-		bool m_pretty = true; //!< Pretty-print JSON
+		bool m_sidecar = true; 
+		std::string m_outputRoot; //Used when m_sidecar == false
+		bool m_pretty = true; 
 
 	};
 
