@@ -109,7 +109,8 @@ namespace gam300 {
 				assetsPath + "Audio",
 				assetsPath + "Textures",
 				assetsPath + "Scene",
-				assetsPath + "Shaders"
+				assetsPath + "Shaders",
+				assetsPath + "Meshes"
 			};
 
 			// Descriptor configuration
