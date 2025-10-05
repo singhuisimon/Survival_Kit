@@ -1,3 +1,14 @@
+/**
+* @file ResourceData.h
+* @brief Resource properties definitions
+*	Defines property structure for different resource types (descriptor files data)
+* @author Wai Lwin Thit
+* @date
+* Copyright (C) 2025 DigiPen Institute of Technology.
+* Reproduction or disclosure of this file or its contents without the
+* prior written consent of DigiPen Institute of Technology is prohibited.
+*/
+
 #pragma once
 #ifndef __RESOURCE_DATA_H__
 #define __RESOURCE_DATA_H__

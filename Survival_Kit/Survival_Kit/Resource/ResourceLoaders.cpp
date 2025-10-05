@@ -2,7 +2,7 @@
  * @file ResourceLoaders.cpp
  * @brief Complete implementation of xresource_mgr loaders with OpenGL integration
  * @details Loads compiled binary resources and creates OpenGL handles
- * @author Wai Lwin Thit
+ * @author Wai Lwin Thit (20%), Simon Chan(80%)
  * @date October 2025
  * Copyright (C) 2025 DigiPen Institute of Technology.
  */

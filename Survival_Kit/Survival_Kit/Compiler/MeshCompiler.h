@@ -3,7 +3,7 @@
  * @brief Mesh resource compiler.
  * @details Compiles intermediate mesh data to optimized binary format.
  * @author Wai Lwin Thit
- * @date October 2025
+ * @date 4 October 2025
  * Copyright (C) 2025 DigiPen Institute of Technology.
  * Reproduction or disclosure of this file or its contents without the
  * prior written consent of DigiPen Institute of Technology is prohibited.
