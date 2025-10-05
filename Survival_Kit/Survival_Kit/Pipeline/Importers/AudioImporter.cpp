@@ -1,3 +1,14 @@
+/**
+ * @file AudioImporter.cpp
+ * @brief Implements audio file importing logic.
+ * @author Rio Shannon Yvon Leonardo (100%)
+ * @date 22/09/2025
+ * Copyright (C) 2025 DigiPen Institute of Technology.
+ * Reproduction or disclosure of this file or its contents without the
+ * prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+
+
 #include "AudioImporter.h"
 #include <filesystem>
 

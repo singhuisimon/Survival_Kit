@@ -1,3 +1,14 @@
+/**
+ * @file AssetScanner.h
+ * @brief Declares the asset directory scanning utility. 
+ * @author Wai Lwin Thit, Rio Shannon Yvon Leonardo
+ * @date 15/09/2025
+ * Copyright (C) 2025 DigiPen Institute of Technology.
+ * Reproduction or disclosure of this file or its contents without the
+ * prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+
+
 #pragma once
 #ifndef __ASSET_SCANNER_H__
 #define __ASSET_SCANNER_H__
@@ -109,12 +120,12 @@ namespace gam300 {
 		bool isHidden(const std::filesystem::path& p) const;
 
 		// State
-		std::vector<std::string> m_roots; //!< Roots to traverse
-		std::unordered_map<std::string, FileStamp> m_snapshot; //!< Path -> stamp
-		std::unordered_set<std::string> m_exts; //!< Lowercase extensions (no dot)
-		std::vector<std::string> m_ignore_substrings; //!< Cheap ignore filters
-		bool m_include_hidden = false; //!< Include dotfiles
-		bool m_follow_symlinks = false; //!< Follow symlinks
+		std::vector<std::string> m_roots; // Roots to traverse
+		std::unordered_map<std::string, FileStamp> m_snapshot; //  Path -> stamp
+		std::unordered_set<std::string> m_exts; //  Lowercase extensions (no dot)
+		std::vector<std::string> m_ignore_substrings; //  Cheap ignore filters
+		bool m_include_hidden = false; //  Include dotfiles
+		bool m_follow_symlinks = false; //  Follow symlinks
 	};
 
 

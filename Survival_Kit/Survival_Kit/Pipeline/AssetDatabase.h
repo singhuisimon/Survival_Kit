@@ -1,3 +1,13 @@
+/**
+ * @file AssetDatabase.h
+ * @brief Defines asset metadata storage and lookup utilities. 
+ * @author Wai Lwin Thit, Rio Shannon Yvon Leonardo
+ * @date 15/09/2025
+ * Copyright (C) 2025 DigiPen Institute of Technology.
+ * Reproduction or disclosure of this file or its contents without the
+ * prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+
 #pragma once
 #ifndef __ASSET_DATABASE_H__
 #define __ASSET_DATABASE_H__
