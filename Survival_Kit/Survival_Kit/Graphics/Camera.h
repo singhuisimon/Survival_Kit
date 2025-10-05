@@ -2,8 +2,8 @@
  * @file Camera.h
  * @brief Declaration of the camera class to manipulate the viewing angle of the scene.
  * @details Manages the camera in the editor and game engine.
- * @author
- * @date
+ * @author Chua Wen Bin Kenny
+ * @date 10 September 2025
  * Copyright (C) 2025 DigiPen Institute of Technology.
  * Reproduction or disclosure of this file or its contents without the
  * prior written consent of DigiPen Institute of Technology is prohibited.
@@ -93,9 +93,6 @@ namespace gam300 {
 
             if (camType == CameraType::ORBITING)
             {
-                // KENNY TESTING
-                //std::cout << "Camera is orbiting with offsets: " << xoffset << ", " << yoffset << std::endl;
-
                 // Calculate spherical coordinates for orbiting movement
                 const float r = glm::sqrt(pos.x * pos.x +
                     pos.y * pos.y + pos.z * pos.z);
@@ -123,10 +120,6 @@ namespace gam300 {
             }
             else if (camType == CameraType::WALKING)
             {
-
-                // KENNY TESTING
-                //std::cout << "Camera is walking" << std::endl;
-
                 // Calculate spherical coordinates for walking movement
                 const float r = glm::sqrt(
                     (target.x - pos.x) * (target.x - pos.x) +
@@ -159,6 +152,8 @@ namespace gam300 {
             //shader->programUse();
             //shader->setUniform("camera.position", pos);
             //shader->programFree();
+            // Unreferenced Parameter
+            shader;
         }
 
         // Handles scroll input to adjust zoom or camera position
@@ -191,6 +186,9 @@ namespace gam300 {
             //shader->programUse();
             //shader->setUniform("camera.position", pos);
             //shader->programFree();
+            
+            // Unreferenced Parameter
+            shader;
         }
 
         //// Getters for camera data
@@ -215,7 +213,6 @@ namespace gam300 {
         //void setCamFOV(float newFOV) { FOV = newFOV; }
         //void setCamNear(float newNear) { nearPlane = newNear; }
         //void setCamFar(float newFar) { farPlane = newFar; }
-
     };
 
 } // end of namespace gam300

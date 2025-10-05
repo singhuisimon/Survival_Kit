@@ -141,8 +141,8 @@ namespace gam300 {
 			const float radius = 1.0f;
 			const float lengthInv = 1.0f / radius;
 
-			float sector_factor = glm::two_pi<float>() / sectors;
-			float stack_factor = glm::pi<float>() / stacks;
+			float sector_factor = MathUtils::TWO_PI / sectors;
+			float stack_factor = MathUtils::PI / stacks;
 
 			float sector_angle, stack_angle; // sector angle is theta, stack angle is phi
 
@@ -217,23 +217,23 @@ namespace gam300 {
 
 			// Calculate how much size we need to allocate for vbo
 			// Calculate values for ease of packing
-			GLsizeiptr position_data_offset = 0;
-			GLsizeiptr position_attribute_size = sizeof(glm::vec3);
-			GLsizeiptr position_data_size = position_attribute_size * static_cast<GLsizeiptr>(mesh.positions.size());
+			GLsizei position_data_offset = 0;
+			GLsizei position_attribute_size = sizeof(glm::vec3);
+			GLsizei position_data_size = position_attribute_size * static_cast<GLsizei>(mesh.positions.size());
 
-			GLsizeiptr normal_data_offset = position_data_size;
-			GLsizeiptr normal_attribute_size = sizeof(glm::vec3);
-			GLsizeiptr normal_data_size = normal_attribute_size * static_cast<GLsizeiptr>(mesh.normals.size());
+			GLsizei normal_data_offset = position_data_size;
+			GLsizei normal_attribute_size = sizeof(glm::vec3);
+			GLsizei normal_data_size = normal_attribute_size * static_cast<GLsizei>(mesh.normals.size());
 
-			GLsizeiptr color_data_offset = position_data_size + normal_data_size;
-			GLsizeiptr color_attribute_size = sizeof(glm::vec3);
-			GLsizeiptr color_data_size = color_attribute_size * static_cast<GLsizeiptr>(mesh.colors.size());
+			GLsizei color_data_offset = position_data_size + normal_data_size;
+			GLsizei color_attribute_size = sizeof(glm::vec3);
+			GLsizei color_data_size = color_attribute_size * static_cast<GLsizei>(mesh.colors.size());
 
-			GLsizeiptr texcoords_data_offset = position_data_size + normal_data_size + color_data_size;
-			GLsizeiptr texcoords_attribute_size = sizeof(glm::vec2);
-			GLsizeiptr texcoords_data_size = texcoords_attribute_size * static_cast<GLsizeiptr>(mesh.texcoords.size());
-
-			GLsizeiptr buffer_size = position_data_size + normal_data_size + color_data_size + texcoords_data_size;
+			GLsizei texcoords_data_offset = position_data_size + normal_data_size + color_data_size;
+			GLsizei texcoords_attribute_size = sizeof(glm::vec2);
+			GLsizei texcoords_data_size = texcoords_attribute_size * static_cast<GLsizei>(mesh.texcoords.size());
+				
+			GLsizei buffer_size = position_data_size + normal_data_size + color_data_size + texcoords_data_size;
 
 			// Wrapper for named buffer storage
 			mgl.vbo.storage(buffer_size, nullptr, GL_DYNAMIC_STORAGE_BIT);
@@ -273,10 +273,10 @@ namespace gam300 {
 
 			// Create an element buffer object to transfer topology
 			mgl.ebo.create();
-			mgl.ebo.storage(sizeof(uint32_t) * mesh.indices.size(), reinterpret_cast<GLvoid*>(mesh.indices.data()), GL_DYNAMIC_STORAGE_BIT);
+			mgl.ebo.storage(sizeof(uint32_t) * static_cast<GLsizei>(mesh.indices.size()), reinterpret_cast<GLvoid*>(mesh.indices.data()), GL_DYNAMIC_STORAGE_BIT);
 			mgl.vao.bind_element_buffer(mgl.ebo);
 
-			mgl.draw_count = mesh.indices.size();
+			mgl.draw_count = static_cast<GLsizei>(mesh.indices.size());
 			mgl.primitive_type = GL_TRIANGLES;
 
 			return mgl;

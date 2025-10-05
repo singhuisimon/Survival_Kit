@@ -2,7 +2,7 @@
  * @file MeshComponent.h
  * @brief Declaration of the MeshComponent for the Entity Component System.
  * @details Handles the mesh and materials properties for entities.
- * @author	Chua Wen Bin Kenny (100%)
+ * @author	Chua Wen Bin Kenny 
  * @date	30/09/2025
  * Copyright (C) 2025 DigiPen Institute of Technology.
  * Reproduction or disclosure of this file or its contents without the
@@ -27,10 +27,13 @@ namespace gam300 {
 		uint16_t m_material_handle;	// Material handle
 
 	public:
+
+		// Constructor
 		MeshComponent(const std::string& guid = "",
 			uint16_t mesh_handle = 0,
 			uint16_t material_handle = 0);
 
+		// Initialization and Update
 		void init(EntityID entity_id) override;
 		void update(float dt) override;
 

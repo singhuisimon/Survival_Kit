@@ -2,8 +2,8 @@
  * @file ShaderProgram.cpp
  * @brief Implementation of shader program class used in the game engine for rendering scenes.
  * @details Handles the creation and usage of shader programs.
- * @author
- * @date
+ * @author Chua Wen Bin Kenny
+ * @date 10 September 2025
  * Copyright (C) 2025 DigiPen Institute of Technology.
  * Reproduction or disclosure of this file or its contents without the
  * prior written consent of DigiPen Institute of Technology is prohibited.

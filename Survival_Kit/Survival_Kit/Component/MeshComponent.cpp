@@ -2,7 +2,7 @@
  * @file MeshComponent.cpp
  * @brief Implementation of the MeshComponent for the Entity Component System.
  * @details Contains implementations for all member functions declared in MeshComponent.h.
- * @author	Chua Wen Bin Kenny (100%)
+ * @author	Chua Wen Bin Kenny 
  * @date	30/09/2025
  * Copyright (C) 2025 DigiPen Institute of Technology.
  * Reproduction or disclosure of this file or its contents without the

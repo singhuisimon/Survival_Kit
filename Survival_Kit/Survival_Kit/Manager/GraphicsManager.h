@@ -2,8 +2,8 @@
  * @file GraphicsManager.h
  * @brief Declaration of the Graphics Manager for the game engine.
  * @details Manages graphical related operations in the game scene.
- * @author
- * @date
+ * @author Chua Wen Bin Kenny
+ * @date 10 September 2025
  * Copyright (C) 2025 DigiPen Institute of Technology.
  * Reproduction or disclosure of this file or its contents without the
  * prior written consent of DigiPen Institute of Technology is prohibited.
@@ -127,31 +127,70 @@ namespace gam300 {
          */
         void update();
 
-        // To load all shader program at start up (the pair of 2 strings are the vertex and fragment shaders' filepath)
+        /**
+        * @brief Load all shader programs at start up.
+        * @param shaders Storage for pairs of vertex and fragment shaders .
+        * @return true if successful, false if unsuccessful.
+        */
         bool loadShaderPrograms(std::vector<std::pair<std::string, std::string>> shaders);
 
+        /**
+        * @brief Return the framebuffer texture for ImGui.
+        * @return texture handle of framebuffer texture.
+        */
         GLuint getImguiTex() const { return m_renderer.get_imgui_texture(); }
 
+        /**
+        * @brief Return a reference to the Renderer object member.
+        * @return referenced to Renderer object member.
+        */
         Renderer& getRenderer() { return m_renderer; }
 
-        // Get materials storage
+        /**
+        * @brief Return a reference to the materials storage.
+        * @return reference to materials storage.
+        */
         const std::vector<Material>& getMaterialStorage() { return m_renderer.getMaterialStorage(); }
 
-        // Get meshdata storage
+        /**
+        * @brief Return a reference to the meshdata storage.
+        * @return reference to meshdata storage.
+        */
         const std::vector<MeshData>& getMeshDataStorage() { return m_renderer.getMeshDataStorage(); }
 
-        // Get texture storage
-        //const std::vector<std::optional<Texture>>& getTextureStorage() { return m_textureStorage; }
+        /**
+        * @brief Return a reference to the texture storage.
+        * @return reference to texture storage.
+        */
         const std::vector<Texture>& getTextureStorage() { return m_renderer.getTextureStorage(); }
         
+        /**
+        * @brief Return the size of the mesh count in the Renderer.
+        * @return mesh count from the Renderer.
+        */
         const size_t getMeshCount() const { return m_renderer.mesh_count(); }
 
-
+        /**
+        * @brief Return a Mesh name with the provide handle.
+        * @return Mesh name in string form.
+        */
         std::string getMeshName(uint16_t handle) const;
+
+        /**
+        * @brief Return a pointer to a Material object with the provide handle.
+        * @return pointer to a Material object.
+        */
         Material* getMaterial(uint16_t handle);
 
+        /**
+        * @brief Return a Mesh GUID with the provide handle.
+        * @return Mesh GUID in string form.
+        */
         std::string getMeshGUID(uint16_t handle) const;
 
+        /**
+        * @brief Handles the termination of GPU queries during abrupt shutdowns.
+        */
         void preShutdownGPU();
     };
 

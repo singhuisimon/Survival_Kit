@@ -2,8 +2,8 @@
  * @file ShaderProgram.h
  * @brief Declaration of shader program class used in the game engine for rendering scenes.
  * @details Manages the creation and usage of shader programs.
- * @author
- * @date
+ * @author Chua Wen Bin Kenny
+ * @date 10 September 2025
  * Copyright (C) 2025 DigiPen Institute of Technology.
  * Reproduction or disclosure of this file or its contents without the
  * prior written consent of DigiPen Institute of Technology is prohibited.
@@ -47,7 +47,6 @@ namespace gam300 {
 
         /**
          * @brief Start the shader program
-         *
          *.@param shader The shader program that is to be started
          */
         void programUse();
@@ -59,14 +58,12 @@ namespace gam300 {
 
         /**
          * @brief Return the shader program handle
-         *
          * @return The program handle
          */
         GLuint getShaderProgramHandle() const;
 
         /**
          * @brief Return the shader program link status
-         *
          * @return The program link status
          */
         GLuint getShaderProgramLinkStatus() const;
@@ -75,43 +72,108 @@ namespace gam300 {
 
         /******************** Functions for setting uniforms ********************/
 
-        // Set uniform for type vec2 (float x, y)
+        /**
+         * @brief Set uniform for type vec2 (float x, y)
+         * @param name The name of the uniform
+         * @param x The X value in float
+         * @param y The Y value in float
+         */
         void setUniform(const std::string& name, float x, float y);
 
-        // Set uniform for type vec3 (float x, y, z)
+        /**
+         * @brief Set uniform for type vec3 (float x, y, z)
+         * @param name The name of the uniform
+         * @param x The X value in float
+         * @param y The Y value in float
+         * @param z The Z value in float
+         */
         void setUniform(const std::string& name, float x, float y, float z);
 
-        // Set uniform for type vec4 (float x, y, z, w)
+        /**
+         * @brief Set uniform for type vec4 (float x, y, z, w)
+         * @param name The name of the uniform
+         * @param x The X value in float
+         * @param y The Y value in float
+         * @param z The Z value in float
+         * @param w The W value in float
+         */
         void setUniform(const std::string& name, float x, float y, float z, float w);
 
-        // Set uniform for type vec2 (glm::vec2)
+        /**
+         * @brief Set uniform for type vec2 (glm::vec2)
+         * @param name The name of the uniform
+         * @param v The vector in glm::vec2
+         * @param cnt The count of glm::vec2 uniforms to set
+         */
         void setUniform(const std::string& name, glm::vec2 v, GLsizei cnt = 1);
 
-        // Set uniform for type vec3 (glm::vec3)
+        /**
+         * @brief Set uniform for type vec3 (glm::vec3)
+         * @param name The name of the uniform
+         * @param v The vector in glm::vec3
+         * @param cnt The count of glm::vec3 uniforms to set
+         */
         void setUniform(const std::string& name, glm::vec3 v, GLsizei cnt = 1);
 
-        // Set uniform for type vec4 (glm::vec4)
+        /**
+         * @brief Set uniform for type vec3 (glm::vec4)
+         * @param name The name of the uniform
+         * @param v The vector in glm::vec4
+         * @param cnt The count of glm::vec4 uniforms to set
+         */
         void setUniform(const std::string& name, glm::vec4 v, GLsizei cnt = 1);
 
-        // Set uniform for type mat3 (glm::mat3)
+        /**
+         * @brief Set uniform for type mat3 (glm::mat3)
+         * @param name The name of the uniform
+         * @param mat The matrix in glm::mat3
+         * @param cnt The count of glm::mat3 uniforms to set
+         */
         void setUniform(const std::string& name, glm::mat3 mat, GLsizei cnt = 1);
 
-        // Set uniform for type mat4 (glm::mat4)
+        /**
+         * @brief Set uniform for type mat4 (glm::mat4)
+         * @param name The name of the uniform
+         * @param mat The matrix in glm::mat4
+         * @param cnt The count of glm::mat4 uniforms to set
+         */
         void setUniform(const std::string& name, glm::mat4 mat, GLsizei cnt = 1);
 
-        // Set uniform for float
+        /**
+         * @brief Set uniform for float
+         * @param name The name of the uniform
+         * @param val The value to set
+         */
         void setUniform(const std::string& name, float val);
 
-        // Set uniform for integer
+        /**
+         * @brief Set uniform for integer
+         * @param name The name of the uniform
+         * @param val The value to set
+         */
         void setUniform(const std::string& name, int val);
 
-        // Set uniform for unsigned integer
+        /**
+         * @brief Set uniform for unsigned int
+         * @param name The name of the uniform
+         * @param val The value to set
+         */
         void setUniform(const std::string& name, GLuint val);
 
+        /**
+         * @brief Set uniform for pointer to unsigned int
+         * @param name The name of the uniform
+         * @param val The value to set
+         * @param cnt The count of GLuint* to set
+         */
         // P.S. -> Set variable name as such: "uIndices[0]" instead of "uIndices"
-        void setUniform(const std::string& name, const GLuint *val, GLsizei cnt = 1);
+        void setUniform(const std::string& name, const GLuint* val, GLsizei cnt = 1);
 
-        // Set uniform for boolean
+        /**
+         * @brief Set uniform for boolean
+         * @param name The name of the uniform
+         * @param val The value to set
+         */
         void setUniform(const std::string& name, GLboolean val);
 
     };

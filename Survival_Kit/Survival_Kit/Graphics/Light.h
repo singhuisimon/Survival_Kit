@@ -2,8 +2,8 @@
  * @file Light.h
  * @brief Definitions of the light class that influences the lighting in the game.
  * @details Manages the lighting in the editor and game engine.
- * @author
- * @date
+ * @author Chua Wen Bin Kenny
+ * @date 10 September 2025
  * Copyright (C) 2025 DigiPen Institute of Technology.
  * Reproduction or disclosure of this file or its contents without the
  * prior written consent of DigiPen Institute of Technology is prohibited.
@@ -27,7 +27,6 @@
 
 // Mathematical operations
 #include "../Utility/MathUtils.h"
-
 
 namespace gam300 {
 
