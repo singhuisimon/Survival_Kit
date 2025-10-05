@@ -1,3 +1,15 @@
+/**
+ * @file Common.h
+ * @brief Platform-independent type aliases and size validation
+ * @details Defines convenient short-hand aliases for fixed-width integer types
+ *          and validates OpenGL type sizes at compile-time. Ensures consistent
+ *          integer sizes across platforms and verifies OpenGL type compatibility.
+ * @author Tan Jun Rui
+ * @date 05 October 2025
+ * Copyright (C) 2025 DigiPen Institute of Technology.
+ * Reproduction or disclosure of this file or its contents without the
+ * prior written consent of DigiPen Institute of Technology is prohibited.
+ */
 #pragma once
 
 #ifndef __COMMON_H__

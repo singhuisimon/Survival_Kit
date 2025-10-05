@@ -1,16 +1,15 @@
 /**
  * @file GLResources.cpp
  * @brief RAII Wrappers for GPU resources (OpenGL based).
- * @details Contains the prototype of RAII wrappers for GPU resources like vertex array objects and buffer objects.
- * @author
- * @date
+ * @details Contains the definitions of RAII wrappers for GPU resources like vertex array objects and buffer objects.
+ * @author Tan Jun Rui
+ * @date 05 October 2025
  * Copyright (C) 2025 DigiPen Institute of Technology.
  * Reproduction or disclosure of this file or its contents without the
  * prior written consent of DigiPen Institute of Technology is prohibited.
  */
 
-// For std::exchange
-#include <algorithm>
+#include <algorithm> // For std::exchange
 
 #include "../Graphics/GLResources.h"
 
@@ -99,11 +98,6 @@ namespace gam300 {
 	void VAO::bind() const {
 
 		glBindVertexArray(handle);
-	}
-
-	static void unbind() {
-		
-		glBindVertexArray(0);
 	}
 
 	void VAO::enable_attrib(GLuint attrib) const {

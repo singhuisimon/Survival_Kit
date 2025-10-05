@@ -148,7 +148,7 @@ namespace gam300 {
                 return i;
         }
 
-        return -1;
+        return static_cast<size_t>(-1);
     }
 
     void Transform3D::removeChild(EntityID c) {

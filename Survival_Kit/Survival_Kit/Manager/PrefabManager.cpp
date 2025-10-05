@@ -144,11 +144,11 @@ namespace gam300 {
     }
 
     // Helper methods implementation (simplified for space)
-    std::string PrefabManager::generateUniqueEntityName(const std::string& baseName, const std::string& prefabName) {
+    std::string PrefabManager::generateUniqueEntityName(const std::string& baseName, [[maybe_unused]] const std::string& prefabName) {
         return baseName + "_" + std::to_string(++m_instanceCounter);
     }
 
-    bool PrefabManager::createComponentsFromPrefab(EntityID entityId, const PrefabData& prefabData, const PrefabInstanceOptions& options) {
+    bool PrefabManager::createComponentsFromPrefab(EntityID entityId, const PrefabData& prefabData, [[maybe_unused]] const PrefabInstanceOptions& options) {
         for (const auto& componentPair : prefabData.componentData) {
             std::string formattedJson = "{\"" + componentPair.first + "\": " + componentPair.second + "}";
             if (!SEM.parseComponents(entityId, formattedJson)) {
@@ -181,7 +181,7 @@ namespace gam300 {
     //    return true;
     //}
 
-    bool PrefabManager::savePrefab(const std::string& prefabName, const std::string& filePath) {
+    bool PrefabManager::savePrefab(const std::string& prefabName, [[maybe_unused]] const std::string& filePath) {
         auto it = m_prefabs.find(prefabName);
         if (it == m_prefabs.end()) {
             LM.writeLog("PrefabManager::savePrefab() - Prefab '%s' not found", prefabName.c_str());
@@ -272,7 +272,7 @@ namespace gam300 {
         return 0; // Simplified for now
     }
 
-    bool PrefabManager::parsePrefabFile(const std::string& filePath, PrefabData& outPrefabData) {
+    bool PrefabManager::parsePrefabFile([[maybe_unused]] const std::string& filePath, [[maybe_unused]] PrefabData& outPrefabData) {
         return true; // Simplified for now
     }
 

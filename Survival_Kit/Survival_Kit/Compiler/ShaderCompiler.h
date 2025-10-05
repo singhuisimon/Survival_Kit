@@ -1,3 +1,13 @@
+/**
+ * @file ShaderCompiler.h
+ * @brief Shader resource compiler.
+ * @details Compiles and validates shader source code to binary format.
+ * @author Simon Chan
+ * @date October 2025
+ * Copyright (C) 2025 DigiPen Institute of Technology.
+ * Reproduction or disclosure of this file or its contents without the
+ * prior written consent of DigiPen Institute of Technology is prohibited.
+ */
 #pragma once
 #ifndef __SHADER_COMPILER_H__
 #define __SHADER_COMPILER_H__

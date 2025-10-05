@@ -1,9 +1,13 @@
 /**
  * @file TextureCompiler.h
- * @brief Texture resource compiler
- * @details Compiles intermediate textures to optimized binary format
+ * @brief Texture resource compiler.
+ * @details Compiles intermediate textures to optimized binary format with mipmap generation.
+ * @author Simon Chan
+ * @date October 2025
+ * Copyright (C) 2025 DigiPen Institute of Technology.
+ * Reproduction or disclosure of this file or its contents without the
+ * prior written consent of DigiPen Institute of Technology is prohibited.
  */
-
 #pragma once
 #ifndef __TEXTURE_COMPILER_H__
 #define __TEXTURE_COMPILER_H__

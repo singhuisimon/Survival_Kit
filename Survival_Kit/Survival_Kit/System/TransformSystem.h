@@ -1,9 +1,12 @@
 /**
  * @file TransformSystem.h
- * @brief RAII Wrappers for GPU resources (OpenGL based).
- * @details Contains the prototype of RAII wrappers for GPU resources like vertex array objects and buffer objects.
- * @author
- * @date
+ * @brief Entity-component system for hierarchical transformations
+ * @details Manages Transform3D components and propagates transformations through
+ *          parent-child hierarchies. Computes world-space transforms from local
+ *          transforms, enabling scene graphs with nested coordinate spaces. Updates
+ *          all entity positions, rotations, and scales each frame.
+ * @author Tan Jun Rui
+ * @date 05 October 2025
  * Copyright (C) 2025 DigiPen Institute of Technology.
  * Reproduction or disclosure of this file or its contents without the
  * prior written consent of DigiPen Institute of Technology is prohibited.
