@@ -1,3 +1,14 @@
+/**
+ * @file survival_kit_obj.frag
+ * @brief Declaration of the objects fragment shader for the game engine.
+ * @details Manages per-fragment data of the object 
+ * @author Chua Wen Bin Kenny
+ * @date 10 September 2025
+ * Copyright (C) 2025 DigiPen Institute of Technology.
+ * Reproduction or disclosure of this file or its contents without the
+ * prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+
 #version 420 core
 //
 struct Material 
@@ -162,9 +173,6 @@ vec3 BlinnPhong(vec3 position, vec3 normal, Light light, Material material, mat4
 }
 
 /////////////////////////////////// Functions /////////////////////////////////////////
-
-
-
 
 void main() 
 {

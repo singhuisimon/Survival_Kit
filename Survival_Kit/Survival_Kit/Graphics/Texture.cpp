@@ -1,3 +1,16 @@
+/**
+ * @file Texture.cpp
+ * @brief GPU texture resource management with RAII semantics
+ * @details Provides a safe, move-only wrapper around OpenGL 4.6 texture objects.
+ *          Supports loading textures from files with configurable color space,
+ *          mipmap generation, and vertical flip options. Implements RAII to
+ *          ensure proper GPU resource cleanup.
+ * @author Tan Jun Rui
+ * @date 05 October 2025
+ * Copyright (C) 2025 DigiPen Institute of Technology.
+ * Reproduction or disclosure of this file or its contents without the
+ * prior written consent of DigiPen Institute of Technology is prohibited.
+ */
 #include "../Graphics/Texture.h"
 #include "../Graphics/stb_image.h"
 #include "../Graphics/Common.h"

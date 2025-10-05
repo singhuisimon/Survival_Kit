@@ -1,3 +1,16 @@
+/**
+ * @file Sampler.cpp
+ * @brief GPU sampler state management for texture filtering and wrapping
+ * @details Provides RAII wrappers for OpenGL 4.6 sampler objects, which define
+ *          how textures are sampled (filtering, wrapping, anisotropy). Sampler
+ *          objects separate sampling parameters from texture data, allowing
+ *          the same texture to be sampled differently in various contexts.
+ * @author Tan Jun Rui
+ * @date 05 October 2025
+ * Copyright (C) 2025 DigiPen Institute of Technology.
+ * Reproduction or disclosure of this file or its contents without the
+ * prior written consent of DigiPen Institute of Technology is prohibited.
+ */
 #include "../Graphics/Sampler.h"
 
 namespace gam300 {

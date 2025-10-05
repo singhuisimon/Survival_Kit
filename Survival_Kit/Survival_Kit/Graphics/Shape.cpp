@@ -1,4 +1,16 @@
-﻿#include "../Graphics/Shape.h"
+﻿/**
+ * @file Shape.cpp
+ * @brief Procedural geometry generation utilities
+ * @details Provides factory functions for creating common 3D primitive shapes
+ *          and utilities for uploading mesh data to the GPU. All generated
+ *          meshes include vertex positions, normals, and texture coordinates.
+ * @author Tan Jun Rui
+ * @date 05 October 2025
+ * Copyright (C) 2025 DigiPen Institute of Technology.
+ * Reproduction or disclosure of this file or its contents without the
+ * prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+#include "../Graphics/Shape.h"
 #include "../Manager/GraphicsManager.h"
 #include "../Utility/MathUtils.h"
 

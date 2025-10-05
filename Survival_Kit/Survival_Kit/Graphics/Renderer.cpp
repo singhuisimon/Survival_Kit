@@ -1,3 +1,17 @@
+/**
+ * @file Renderer.cpp
+ * @brief Core rendering system for managing the graphics pipeline
+ * @details This class encapsulates the entire rendering workflow including
+ *          mesh management, shader programs, render passes, framebuffers,
+ *          and material systems. It provides a high-level interface for
+ *          rendering 3D scenes using OpenGL 4.6.
+ * @author Tan Jun Rui
+ * @date 05 October 2025
+ * Copyright (C) 2025 DigiPen Institute of Technology.
+ * Reproduction or disclosure of this file or its contents without the
+ * prior written consent of DigiPen Institute of Technology is prohibited.
+ */
+
 #include "../Graphics/Renderer.h"
 #include "../Manager/InputManager.h"
 
@@ -257,7 +271,8 @@ namespace gam300 {
 		glBindFramebuffer(GL_FRAMEBUFFER, static_cast<GLuint>(fbo.handle()));
 
 		auto& viewport = pass.view_port;
-		glViewport(viewport.x, viewport.y, viewport.z, viewport.w);
+		glViewport(static_cast<GLint>(viewport.x), static_cast<GLint>(viewport.y), 
+				   static_cast<GLsizei>(viewport.z), static_cast<GLsizei>(viewport.w));
 
 		pass.depth_test ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS);
@@ -383,7 +398,7 @@ namespace gam300 {
 
 #pragma region SET_UNIFORM_TEMP
 		if (textureMode) {
-			glBindTextureUnit(0, t_testing_textures[selected_texture].handle());
+			glBindTextureUnit(0, static_cast<GLuint>(t_testing_textures[selected_texture].handle()));
 			prog.setUniform("Texture2D", 0);
 			prog.setUniform("isTexture", true);
 

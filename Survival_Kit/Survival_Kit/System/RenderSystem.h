@@ -1,3 +1,16 @@
+/**
+ * @file RenderSystem.h
+ * @brief Entity-component system for rendering scene geometry
+ * @details Processes entities with Transform3D and MeshComponent to generate
+ *          draw calls. Maintains a camera, lighting state, and builds a draw
+ *          list each frame for submission to the renderer. Responsible for
+ *          culling, sorting, and batching renderable entities.
+ * @author Tan Jun Rui
+ * @date 05 October 2025
+ * Copyright (C) 2025 DigiPen Institute of Technology.
+ * Reproduction or disclosure of this file or its contents without the
+ * prior written consent of DigiPen Institute of Technology is prohibited.
+ */
 #pragma once
 
 #include <unordered_map>
