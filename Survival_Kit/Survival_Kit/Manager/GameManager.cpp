@@ -26,16 +26,17 @@
 #include "../Component/Script.h"
 #include "../Component/MeshComponent.h"
 #include "../Component/TextureComponent.h"
+#include "../Component/AIComponent.h"
 
 // Include system headers
 #include "../System/MovementSystem.h"
 #include "../System/PhysicsSystem.h"
 #include "../System/RenderSystem.h"
-#include "../Component/RigidBody.h"
 #include "../System/BulletSystem.h"
 #include "../System/CollisionSystem.h"
 #include "../System/TransformSystem.h"
 #include "../System/AudioSystem.h"
+#include "../System/AISystem.h"
 
 // Include Utility headers
 #include "../Utility/Clock.h"
@@ -155,6 +156,9 @@ namespace gam300 {
         CM.register_component<TextureComponent>();
         LM.writeLog("GameManager::startUp() - Texture componennt registered successfully");
 
+		CM.register_component<AIComponent>();
+		LM.writeLog("GameManager::startUp() - AIComponent component registered successfully");
+
         // Check the scene path
         const std::string scenePath = getAssetFilePath("Scene/Game.scn");
         LM.writeLog("GameManager::startUp() - Attempting to load scene from '%s'", scenePath.c_str());
@@ -169,6 +173,7 @@ namespace gam300 {
         SM.register_system<RenderSystem>();
         SM.register_system<TransformSystem>();
         SM.register_system<AudioSystem>();
+		SM.register_system<AISystem>();
 
         // Initialize step count
         m_step_count = 0;

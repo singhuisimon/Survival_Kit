@@ -24,6 +24,7 @@
     <ClCompile Include="Compiler\ResourceCompiler.cpp" />
     <ClCompile Include="Compiler\ShadowCompiler.cpp" />
     <ClCompile Include="Compiler\TextureCompiler.cpp" />
+    <ClCompile Include="Component\AIComponent.cpp" />
     <ClCompile Include="Component\Bullet.cpp" />
     <ClCompile Include="Component\Collider.cpp" />
     <ClCompile Include="Component\MeshComponent.cpp" />
@@ -81,6 +82,7 @@
     <ClCompile Include="Manager\SerialisationBinManager.cpp" />
     <ClCompile Include="Manager\SerialisationManager.cpp" />
     <ClCompile Include="Manager\SystemManager.cpp" />
+    <ClCompile Include="System\AISystem.cpp" />
     <ClCompile Include="System\RenderSystem.cpp" />
     <ClCompile Include="System\BulletSystem.cpp" />
     <ClCompile Include="System\CollisionSystem.cpp" />
@@ -102,6 +104,7 @@
     <ClInclude Include="Compiler\ResourceCompiler.h" />
     <ClInclude Include="Compiler\ShaderCompiler.h" />
     <ClInclude Include="Compiler\TextureCompiler.h" />
+    <ClInclude Include="Component\AIComponent.h" />
     <ClInclude Include="Component\AudioComponent.h" />
     <ClInclude Include="Component\Bullet.h" />
     <ClInclude Include="Component\Collider.h" />
@@ -177,6 +180,7 @@
     <ClInclude Include="Pipeline\Importers\TextureImporter.h" />
     <ClInclude Include="Manager\SerialisationBinManager.h" />
     <ClInclude Include="Manager\SerialisationManager.h" />
+    <ClInclude Include="System\AISystem.h" />
     <ClInclude Include="System\RenderSystem.h" />
     <ClInclude Include="System\BulletSystem.h" />
     <ClInclude Include="System\CollisionSystem.h" />
