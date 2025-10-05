@@ -30,15 +30,15 @@ namespace gam300 {
 	* @brief Per-asset metadata tracked by the pipeline/editor.
 	*/
 	struct AssetRecord {
-		AssetId id = 0; //!< Stable ID
-		std::string sourcePath; //!< Canonical source path (forward slashes)
-		std::string intermediatePath; //!< Where the importer writes the cooked/intermediate file
-		std::string compiledPath; //!< (Future) where a fully compiled runtime blob may live
-		AssetType type = AssetType::Unknown; //!< Asset classification
-		std::string ext; //!< Extension from source (e.g. ".png")
-		std::string contentHash; //!< Optional strong content hash (hex)
-		std::time_t lastWriteTime = 0; //!< Last observed source mtime (seconds)
-		bool valid = false; //!< Import success flag (true when last import succeeded)
+		AssetId id = 0; // Stable ID
+		std::string sourcePath; // Canonical source path (forward slashes)
+		std::string intermediatePath; // Where the importer writes the cooked/intermediate file
+		std::string compiledPath; // (Future) where a fully compiled runtime blob may live
+		AssetType type = AssetType::Unknown; // Asset classification
+		std::string ext; //Extension from source (e.g. ".png")
+		std::string contentHash; // Optional strong content hash (hex)
+		std::time_t lastWriteTime = 0; // Last observed source mtime (seconds)
+		bool valid = false; // Import success flag (true when last import succeeded)
 	};
 
 	/**
@@ -95,8 +95,8 @@ namespace gam300 {
 		static std::string ExtensionLower(const std::string& path);
 
 		//storage
-		std::unordered_map<AssetId, AssetRecord> byId; //!< id -> record
-		std::unordered_map<std::string, AssetId> bySourcePath; //!< normalized source -> id
+		std::unordered_map<AssetId, AssetRecord> byId; // id > record
+		std::unordered_map<std::string, AssetId> bySourcePath; // normalized source -> id
 
 	};
 

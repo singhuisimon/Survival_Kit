@@ -26,8 +26,8 @@ namespace gam300 {
 	* @brief Change description for a scanned source file.
 	*/
 	struct ScanChange {
-		enum class Kind { Added, Modified, Removed } kind; //!< Change category
-		std::string sourcePath; //!< Absolute/normalized path
+		enum class Kind { Added, Modified, Removed } kind; // Change category
+		std::string sourcePath; // Absolute/normalized path
 	};
 
 	/**
@@ -36,8 +36,8 @@ namespace gam300 {
 	* cheap-but-effective change heuristic.
 	*/
 	struct FileStamp {
-		std::time_t lastWrite = 0; //!< Last write time converted to system_clock
-		std::uintmax_t size = 0; //!< Size in bytes
+		std::time_t lastWrite = 0; // Last write time converted to system_clock
+		std::uintmax_t size = 0; // Size in bytes
 	};
 
 	/**
