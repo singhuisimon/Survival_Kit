@@ -1,3 +1,13 @@
+/**
+ * @file AudioCompiler.cpp
+ * @brief Implementation of audio compilation.
+ * @details Handles audio compression and binary serialization for runtime playback.
+ * @author Simon Chan
+ * @date October 2025
+ * Copyright (C) 2025 DigiPen Institute of Technology.
+ * Reproduction or disclosure of this file or its contents without the
+ * prior written consent of DigiPen Institute of Technology is prohibited.
+ */
 #include "AudioCompiler.h"
 #include <fstream>
 #include <filesystem>

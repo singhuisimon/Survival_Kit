@@ -1,3 +1,13 @@
+/**
+ * @file ShaderCompiler.cpp
+ * @brief Implementation of shader compilation.
+ * @details Handles shader validation and binary serialization for GPU execution.
+ * @author Simon Chan
+ * @date October 2025
+ * Copyright (C) 2025 DigiPen Institute of Technology.
+ * Reproduction or disclosure of this file or its contents without the
+ * prior written consent of DigiPen Institute of Technology is prohibited.
+ */
 #include "ShaderCompiler.h"
 #include <fstream>
 #include <filesystem>
