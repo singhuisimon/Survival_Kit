@@ -1,7 +1,7 @@
 /**
  * @file AssetManager.cpp
  * @brief Implements the asset management system and compilation pipeline.
- * @author Wai Lwin Thit, Rio Shannon Yvon Leonardo
+ * @author Wai Lwin Thit(20%), Simon Chan(30%), Rio Shannon Yvon Leonardo(50%)
  * @date 18/09/2025
  * Copyright (C) 2025 DigiPen Institute of Technology.
  * Reproduction or disclosure of this file or its contents without the

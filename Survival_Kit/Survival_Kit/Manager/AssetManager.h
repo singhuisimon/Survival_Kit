@@ -3,7 +3,7 @@
 /**
  * @file AssetManager.h
  * @brief Declares the AssetManager for coordinating asset pipeline tasks.
- * @author Wai Lwin Thit, Rio Shannon Yvon Leonardo
+ * @author Wai Lwin Thit(20%), Simon Chan(30%), Rio Shannon Yvon Leonardo(50%)
  * @date 18/09/2025
  * Copyright (C) 2025 DigiPen Institute of Technology.
  * Reproduction or disclosure of this file or its contents without the
@@ -53,9 +53,9 @@ namespace gam300 {
 	* @brief Job for the compilation thread pool
 	*/
 	struct CompilationJob {
-		AssetId assetId;
+		AssetId assetId = 0;
 		std::string intermediatePath;
-		AssetType assetType;
+		AssetType assetType = AssetType::Unknown;
 		std::unique_ptr<ResourceProperties> properties;
 		xresource::full_guid guid;
 	};
@@ -121,7 +121,9 @@ namespace gam300 {
 				assetsPath + "Audio",
 				assetsPath + "Textures",
 				assetsPath + "Scene",
-				assetsPath + "Shaders"
+				assetsPath + "Shaders",
+		        assetsPath + "Meshes"
+
 			};
 
 			// Descriptor configuration

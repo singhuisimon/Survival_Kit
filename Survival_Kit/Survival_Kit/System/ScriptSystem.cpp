@@ -49,6 +49,9 @@ namespace gam300 {
             m_script_engine_initialized = false;
             return false;
         }
+
+        // Unreferenced parameter
+        system_manager;
     }
 
     void ScriptSystem::update([[maybe_unused]] float dt) {

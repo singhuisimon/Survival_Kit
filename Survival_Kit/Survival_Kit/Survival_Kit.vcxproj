@@ -52,7 +52,6 @@
     <ClCompile Include="Main\Main.cpp" />
     <ClCompile Include="Manager\AssetManager.cpp" />
     <ClCompile Include="Manager\ComponentManager.cpp" />
-    <ClCompile Include="Manager\DescriptorFileManager.cpp" />
     <ClCompile Include="Manager\ECSManager.cpp" />
     <ClCompile Include="Manager\ForceManager.cpp" />
     <ClCompile Include="Manager\GameManager.cpp" />
@@ -64,6 +63,8 @@
     <ClCompile Include="Manager\ResourceManager.cpp" />
     <ClCompile Include="Manager\TracyManager.cpp" />
     <ClCompile Include="Manager\TorqueManager.cpp" />
+    <ClCompile Include="OpenFBX\libdeflate.c" />
+    <ClCompile Include="OpenFBX\ofbx.cpp" />
     <ClCompile Include="Pipeline\DescriptorEditor.cpp" />
     <ClCompile Include="Pipeline\Importers\AudioImporter.cpp" />
     <ClCompile Include="Pipeline\Importers\MeshImporter.cpp" />
@@ -146,7 +147,6 @@
     <ClInclude Include="Main\Main.h" />
     <ClInclude Include="Manager\AssetManager.h" />
     <ClInclude Include="Manager\ComponentManager.h" />
-    <ClInclude Include="Manager\DescriptorFileManager.h" />
     <ClInclude Include="Manager\ECSManager.h" />
     <ClInclude Include="Manager\ForceManager.h" />
     <ClInclude Include="Manager\GameManager.h" />
@@ -159,6 +159,8 @@
     <ClInclude Include="Manager\ResourceManager.h" />
     <ClInclude Include="Manager\TracyManager.h" />
     <ClInclude Include="Manager\TorqueManager.h" />
+    <ClInclude Include="OpenFBX\libdeflate.h" />
+    <ClInclude Include="OpenFBX\ofbx.h" />
     <ClInclude Include="Pipeline\DescriptorEditor.h" />
     <ClInclude Include="Resource\ResourceData.h" />
     <ClInclude Include="Resource\ResourceMetadata.h" />
@@ -308,7 +310,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;TRACY_ENABLE;TRACY_ON_DEMAND;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)ScriptCore;$(SolutionDir)External_Libraries\include\FMOD API\core;$(SolutionDir)External_Libraries\include\FMOD API\studio;$(ProjectDir)Tracy;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)ScriptCore;$(SolutionDir)External_Libraries\include\FMOD API\core;$(SolutionDir)External_Libraries\include\FMOD API\studio;$(SolutionDir)External_Libraries\include\OpenFBX;$(ProjectDir)Tracy;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -334,7 +336,7 @@ if exist "$(SolutionDir)..\tracy-profiler.exe" (
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)ScriptCore;$(SolutionDir)External_Libraries\include\FMOD API\core;$(SolutionDir)External_Libraries\include\FMOD API\studio;$(ProjectDir)Tracy;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)ScriptCore;$(SolutionDir)External_Libraries\include\FMOD API\core;$(SolutionDir)External_Libraries\include\FMOD API\studio;$(SolutionDir)External_Libraries\include\OpenFBX;$(ProjectDir)Tracy;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>

@@ -1,8 +1,11 @@
 /**
  * @file ResourceCompiler.cpp
- * @brief Implementation of base compiler functionality
+ * @brief Base interface for resource compilers
+ * @details Defines the common interface for all resource type compilers
+ * @author Simon Chan
+ * @date
+ * Copyright (C) 2025 DigiPen Institute of Technology.
  */
-
 #include "ResourceCompiler.h"
 #include <filesystem>
 
