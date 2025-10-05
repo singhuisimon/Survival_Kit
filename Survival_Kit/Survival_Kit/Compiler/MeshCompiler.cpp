@@ -1,3 +1,13 @@
+/**
+ * @file MeshCompiler.cpp
+ * @brief Implementation of mesh compilation.
+ * @details Handles mesh optimization and binary serialization for runtime loading.
+ * @author Wai Lwin Thit
+ * @date October 2025
+ * Copyright (C) 2025 DigiPen Institute of Technology.
+ * Reproduction or disclosure of this file or its contents without the
+ * prior written consent of DigiPen Institute of Technology is prohibited.
+ */
 #include "MeshCompiler.h"
 #include <fstream>
 #include <filesystem>
@@ -12,7 +22,7 @@ namespace gam300 {
 
     CompileResult MeshCompiler::compile(
         const std::string& intermediatePath,
-        const ResourceProperties* properties,
+        [[maybe_unused]] const ResourceProperties* properties,
         ResourcePaths& paths,
         const xresource::full_guid& guid
     ) {

@@ -281,15 +281,17 @@ xresource::loader<gam300::ResourceGUID::mesh_type_guid_v>::Load(
     size_t stride = 8 * sizeof(float);
 
     // Position attribute (location = 0)
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
+    // Cast stride to GLsizei to avoid warnings
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, static_cast<GLsizei>(stride), (void*)0);
+
     glEnableVertexAttribArray(0);
 
     // Normal attribute (location = 1)
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, static_cast<GLsizei>(stride), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
     // TexCoord attribute (location = 2)
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, (void*)(6 * sizeof(float)));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, static_cast<GLsizei>(stride), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
     glBindVertexArray(0);

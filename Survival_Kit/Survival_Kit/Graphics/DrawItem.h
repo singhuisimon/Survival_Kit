@@ -1,3 +1,16 @@
+/**
+ * @file DrawItem.h
+ * @brief Drawable object representation for rendering
+ * @details Defines a lightweight structure representing a single drawable
+ *          entity in the scene. Contains indices to shared resources (mesh,
+ *          texture, material) and per-instance transformation data. Used to
+ *          submit geometry to the renderer efficiently.
+ * @author Tan Jun Rui
+ * @date 05 October 2025
+ * Copyright (C) 2025 DigiPen Institute of Technology.
+ * Reproduction or disclosure of this file or its contents without the
+ * prior written consent of DigiPen Institute of Technology is prohibited.
+ */
 #pragma once
 
 #ifndef __DRAW_ITEM_H__
@@ -7,6 +20,13 @@
 
 namespace gam300{
 
+	/**
+	 * @brief Represents a single drawable object instance in the scene
+	 * @details Compact structure containing resource handles and transform data.
+	 *          Multiple DrawItems can reference the same mesh/texture/material,
+	 *          enabling efficient instanced rendering. The renderer uses these
+	 *          to batch and execute draw calls.
+	 */
 	struct DrawItem
 	{
 		u16       m_mesh_handle;
