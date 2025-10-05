@@ -15,7 +15,7 @@ namespace gam300 {
     bool IResourceCompiler::needsRecompile(
         const std::string& intermediatePath,
         const std::string& compiledPath,
-        const ResourceProperties* properties
+        [[maybe_unused]] const ResourceProperties* properties
     ) const {
         // Check if compiled file exists
         if (!fs::exists(compiledPath)) {

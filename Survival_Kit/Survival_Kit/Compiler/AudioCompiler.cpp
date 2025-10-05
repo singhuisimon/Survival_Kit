@@ -8,7 +8,7 @@ namespace gam300 {
 
     CompileResult AudioCompiler::compile(
         const std::string& intermediatePath,
-        const ResourceProperties* properties,
+        [[maybe_unused]] const ResourceProperties* properties,
         ResourcePaths& paths,
         const xresource::full_guid& guid
     ) {
