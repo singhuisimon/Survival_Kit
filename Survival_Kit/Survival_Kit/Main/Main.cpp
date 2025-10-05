@@ -226,7 +226,7 @@ int main(void) {
             fps_timer = 0.0;
 
             // for performance profile use
-            IMGUIM.updateFPS(current_fps);
+            IMGUIM.updateFPS(static_cast<float>(current_fps));
         }
 
         // Convert frame time from milliseconds to microseconds

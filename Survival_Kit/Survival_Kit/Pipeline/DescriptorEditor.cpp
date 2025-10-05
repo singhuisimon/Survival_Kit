@@ -362,6 +362,7 @@ namespace gam300 {
 
     bool DescriptorEditor::WriteDescriptorFile(const std::string& filePath,
         const EditableDescriptor& descriptor) {
+        (void)filePath;
         // Get the asset record to include in JSON
         const AssetRecord* rec = m_db.Find(descriptor.assetId);
         if (!rec) return false;

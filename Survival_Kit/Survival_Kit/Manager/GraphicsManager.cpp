@@ -212,9 +212,6 @@ namespace gam300 {
 
         glQueryCounter(gpuStartQueries[q], GL_TIMESTAMP);
 
-        // === Main Rendering Pass ===
-        auto& renderer = getRenderer();
-
         glQueryCounter(gpuEndQueries[q], GL_TIMESTAMP);
         TracyGpuCollect; // flush GPU timeline to Tracy
 

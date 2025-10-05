@@ -66,6 +66,7 @@ namespace gam300 {
 	}
 
 	void TransformSystem::process_entity(EntityID entity_id) {
+		(void)entity_id;
 		return;
 	}
 

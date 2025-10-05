@@ -36,9 +36,6 @@ namespace gam300
 
         // Direct-move speed for static bodies (units/sec)
         float m_kinematicSpeed{ 2.0f };
-
-        // Mask to tag per-frame input forces in ForceManager
-        static constexpr unsigned INPUT_FORCE_MASK = 1u << 0;
     };
 }
 
