@@ -3,7 +3,7 @@
 /**
  * @file AssetImporter.h
  * @brief Declares the asset importer interface and registry. 
- * @author Wai Lwin Thit, Rio Shannon Yvon Leonardo
+ * @author Rio Shannon Yvon Leonardo
  * @date 15/09/2025
  * Copyright (C) 2025 DigiPen Institute of Technology.
  * Reproduction or disclosure of this file or its contents without the
@@ -40,11 +40,11 @@ namespace gam300 {
 	* @brief Result of a single import operation.
 	*/
 	struct ImportResult {
-		bool ok = false; //!< True if importer succeeded
-		std::string intermediatePath; //!< Full path to the generated file
-		AssetType type = AssetType::Unknown; //!< Classified asset type
-		std::string contentHash; //!< Optional content hash (hex)
-		std::string error; //!< Short error message when ok==false
+		bool ok = false; // True if importer succeeded
+		std::string intermediatePath; // Full path to the generated file
+		AssetType type = AssetType::Unknown; // Classified asset type
+		std::string contentHash; // Optional content hash (hex)
+		std::string error; // Short error message when ok==false
 		std::optional<TextureSettings> textureSettings; //ADDED
 	
 	};

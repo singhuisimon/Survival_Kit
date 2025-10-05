@@ -3,7 +3,7 @@
 /**
  * @file AssetDescriptorGenerator.h
  * @brief Declares the asset descriptor generator class. 
- * @author Wai Lwin Thit, Rio Shannon Yvon Leonardo
+ * @author Wai Lwin Thit (20%), Rio Shannon Yvon Leonardo(80%)
  * @date 15/09/2025
  * Copyright (C) 2025 DigiPen Institute of Technology.
  * Reproduction or disclosure of this file or its contents without the
@@ -29,6 +29,60 @@ namespace gam300 {
 
 	// Forward declaration to avoid coupling. Defined in AssetDatabase.h
 	struct AssetRecord;
+	//for basic audio compilation settings 
+	struct AudioSettings {
+
+		//output format 
+		std::string outputFormat = "OGG"; //the target format could be OGG, WAV
+		std::string compression = "VORBIS"; //VORBIS, PCM
+
+		//quality
+		float quality = 0.7f;	//compression quality 0.0-1.0
+		int sampleRate = 44100; //output sample rate 
+		//channels
+		std::string channelMode = "STEREO"; //MONO or STEREO
+	};
+
+	//for basic mesh compilation settings
+	struct MeshSettings {
+
+		//output format
+		std::string outputFormat = "CUSTOM"; //custom binary format for the engine
+
+		//vertex Data 
+		bool includePos = true; //need position
+		bool includeNormals = true; //for lighting
+		bool includeColors = false; //vertex colors
+		bool includeTexCoords = true; //for texturing
+
+		//index format
+		std::string indexType = "UINT32"; //UINT16 or UINT32
+
+		//transform 
+		float scale = 1.0f; //uniform scale
+
+		//optimizations 
+		bool optimizeVertices = true; //remove duplicates and optimize cache
+		bool generateNormals = false; //generate if missing
+	};
+
+	//basic shader compilation settings
+	struct ShaderSettings {
+		//input files
+		std::string vertexShader = ""; //Path to .vert source
+		std::string fragmentShader = ""; //Path to .frag source
+
+		//output format 
+		std::string outputFormat = "GLSL"; //SPIRV or GLSL
+
+		//target platform is OPENGL
+		std::string targetAPI = "OPENGL";
+		std::string targetVersion = "460"; //what is thisisssssss
+
+		//optimization 
+		std::string optimizationLevel = "PERFORMANCE"; //none, size, performance
+		bool stripDebugInfo = true; //remove debug symbols 
+	};
 
 	/**
 	* @brief Optional extra metadata to embed in the descriptor.
@@ -50,7 +104,12 @@ namespace gam300 {
 		bool srgb = false;
 		std::vector<std::string> inputFiles;
 
-	
+		//new audio settings (for compile settings)
+		AudioSettings audioSettings;
+		//new mesh settings (for compile settings)
+		MeshSettings meshSettings;
+		//new shader settings (for compiler)
+		ShaderSettings shaderSettings;
 	};
 
 	/**

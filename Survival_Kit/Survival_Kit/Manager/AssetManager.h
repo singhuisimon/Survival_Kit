@@ -3,7 +3,7 @@
 /**
  * @file AssetManager.h
  * @brief Declares the AssetManager for coordinating asset pipeline tasks.
- * @author Wai Lwin Thit, Rio Shannon Yvon Leonardo
+ * @author Wai Lwin Thit(20%), Simon Chan(30%), Rio Shannon Yvon Leonardo(50%)
  * @date 18/09/2025
  * Copyright (C) 2025 DigiPen Institute of Technology.
  * Reproduction or disclosure of this file or its contents without the
@@ -53,9 +53,9 @@ namespace gam300 {
 	* @brief Job for the compilation thread pool
 	*/
 	struct CompilationJob {
-		AssetId assetId;
+		AssetId assetId = 0;
 		std::string intermediatePath;
-		AssetType assetType;
+		AssetType assetType = AssetType::Unknown;
 		std::unique_ptr<ResourceProperties> properties;
 		xresource::full_guid guid;
 	};
@@ -96,9 +96,9 @@ namespace gam300 {
 			bool followSymlinks = false; // Recurse through symlinks
 
 			//temporary for now
-			std::string intermediateDirectory = "Survival_Kit/Survival_Kit/Assets/Cache/Intermediate"; //!< Where import output goes
-			std::string databaseFile = "Survival_Kit/Survival_Kit/Assets/Cache/assetdb.txt"; //!< Asset DB persistence
-			std::string snapshotFile = "Survival_Kit/Survival_Kit/Assets/Cache/scan.snapshot"; //!< Scanner warm start
+			std::string intermediateDirectory = "Survival_Kit/Survival_Kit/Assets/Cache/Intermediate"; // Where import output goes
+			std::string databaseFile = "Survival_Kit/Survival_Kit/Assets/Cache/assetdb.txt"; // Asset DB persistence
+			std::string snapshotFile = "Survival_Kit/Survival_Kit/Assets/Cache/scan.snapshot"; // Scanner warm start
 
 			bool writeDescriptors = true; // Emit .desc files
 			bool descriptorSidecar = true; // `foo.png.desc` next to source
@@ -121,7 +121,9 @@ namespace gam300 {
 				assetsPath + "Audio",
 				assetsPath + "Textures",
 				assetsPath + "Scene",
-				assetsPath + "Shaders"
+				assetsPath + "Shaders",
+		        assetsPath + "Meshes"
+
 			};
 
 			// Descriptor configuration
@@ -145,8 +147,8 @@ namespace gam300 {
 
 
 		// --------------- Lifetime (Manager API) ---------------
-		int startUp() override; //!< Configure pipeline and warm-load DB
-		void shutDown() override; //!< Persist DB and snapshot
+		int startUp() override; // Configure pipeline and warm-load DB
+		void shutDown() override; // Persist DB and snapshot
 
 
 		// --------------- Main work ---------------
@@ -228,7 +230,7 @@ namespace gam300 {
 
 		// State
 		Config m_cfg{};
-		::gam300::AssetScanner m_scanner; //!< Scanner lives in namespace *game300*
+		::gam300::AssetScanner m_scanner; // Scanner lives in namespace *game300*
 		AssetImporterRegistry m_importers;
 		AssetDatabase m_db;
 		AssetDescriptorGenerator m_descGen;

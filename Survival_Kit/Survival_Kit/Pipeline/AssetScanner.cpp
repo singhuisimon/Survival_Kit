@@ -1,7 +1,7 @@
 /**
  * @file AssetScanner.cpp
  * @brief Implements the asset directory scanner. 
- * @author Wai Lwin Thit, Rio Shannon Yvon Leonardo
+ * @author Rio Shannon Yvon Leonardo
  * @date 15/09/2025
  * Copyright (C) 2025 DigiPen Institute of Technology.
  * Reproduction or disclosure of this file or its contents without the
@@ -99,14 +99,14 @@ namespace gam300 {
 	//scanning
 	std::vector<ScanChange> AssetScanner::Scan()
 	{
-		std::vector<ScanChange> changes;                 // <— previously missing
-		std::unordered_set<std::string> seen;            // <— previously missing
+		std::vector<ScanChange> changes;                 
+		std::unordered_set<std::string> seen;            
 
 		fs::directory_options opts = fs::directory_options::skip_permission_denied;
 		if (m_follow_symlinks)
 			opts |= fs::directory_options::follow_directory_symlink;
 
-		// Iterate over configured roots (previously missing entirely)
+		// Iterate over configured roots 
 		for (const auto& root : m_roots)
 		{
 			if (!fs::exists(root))
