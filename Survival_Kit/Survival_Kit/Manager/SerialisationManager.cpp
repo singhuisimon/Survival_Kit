@@ -431,7 +431,7 @@ namespace gam300 {
         }
 
         if (path.empty()) {
-            path = audio->getHandle();
+            path = std::to_string(audio->getHandle());
         }
 
         ss << "          \"guid\": \"" << path << "\",\n";
