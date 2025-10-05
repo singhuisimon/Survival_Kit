@@ -25,7 +25,7 @@ namespace gam300 {
 																   int& out_channels) {
 
 		stbi_set_flip_vertically_on_load(flip_vertical ? 1 : 0);
-		int channels = 0;
+		//int channels = 0;
 		unsigned char* data = stbi_load(path.string().c_str(), &out_w, &out_h, &out_channels, 4); 
 		if (!data) return std::nullopt; 
 

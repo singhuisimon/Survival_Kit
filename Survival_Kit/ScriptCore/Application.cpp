@@ -224,13 +224,13 @@ namespace Core
         // Step 4: Start the CoreCLR runtime
         int result = initializeCoreClr
         (
-            runtimePath.c_str(),     // AppDomain base path
-            "SampleHost",            // AppDomain friendly name, this can be anything you want really
-            propertyKeys.size(),     // Property count
-            propertyKeys.data(),     // Property names
-            propertyValues.data(),   // Property values
-            &hostHandle,             // Host handle
-            &domainId                // AppDomain ID
+            runtimePath.c_str(),                    // AppDomain base path
+            "SampleHost",                           // AppDomain friendly name, this can be anything you want really
+            static_cast<int>(propertyKeys.size()),  // Property count
+            propertyKeys.data(),                    // Property names
+            propertyValues.data(),                  // Property values
+            &hostHandle,                            // Host handle
+            &domainId                               // AppDomain ID
         );
 
         // Check if intiialization of CoreCLR failed
