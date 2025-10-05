@@ -7,8 +7,7 @@
 // For access to vector types
 #include <glm-0.9.9.8/glm/glm.hpp>
 
-//to load FBX mesh data
-#include "../OpenFBX/ofbx.h"
+
 
 namespace gam300 {
 

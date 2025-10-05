@@ -2,6 +2,10 @@
 #include <fstream>
 #include <filesystem>
 
+
+//to load FBX mesh data
+#include "../OpenFBX/ofbx.h"
+
 namespace fs = std::filesystem;
 
 namespace gam300 {
