@@ -1,5 +1,17 @@
 #pragma once
-
+/**
+ * @file MonoBehaviour.h
+ * @brief Declaration of the MonoBehaviour class for script template management
+ *        and C# script file creation.
+ * @author Kuek Wei Jie
+ * @date October 5, 2025
+ * @details Defines the interface for creating MonoBehaviour scripts from
+ *          templates, validating script names, and managing script files
+ *          within the game engine's scripting system.
+ * Copyright (C) 2025 DigiPen Institute of Technology.
+ * Reproduction or disclosure of this file or its contents without the
+ * prior written consent of DigiPen Institute of Technology is prohibited.
+ */
 #include <string>
 #include <vector>
 #include <filesystem>

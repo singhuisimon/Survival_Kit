@@ -1,4 +1,14 @@
 #pragma once
+
+/**
+ * @file Debug.hxx
+ * @brief Exception handling macros for native and managed code interop.
+ * @author Kuek Wei Jie
+ * @date October 5, 2025
+ * Copyright (C) 2025 DigiPen Institute of Technology.
+ * Reproduction or disclosure of this file or its contents without the
+ * prior written consent of DigiPen Institute of Technology is prohibited.
+ */
 #include <stdexcept>
 #include <iostream>
 

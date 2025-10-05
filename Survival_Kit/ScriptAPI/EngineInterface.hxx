@@ -1,5 +1,19 @@
 // EngineInterface.hxx
 #pragma once
+
+/**
+ * @file EngineInterface.hxx
+ * @brief Declaration of the EngineInterface class providing the C++/CLI bridge
+ *        between native C++ engine code and managed C# scripts.
+ * @author Kuek Wei Jie
+ * @date October 5, 2025
+ * @details Manages script lifecycle including initialization, reloading, script
+ *          attachment to entities, and update execution. Handles assembly loading
+ *          through AssemblyLoadContext for hot-reload support.
+ * Copyright (C) 2025 DigiPen Institute of Technology.
+ * Reproduction or disclosure of this file or its contents without the
+ * prior written consent of DigiPen Institute of Technology is prohibited.
+ */
 #include "Script.hxx"
 namespace ScriptAPI
 {
