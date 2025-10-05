@@ -1,28 +1,26 @@
 /**
  * @file ImguiManager.cpp
  * @brief Implementation of the functions of IMGUI_Manager class for running the IMGUI level editor.
- * @author Liliana Hanawardani, Saw Hui Shan
+ * @author Liliana Hanawardani (45%), Saw Hui Shan (45%), Rio Shannon Yvon Leonardo (10%)
  * @date September 8, 2025
  * Copyright (C) 2025 DigiPen Institute of Technology.
  * Reproduction or disclosure of this file or its contents without the
  * prior written consent of DigiPen Institute of Technology is prohibited.
  */
 
- // Include header file
+// Include header file and managers
 #include "ImguiManager.h"
 #include "ECSManager.h"
-#include "MonoBehaviour.h"
-
 #include "SerialisationManager.h"
 #include "SerialisationBinManager.h"
-
 #include "../Manager/PrefabManager.h"
 #include "../Manager/AssetManager.h"
 #include "../Manager/TracyManager.h"
 
-
+// Include AssetPath headers
 #include "../Utility/AssetPath.h"
 
+// Include component headers
 #include "../Component/Transform3D.h"
 #include "../Component/RigidBody.h"
 #include "../Component/RenderComponent.h"
@@ -31,13 +29,17 @@
 #include "../Component/MeshComponent.h"
 #include "../Component/Script.h"
 
+// Include Script header
+#include "MonoBehaviour.h"
+
+// Includes the standard I/O stream
 #include <iostream>
 
 namespace gam300 {
 
+    // IMGUI Hierachy and Inspector Window functionality
     static bool hierachyWindow = true;
     static bool inspectorWindow = true;
-    static bool assetsBrowser = true; // to load assets
 
     // ----------------- ASSET BROWSER FUNCTIONALITY -----------------
 
@@ -49,12 +51,14 @@ namespace gam300 {
     static float assetIconSize = 64.0f;
     static int selectedAssetIndex = -1;
 
-    //static bool asset_editor = false;
+    // Prefab Editor functionality
     static bool prefab_editor = false;
-    //static std::filesystem::directory_entry currentAsset;
     static std::filesystem::directory_entry selectedPrefab;
 
+    // Descriptor Editor functionality
     static int tex_index = -1;
+
+    // Script UI functionality
     static int selectedScriptIndex = -1;
 
     // Asset Type names for display
@@ -114,8 +118,7 @@ namespace gam300 {
         // Setup scaling
         ImGuiStyle& style = ImGui::GetStyle();
        
-
-        // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
+        // Set WindowRounding and ImGuiCol_WindowBg when viewport is enabled
         if (imgui_io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
         {
             style.WindowRounding = 0.0f;
@@ -147,10 +150,7 @@ namespace gam300 {
     void ImguiManager::finishImguiRender(ImGuiIO& imgui_io) {
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-        // 
         // Update and Render additional Platform Windows
-        // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
-        //  For this specific demo app we could also call glfwMakeContextCurrent(window) directly)
         if (imgui_io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
         {
             GLFWwindow* backup_current_context = glfwGetCurrentContext();
@@ -244,6 +244,7 @@ namespace gam300 {
         }
     }
 
+    // Variables for creating prefabs
     static std::string prefab_name;
     static int prefab_index = -1;
 
@@ -254,13 +255,13 @@ namespace gam300 {
         if (ImGui::Begin("Hierarchy", &hierachyWindow, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize)) {
             const auto& allEntities = ImguiEcsRef.getAllEntities();
 
-        
+            //New Entity Button
             if (ImGui::Button("+"))
             {
                 ImGui::OpenPopup("New Action");
 
             }
-            // what does + button do
+            // Explanation for + button
             if (ImGui::IsItemHovered())
             {
                
@@ -296,16 +297,14 @@ namespace gam300 {
                 ImGui::EndPopup();
             }
 
-
+            // List of entities
             if (allEntities.empty())
             {
-                //std::cout << "There is no entities to get in IMGUI\n"; 
                 ImGui::Text("No entity available.");
                 selectedObjIndex = -1; // reset selected object if there is no entity to get
             }
             else
             {
-                //std::cout << "There are entities to get in IMGUI\n";
                 for (int i = 0; i < allEntities.size(); i++)
                 {
                     const std::string objName = allEntities[i].get_name();
@@ -314,9 +313,8 @@ namespace gam300 {
                         selectedObjIndex = i;
                     }
 
-                    // delete entity by right click 
+                    // Delete entity by right click 
                     if (ImGui::BeginPopupContextItem(("Entity Context" + std::to_string(i)).c_str()))
-                        //if (ImGui::BeginPopup("Selected Entity Menu"))
                     {
                         //========================Delete Entity=====================================
                         if (ImGui::MenuItem("Delete"))
@@ -428,10 +426,6 @@ namespace gam300 {
                             }
 
                             ImGui::Separator();
-                         /*   if (ImGui::MenuItem("Replace Prefabs"))
-                            {
-                                showReplacePrefab = true;
-                            }*/
 
                             ImGui::EndMenu();
                         }
@@ -483,11 +477,9 @@ namespace gam300 {
     {
         ImGui::SetNextWindowSize(ImVec2(600, 400));
 
-
-
         if (ImGui::Begin("Properties/ Inspector", &inspectorWindow, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize))
         {
-            // to get all the entities 
+            // Get all the entities 
             const std::vector<Entity>& allEntities = ImguiEcsRef.getAllEntities();
             if (allEntities.empty() || selectedObjIndex < 0 || selectedObjIndex >= static_cast<int>(allEntities.size()))
             {
@@ -497,18 +489,16 @@ namespace gam300 {
             else
             {
 
-                // Get the selected entity (Fix: proper array access)
+                // Get the selected entity
                 const Entity& selectedEntity = allEntities[selectedObjIndex];
 
-                // Display entity information using input text (Fix: strncpy_s parameters)
+                // Display entity information using input text
                 char nameBuffer[128];
                 const std::string& selectedEntityName = selectedEntity.get_name();
-
-                // Fix: strncpy_s requires 3 parameters: destination, size, source
                 strcpy_s(nameBuffer, sizeof(nameBuffer), selectedEntityName.c_str());
 
                 // add ImGuiInputTextFlags_EnterReturnsTrue to ensure only change name after user press enter
-                // Fix: Game crash if delete the last alphabet since it keep updating the frame and cause a empty ID 
+                // Game crash if delete the last alphabet since it keep updating the frame and cause a empty ID 
                 if (ImGui::InputText("Entity Name", nameBuffer, sizeof(nameBuffer), ImGuiInputTextFlags_EnterReturnsTrue)) {
                     std::string newSelectedEntityName = nameBuffer;
 
@@ -516,7 +506,7 @@ namespace gam300 {
                         newSelectedEntityName = selectedEntity.get_name();
                     }
 
-                    // Fix: Can't modify const entity directly, need to use ECS manager
+                    // Can't modify const entity directly, need to use ECS manager
                     ImguiEcsRef.renameEntity(selectedEntity.get_id(), newSelectedEntityName);
                 }
 
@@ -558,8 +548,8 @@ namespace gam300 {
                 }
 
                 ImGui::Separator();
-                // Adding components 
-
+                
+                // Add components 
                 ImVec2 windowSize = ImGui::GetWindowSize(); // get Properties window size
                 ImVec2 buttonSize(140, 40); // set button size
 
@@ -568,7 +558,6 @@ namespace gam300 {
 
                 if (ImGui::Button("Add Component", buttonSize))
                 {
-                    //ImGui::Text("Component"); // for now only transform3D component
 
                     ImGui::OpenPopup("AddComponentPopup");
                     
@@ -652,9 +641,6 @@ namespace gam300 {
 
                     ImGui::EndPopup();
                 }
-                // Removed Component 
-
-
             }
         }
 
@@ -662,16 +648,8 @@ namespace gam300 {
     }
 #endif
 
-    //void ImguiManager::showPrefabsPanel(EntityID selectedEntity)
-    //{
-    //    //if (ImGui::Begin)
-    //}
-
     void ImguiManager::displayTopMenu()
     {
-        //static std::string shownFile = getAssetFilePath("Scene/") + "default.scn";
-
-
         if (ImGui::BeginMainMenuBar())
         {
             ImGui::Separator();
@@ -681,19 +659,18 @@ namespace gam300 {
                 if (ImGui::MenuItem("New"))
                 {
 
-                    // need to improve, for now just create new untitled file 
+                    // Need to improve, for now just create new untitled file 
                     static int untitledCount = 1;
                     std::string sceneFolder = getAssetFilePath("Scene");
 
-                    // clear all entities to ensure empty scene
+                    // Clear all entities to ensure empty scene
                     ImguiEcsRef.clearAllEntities();
 
                     std::string newScenePath = sceneFolder + "/Untitled" + std::to_string(untitledCount) + ".scn";
-                    untitledCount++;  // increment for next new scene
-                    // ImguiEcsRef.clearAllEntities();
+                    untitledCount++;  // Increment for next new scene
                     SEM.saveScene(newScenePath);
                     shownFile = newScenePath;
-                    //LM.writeLog("New scene created: %s", newScenePath.c_str());
+
                 }
                 if (ImGui::IsItemHovered())
                 {
@@ -716,12 +693,7 @@ namespace gam300 {
                 // --------------------- save scene -----------------------
                 if (ImGui::MenuItem("Save"))
                 {
-
-                    //To uncomment after Serialisation is fixed
-                    // shownFile: Survival_Kit/Assets/Scene\Game.scn
                     SEM.saveScene(shownFile);
-                    //std::cout << "test here" << shownFile << "\n";
-
                 }
              
                 if (ImGui::IsItemHovered())
@@ -770,10 +742,8 @@ namespace gam300 {
                 ImGui::Separator();
 
             }
-            //ImGui::SameLine(); // make 
-            // 
-            // it appear on the same bar
-           
+
+            // Make it appear on the same bar
             std::string displayedScene = shownFile;
             size_t pos = shownFile.find("Assets");
             if (pos != std::string::npos) {
@@ -788,8 +758,6 @@ namespace gam300 {
             ImGui::SetCursorPosX(windowWidth - textWidth - 10); // 10 pixels padding from right
             ImGui::Text("%s", displayedScene.c_str());
 
-            //ImGui::Text("Current Scene: %s", displayedScene.c_str());
-
             ImGui::EndMainMenuBar();
 
         }
@@ -800,23 +768,26 @@ namespace gam300 {
             IMGUIM.displayFileList();
         }
 
+        // ------------------ Open Script Functionality ---------------------------
         if (showScriptOptions) {
 
             if (ImGui::Begin("Script Options", &showScriptOptions, ImGuiWindowFlags_AlwaysAutoResize)) {
 
+                // Get list of scripts
                 static std::vector<std::string> availableScripts = getAvailableScripts();
 
                 const char* currentScript = (selectedScriptIndex >= 0 && selectedScriptIndex < availableScripts.size())
                     ? availableScripts[selectedScriptIndex].c_str()
                     : "Select Script";
 
+                // Dropdown to select script
                 if (ImGui::BeginCombo("Select Script", currentScript)) {
                     for (int i = 0; i < availableScripts.size(); ++i) {
                         bool isSelected = (i == selectedScriptIndex);
                         if (ImGui::Selectable(availableScripts[i].c_str(), isSelected)) {
                             selectedScriptIndex = i;
                             Core::MonoBehaviour::OpenScriptInEditor(availableScripts[i]);
-                            showScriptOptions = false; // auto-close after selection (optional)
+                            showScriptOptions = false; 
                         }
 
                         if (isSelected)
@@ -834,6 +805,7 @@ namespace gam300 {
 
         }
 
+        // ------------------ New Script Functionality ---------------------------
         if (makeScript)
         {
             if (ImGui::Begin("Create New Script", &makeScript, ImGuiWindowFlags_AlwaysAutoResize))
@@ -848,6 +820,7 @@ namespace gam300 {
 
                 if (ImGui::Button("Create", ImVec2(120, 0)))
                 {
+                    // Only create scripts when name is filled
                     if (!newScriptName.empty())
                     {
                         Core::MonoBehaviour::CreateScript(newScriptName);
@@ -952,11 +925,8 @@ namespace gam300 {
 
     Vector2D ImguiManager::getWindowSize(GLFWwindow& window)
     {
-        //Vector2D dimension{ 0,0 };
-
         glfwGetWindowSize(&window, &width, &height);
         return Vector2D(static_cast<float>(width), static_cast<float>(height));
-        //std::cout << width << ", " << "height\n";
     }
 
     void ImguiManager::renderViewport()
@@ -969,8 +939,6 @@ namespace gam300 {
              static_cast<float>(getWindowWidthHeight().x) / 2.0f,
              static_cast<float>(getWindowWidthHeight().y) / 2.0f
         };
-        /* int windowWidth = getWindowWidthHeight().x / 2;
-         int windowHeight = getWindowWidthHeight().y / 2;*/
 
         ImGui::Begin("Viewport");
 
@@ -985,13 +953,9 @@ namespace gam300 {
             handleViewPortClick(imagePos, viewportSize);
         }
 
-        //ImVec2 mousePos, viewportSize;
-        //void(mousePos);
-
         ImGui::End();
     }
 
-    // ASSET BROWSER FUNCTIONS TO BE PLACED HERE
 #if 1
     void ImguiManager::refreshAssetList()
     {
@@ -1097,9 +1061,6 @@ namespace gam300 {
         }
 
         static std::string selectedFolder = ""; // currently selected folder type e.g. scene, prefab
-        //static int selectedAssetIndex = -1;
-        //std::cout << "selectedFolder: " << selectedFolder << "\n";
-        // ---set up 2 column ---
         ImGui::Columns(2, nullptr, true);
 
         // ----- Left column panel:  ----- //
@@ -1158,7 +1119,6 @@ namespace gam300 {
 
             else
             {
-                //std::cout << "\nselected Folder: " << selectedFolder << "\n";
                 // normal view: only selected folder
                 std::filesystem::path currentFolder = std::filesystem::path(getAssetsPath()) / selectedFolder;
                 if (std::filesystem::exists(currentFolder) && std::filesystem::is_directory(currentFolder))
@@ -1225,8 +1185,6 @@ namespace gam300 {
                     // to ge the type of the file e.g. .scn, .wav
                     std::string extension = assetEntry.path().extension().string();
 
-
-                    //std::cout << extension << "\n";
                     if (extension == ".scn") // if it is scene
                     {
                         ImguiEcsRef.clearAllEntities();
@@ -1298,10 +1256,6 @@ namespace gam300 {
                 ImGui::PopID();
             }
             ImGui::Columns(1);
-
-            /*if (asset_editor) {
-                displayAssetEditor(currentAsset);
-            }*/
 
             if (prefab_editor) {
                 assert(selectedPrefab.exists() && "Selected prefab does not exist!");
@@ -1498,7 +1452,6 @@ namespace gam300 {
         // Check the mouse hover position for reference
         if (ImGui::IsItemHovered())
         {
-
             ImVec2 mouseScreen = ImGui::GetIO().MousePos;
             // Get aspect ratio between scene dimensions and viewport dimensions
             ImVec2 ar = { getWindowWidthHeight().x / viewportSize.x,
@@ -1564,7 +1517,6 @@ namespace gam300 {
     template<typename componentType>
     void ImguiManager::displayComponentContent(EntityID selectedEntityID)
     {
-
         // Transform Component
         if constexpr (std::is_same_v<componentType, Transform3D>) {
             if (Transform3D* transform = ImguiEcsRef.getComponent<componentType>(selectedEntityID)) {
@@ -1593,20 +1545,17 @@ namespace gam300 {
             }
         }
         else if constexpr (std::is_same_v<componentType, RigidBody>) {
-            // rigidBody 
+            // RigidBody Component 
             if (RigidBody* rigidBody = ImguiEcsRef.getComponent<RigidBody>(selectedEntityID)) {
 
                 if (rigidBody)
                 {
                     ImGui::Separator(); // for editable value
 
-
-
                     float mass = rigidBody->getMass();
                     if (ImGui::InputFloat("Mass", &mass)) {
                         rigidBody->setMass(mass);
                     }
-
 
                     Vector3D iDiagonal = rigidBody->getInertiaDiagonal();
                     float inertiaDiagonal[3] = { iDiagonal.x, iDiagonal.y, iDiagonal.z };
@@ -1614,17 +1563,7 @@ namespace gam300 {
                         rigidBody->setInertiaDiagonal(Vector3D(inertiaDiagonal[0], inertiaDiagonal[1], inertiaDiagonal[2]));
                     }
 
-                    //static bool forceMask = true;
-                    //if (ImGui::Checkbox("ForceMask", &forceMask)) {
-                    //    rigidBody->setForceMask(forceMask ? 0xFFFFFFFFu : 0u);
-                    //}
-
-                    //static bool torqueMask = true;
-                    //if (ImGui::Checkbox("Torque Mask", &torqueMask)) {
-                    //    rigidBody->setTorqueMask(torqueMask ? 0xFFFFFFFFu : 0u);
-                    //}
-
-                    //TODO: implement layer once the layer is done
+                    // Implement layer once the layer is done
 
                     ImGui::Separator(); // read only value
                     ImGui::Text("Display Value:");
@@ -1647,7 +1586,7 @@ namespace gam300 {
         }
 
         else if constexpr (std::is_same_v<componentType, Collider>) {
-            // rigidBody 
+            // Collider Component 
             if (Collider* collider = ImguiEcsRef.getComponent<Collider>(selectedEntityID)) {
 
                 if (collider)
@@ -1670,7 +1609,7 @@ namespace gam300 {
             }
         }
         else if constexpr (std::is_same_v<componentType, AudioComponent>) {
-            // audio
+            // Audio Component
             if (AudioComponent* audio = ImguiEcsRef.getComponent<AudioComponent>(selectedEntityID)) {
 
                 if (audio)
@@ -1782,11 +1721,10 @@ namespace gam300 {
             }
         }
         else if constexpr (std::is_same_v<componentType, MeshComponent>) {
-            // rigidBody 
+            // Mesh Component
             if (MeshComponent* mesh = ImguiEcsRef.getComponent<MeshComponent>(selectedEntityID)) {
 
                 ImGui::Separator();
-                //ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.6f, 0.6f, 0.6f, 1.0f));
                 ImGui::Text("GUID: %s", mesh->getGUID().c_str());
                 ImGui::Separator();
 
@@ -1820,7 +1758,6 @@ namespace gam300 {
 
                 // =============== Meterial Dropdown =======================
                 uint16_t currMaterial = mesh->getMaterialHandle();
-                //ImGui::Text("Debug - Current Material Handle: %d", currMaterial);
                 std::string materialName;
                 if (currMaterial == 0) {
                     materialName = "None";
@@ -1867,44 +1804,32 @@ namespace gam300 {
             }
         }
         else if constexpr (std::is_same_v<componentType, Script>) {
-            // script 
+            // Script Component
             if (Script* script = ImguiEcsRef.getComponent<Script>(selectedEntityID)) {
 
                 ImGui::Separator();
 
-                /*char scriptNameBuffer[128];
-
-                strcpy_s(scriptNameBuffer, sizeof(scriptNameBuffer), script->getScriptName().c_str());
-
-                if (ImGui::InputText("Script Name", scriptNameBuffer, sizeof(scriptNameBuffer), ImGuiInputTextFlags_EnterReturnsTrue)) {
-                    std::string newScriptName = scriptNameBuffer;
-
-                    if (newScriptName.empty()) {
-                        newScriptName = script->getScriptName();
-                    }
-
-                    script->setScriptName(newScriptName);
-                }*/
-
+                // List of scripts
                 static std::vector<std::string> availableScripts = getAvailableScripts();
-                static int selectedScriptIndex = -1;
+                static int selectedScriptChangeIndex = -1;
 
+                //Get current script
                 std::string currentScriptName = script->getScriptName();
 
-                // Find current script in the list (if exists)
+                // Find current script in the list
                 for (size_t i = 0; i < availableScripts.size(); ++i) {
                     if (availableScripts[i] == currentScriptName) {
-                        selectedScriptIndex = static_cast<int>(i);
+                        selectedScriptChangeIndex = static_cast<int>(i);
                         break;
                     }
                 }
 
-                // --- Dropdown combo box ---
+                // Dropdown to select script
                 if (ImGui::BeginCombo("Select Script", currentScriptName.c_str())) {
                     for (int i = 0; i < availableScripts.size(); ++i) {
-                        bool isSelected = (i == selectedScriptIndex);
+                        bool isSelected = (i == selectedScriptChangeIndex);
                         if (ImGui::Selectable(availableScripts[i].c_str(), isSelected)) {
-                            selectedScriptIndex = i;
+                            selectedScriptChangeIndex = i;
                             script->setScriptName(availableScripts[i]);
                         }
 
@@ -1921,8 +1846,6 @@ namespace gam300 {
                     script->setActive(active);
                 }
 
-
-
             }
         }
     }
@@ -1933,6 +1856,8 @@ namespace gam300 {
 
         if (ImGui::Begin("Performance Profile", &hierachyWindow, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize))
         {
+
+            // Only open Tracy in Debug mode, not release
 
 #ifndef TRACY_ENABLE
 
@@ -2090,8 +2015,6 @@ namespace gam300 {
                 ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Performance: Poor");
 
             ImGui::Spacing();
-
-
 
         }
 

@@ -1,7 +1,7 @@
 /**
  * @file AssetPath.h
  * @brief Helper functions for asset path management.
- * @author
+ * @author Simon Chan, Liliana Hanawardani, Saw Hui Shan
  * @date
  * Copyright (C) 2025 DigiPen Institute of Technology.
  * Reproduction or disclosure of this file or its contents without the

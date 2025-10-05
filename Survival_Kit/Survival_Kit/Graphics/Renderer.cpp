@@ -222,19 +222,18 @@ namespace gam300 {
 		{
 
 			// Temporarily load textures 
-			auto mouse_tex = Texture::load_from_file(getAssetFilePath("Textures/mouse_kenny.png"), TextureDesc(false, false, true));
-			if (mouse_tex->valid()) {
-				t_testing_textures.push_back(std::move(*mouse_tex));
-			}
+			for (const auto& entry : std::filesystem::directory_iterator(getAssetFilePath("Textures/"))) {
+				if (entry.is_regular_file()) {
 
-			auto rabbit_tex = Texture::load_from_file(getAssetFilePath("Textures/rabbit_kenny.png"), TextureDesc(false, false, true));
-			if (rabbit_tex->valid()) {
-				t_testing_textures.push_back(std::move(*rabbit_tex));
-			}
+					auto path = entry.path();
 
-			auto squirrel_tex = Texture::load_from_file(getAssetFilePath("Textures/squirrel_kenny.png"), TextureDesc(false, false, true));
-			if (squirrel_tex->valid()) {
-				t_testing_textures.push_back(std::move(*squirrel_tex));
+					if (path.extension() == ".png" || path.extension() == ".jpg" || path.extension() == ".jpeg") {
+						auto tex = Texture::load_from_file(path.string(), TextureDesc(false, false, true));
+						if (tex && tex->valid()) {
+							t_testing_textures.push_back(std::move(*tex));
+						}
+					}
+				}
 			}
 		}
 #pragma endregion

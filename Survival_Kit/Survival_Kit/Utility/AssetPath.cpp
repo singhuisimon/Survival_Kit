@@ -1,7 +1,7 @@
 /**
  * @file AssetPath.cpp
  * @brief Implementation of asset path management functions.
- * @author
+ * @author Simon Chan, Liliana Hanawardani, Saw Hui Shan
  * @date
  * Copyright (C) 2025 DigiPen Institute of Technology.
  * Reproduction or disclosure of this file or its contents without the
@@ -19,7 +19,7 @@ namespace gam300 {
     // Base path to the assets directory - modify this to match your project structure
     const std::string BASE_ASSETS_PATH = std::filesystem::current_path().string() + "\\Assets\\";
 
-    //Edited - Lily and Huishan (10/9)
+    // Format the filepath for the assets directory
     std::string getAssetsPath() {
         std::string formattedBasePath = BASE_ASSETS_PATH;
 
@@ -34,12 +34,8 @@ namespace gam300 {
         return formattedBasePath;
     }
 
-    //Edited - Lily and Huishan (10/9)
+    // Get thee filepath for file in assets directory
     std::string getAssetFilePath(const std::string& relativePath) {
-        // Make sure the path uses forward slashes for consistency
-
-        //Debug for the Assets File path
-        //std::cout << "Current Path: " << std::filesystem::current_path() << "\n";
 
         std::string formattedPath = relativePath;
         std::string currentPath = getAssetsPath();
