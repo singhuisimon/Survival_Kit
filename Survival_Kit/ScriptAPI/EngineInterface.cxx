@@ -1,4 +1,17 @@
-// EngineInterface.cxx
+/**
+ * @file EngineInterface.cxx
+ * @brief Implementation of the EngineInterface class managing the C++/CLI bridge
+ *        between native engine and managed C# scripts.
+ * @author Kuek Wei Jie
+ * @date October 5, 2025
+ * @details Handles assembly loading and unloading through AssemblyLoadContext,
+ *          script instantiation and registration to entities, script type
+ *          discovery via reflection, and update execution for all scripts or
+ *          individual entities. Supports hot-reload functionality.
+ * Copyright (C) 2025 DigiPen Institute of Technology.
+ * Reproduction or disclosure of this file or its contents without the
+ * prior written consent of DigiPen Institute of Technology is prohibited.
+ */
 #include "EngineInterface.hxx"
 #include "../ScriptCore/Application.h"
 #include "Debug.hxx"

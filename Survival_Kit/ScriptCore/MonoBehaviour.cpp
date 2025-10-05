@@ -1,5 +1,18 @@
 #include "pch.h"
-
+/**
+ * @file MonoBehaviour.cpp
+ * @brief Implementation of the MonoBehaviour class for creating and managing
+ *        C# script files from templates.
+ * @author Kuek Wei Jie
+ * @date October 5, 2025
+ * @details Provides functionality for script creation, template processing,
+ *          validation, and file system operations for MonoBehaviour scripts.
+ *          Handles script name sanitization, C# identifier validation, and
+ *          automatic opening of created scripts in the default editor.
+ * Copyright (C) 2025 DigiPen Institute of Technology.
+ * Reproduction or disclosure of this file or its contents without the
+ * prior written consent of DigiPen Institute of Technology is prohibited.
+ */
 #include "MonoBehaviour.h"
 #include <iostream>
 #include <algorithm>

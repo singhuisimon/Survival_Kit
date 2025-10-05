@@ -1,10 +1,14 @@
 /**
  * @file ScriptSystem.cpp
- * @brief Implementation of the ScriptSystem.
- * @details Manages script execution and lifecycle in the ECS.
- * @author
- * @date
+ * @brief Implementation of the ScriptSystem for ECS script management.
+ * @author Kuek Wei Jie
+ * @date October 5, 2025
+ * @details Manages script execution and lifecycle in the ECS, including
+ *          initialization, per-entity updates, hot-reload monitoring, and
+ *          script-to-entity binding through the C# scripting engine.
  * Copyright (C) 2025 DigiPen Institute of Technology.
+ * Reproduction or disclosure of this file or its contents without the
+ * prior written consent of DigiPen Institute of Technology is prohibited.
  */
 
 #include "ScriptSystem.h"

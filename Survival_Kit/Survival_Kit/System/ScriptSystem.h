@@ -1,10 +1,13 @@
 /**
  * @file ScriptSystem.h
  * @brief System for managing and executing scripts in the ECS.
- * @details Bridges the ECS with the C# scripting engine.
- * @author
- * @date
+ * @author Kuek Wei Jie
+ * @date October 5, 2025
+ * @details Bridges the ECS with the C# scripting engine, managing script
+ *          lifecycle, hot-reload functionality, and per-entity script execution.
  * Copyright (C) 2025 DigiPen Institute of Technology.
+ * Reproduction or disclosure of this file or its contents without the
+ * prior written consent of DigiPen Institute of Technology is prohibited.
  */
 #pragma once
 #ifndef __SCRIPT_SYSTEM_H__

@@ -4,8 +4,16 @@
 
 #pragma comment(lib, "shlwapi.lib")
 
-// Rest of your code stays the same...
-
+/**
+ * @file Application.cpp
+ * @brief Implementation of the Application class managing the game engine's
+ *        core runtime, script system, and hot-reload functionality.
+ * @author Kuek Wei Jie
+ * @date October 5, 2025
+ * Copyright (C) 2025 DigiPen Institute of Technology.
+ * Reproduction or disclosure of this file or its contents without the
+ * prior written consent of DigiPen Institute of Technology is prohibited.
+ */
 namespace Core
 {
 

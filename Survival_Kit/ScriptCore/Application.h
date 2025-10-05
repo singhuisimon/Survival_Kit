@@ -1,5 +1,14 @@
 #pragma once
-
+/**
+ * @file Application.h
+ * @brief Declaration of the Application class for managing the game engine's
+ *        core systems including scripting, hot-reload, and entity management.
+ * @author Kuek Wei Jie
+ * @date October 5, 2025
+ * Copyright (C) 2025 DigiPen Institute of Technology.
+ * Reproduction or disclosure of this file or its contents without the
+ * prior written consent of DigiPen Institute of Technology is prohibited.
+ */
 #include <Windows.h>        // HMODULE
 #include <string>
 #include <stdexcept>
