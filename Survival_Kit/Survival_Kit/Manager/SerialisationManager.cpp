@@ -419,9 +419,9 @@ namespace gam300 {
         ss << std::fixed << std::setprecision(2);
         ss << "{\n";
 
-        std::string path;
+        //std::string path;
         AssetId handle = audio->getHandle();
-        if (handle != 0) {
+        /*if (handle != 0) {
             const AssetRecord* record = AM.getAssetRecord(handle);
             if (record && record->valid) {
                 path = getRelativeAssetPath(record->sourcePath);
@@ -434,18 +434,31 @@ namespace gam300 {
             path = std::to_string(audio->getHandle());
         }
 
-        ss << "          \"guid\": \"" << path << "\",\n";
+        ss << "          \"guid\": \"" << path << "\",\n";*/
         //ss << "          \"audioID\": " << audio->getAudioID() << ",\n"; // Placeholder for audioID
-        ss << "          \"type\": \"" << (audio->getType() == AudioType::BGM ? "BGM" : "SFX") << "\",\n";
+        
+        if (handle == 0) {
+            ss << "          \"guid\": 0,\n";
+        }
+        else {
+            ss << "          \"guid\": " << handle << ",\n";
+        }
+        
+        /*ss << "          \"type\": \"" << (audio->getType() == AudioType::BGM ? "BGM" : "SFX") << "\",\n";
         ss << "          \"state\": \""
             << (audio->getPlayState() == PlayState::PLAY ? "PLAY" :
                 audio->getPlayState() == PlayState::PAUSE ? "PAUSE" : "STOP")
-            << "\",\n";
+            << "\",\n";*/
+        ss << "          \"type\": " << static_cast<int>(audio->getType()) << ",\n";
+        ss << "          \"state\": " << static_cast<int>(audio->getPlayState()) << ",\n";
         ss << "          \"volume\": " << audio->getVolume() << ",\n";
         ss << "          \"pitch\": " << audio->getPitch() << ",\n";
-        ss << "          \"loop\": \"" << (audio->isLooping() ? "true" : "false") << "\",\n";
+        ss << "          \"loop\": " << (audio->isLooping() ? "true" : "false") << ",\n";
+        ss << "          \"mute\": " << (audio->isMute() ? "true" : "false") << ",\n";
+        ss << "          \"is3D\": " << (audio->is3D() ? "true" : "false") << ",\n";
+        /*ss << "          \"loop\": \"" << (audio->isLooping() ? "true" : "false") << "\",\n";
         ss << "          \"mute\": \"" << (audio->isMute() ? "true" : "false") << "\",\n";
-        ss << "          \"is3D\": \"" << (audio->is3D() ? "true" : "false") << "\",\n";
+        ss << "          \"is3D\": \"" << (audio->is3D() ? "true" : "false") << "\",\n";*/
         ss << "          \"minDistance\": " << audio->getMinDistance() << ",\n";
         ss << "          \"maxDistance\": " << audio->getMaxDistance() << "\n";
         ss << "        }";
@@ -455,33 +468,60 @@ namespace gam300 {
     //AudioComponentDeserializer implementation
     Component* AudioComponentSerializer::deserialize(EntityID entityId, const std::string& jsonData) {
         //GUID
-        std::string path = SerialisationManager::extractQuotedValue(jsonData, "guid");
 
         AssetId handle = 0;
+        std::string guidData = SerialisationManager::extractNumberValue(jsonData, "guid");
+        if (!guidData.empty()) {
+            try {
+                handle = static_cast<AssetId>(std::stoull(guidData));
+            }
+            catch (const std::exception&) {
+                LM.writeLog("AudioComponentSerializer::deserialize() - Invalid AssetId value");
+            }
+        }
+
+        //std::string path = SerialisationManager::extractQuotedValue(jsonData, "guid");
+
+        //AssetId handle = 0;
         //std::string guid;
 
-        if (!path.empty()) {
+        /*if (!path.empty()) {
             std::string fullpath = getAssetFilePath(path);
             handle = AM.getAssetId(fullpath);
             if (handle == 0) {
                 LM.writeLog("AudioComponentSerializer::Deserialize() - Asset not found for %s, check assetdb.txt", path.c_str());
             }
-        }
+        }*/
 
         //Type
-        std::string typeData = SerialisationManager::extractQuotedValue(jsonData, "type");
-        AudioType type = (typeData == "BGM") ? AudioType::BGM : AudioType::SFX;
+        //std::string typeData = SerialisationManager::extractQuotedValue(jsonData, "type");
+        //AudioType type = (typeData == "BGM") ? AudioType::BGM : AudioType::SFX;
 
-        //State
+        ////State
+        //PlayState state = PlayState::STOP;
+        //std::string stateData = SerialisationManager::extractQuotedValue(jsonData, "state");
+        //if (!stateData.empty()) {
+        //    if (stateData == "PLAY") {
+        //        state = PlayState::PLAY;
+        //    }
+        //    else if (stateData == "PAUSE") {
+        //        state = PlayState::PAUSE;
+        //    }
+        //}
+
+        // AudioType (0 = SFX, 1 = BGM)
+        AudioType type = AudioType::SFX;
+        if (auto s = SerialisationManager::extractNumberValue(jsonData, "type"); !s.empty()) {
+            int val = std::stoi(s);
+            if (val == 1) type = AudioType::BGM;
+        }
+
+        // PlayState (0 = STOP, 1 = PLAY, 2 = PAUSE)
         PlayState state = PlayState::STOP;
-        std::string stateData = SerialisationManager::extractQuotedValue(jsonData, "state");
-        if (!stateData.empty()) {
-            if (stateData == "PLAY") {
-                state = PlayState::PLAY;
-            }
-            else if (stateData == "PAUSE") {
-                state = PlayState::PAUSE;
-            }
+        if (auto s = SerialisationManager::extractNumberValue(jsonData, "state"); !s.empty()) {
+            int val = std::stoi(s);
+            if (val == 1) state = PlayState::PLAY;
+            else if (val == 2) state = PlayState::PAUSE;
         }
 
         //Volume
@@ -508,27 +548,40 @@ namespace gam300 {
             }
         }
 
-        // Loop
+        // Booleans (no quotes now)
         bool loop = false;
-        std::string loopData = SerialisationManager::extractQuotedValue(jsonData, "loop");
-        if (!loopData.empty()) {
-            loop = (loopData == "true");
-        }
+        if (auto s = SerialisationManager::extractNumberValue(jsonData, "loop"); !s.empty())
+            loop = (s.find("true") != std::string::npos || s == "1");
 
-        // Mute
         bool mute = false;
-        std::string muteData = SerialisationManager::extractQuotedValue(jsonData, "mute");
-        if (!muteData.empty()) {
-            mute = (muteData == "true");
-        }
+        if (auto s = SerialisationManager::extractNumberValue(jsonData, "mute"); !s.empty())
+            mute = (s.find("true") != std::string::npos || s == "1");
 
-        // is3D
-        bool is3D = true; // default true
-        std::string is3DData = SerialisationManager::extractQuotedValue(jsonData, "is3D");
-        if (!is3DData.empty()) {
-            is3D = (is3DData == "true");
-            //LM.writeLog("AudioComponentSerializer::deserialize() - is3D is %s", is3DData.c_str());
-        }
+        bool is3D = true;
+        if (auto s = SerialisationManager::extractNumberValue(jsonData, "is3D"); !s.empty())
+            is3D = (s.find("true") != std::string::npos || s == "1");
+
+        //// Loop
+        //bool loop = false;
+        //std::string loopData = SerialisationManager::extractQuotedValue(jsonData, "loop");
+        //if (!loopData.empty()) {
+        //    loop = (loopData == "true");
+        //}
+
+        //// Mute
+        //bool mute = false;
+        //std::string muteData = SerialisationManager::extractQuotedValue(jsonData, "mute");
+        //if (!muteData.empty()) {
+        //    mute = (muteData == "true");
+        //}
+
+        //// is3D
+        //bool is3D = true; // default true
+        //std::string is3DData = SerialisationManager::extractQuotedValue(jsonData, "is3D");
+        //if (!is3DData.empty()) {
+        //    is3D = (is3DData == "true");
+        //    //LM.writeLog("AudioComponentSerializer::deserialize() - is3D is %s", is3DData.c_str());
+        //}
 
         //minDistance
         float minDistance = 1.0f;
@@ -553,8 +606,9 @@ namespace gam300 {
                 LM.writeLog("AudioComponentSerializer::deserialize() - Fail to parse maxDistance");
             }
         }
-        LM.writeLog("AudioComponentSerializer::deserialize() - Parsed AudioComponent data: guid=%s, handle=%llu, type=%s, state=%s, volume=%.2f, pitch=%.2f, loop=%s, mute=%s, is3D=%s, minDistance=%.2f, maxDistance=%.2f",
-            path.c_str(), handle, (type == AudioType::BGM ? "BGM" : "SFX"),
+        LM.writeLog("AudioComponentSerializer::deserialize() - Parsed AudioComponent data: handle=%llu, type=%s, state=%s, volume=%.2f, pitch=%.2f, loop=%s, mute=%s, is3D=%s, minDistance=%.2f, maxDistance=%.2f",
+            //path.c_str(), handle, (type == AudioType::BGM ? "BGM" : "SFX"),
+            handle, (type == AudioType::BGM ? "BGM" : "SFX"),
             (state == PlayState::PLAY ? "PLAY" : state == PlayState::PAUSE ? "PAUSE" : "STOP"),
             volume, pitch, loop ? "true" : "false", mute ? "true" : "false", is3D ? "true" : "false", minDistance, maxDistance);
 

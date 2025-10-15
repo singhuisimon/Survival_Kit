@@ -58,14 +58,14 @@
           ]
         },
         "AudioComponent": {
-          "guid": "\\Audio\\laserSmall_001.ogg",
-          "type": "SFX",
-          "state": "STOP",
+          "guid": 12638833775750905857,
+          "type": 0,
+          "state": 0,
           "volume": 1.00,
           "pitch": 1.00,
-          "loop": "false",
-          "mute": "false",
-          "is3D": "true",
+          "loop": true,
+          "mute": false,
+          "is3D": false,
           "minDistance": 1.00,
           "maxDistance": 10.00
         },
