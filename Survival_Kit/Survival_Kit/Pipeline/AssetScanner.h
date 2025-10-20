@@ -26,8 +26,12 @@ namespace gam300 {
 	* @brief Change description for a scanned source file.
 	*/
 	struct ScanChange {
-		enum class Kind { Added, Modified, Removed } kind; //!< Change category
-		std::string sourcePath; //!< Absolute/normalized path
+		enum class Kind {
+			Added,
+			Modified,
+			Removed
+		} kind; // Change category
+		std::string sourcePath; // Absolute/normalized path
 	};
 
 	/**
@@ -36,8 +40,8 @@ namespace gam300 {
 	* cheap-but-effective change heuristic.
 	*/
 	struct FileStamp {
-		std::time_t lastWrite = 0; //!< Last write time converted to system_clock
-		std::uintmax_t size = 0; //!< Size in bytes
+		std::time_t lastWrite = 0; // Last write time converted to system_clock
+		std::uintmax_t size = 0; // Size in bytes
 	};
 
 	/**
@@ -84,11 +88,6 @@ namespace gam300 {
 		void setIncludeHidden(bool include_hidden);
 
 		/**
-		* @brief Follow directory symlinks during recursion.
-		*/
-		void setFollowSymlinks(bool follow);
-
-		/**
 		* @brief Scan all roots and return the changes since the previous scan.
 		*/
 		std::vector<ScanChange> Scan();
@@ -125,7 +124,6 @@ namespace gam300 {
 		std::unordered_set<std::string> m_exts; //  Lowercase extensions (no dot)
 		std::vector<std::string> m_ignore_substrings; //  Cheap ignore filters
 		bool m_include_hidden = false; //  Include dotfiles
-		bool m_follow_symlinks = false; //  Follow symlinks
 	};
 
 

@@ -10,302 +10,270 @@
 
 
 #include "AssetDescriptorGenerator.h"
-#include "AssetDatabase.h" // AssetRecord definition
-
+#include "AssetDatabase.h"
 #include <filesystem>
-#include <sstream>
 #include <fstream>
-#include <algorithm>
+#include <sstream>
+#include <iomanip>
 
 namespace fs = std::filesystem;
 
 namespace gam300 {
 
-	// API
-	void AssetDescriptorGenerator::SetSidecar(bool sidecar) { m_sidecar = sidecar; }
-	void AssetDescriptorGenerator::SetOutputRoot(const std::string& root) { m_outputRoot = root; }
-	void AssetDescriptorGenerator::SetPretty(bool pretty) { m_pretty = pretty; }
+    // ==================== PUBLIC API ====================
+
+    void AssetDescriptorGenerator::SetOutputRoot(const std::string& root) {
+        m_outputRoot = root;
+    }
 
 
-	bool AssetDescriptorGenerator::GenerateFor(const AssetRecord& rec,
-		const DescriptorExtras* extras, std::string* outPath) const
-	{
-	    //compute default descriptor file path from record
-        const std::string path = DefaultDescPathForRecord(rec);
-        if (!EnsureParentDir(path)) return false;
+    std::string AssetDescriptorGenerator::GetDescriptorFolderPath(const AssetRecord& rec) const {
+        // Convert GUID to hex string (16 characters, uppercase)
+        std::ostringstream guidStream;
+        guidStream << std::uppercase << std::hex << std::setw(16) << std::setfill('0')
+            << rec.guid.m_Value;
+        std::string guidHex = guidStream.str();
 
-        //build JSON contents
-        const std::string json = BuildJson(&rec, extras);
+        // Extract last 4 characters for folder structure
+        // Example: 5F7ED05B14224003 -> folders: "40/03"
+        std::string dir1 = guidHex.substr(12, 2);  // Characters 13-14
+        std::string dir2 = guidHex.substr(14, 2);  // Characters 15-16
 
-        //write file
-        if (!WriteText(path, json)) return false;
+        // Get resource type folder name
+        std::string typeFolder = resourceTypeToString(rec.type);
 
-        //build info.txt here
+        // Build path: Descriptors/Texture/40/03/5F7ED05B14224003/
+        std::string path = m_outputRoot + "/" + typeFolder + "/" + dir1 + "/" + dir2 + "/" + guidHex + "/";
 
-        if (outPath) *outPath = path;
-        return true;
-	}
-
-
-
-	bool AssetDescriptorGenerator::GenerateForPath(AssetDatabase& db, const std::string& sourcePath,
-		const DescriptorExtras* extras, std::string* outPath) const
-	{
-        //ensure the database has a stable GUID for this source path
-        AssetId id = db.EnsureIdForPath(sourcePath);
-        AssetRecord* rec = db.FindMutable(id);
-        if (!rec) return false;
-
-        //compute descriptor file path
-        const std::string path = DefaultDescPathForRecord(*rec);
-        if (!EnsureParentDir(path)) return false;
-
-        //build json for this record
-        const std::string json = BuildJson(rec, extras);
-
-        //write to file
-        if (!WriteText(path, json)) return false;
-
-        if (outPath) *outPath = path;
-        return true;
-	}
-
-
-    std::string AssetDescriptorGenerator::DefaultDescPathForRecord(const AssetRecord& rec) const
-	{
-        //convert the GUID into a 16-character uppercase hex string
-        std::ostringstream ss;
-        ss << std::uppercase << std::hex << std::setw(16) << std::setfill('0') << rec.id;
-        const std::string guid = ss.str();
-
-        //use last 2 + before last 2 characters as subfolders (the two directories)
-        const std::string dir1 = guid.substr(14, 2);
-        const std::string dir2 = guid.substr(12, 2);
-
-        //map asset type to folder
-        std::string typeFolder;
-
-        switch (rec.type) {
-            case AssetType::Texture:   typeFolder = "Texture"; break;
-            case AssetType::Mesh:      typeFolder = "Mesh";    break;
-            case AssetType::Material:  typeFolder = "Material"; break;
-            case AssetType::Shader:    typeFolder = "Shader";  break;
-            case AssetType::Audio:     typeFolder = "Audio";   break;
-            case AssetType::Scene:     typeFolder = "Scene";   break;
-            default:                   typeFolder = "Unknown"; break;
-        }
-
-        //determine base path
-
-        fs::path base;
-        if (m_sidecar) {
-            // if sidecar mode, put it next to source file
-            base = fs::path(rec.sourcePath).parent_path();
-            fs::path descriptorPath = base / (guid + ".desc");
-            std::error_code ec;
-            fs::create_directories(descriptorPath, ec);
-            return (descriptorPath / "Descriptor.txt").string();
-        }
-        
-
-        fs::path root = m_outputRoot.empty()
-            ? fs::path(getAssetsPath()) / "Descriptors"
-            : fs::path(m_outputRoot);
-        base = root;
-
-         //use AssetPath to get the proper Assets folder path
-         //ensure it works on everyone's machine
-         //std::string assetsPath = getAssetsPath();
-        
-        //build complete path: Assets/AssetType/Dir1/Dir2/GUID.desc/Descriptor.txt
-        fs::path descriptorPath = root / typeFolder / dir1 / dir2 / (guid + ".desc");
-
-        // create all necessary directories
-        std::error_code ec;
-        fs::create_directories(descriptorPath, ec);
-
-        //return full path including Descriptor.txt
-        return (descriptorPath / "Descriptor.txt").string();
-
-    
-
-
-	}
-
-	
-	// JSON Builder
-    /**
-     * @brief Convert (optional) AssetRecord + Extras to a JSON string.
-    * @notes We intentionally avoid any external JSON dependency for simplicity.
-    */
-    std::string AssetDescriptorGenerator::BuildJson(const AssetRecord* recOpt,
+        return path;
+    }
+    // ==================== INFO.TXT GENERATION ====================
+    bool AssetDescriptorGenerator::WriteInfoFile(
+        const std::string& folderPath,
+        const AssetRecord& rec,
         const DescriptorExtras* extras) const
     {
-        std::ostringstream o;
-        auto nl = [&](int n) { if (m_pretty) for (int i = 0; i < n; ++i) o << '\n'; };
-        auto ind = [&](int n) { if (m_pretty) for (int i = 0; i < n; ++i) o << "  "; };
-
-        o << "{"; nl(1);
-
-        // ---- asset (pipeline record) ----
-        ind(1); o << "\"asset\": ";
-        if (recOpt) {
-            o << "{"; nl(1);
-
-            // GUID in hex (readable)
-            std::ostringstream ss;
-            ss << std::uppercase << std::hex << std::setw(16) << std::setfill('0') << recOpt->id;
-
-            ind(2); o << "\"guid\": \"" << ss.str() << "\","; nl(1);
-            ind(2); o << "\"id\": " << recOpt->id << ","; nl(1);
-            ind(2); o << "\"sourcePath\": \"" << EscapeJson(recOpt->sourcePath) << "\","; nl(1);
-            ind(2); o << "\"intermediatePath\": \"" << EscapeJson(recOpt->intermediatePath) << "\","; nl(1);
-            ind(2); o << "\"compiledPath\": \"" << EscapeJson(recOpt->compiledPath) << "\","; nl(1);
-            ind(2); o << "\"type\": " << static_cast<int>(recOpt->type) << ","; nl(1);
-            ind(2); o << "\"ext\": \"" << EscapeJson(recOpt->ext) << "\","; nl(1);
-            ind(2); o << "\"contentHash\": \"" << EscapeJson(recOpt->contentHash) << "\","; nl(1);
-            ind(2); o << "\"lastWriteTime\": " << static_cast<unsigned long long>(recOpt->lastWriteTime) << ","; nl(1);
-            ind(2); o << "\"valid\": " << (recOpt->valid ? "true" : "false"); nl(1);
-
-            ind(1); o << "},"; nl(1);
-        }
-        else {
-            o << "null,"; nl(1);
-        }
-
-        // ---- extras (generic, resource-agnostic) ----
-        ind(1); o << "\"extras\": ";
-        if (extras) {
-            o << "{"; nl(1);
-            ind(2); o << "\"displayName\": \"" << EscapeJson(extras->displayName) << "\","; nl(1);
-            ind(2); o << "\"category\": \"" << EscapeJson(extras->category) << "\","; nl(1);
-            ind(2); o << "\"tags\": [";
-            for (size_t i = 0; i < extras->tags.size(); ++i) {
-                if (i) o << ",";
-                o << "\"" << EscapeJson(extras->tags[i]) << "\"";
-            }
-            o << "],"; nl(1);
-            ind(2); o << "\"lastImported\": " << static_cast<unsigned long long>(extras->lastImported) << ","; nl(1);
-            ind(2); o << "\"user\": {";
-            size_t c = 0;
-            for (const auto& kv : extras->user) {
-                if (c++) o << ",";
-                nl(0);
-                ind(3); o << "\"" << EscapeJson(kv.first) << "\": \"" << EscapeJson(kv.second) << "\"";
-            }
-            nl(0); o << "}"; nl(1);
-            ind(1); o << "}"; nl(1);
-
-            //ADDED - this is focused for the Descriptor from the asset type from the Texture folder
-            if (recOpt && recOpt->type == AssetType::Texture) {
-                ind(1); o << ",\"textureSettings\": {"; nl(1);
-                ind(2); o << "\"usageType\": \"" << EscapeJson(extras->usageType) << "\","; nl(1);
-                ind(2); o << "\"compression\": \"" << EscapeJson(extras->compression) << "\","; nl(1);
-                ind(2); o << "\"quality\": " << extras->quality << ","; nl(1);
-                ind(2); o << "\"generateMipmaps\": " << (extras->generateMipmaps ? "true" : "false") << ","; nl(1);
-                ind(2); o << "\"srgb\": " << (extras->srgb ? "true" : "false") << ","; nl(1);
-
-                ind(2); o << "\"inputFiles\": [";
-                for (size_t i = 0; i < extras->inputFiles.size(); ++i) {
-                    if (i) o << ",";
-                    o << "\"" << EscapeJson(extras->inputFiles[i]) << "\"";
-                }
-                o << "]"; nl(1);
-
-                ind(1); o << "}"; nl(1);
-            }
-
-            //ADDED - Audio Settings for Audio compilation 
-            if (recOpt && recOpt->type == AssetType::Audio) {
-                ind(1); o << ",\"audioSettings\": {"; nl(1);
-                ind(2); o << "\"outputFormat\": \"" << EscapeJson(extras->audioSettings.outputFormat) << "\","; nl(1);
-                ind(2); o << "\"compression\": \"" << EscapeJson(extras->audioSettings.compression) << "\","; nl(1);
-                ind(2); o << "\"quality\": " << extras->audioSettings.quality << ","; nl(1);
-                ind(2); o << "\"sampleRate\": " << extras->audioSettings.sampleRate << ","; nl(1);
-                ind(2); o << "\"channelMode\": \"" << EscapeJson(extras->audioSettings.channelMode) << "\""; nl(1);
-                ind(1); o << "}"; nl(1);
-            }
-
-            //ADDED - Mesh Settings for Mesh Compilation
-            if (recOpt && recOpt->type == AssetType::Mesh) {
-                ind(1); o << ",\meshSettings\": {"; nl(1);
-                ind(2); o << "\outputFormat\": \"" << EscapeJson(extras->meshSettings.outputFormat) << "\","; nl(1);
-                ind(2); o << "\"includePos\": " << (extras->meshSettings.includePos ? "true" : "false") << ","; nl(1);
-                ind(2); o << "\"includeNormals\": " << (extras->meshSettings.includeNormals ? "true" : "false") << ","; nl(1);
-                ind(2); o << "\"includeColors\": " << (extras->meshSettings.includeColors ? "true" : "false") << ","; nl(1);
-                ind(2); o << "\"includeTexCoords\": " << (extras->meshSettings.includeTexCoords ? "true" : "false") << ","; nl(1);
-                ind(2); o << "\"indexType\": \"" << EscapeJson(extras->meshSettings.indexType) << "\","; nl(1);
-                ind(2); o << "\"scale\": " << extras->meshSettings.scale << ","; nl(1);
-                ind(2); o << "\"optimizeVertices\": " << (extras->meshSettings.optimizeVertices ? "true" : "false") << ","; nl(1);
-                ind(2); o << "\"generateNormals\": " << (extras->meshSettings.generateNormals ? "true" : "false"); nl(1);
-                ind(1); o << "}"; nl(1);
-            }
-
-            //Added shader settings for shader assets
-            if (recOpt && recOpt->type == AssetType::Shader) {
-                ind(1); o << ",\"shaderSettings\": {"; nl(1);
-                ind(2); o << "\"vertexShader\": \"" << EscapeJson(extras->shaderSettings.vertexShader) << "\","; nl(1);
-                ind(2); o << "\"fragmentShader\": \"" << EscapeJson(extras->shaderSettings.fragmentShader) << "\","; nl(1);
-                ind(2); o << "\"outputFormat\": \"" << EscapeJson(extras->shaderSettings.outputFormat) << "\","; nl(1);
-                ind(2); o << "\"targetAPI\": \"" << EscapeJson(extras->shaderSettings.targetAPI) << "\","; nl(1);
-                ind(2); o << "\"targetVersion\": \"" << EscapeJson(extras->shaderSettings.targetVersion) << "\","; nl(1);
-                ind(2); o << "\"optimizationLevel\": \"" << EscapeJson(extras->shaderSettings.optimizationLevel) << "\","; nl(1);
-                ind(2); o << "\"stripDebugInfo\": " << (extras->shaderSettings.stripDebugInfo ? "true" : "false"); nl(1);
-                ind(1); o << "}"; nl(1);
-            }
-
-
-
-        }
-        else {
-            o << "null"; nl(1);
-        }
-
-        o << "}"; nl(1);
-        return o.str();
+        std::string infoPath = folderPath + "Info.txt";
+        std::string json = BuildInfoJson(rec, extras);
+        return WriteText(infoPath, json);
     }
 
-
-    std::string AssetDescriptorGenerator::EscapeJson(const std::string& s)
+    std::string AssetDescriptorGenerator::BuildInfoJson(
+        const AssetRecord& rec,
+        const DescriptorExtras* extras) const
     {
-        std::string out; out.reserve(s.size() + 8);
+        std::ostringstream ss;
+
+        ss << "{\n";
+
+        // Display name
+        if (extras && !extras->displayName.empty()) {
+            ss << "  \"name\": \"" << EscapeJson(extras->displayName) << "\",\n";
+        }
+        else {
+            // Default: use filename without extension
+            fs::path p(rec.sourcePath);
+            ss << "  \"name\": \"" << EscapeJson(p.stem().string()) << "\",\n";
+        }
+
+        // Comment (optional)
+        if (extras && !extras->comment.empty()) {
+            ss << "  \"comment\": \"" << EscapeJson(extras->comment) << "\",\n";
+        }
+
+        // GUID (for debugging/reference)
+        ss << "  \"guid\": {\n";
+        ss << "    \"instance\": \"" << std::uppercase << std::hex << std::setw(16)
+            << std::setfill('0') << rec.guid.m_Value << "\",\n";
+
+        // Get type GUID
+        xresource::type_guid typeGuid = ResourceGUID::getTypeGUID(rec.type);
+        ss << "    \"type\": \"" << std::uppercase << std::hex << std::setw(16)
+            << std::setfill('0') << typeGuid.m_Value << "\"\n";
+        ss << "  },\n";
+
+        // Tags
+        ss << "  \"tags\": [";
+        if (extras && !extras->tags.empty()) {
+            for (size_t i = 0; i < extras->tags.size(); ++i) {
+                ss << "\"" << EscapeJson(extras->tags[i]) << "\"";
+                if (i < extras->tags.size() - 1) ss << ", ";
+            }
+        }
+        ss << "],\n";
+
+        // Last imported timestamp
+        if (extras) {
+            ss << "  \"lastImported\": " << extras->lastImported << ",\n";
+        }
+        else {
+            ss << "  \"lastImported\": 0,\n";
+        }
+
+        // Resource links (optional dependencies)
+        ss << "  \"resourceLinks\": [";
+        if (extras && !extras->resourceLinks.empty()) {
+            ss << "\n";
+            for (size_t i = 0; i < extras->resourceLinks.size(); ++i) {
+                const auto& link = extras->resourceLinks[i];
+                ss << "    {\n";
+                ss << "      \"instance\": \"" << std::uppercase << std::hex << std::setw(16)
+                    << std::setfill('0') << link.m_Instance.m_Value << "\",\n";
+                ss << "      \"type\": \"" << std::uppercase << std::hex << std::setw(16)
+                    << std::setfill('0') << link.m_Type.m_Value << "\"\n";
+                ss << "    }";
+                if (i < extras->resourceLinks.size() - 1) ss << ",";
+                ss << "\n";
+            }
+            ss << "  ]\n";
+        }
+        else {
+            ss << "]\n";
+        }
+
+        ss << "}\n";
+
+        return ss.str();
+    }
+
+    // ==================== DESCRIPTOR.TXT GENERATION ====================
+
+    //****TEXTURE*****/
+    std::string AssetDescriptorGenerator::BuildDescriptorJson(
+        const std::string& sourcePath,
+        const TextureSettings& settings) const
+    {
+        std::ostringstream ss;
+
+        ss << "{\n";
+        ss << "  \"sourcePath\": \"" << EscapeJson(sourcePath) << "\",\n";
+        ss << "  \"textureSettings\": {\n";
+        ss << "    \"usageType\": \"" << EscapeJson(settings.usageType) << "\",\n";
+        ss << "    \"compression\": \"" << EscapeJson(settings.compression) << "\",\n";
+        ss << "    \"quality\": " << settings.quality << ",\n";
+        ss << "    \"generateMipmaps\": " << (settings.generateMipmaps ? "true" : "false") << ",\n";
+        ss << "    \"srgb\": " << (settings.srgb ? "true" : "false") << "\n";
+        ss << "  }\n";
+        ss << "}\n";
+
+        return ss.str();
+    }
+
+    //*****AUDIO*******/
+    std::string AssetDescriptorGenerator::BuildDescriptorJson(
+        const std::string& sourcePath,
+        const AudioSettings& settings) const
+    {
+
+        std::ostringstream ss;
+
+
+        ss << "{\n";
+        ss << "  \"sourcePath\": \"" << EscapeJson(sourcePath) << "\",\n";
+        ss << "  \"audioSettings\": {\n";
+        ss << "    \"outputFormat\": \"" << EscapeJson(settings.outputFormat) << "\",\n";
+        ss << "    \"compression\": \"" << EscapeJson(settings.compression) << "\",\n";
+        ss << "    \"quality\": " << settings.quality << ",\n";
+        ss << "    \"sampleRate\": " << settings.sampleRate << ",\n";
+        ss << "    \"channelMode\": \"" << EscapeJson(settings.channelMode) << "\"\n";
+        ss << "  }\n";
+        ss << "}\n";
+
+        return ss.str();
+
+    }
+
+    //*******MESH******* */
+    std::string AssetDescriptorGenerator::BuildDescriptorJson(
+        const std::string& sourcePath,
+        const MeshSettings& settings) const
+    {
+        std::ostringstream ss;
+
+        ss << "{\n";
+        ss << "  \"sourcePath\": \"" << EscapeJson(sourcePath) << "\",\n";
+        ss << "  \"meshSettings\": {\n";
+        ss << "    \"outputFormat\": \"" << EscapeJson(settings.outputFormat) << "\",\n";
+        ss << "    \"includePos\": " << (settings.includePos ? "true" : "false") << ",\n";
+        ss << "    \"includeNormals\": " << (settings.includeNormals ? "true" : "false") << ",\n";
+        ss << "    \"includeColors\": " << (settings.includeColors ? "true" : "false") << ",\n";
+        ss << "    \"includeTexCoords\": " << (settings.includeTexCoords ? "true" : "false") << ",\n";
+        ss << "    \"indexType\": \"" << EscapeJson(settings.indexType) << "\",\n";
+        ss << "    \"scale\": " << settings.scale << ",\n";
+        ss << "    \"optimizeVertices\": " << (settings.optimizeVertices ? "true" : "false") << ",\n";
+        ss << "    \"generateNormals\": " << (settings.generateNormals ? "true" : "false") << "\n";
+        ss << "  }\n";
+        ss << "}\n";
+
+        return ss.str();
+    }
+    //*******SHADER******* */
+    std::string AssetDescriptorGenerator::BuildDescriptorJson(
+        const std::string& sourcePath,
+        const ShaderSettings& settings) const
+    {
+        std::ostringstream ss;
+
+        ss << "{\n";
+        ss << "  \"sourcePath\": \"" << EscapeJson(sourcePath) << "\",\n";
+        ss << "  \"shaderSettings\": {\n";
+
+        if (!settings.vertexShader.empty()) {
+            ss << "    \"vertexShader\": \"" << EscapeJson(settings.vertexShader) << "\",\n";
+        }
+        if (!settings.fragmentShader.empty()) {
+            ss << "    \"fragmentShader\": \"" << EscapeJson(settings.fragmentShader) << "\",\n";
+        }
+
+        ss << "    \"outputFormat\": \"" << EscapeJson(settings.outputFormat) << "\",\n";
+        ss << "    \"targetAPI\": \"" << EscapeJson(settings.targetAPI) << "\",\n";
+        ss << "    \"targetVersion\": \"" << EscapeJson(settings.targetVersion) << "\",\n";
+        ss << "    \"optimizationLevel\": \"" << EscapeJson(settings.optimizationLevel) << "\",\n";
+        ss << "    \"stripDebugInfo\": " << (settings.stripDebugInfo ? "true" : "false") << "\n";
+        ss << "  }\n";
+        ss << "}\n";
+
+        return ss.str();
+    }
+
+    // ==================== HELPER FUNCTIONS ====================
+    std::string AssetDescriptorGenerator::EscapeJson(const std::string& s) {
+        std::string escaped;
+        escaped.reserve(s.size());
+
         for (char c : s) {
             switch (c) {
-            case '\"': out += "\\\""; break;
-            case '\\': out += "\\\\"; break;
-            case '\b': out += "\\b";  break;
-            case '\f': out += "\\f";  break;
-            case '\n': out += "\\n";  break;
-            case '\r': out += "\\r";  break;
-            case '\t': out += "\\t";  break;
-            default:   out += c;      break;
+            case '\"': escaped += "\\\""; break;
+            case '\\': escaped += "\\\\"; break;
+            case '\b': escaped += "\\b"; break;
+            case '\f': escaped += "\\f"; break;
+            case '\n': escaped += "\\n"; break;
+            case '\r': escaped += "\\r"; break;
+            case '\t': escaped += "\\t"; break;
+            default:
+                if (c < 0x20) {
+                    // Escape control characters
+                    char buf[7];
+                    snprintf(buf, sizeof(buf), "\\u%04x", c);
+                    escaped += buf;
+                }
+                else {
+                    escaped += c;
+                }
+                break;
             }
         }
-        return out;
+
+        return escaped;
     }
 
-    bool AssetDescriptorGenerator::EnsureParentDir(const std::string& path)
-    {
+
+    bool AssetDescriptorGenerator::EnsureDirectory(const std::string& path) {
         try {
             fs::path p(path);
-            fs::path dir = p.parent_path();
-            if (dir.empty()) return true;
-            std::error_code ec;
-            fs::create_directories(dir, ec);
-            return !ec;
-        }
-        catch (...) 
-        { 
-            return false; 
-        }
-    }
-
-    bool AssetDescriptorGenerator::WriteText(const std::string& path, const std::string& text)
-    {
-        try {
-            std::ofstream ofs(path, std::ios::out | std::ios::trunc);
-            if (!ofs.is_open()) return false;
-            ofs << text;
+            if (!fs::exists(p)) {
+                return fs::create_directories(p);
+            }
             return true;
         }
         catch (...) {
@@ -313,5 +281,18 @@ namespace gam300 {
         }
     }
 
+    bool AssetDescriptorGenerator::WriteText(const std::string& path, const std::string& text) {
+        try {
+            std::ofstream file(path);
+            if (!file.is_open()) {
+                return false;
+            }
+            file << text;
+            return file.good();
+        }
+        catch (...) {
+            return false;
+        }
+    }
 
-}  //end of namespace gam300
+}//end of namespace gam300

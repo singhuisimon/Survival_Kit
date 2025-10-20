@@ -1,7 +1,7 @@
 /**
  * @file AssetDatabase.cpp
- * @brief Implements asset database management functions. 
- * @author Rio Shannon Yvon Leonardo
+ * @brief Implements asset database management functions.
+ * @author
  * @date 15/09/2025
  * Copyright (C) 2025 DigiPen Institute of Technology.
  * Reproduction or disclosure of this file or its contents without the
@@ -15,17 +15,15 @@
 #include <sstream>
 #include <algorithm>
 
-//external library for GUID
+ //external library for GUID
 #include "../include/xresource_guid-main/source/xresource_guid.h"
 
 namespace gam300 {
 
-	//generate Asset IDs from the GUID library 
-	static AssetId GenId()
+	//generate GUIDs using xresource_guid library
+	static xresource::instance_guid GenId()
 	{
-		const xresource::instance_guid inst = xresource::instance_guid::GenerateGUIDCopy();
-
-		return static_cast<AssetId>(inst.m_Value);
+		return xresource::instance_guid::GenerateGUIDCopy();
 	}
 
 	std::string AssetDatabase::NormalizePath(const std::string& path)
@@ -49,74 +47,23 @@ namespace gam300 {
 
 	bool AssetDatabase::Load(const std::string& file)
 	{
+
+		//TODO:: update this for after the storage format is finalized
+
 		// Reset in-memory state first to avoid mixing sessions
 		byId.clear();
 		bySourcePath.clear();
 
-
-		std::ifstream in(file);
-		if (!in) return false; // caller may log the filename if needed
-
-
-		// Format per line:
-		// id|source|intermediate|compiled|type|hash|lastWrite|valid\n
-		std::string line;
-		while (std::getline(in, line))
-		{
-			if (line.empty()) continue;
-			std::istringstream ss(line);
-
-
-			AssetRecord rec;
-			int typeInt = 0;
-			int validInt = 0;
-
-
-			// Read id until pipe
-			ss >> rec.id; ss.ignore(1); // skip '|'
-			// Read delimited strings
-			std::getline(ss, rec.sourcePath, '|');
-			std::getline(ss, rec.intermediatePath, '|');
-			std::getline(ss, rec.compiledPath, '|');
-			// Read type, skip '|'
-			ss >> typeInt; ss.ignore(1);
-			// Read hash (may be empty), then lastWrite, valid
-			std::getline(ss, rec.contentHash, '|');
-			ss >> rec.lastWriteTime; ss.ignore(1);
-			ss >> validInt;
-
-
-			rec.type = static_cast<AssetType>(typeInt);
-			rec.sourcePath = NormalizePath(rec.sourcePath);
-			rec.ext = ExtensionLower(rec.sourcePath);
-			rec.valid = (validInt != 0);
-
-
-			// Insert into maps
-			bySourcePath[rec.sourcePath] = rec.id;
-			byId[rec.id] = std::move(rec);
-		}
 		return true;
 	}
 
 	bool AssetDatabase::Save(const std::string& file) const
 	{
-		std::ofstream out(file);
-		if (!out) return false;
-
-
-		// Write each record in one line with pipe separators
-		for (const auto& [id, rec] : byId)
-		{
-			out << rec.id << "|" << rec.sourcePath << "|" << rec.intermediatePath
-				<< "|" << rec.compiledPath << "|" << static_cast<int>(rec.type) << "|"
-				<< rec.contentHash << "|" << rec.lastWriteTime << "|" << (rec.valid ? 1 : 0)
-				<< "\n";
-		}
+		//TODO:: update later after finalizing the storage format
 		return true;
 	}
 
-	AssetId AssetDatabase::EnsureIdForPath(const std::string& path)
+	xresource::instance_guid AssetDatabase::EnsureIdForPath(const std::string& path)
 	{
 		const std::string key = NormalizePath(path);
 
@@ -125,28 +72,28 @@ namespace gam300 {
 			return it->second;
 
 
-		// Create new record with generated id
-		AssetId id = GenId();
+		// Create new record with generated guid
+		xresource::instance_guid guid = GenId();
 		AssetRecord rec;
-		rec.id = id;
+		rec.guid = guid;
 		rec.sourcePath = key;
 		rec.ext = ExtensionLower(key);
 
 
-		byId[id] = rec;
-		bySourcePath[key] = id;
-		return id;
+		byId[guid] = rec;
+		bySourcePath[key] = guid;
+		return guid;
 	}
 
-	const AssetRecord* AssetDatabase::Find(AssetId id) const
+	const AssetRecord* AssetDatabase::Find(xresource::instance_guid guid) const
 	{
-		auto it = byId.find(id);
+		auto it = byId.find(guid);
 		return (it == byId.end()) ? nullptr : &it->second;
 	}
 
-	AssetRecord* AssetDatabase::FindMutable(AssetId id)
+	AssetRecord* AssetDatabase::FindMutable(xresource::instance_guid guid)
 	{
-		auto it = byId.find(id);
+		auto it = byId.find(guid);
 		return (it == byId.end()) ? nullptr : &it->second;
 	}
 
@@ -166,9 +113,9 @@ namespace gam300 {
 		return FindMutable(it->second);
 	}
 
-	bool AssetDatabase::Remove(AssetId id)
+	bool AssetDatabase::Remove(xresource::instance_guid guid)
 	{
-		auto it = byId.find(id);
+		auto it = byId.find(guid);
 		if (it == byId.end()) return false;
 		bySourcePath.erase(it->second.sourcePath);
 		byId.erase(it);
@@ -187,7 +134,7 @@ namespace gam300 {
 	{
 		std::vector<AssetRecord*> v;
 		v.reserve(byId.size());
-		for (auto& [id, rec] : byId)
+		for (auto& [guid, rec] : byId)
 			v.push_back(&rec);
 		return v;
 	}

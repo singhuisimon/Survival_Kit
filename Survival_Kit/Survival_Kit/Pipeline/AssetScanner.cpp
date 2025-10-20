@@ -9,12 +9,16 @@
  */
 
 
+
 #include "AssetScanner.h"
 #include <filesystem>
 #include <fstream>
 #include <sstream>
 #include <algorithm>
 #include <unordered_set>
+
+ //include log manager
+#include "../Manager/LogManager.h"
 
 namespace fs = std::filesystem;
 
@@ -65,11 +69,6 @@ namespace gam300 {
 		m_include_hidden = include_hidden;
 	}
 
-
-	void AssetScanner::setFollowSymlinks(bool follow) {
-		m_follow_symlinks = follow;
-	}
-
 	bool AssetScanner::extAllowed(const fs::path& p) const {
 		if (m_exts.empty()) return true; // Allow all if unset
 		auto ext = p.extension().string();
@@ -99,14 +98,12 @@ namespace gam300 {
 	//scanning
 	std::vector<ScanChange> AssetScanner::Scan()
 	{
-		std::vector<ScanChange> changes;                 // <— previously missing
-		std::unordered_set<std::string> seen;            // <— previously missing
+		std::vector<ScanChange> changes;
+		std::unordered_set<std::string> seen;
 
 		fs::directory_options opts = fs::directory_options::skip_permission_denied;
-		if (m_follow_symlinks)
-			opts |= fs::directory_options::follow_directory_symlink;
 
-		// Iterate over configured roots (previously missing entirely)
+		// Iterate over source roots 
 		for (const auto& root : m_roots)
 		{
 			if (!fs::exists(root))
@@ -125,20 +122,26 @@ namespace gam300 {
 					if (shouldIgnore(path) || !extAllowed(path))
 						continue;
 
+					//get the file path (metadata)
 					const std::string pathStr = path.string();
 					const std::time_t t = toTimeT(entry.last_write_time());
 					const std::uintmax_t sz = (entry.is_regular_file() ? entry.file_size() : 0);
 
+					//mark the file as seen
 					seen.insert(pathStr);
 
+					//check with the previous snapshot
 					auto found = m_snapshot.find(pathStr);
+					// not found in the prev snap, it's a new file
 					if (found == m_snapshot.end())
 					{
+						//push the new file into the changes 
 						m_snapshot[pathStr] = { t, sz };
 						changes.push_back({ ScanChange::Kind::Added, pathStr });
 					}
 					else
 					{
+						//file exists, but check if the file is changed
 						FileStamp& stamp = found->second;
 						if (stamp.lastWrite != t || stamp.size != sz)
 						{
@@ -146,29 +149,42 @@ namespace gam300 {
 							stamp.size = sz;
 							changes.push_back({ ScanChange::Kind::Modified, pathStr });
 						}
+						//file did not change
 					}
 				}
 			}
+			catch (const std::filesystem::filesystem_error& e)
+			{
+				LM.writeLog("AssetScanner - Filesystem error in '%s': %s",
+					root.c_str(), e.what());
+			}
+			catch (const std::exception& e)
+			{
+				LM.writeLog("AssetScanner - Error scanning '%s': %s",
+					root.c_str(), e.what());
+			}
 			catch (...)
 			{
-				// Swallow errors per entry/permissions; scanning should be best-effort.
+				LM.writeLog("AssetScanner - Unknown error scanning '%s'", root.c_str());
 			}
-		}
+		} //finished iterating the Source folders
 
 		// Detect removed files (present in snapshot but not seen now)
 		for (auto it = m_snapshot.begin(); it != m_snapshot.end(); )
 		{
 			if (seen.find(it->first) == seen.end())
 			{
+				//file was in snapshot but it's NOT seen in this scan = deleted file
 				changes.push_back({ ScanChange::Kind::Removed, it->first });
-				it = m_snapshot.erase(it);
+				it = m_snapshot.erase(it); //remove from snapshot
 			}
 			else
 			{
-				++it;
+				++it; //or else keep the file in the snapshot
 			}
 		}
 
+		//finally return the changes
 		return changes;
 	}
 

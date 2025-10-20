@@ -3,7 +3,7 @@
 /**
  * @file AssetDescriptorGenerator.h
  * @brief Declares the asset descriptor generator class. 
- * @author Wai Lwin Thit (20%), Rio Shannon Yvon Leonardo(80%)
+ * @author 
  * @date 15/09/2025
  * Copyright (C) 2025 DigiPen Institute of Technology.
  * Reproduction or disclosure of this file or its contents without the
@@ -13,6 +13,8 @@
 
 #ifndef __ASSET_DESCGENERATOR_H__
 #define __ASSET_DESCGENERATOR_H__
+
+
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -21,15 +23,22 @@
 #include "AssetDatabase.h"
 #include "../Utility/AssetPath.h"
 
-//external library for GUID
-#include "../include/xresource_guid-main/source/xresource_guid.h"
-
-
 namespace gam300 {
 
 	// Forward declaration to avoid coupling. Defined in AssetDatabase.h
 	struct AssetRecord;
 	//for basic audio compilation settings 
+
+	struct TextureSettings {
+
+		std::string usageType;
+		std::string compression;
+		float quality = 1.0f;
+		bool generateMipmaps = false;
+		bool srgb = false;
+	};
+
+
 	struct AudioSettings {
 
 		//output format 
@@ -85,32 +94,18 @@ namespace gam300 {
 	};
 
 	/**
-	* @brief Optional extra metadata to embed in the descriptor.
-	* @details These fields are generic and do not depend on Resource*.
+	* @brief To display for the Info.txt
+	* @details
 	*/
 	struct DescriptorExtras
 	{
-		std::string displayName; 
-		std::string category; 
-		std::vector<std::string> tags; 
-		std::time_t lastImported = 0; 
-		std::unordered_map<std::string, std::string> user; 
-	
-		//added texture settings -- needed for compiler
-		std::string usageType;
-		std::string compression;
-		float quality = 1.0f;
-		bool generateMipmaps = false;
-		bool srgb = false;
-		std::vector<std::string> inputFiles;
-
-		//new audio settings (for compile settings)
-		AudioSettings audioSettings;
-		//new mesh settings (for compile settings)
-		MeshSettings meshSettings;
-		//new shader settings (for compiler)
-		ShaderSettings shaderSettings;
+		std::string displayName; //human readable file name
+		std::string comment; //optimal description
+		std::vector<std::string> tags; //user-defined lables for organization
+		std::time_t lastImported = 0; //last-imported time
+		std::vector<xresource::full_guid> resourceLinks;
 	};
+
 
 	/**
 	* @class AssetDescriptorGenerator
@@ -119,60 +114,95 @@ namespace gam300 {
 	class AssetDescriptorGenerator
 	{
 	public:
-		/**
-		* @brief Control where descriptors are written.
-		* @param sidecar If true, write next to the source file (foo.png.desc).
-		* If false, write to m_outputRoot/filename.ext.desc.
-		*/
-		void SetSidecar(bool sidecar);
-
 
 		/** @brief Set centralized output root (used when sidecar=false). */
 		void SetOutputRoot(const std::string& root);
 
+		/**
+				 * @brief Generate Info.txt and Descriptor.txt for an asset
+				 * @tparam SettingsType Compile settings type (TextureSettings, ShaderSettings, etc.)
+				 * @param rec Asset record with GUID and metadata
+				 * @param extras Optional display metadata (name, tags, etc.)
+				 * @param settings Compilation settings for this asset type
+				 * @param outPath Optional output folder path
+				 * @return True on success
+				 */
+		template<typename SettingType>
+		bool GenerateFor(const AssetRecord& rec,
+			const DescriptorExtras* extras = nullptr,
+			const SettingType& settings = nullptr,
+			std::string* outPath = nullptr) const {
+			//get folder path for this GUID
+			std::string folderPath = GetDescriptorFolderPath(rec);
 
-		/** @brief Pretty-print JSON with indentation (default: true). */
-		void SetPretty(bool pretty);
+			//ensure directory exists
+			if (!EnsureDirectory(folderPath)) return false;
 
+			//write Info.txt (metadata)
+			if (!WriteInfoFile(folderPath, rec, extras)) return false;
+
+
+			//write descriptor.txt (compile settings)
+			if (!WriteDescriptorFile(folderPath, rec.sourcePath, settings)) return false;
+
+			//return folder path if requested
+			if (outPath) {
+				*outPath = folderPath;
+			}
+
+			return true;
+		}
 
 		/**
-		* @brief Generate a descriptor for a known AssetRecord.
-		* @param rec Asset record (id/paths/type/etc.).
-		* @param extras Optional extra fields to embed.
-		* @param outPath Optional output: the path of the file written.
-		* @return True on success (I/O succeeded).
-		*/
-		bool GenerateFor(const AssetRecord& rec, const DescriptorExtras* extras = nullptr,
-			std::string* outPath = nullptr) const;
-
-
-		/**
-		* @brief Generate a descriptor for a raw source path (no AssetRecord).
-		* @param sourcePath Path to the original asset file on disk.
-		* @param extras Optional extra fields to embed.
-		* @param outPath Optional output path string.
-		*/
-		bool GenerateForPath(AssetDatabase& db, const std::string& sourcePath,
-			const DescriptorExtras* extras = nullptr, std::string* outPath = nullptr) const;
-
-
-		/**
-		* @brief Compute the default descriptor path for a source file.
-		*/
-		std::string DefaultDescPathForRecord(const AssetRecord& rec) const;
+			 * @brief Get the folder path for a GUID's descriptors
+			 * Example: "Assets/Descriptors/Shader/03/40/5F7ED05B14224003/"
+			 */
+		std::string GetDescriptorFolderPath(const AssetRecord& rec) const;
 
 	private:
-		// ---- Helpers (implementation only) ----
-		std::string BuildJson(const AssetRecord* recOpt,
+
+		// ==================== INFO.TXT GENERATION ====================
+		// Generate Info.txt (metadata)
+		bool WriteInfoFile(const std::string& folderPath,
+			const AssetRecord& rec,
 			const DescriptorExtras* extras) const;
+		// Build JSON for Info.txt
+		std::string BuildInfoJson(const AssetRecord& rec,
+			const DescriptorExtras* extras) const;
+
+		// ==================== DESCRIPTOR.TXT GENERATION ====================
+
+		template<typename SettingsType>
+		bool WriteDescriptorFile(const std::string& folderPath,
+			const std::string& sourcePath,
+			const SettingsType& settings) const
+		{
+			std::string descriptorPath = folderPath + "Descriptor.txt";
+			std::string json = BuildDescriptorJson(sourcePath, settings);
+			return WriteText(descriptorPath, json);
+		}
+
+		// Overloaded JSON builders for each settings type
+		std::string BuildDescriptorJson(const std::string& sourcePath,
+			const TextureSettings& settings) const;
+
+		std::string BuildDescriptorJson(const std::string& sourcePath,
+			const ShaderSettings& settings) const;
+
+		std::string BuildDescriptorJson(const std::string& sourcePath,
+			const MeshSettings& settings) const;
+
+		std::string BuildDescriptorJson(const std::string& sourcePath,
+			const AudioSettings& settings) const;
+
+		// ==================== HELPERS ====================
+
 		static std::string EscapeJson(const std::string& s);
-		static bool EnsureParentDir(const std::string& path);
+		static bool EnsureDirectory(const std::string& path);
 		static bool WriteText(const std::string& path, const std::string& text);
 
-
-		bool m_sidecar = true; 
-		std::string m_outputRoot; //Used when m_sidecar == false
-		bool m_pretty = true; 
+		//for output root of the descriptor files
+		std::string m_outputRoot;
 
 	};
 

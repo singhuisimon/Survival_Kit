@@ -1,51 +1,51 @@
 /**
  * @file AssetDatabase.h
- * @brief Defines asset metadata storage and lookup utilities. 
- * @author Rio Shannon Yvon Leonardo
+ * @brief Defines asset metadata storage and lookup utilities.
+ * @author
  * @date 15/09/2025
  * Copyright (C) 2025 DigiPen Institute of Technology.
  * Reproduction or disclosure of this file or its contents without the
  * prior written consent of DigiPen Institute of Technology is prohibited.
  */
-
 #pragma once
 #ifndef __ASSET_DATABASE_H__
 #define __ASSET_DATABASE_H__
+
 #include <string>
 #include <unordered_map>
 #include <vector> // iteration helper
-#include <ctime> // lastWriteTime
+
+ //files
+#include "../include/xresource_guid-main/source/xresource_guid.h"
+#include "../Resource/ResourceTypes.h"  // Use existing ResourceType enum
 
 namespace gam300 {
 
-	// A stable identifier for an asset. Generated internally when needed.
-	using AssetId = unsigned long long;
-
-
-	// Broad categories of assets the pipeline recognizes.
-	// Expand as needed for your project.
-	enum class AssetType { Unknown, Shader, Texture, Audio, Mesh, Material, Scene };
-
-	/**
-	* @brief Per-asset metadata tracked by the pipeline/editor.
-	*/
 	struct AssetRecord {
-		AssetId id = 0; //!< Stable ID
-		std::string sourcePath; //!< Canonical source path (forward slashes)
-		std::string intermediatePath; //!< Where the importer writes the cooked/intermediate file
-		std::string compiledPath; //!< (Future) where a fully compiled runtime blob may live
-		AssetType type = AssetType::Unknown; //!< Asset classification
-		std::string ext; //!< Extension from source (e.g. ".png")
-		std::string contentHash; //!< Optional strong content hash (hex)
-		std::time_t lastWriteTime = 0; //!< Last observed source mtime (seconds)
-		bool valid = false; //!< Import success flag (true when last import succeeded)
+
+		//GUID 
+		xresource::instance_guid guid;
+		ResourceType type = ResourceType::UNKNOWN;
+
+		//filepaths 
+		std::string sourcePath;
+		std::string compiledPath;
+
+		//metadata 
+		std::string ext; //file extension
+		std::string contentHash;
+		std::time_t lastWriteTime;
+
+		//Status
+		bool valid = false;
+
 	};
 
 	/**
-	* @brief Map of AssetId <-> AssetRecord with helpers for path lookups.
+	* @brief Map of GUID <-> AssetRecord with helpers for path lookups.
 	*/
-
 	struct AssetDatabase {
+
 
 		/** Load database from a text file. Returns false on I/O failure. */
 		bool Load(const std::string& file);
@@ -58,23 +58,21 @@ namespace gam300 {
 		* @details If the path is new, a record is created with a fresh id.
 		* Path is normalized to forward slashes for the key.
 		*/
-		AssetId EnsureIdForPath(const std::string& path);
+		xresource::instance_guid EnsureIdForPath(const std::string& path);
 
-		/** Find record by id (const). Returns nullptr if missing. */
-		const AssetRecord* Find(AssetId id) const;
-
-		/** Find record by id (mutable). Returns nullptr if missing. */
-		AssetRecord* FindMutable(AssetId id);
-
-		/** Find record by *source* path (const). Returns nullptr if missing. */
+		//Look up (const)
+		const AssetRecord* Find(xresource::instance_guid id) const;
 		const AssetRecord* FindBySource(const std::string& path) const;
 
-		/** Find record by *source* path (mutable). Returns nullptr if missing. */
+		//Look up (mutable)
+		AssetRecord* FindMutable(xresource::instance_guid id);
 		AssetRecord* FindBySourceMutable(const std::string& path);
 
 
+		//Remove function 
+
 		/** Remove a record by id. Returns true if a record was erased. */
-		bool Remove(AssetId id);
+		bool Remove(xresource::instance_guid id);
 
 		/** Remove a record by source path. Returns true if a record was erased. */
 		bool RemoveBySource(const std::string& path);
@@ -85,6 +83,7 @@ namespace gam300 {
 		/** Clear the whole database (in-memory). */
 		void Clear();
 
+		//Utility functions
 		/** @return Number of records currently stored. */
 		size_t Count() const { return byId.size(); }
 
@@ -94,12 +93,13 @@ namespace gam300 {
 		/** Extract the lowercase extension (including the dot) from a path. */
 		static std::string ExtensionLower(const std::string& path);
 
+
 		//storage
-		std::unordered_map<AssetId, AssetRecord> byId; //!< id -> record
-		std::unordered_map<std::string, AssetId> bySourcePath; //!< normalized source -> id
+		std::unordered_map<xresource::instance_guid, AssetRecord> byId; //!< id -> record
+		std::unordered_map<std::string, xresource::instance_guid> bySourcePath; //!< normalized source -> id
 
 	};
 
-} //end of namespace gam300
+}//endof nnamespace gam300
 
-#endif // __ASSET_DATABASE_H__
+#endif
